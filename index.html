@@ -3289,7 +3289,8 @@ body.showmode #view-day .qp { display: none; }
 .bg-line .bg-li small { flex-basis: 100%; font-size: 12px; color: var(--muted); }
 
 .sci { display: flex; gap: 8px; margin: 0 0 6px; font-size: 13px; line-height: 1.4; color: var(--ink); }
-.sci span { flex: none; font-size: 16px; }
+.sci > span:first-child { flex: none; font-size: 16px; }
+.sci-t small { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
 
 /* make a plan for me */
 .gm-delbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: -6px 0 14px; padding: 12px 14px; font-size: 14px; background: var(--card); border: 1px solid var(--hair); border-radius: 14px; }
@@ -3369,6 +3370,63 @@ body.showmode #view-day .qp { display: none; }
   position: absolute; top: -6px; left: -6px; width: 26px; height: 26px; padding: 0;
   font-size: 15px; line-height: 1; color: var(--muted); background: var(--card); border: 1px solid var(--hair); border-radius: 50%; cursor: pointer;
 }
+
+/* today's plate */
+.pl-card { margin-top: 12px; padding: 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.pl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.pl-head b { font-size: 16px; font-weight: 600; }
+.pl-head small { font-size: 12px; color: var(--muted); }
+.pl-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+.pl-i { position: relative; display: flex; flex-direction: column; gap: 2px; padding: 10px; background: var(--hair); border-radius: 14px; }
+.pl-i small { font-size: 12px; color: var(--muted); }
+.pl-i b { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pl-i i { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; display: grid; place-items: center; font-style: normal; font-size: 11px; color: transparent; border: 1.5px solid var(--dash); border-radius: 50%; }
+.pl-i.ok { background: color-mix(in srgb, #7daf86 18%, var(--card)); }
+.pl-i.ok i { color: #fff; background: #7daf86; border-color: #7daf86; }
+.pl-tip { margin: 12px 0 0; font-size: 14px; line-height: 1.45; }
+.pl-ins { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hair); }
+.pl-ins span { font-size: 12px; font-weight: 600; color: var(--pink); }
+.pl-ins p { margin: 2px 0 0; font-size: 15px; font-weight: 500; line-height: 1.4; }
+.pl-ins small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+
+/* groceries, smarter */
+.gr-name small.gr-v { display: block; margin-top: 2px; font-size: 12px; }
+.gr-v.good { color: #5f9468; } .gr-v.watch { color: #c2784e; }
+.gr-swap { display: block; margin-top: 4px; padding: 2px 0; text-align: left; font: 500 12px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
+.gr-sug + .gr-sug { margin-top: 12px; }
+
+/* a month ahead */
+.mo-card { margin-top: 12px; padding: 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.mo-card ul { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.mo-card li { display: flex; gap: 12px; align-items: flex-start; }
+.mo-e { flex: none; width: 34px; height: 34px; display: grid; place-items: center; font-size: 17px; border-radius: 11px; background: color-mix(in srgb, #e3a27a 22%, var(--card)); }
+.mo-card li.good .mo-e { background: color-mix(in srgb, #7daf86 22%, var(--card)); }
+.mo-card li b { display: block; font-size: 15px; font-weight: 500; line-height: 1.35; }
+.mo-card li small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+.mo-fine { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
+
+/* grocery details and sharing */
+.gr-share { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; }
+.gr-share button { min-height: 36px; padding: 0 14px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 18px; cursor: pointer; }
+.gr-msg { font-size: 13px; color: #5f9468; font-weight: 500; }
+.gr-ghead { margin: 16px 2px 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.gr-ghead + .gr-list { margin-top: 0; }
+.gr-row { flex-wrap: wrap; }
+.gr-open { flex: 1; min-width: 0; padding: 4px 0; text-align: left; font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+.gr-t { display: block; font-size: 16px; }
+.gr-q { margin-left: 6px; font-style: normal; font-weight: 600; color: var(--pink); }
+.gr-note { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.gr-note i { font-style: normal; color: var(--blue); }
+.gr-row > .gr-swap { flex-basis: 100%; margin: -8px 0 8px; padding-left: 48px; }
+.gr-ed { flex-basis: 100%; display: flex; flex-direction: column; gap: 10px; padding: 4px 6px 12px 48px; }
+.gr-qrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.gr-qrow > button { width: 38px; height: 38px; font-size: 18px; color: var(--ink); background: var(--hair); border: none; border-radius: 50%; cursor: pointer; }
+.gr-qin { width: 76px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
+.gr-units { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
+.gr-units button { min-height: 32px; padding: 0 12px; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: var(--hair); border: none; border-radius: 16px; cursor: pointer; }
+.gr-units button.on { color: #fff; background: var(--pink); }
+.gr-nin { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
+.gr-done { align-self: flex-start; padding: 4px 0; font: 600 14px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
 
 /* stats cards */
 #stats-body { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
@@ -3611,13 +3669,16 @@ body, body[data-view] {
     <div id="food-logview">
     <div class="fd-composer">
       <span class="fd-pick"><i id="meal-dot"></i><select id="meal-pick" aria-label="which meal"></select></span>
-      <input id="food-input" type="text" placeholder="What did you eat?" maxlength="120" autocomplete="off">
+      <input id="food-input" type="text" placeholder="What did you eat?" maxlength="120" autocomplete="off" list="food-past">
+      <datalist id="food-past"></datalist>
       <button id="food-add" type="button" aria-label="add">+</button>
     </div>
     <div class="fd-preview" id="food-preview"></div>
     <div class="fd-quick" id="food-quick"></div>
 
     <div id="food-now"></div>
+    <div id="food-plate"></div>
+    <div id="food-month"></div>
 
     <div class="datebar" style="margin-top:22px">
       <div class="big" id="food-title"></div>
@@ -3644,7 +3705,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 17:29</footer>
+  <footer>everything saves on this device · build 21:23</footer>
 </div>
 
 <script>
@@ -3655,7 +3716,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [] };
 
 function load() {
   try {
@@ -3684,6 +3745,7 @@ function load() {
         gymLog:    Array.isArray(d.gymLog) ? d.gymLog : [],
         routine:   (d.routine && typeof d.routine === 'object') ? d.routine : null,
         trainProfile: (d.trainProfile && typeof d.trainProfile === 'object') ? d.trainProfile : null,
+        groceryLog: Array.isArray(d.groceryLog) ? d.groceryLog : [],
         penalties: Array.isArray(d.penalties) ? d.penalties : [],
         penaltyLink: typeof d.penaltyLink === 'string' ? d.penaltyLink : '',
         goalSetAt: Number(d.goalSetAt) || 0,
@@ -6865,17 +6927,75 @@ const GOAL_NEXT = {
   sugar:   [['fibre', 'calms the sweet cravings'], ['protein', 'stops the up and down feeling']],
   gut:     [['fibre', 'helps your belly work well'], ['water', 'keeps things moving']]
 };
+// what is happening inside you, step by step after you eat or drink it.
+// [minutes since, plain words]. the line changes as time goes on.
+const BODY_STEPS = {
+  caffeine: [[10, 'It is moving from your stomach into your blood.'],
+             [20, 'It is reaching your brain and blocking the tired signal.'],
+             [30, 'You are starting to feel more awake.'],
+             [60, 'It is at its strongest now. Good time to focus.'],
+             [180, 'Still working. Your body clears it slowly.'],
+             [360, 'About half of it is still in you. It can keep you awake tonight.'],
+             [600, 'Mostly gone now.']],
+  sugar:    [[10, 'Sugar is going straight into your blood.'],
+             [20, 'Your blood sugar is going up. You feel a quick lift.'],
+             [40, 'Your body is releasing insulin to move the sugar into your cells.'],
+             [60, 'Your blood sugar is coming down fast.'],
+             [90, 'You may feel a dip: tired, grumpy or hungry.'],
+             [120, 'Your body is settling back to normal.']],
+  carbs:    [[10, 'Your stomach is starting to break it down.'],
+             [30, 'It is turning into sugar and going into your blood.'],
+             [60, 'Lots of blood is going to your belly to digest. You may feel slow or sleepy.'],
+             [120, 'Still digesting. The heavy feeling should start to ease.'],
+             [180, 'Mostly digested. Your energy should come back.']],
+  protein:  [[20, 'Your stomach is starting to break it down.'],
+             [60, 'It is breaking into small building blocks your muscles use.'],
+             [120, 'Those blocks are going to your muscles to repair them. You feel full.'],
+             [240, 'Still giving you steady energy.'],
+             [300, 'Mostly used up. You may start to feel hungry again.']],
+  fibre:    [[30, 'It is slowing down the rest of your food, so energy stays steady.'],
+             [120, 'It is moving through your gut and feeding the good bacteria there.'],
+             [300, 'It keeps your belly working well.']],
+  fried:    [[20, 'Oil slows your stomach down, so the food sits there longer.'],
+             [90, 'Your body is working hard to break down the fat. You may feel heavy.'],
+             [180, 'Still digesting. The heavy feeling should ease soon.'],
+             [240, 'Mostly digested now.']],
+  water:    [[10, 'It is moving into your blood.'],
+             [30, 'Your brain and muscles are getting the water they need. Easier to think.'],
+             [90, 'Keeping you going. Have another glass soon.']],
+  alcohol:  [[10, 'It is going into your blood fast.'],
+             [30, 'It is reaching your brain. You feel relaxed.'],
+             [60, 'At its strongest. Your thinking and reactions are slower.'],
+             [120, 'Your liver is cleaning it out, slowly.'],
+             [240, 'You may feel tired or flat. Your sleep tonight will be lighter.']],
+  cannabis: [[30, 'It is still in your stomach. You will not feel it yet.'],
+             [60, 'Your liver is turning it into a stronger form. Wait before having more.'],
+             [90, 'It is reaching your brain. You may start to feel it.'],
+             [180, 'At its strongest around now.'],
+             [360, 'Slowly wearing off.'],
+             [480, 'Mostly gone. You may feel sleepy.']]
+};
+function bodyStep(k, mins) {
+  const st = BODY_STEPS[k];
+  if (!st) return null;
+  const hit = st.find(([m]) => mins < m);
+  return hit ? hit[1] : null;
+}
 function eatNextHTML(goal, recent, now) {
-  // what you had that is still working on you, most recent first, at most two
+  // what is happening inside you right now, from what you had, newest first, at most two
   const seen = new Set(), lines = [];
   for (const f of recent.slice().sort((a, b) => b.at - a.at)) {
-    if (now - f.at > 5 * 3600000) continue;
+    const mins = Math.floor((now - f.at) / 60000);
     for (const k of entryKinds(f)) {
-      if (seen.has(k) || !KIND_SCIENCE[k] || lines.length >= 2) continue;
-      seen.add(k); lines.push(KIND_SCIENCE[k]);
+      if (seen.has(k) || lines.length >= 2) continue;
+      const t = bodyStep(k, mins);
+      if (!t) continue;
+      seen.add(k); lines.push([KINDS[k].e, t, f.what, mins]);
     }
   }
-  const sci = lines.length ? '<p class="fh-sec">Affecting you now</p>' + lines.map(([e, t]) => '<p class="sci"><span>' + e + '</span>' + esc(t) + '</p>').join('') : '';
+  const ago = m => m < 60 ? m + ' min ago' : Math.floor(m / 60) + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '') + ' ago';
+  const sci = lines.length ? '<p class="fh-sec">Inside you now</p>' + lines.map(([e, t, what, m]) =>
+    '<p class="sci"><span>' + e + '</span><span class="sci-t">' + esc(t) + '<small>' + esc(what) + ' · ' + ago(m) + '</small></span></p>').join('') : '';
   // one nutrient for your goal; if you already had the first today, the second
   const today = foodIn([todayKey()]);
   const had = k => today.some(f => entryKinds(f).includes(k));
@@ -6885,6 +7005,129 @@ function eatNextHTML(goal, recent, now) {
 }
 
 // what is going on in your body, from what you logged in the last 12 hours
+/* ---- today's plate and one thing noticed ----
+   protein, veg and fruit, and water so far today, paced to the time of day.
+   then one pattern from the last 2 weeks, only when the data really shows it. */
+const VEG_IDEAS = ['a handful of ugwu or efo in your stew', 'a banana or an orange', 'some pawpaw or pineapple', 'a side of salad or garden egg'];
+const PRO_IDEAS = ['two boiled eggs', 'beans or moi moi', 'fish or chicken', 'Greek yoghurt'];
+
+/* ---- in a month, if you keep eating like this ----
+   from the last 2 weeks: what each habit tends to do over a month, and the
+   exact foods behind it. general patterns, not medical advice. */
+function renderMonth() {
+  const box = document.getElementById('food-month');
+  if (foodDay !== todayKey()) { box.innerHTML = ''; return; }
+  const since = Date.now() - 14 * 86400000;
+  const recent = state.food.filter(f => f.at >= since);
+  const days = new Set(recent.map(f => key(new Date(f.at)))).size;
+  if (days < 4) { box.innerHTML = ''; return; }
+  const wk = n => n / days * 7;                       // per week
+  const top = kind => {
+    const t = {};
+    for (const f of recent) if (entryKinds(f).includes(kind)) t[f.what.trim().toLowerCase()] = (t[f.what.trim().toLowerCase()] || 0) + 1;
+    return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, c]) => n + ' (' + c + '×)').join(', ');
+  };
+  const cnt = kind => recent.filter(f => entryKinds(f).includes(kind)).length;
+  const meals = recent.filter(f => !isDrink(f));
+  const proShare = meals.filter(f => entryKinds(f).includes('protein')).length / Math.max(1, meals.length);
+  const noPro = (() => { const t = {}; for (const f of meals) if (!entryKinds(f).includes('protein')) t[f.what.trim().toLowerCase()] = (t[f.what.trim().toLowerCase()] || 0) + 1;
+    return Object.entries(t).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([n, c]) => n + ' (' + c + '×)').join(', '); })();
+  const fibreDays = new Set(recent.filter(f => entryKinds(f).includes('fibre')).map(f => key(new Date(f.at)))).size;
+  const lateCaf = recent.filter(f => entryKinds(f).includes('caffeine') && new Date(f.at).getHours() >= 15);
+  const lateTop = (() => { const t = {}; for (const f of lateCaf) t[f.what.trim().toLowerCase()] = (t[f.what.trim().toLowerCase()] || 0) + 1;
+    return Object.entries(t).sort((a, b) => b[1] - a[1]).map(([n, c]) => n + ' (' + c + '×)').join(', '); })();
+
+  const rows = [];
+  if (wk(cnt('sugar')) >= 5) rows.push(['bad', '⚡', 'More energy crashes and stronger sugar cravings', top('sugar')]);
+  if (wk(cnt('fried')) >= 4) rows.push(['bad', '\u{1F9F1}', 'Heavier, slower digestion, and your weight may creep up', top('fried')]);
+  if (wk(lateCaf.length) >= 3) rows.push(['bad', '\u{1F319}', 'Lighter sleep and more tired mornings', lateTop]);
+  if (wk(cnt('alcohol')) >= 3) rows.push(['bad', '\u{1F327}', 'Flatter mood and poorer sleep', top('alcohol')]);
+  if (meals.length >= 5 && proShare < 0.4) rows.push(['bad', '\u{1F4AA}', 'Slow progress at the gym, and hungry again sooner', 'meals without protein: ' + noPro]);
+  if (fibreDays / days < 0.4) rows.push(['bad', '\u{1F33F}', 'Your gut may feel bloated or blocked', 'veg or fruit on only ' + fibreDays + ' of ' + days + ' days']);
+  if (cnt('water') / days < 3) rows.push(['bad', '\u{1F4A7}', 'More tiredness and headaches', 'about ' + (cnt('water') / days).toFixed(1) + ' glasses of water a day']);
+  if (proShare >= 0.6) rows.push(['good', '\u{1F4AA}', 'Stronger, and full for longer', top('protein')]);
+  if (fibreDays / days >= 0.7) rows.push(['good', '\u{1F33F}', 'A calmer gut and steadier energy', top('fibre')]);
+
+  if (!rows.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="mo-card"><div class="pl-head"><b>In a month, if you keep eating like this</b></div><ul>' +
+    rows.map(([t, e, say, why]) => '<li class="' + t + '"><span class="mo-e">' + e + '</span><div><b></b><small></small></div></li>').join('') +
+    '</ul><p class="mo-fine">From your last ' + days + ' days. General patterns, not medical advice.</p></div>';
+  box.querySelectorAll('li').forEach((li, i) => {
+    li.querySelector('b').textContent = rows[i][2];
+    li.querySelector('small').textContent = (rows[i][0] === 'good' ? 'Thanks to ' : 'Because of ') + rows[i][3];
+  });
+}
+
+function renderPlate() {
+  const box = document.getElementById('food-plate');
+  // type-ahead from foods you have logged before, most used first
+  const dl = document.getElementById('food-past');
+  const tally = {};
+  for (const f of state.food) { const k = f.what.trim(); if (k) tally[k.toLowerCase()] = [k, ((tally[k.toLowerCase()] || [])[1] || 0) + 1]; }
+  dl.innerHTML = Object.values(tally).sort((a, b) => b[1] - a[1]).slice(0, 40).map(([k]) => '<option value="' + esc(k) + '">').join('');
+
+  if (foodDay !== todayKey()) { box.innerHTML = ''; return; }
+  const t = todayKey(), now = new Date(), h = now.getHours() + now.getMinutes() / 60;
+  const today = state.food.filter(f => key(new Date(f.at)) === t);
+  const meals = today.filter(f => !isDrink(f));
+  const pro = meals.filter(f => entryKinds(f).includes('protein')).length;
+  const veg = today.filter(f => entryKinds(f).includes('fibre')).length;
+  const water = today.filter(f => entryKinds(f).includes('water')).length;
+  // by now: awake from about 7am, 8 glasses spread to 11pm, 3 meals with protein by 8pm
+  const day = Math.max(0, Math.min(1, (h - 7) / 16));
+  const waterBy = Math.max(1, Math.round(8 * day));
+  const mealsBy = h < 11 ? 1 : h < 16 ? 2 : 3;
+  const items = [
+    { k: 'Protein', v: pro + '/' + mealsBy + ' meals', ok: pro >= Math.min(mealsBy, Math.max(1, meals.length)) && pro > 0 },
+    { k: 'Veg & fruit', v: veg ? veg + ' today' : 'none yet', ok: veg >= (h < 14 ? 1 : 2) },
+    { k: 'Water', v: water + ' of 8', ok: water >= waterBy }
+  ];
+  const miss = [];
+  if (!items[0].ok) miss.push(PRO_IDEAS[now.getDate() % PRO_IDEAS.length]);
+  if (!items[1].ok) miss.push(VEG_IDEAS[now.getDate() % VEG_IDEAS.length]);
+  if (!items[2].ok) miss.push((waterBy - water) + ' glass' + (waterBy - water > 1 ? 'es' : '') + ' of water');
+  const tip = miss.length ? 'To catch up: ' + miss.join(', ') + '.' : 'On track for this time of day. Nice.';
+
+  const ins = noticeFood();
+  box.innerHTML = '<div class="pl-card"><div class="pl-head"><b>Today’s plate</b><small>so far, for ' + (h < 12 ? 'this morning' : h < 17 ? 'this afternoon' : 'today') + '</small></div>' +
+    '<div class="pl-row">' + items.map(x => '<span class="pl-i' + (x.ok ? ' ok' : '') + '"><i>' + (x.ok ? '✓' : '') + '</i><small>' + x.k + '</small><b>' + x.v + '</b></span>').join('') + '</div>' +
+    '<p class="pl-tip"></p>' +
+    (ins ? '<div class="pl-ins"><span>Noticed</span><p></p><small></small></div>' : '') + '</div>';
+  box.querySelector('.pl-tip').textContent = tip;
+  if (ins) { box.querySelector('.pl-ins p').textContent = ins.say; box.querySelector('.pl-ins small').textContent = ins.proof; }
+}
+
+// one pattern from your own last 14 days, with the numbers behind it
+function noticeFood() {
+  const ks = []; for (let i = 0; i < 14; i++) ks.push(shiftKey(todayKey(), -i));
+  const byDay = k => state.food.filter(f => key(new Date(f.at)) === k);
+  const logged = ks.filter(k => byDay(k).length);
+  if (logged.length < 4) return null;
+  const hr = f => new Date(f.at).getHours();
+
+  // skipping breakfast and how the afternoon feels
+  const moodsOn = k => state.moods.filter(m => key(new Date(m.at)) === k && new Date(m.at).getHours() >= 12 && new Date(m.at).getHours() < 19);
+  const low = m => ['tired', 'low', 'unmotivated', 'unfocused'].includes(m.mood);
+  const skip = logged.filter(k => !byDay(k).some(f => !isDrink(f) && hr(f) < 11));
+  const ate = logged.filter(k => byDay(k).some(f => !isDrink(f) && hr(f) < 11));
+  const rate = days => { const m = days.flatMap(moodsOn); return m.length ? m.filter(low).length / m.length : null; };
+  const rs = rate(skip), ra = rate(ate);
+  if (skip.length >= 3 && ate.length >= 3 && rs !== null && ra !== null && rs - ra >= 0.3) {
+    return { say: 'On days you skip breakfast, your afternoons feel more tired or low.',
+             proof: Math.round(rs * 100) + '% of afternoon check-ins vs ' + Math.round(ra * 100) + '% on days you eat before 11.' };
+  }
+  // late caffeine
+  const late = ks.slice(0, 7).filter(k => byDay(k).some(f => entryKinds(f).includes('caffeine') && hr(f) >= 15));
+  if (late.length >= 3) return { say: 'Caffeine after 3pm on ' + late.length + ' of the last 7 days.', proof: 'It stays in your body for hours and can make sleep lighter.' };
+  // water
+  const glasses = ks.slice(0, 7).reduce((n, k) => n + byDay(k).filter(f => entryKinds(f).includes('water')).length, 0);
+  if (logged.length >= 4 && glasses / 7 < 3) return { say: 'About ' + (glasses / 7).toFixed(1) + ' glasses of water a day this week.', proof: 'Low water often feels like tiredness or hunger.' };
+  // fried food
+  const fried = ks.slice(0, 7).reduce((n, k) => n + byDay(k).filter(f => entryKinds(f).includes('fried')).length, 0);
+  if (fried >= 5) return { say: fried + ' fried things this week.', proof: 'They digest slowly and can leave you heavy for hours.' };
+  return null;
+}
+
 function renderBodyNow() {
   const box = document.getElementById('food-now');
   box.innerHTML = '';
@@ -7064,6 +7307,53 @@ const GOAL_HINT = {
   gut: 'Fibre feeds the good bacteria in your gut.'
 };
 
+// healthier swaps for things that pull against most goals
+const SWAPS = [
+  [/puff ?puff|chin ?chin|doughnut|donut|cake|biscuit|cookie/i, 'roasted groundnuts or plantain chips baked, not fried'],
+  [/coke|pepsi|fanta|sprite|soda|malt|energy drink/i, 'water with lemon, or zobo with less sugar'],
+  [/white bread|agege/i, 'wheat bread or oats'],
+  [/indomie|noodles/i, 'oats or beans'],
+  [/fried yam|fries|chips|crisps/i, 'boiled yam or roasted potatoes'],
+  [/sweets|candy|chocolate/i, 'dates, a banana or a few groundnuts'],
+  [/juice/i, 'whole oranges or watermelon'],
+  [/sugar\b/i, 'a little honey, or fruit']
+];
+const swapFor = text => (SWAPS.find(([re]) => re.test(text)) || [])[1] || null;
+
+// what the last 2 weeks say you are short of
+function foodGaps() {
+  const since = Date.now() - 14 * 86400000;
+  const recent = state.food.filter(f => f.at >= since);
+  const days = new Set(recent.map(f => key(new Date(f.at)))).size;
+  if (days < 3) return [];
+  const meals = recent.filter(f => !isDrink(f));
+  const pro = meals.filter(f => entryKinds(f).includes('protein')).length / Math.max(1, meals.length);
+  const fibreDays = new Set(recent.filter(f => entryKinds(f).includes('fibre')).map(f => key(new Date(f.at)))).size;
+  const water = recent.filter(f => entryKinds(f).includes('water')).length / days;
+  const out = [];
+  if (pro < 0.5) out.push({ need: 'protein', say: 'Protein in only ' + Math.round(pro * 100) + '% of your meals', items: ['eggs', 'beans', 'fish', 'chicken', 'greek yogurt'] });
+  if (fibreDays / days < 0.6) out.push({ need: 'fibre', say: 'Veg or fruit on ' + fibreDays + ' of ' + days + ' days', items: ['ugwu', 'bananas', 'oats', 'oranges', 'spinach'] });
+  if (water < 4) out.push({ need: 'water', say: 'About ' + water.toFixed(1) + ' glasses of water a day', items: ['water'] });
+  return out;
+}
+
+// things you tick off often and are probably running out of
+function restockSoon() {
+  const log = state.groceryLog || [];
+  const by = {};
+  for (const x of log) (by[x.text.toLowerCase()] = by[x.text.toLowerCase()] || []).push(x.at);
+  const out = [];
+  for (const [k, ts] of Object.entries(by)) {
+    if (ts.length < 2) continue;
+    ts.sort((a, b) => a - b);
+    const gaps = ts.slice(1).map((t, i) => t - ts[i]);
+    const every = gaps.reduce((a, b) => a + b, 0) / gaps.length;
+    const since = Date.now() - ts[ts.length - 1];
+    if (since >= every * 0.8) out.push({ name: k, days: Math.round(every / 86400000), since: Math.round(since / 86400000) });
+  }
+  return out.slice(0, 4);
+}
+
 function grocerySuggestions() {
   const g = myGoal();
   if (!g) return null;
@@ -7093,19 +7383,121 @@ function grocerySuggestions() {
   return { goal: g, list: [...known, ...fresh] };
 }
 
+/* ---- grocery details and sharing ----
+   each item can carry how many, a unit, and a note (how you'll prepare it).
+   when you add something you already eat, those are filled in from your
+   food log: how often you had it in the last 2 weeks, and how you usually
+   have it. the list can be copied as text or sent to Notes. */
+const COUNT_WORDS = /\b(eggs?|bananas?|oranges?|apples?|mangoe?s?|avocados?|plantains?|tomato(es)?|onions?|peppers?|cucumbers?|carrots?|lemons?|limes?|sardines?|tins?|cans?|bread|loaf|loaves|yoghurts?|yogurts?)\b/i;
+const UNITS = ['', 'pcs', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
+let grOpen = null;   // item id with its details open
+
+function grocGroup(text) {
+  const ks = foodKinds(text);
+  if (ks.includes('protein')) return 'Protein';
+  if (ks.includes('fibre')) return 'Veg and fruit';
+  if (ks.includes('water') || ks.includes('caffeine') || DRINK_RE.test(text)) return 'Drinks';
+  if (ks.includes('carbs')) return 'Staples';
+  return 'Other';
+}
+
+// from your food log: how much of it you get through in a week, and how you have it
+function grocGuess(text) {
+  const base = text.toLowerCase().replace(/[^a-z ]/g, '').trim().split(' ').pop().replace(/(es|s)$/, '');
+  if (base.length < 3) return null;
+  const re = new RegExp('\\b' + base + '(e?s)?\\b', 'i');
+  const since = Date.now() - 14 * 86400000;
+  const hits = state.food.filter(f => f.at >= since && re.test(f.what));
+  if (!hits.length) return null;
+  // "2 eggs", "3 bananas": the number in front, else one each time
+  const each = hits.map(f => { const m = f.what.toLowerCase().match(new RegExp('(\\d+)\\s*' + base)); return m ? Number(m[1]) : 1; });
+  const perWeek = each.reduce((a, b) => a + b, 0) / 2;
+  const dishes = {};
+  for (const f of hits) { const d = f.what.trim().toLowerCase(); if (d.replace(/\d+\s*/, '') !== base && d !== base + 's') dishes[d] = (dishes[d] || 0) + 1; }
+  const usual = Object.entries(dishes).sort((a, b) => b[1] - a[1])[0];
+  const meals = {};
+  for (const f of hits) meals[f.meal] = (meals[f.meal] || 0) + 1;
+  const meal = Object.entries(meals).sort((a, b) => b[1] - a[1])[0][0];
+  const count = COUNT_WORDS.test(text);
+  return {
+    qty: count ? Math.max(1, Math.ceil(perWeek)) : null,
+    unit: count ? 'pcs' : '',
+    note: (usual ? 'usually ' + usual[0] : 'for ' + meal) + ' · about ' + Math.max(1, Math.round(perWeek)) + '× a week',
+    auto: true
+  };
+}
+
+function grocLine(it) {
+  const q = it.qty ? ' x' + it.qty + (it.unit && it.unit !== 'pcs' ? ' ' + it.unit : '') : '';
+  return it.text + q + (it.note ? ' (' + it.note + ')' : '');
+}
+
+function grocText() {
+  const todo = (state.grocery || []).filter(x => !x.done);
+  const d = new Date();
+  const groups = {};
+  for (const it of todo) (groups[grocGroup(it.text)] = groups[grocGroup(it.text)] || []).push(it);
+  const order = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'];
+  return 'Groceries, ' + cap(FULL[d.getDay()].slice(0, 3)) + ' ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '\n\n' +
+    order.filter(g => groups[g]).map(g => g + '\n' + groups[g].map(it => '- ' + grocLine(it)).join('\n')).join('\n\n');
+}
+
+async function grocShare(how) {
+  const text = grocText();
+  if (how === 'share' && navigator.share) {
+    try { await navigator.share({ title: 'Groceries', text }); return 'Sent'; } catch { return null; }
+  }
+  try { await navigator.clipboard.writeText(text); return 'Copied'; }
+  catch {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch {}
+    ta.remove(); return 'Copied';
+  }
+}
+
 function renderGroceries() {
   if (!state.grocery) state.grocery = [];
   const list = document.getElementById('groc-list');
   const todo = state.grocery.filter(x => !x.done), got = state.grocery.filter(x => x.done);
 
-  const row = it => '<li class="gr-row' + (it.done ? ' done' : '') + '" data-id="' + it.id + '">' +
-    '<button type="button" class="gr-tick" data-a="tick" aria-label="' + (it.done ? 'put back on the list' : 'got it') + '"><i>✓</i></button>' +
-    '<span class="gr-name">' + esc(it.text) + '</span>' +
-    '<button type="button" class="gr-del" data-a="del" aria-label="remove">×</button></li>';
+  const g = myGoal();
+  const row = it => {
+    const ks = foodKinds(it.text);
+    const v = g && ks.length ? g.verdict({ what: it.text, at: Date.now(), meal: 'lunch' }, ks) : null;
+    const sw = !it.done && v && v[0] === 'watch' ? swapFor(it.text) : null;
+    const open = grOpen === it.id && !it.done;
+    const qty = it.qty ? '<em class="gr-q">×' + it.qty + (it.unit && it.unit !== 'pcs' ? ' ' + esc(it.unit) : '') + '</em>' : '';
+    const sub = it.done ? '' :
+      (it.note ? '<small class="gr-note">' + esc(it.note) + (it.auto ? ' · <i>from what you eat</i>' : '') + '</small>' : '') +
+      (v && (v[0] === 'good' || sw) ? '<small class="gr-v ' + v[0] + '">' + (v[0] === 'good' ? '✓ ' : '⚠ ') + esc(v[1]) + '</small>' : '');
+    const swapBtn = sw ? '<button type="button" class="gr-swap" data-a="swap" data-to="' + esc(sw) + '">Swap for ' + esc(sw) + '</button>' : '';
+    const editor = !open ? '' :
+      '<div class="gr-ed">' +
+        '<div class="gr-qrow"><button type="button" data-a="minus" aria-label="less">−</button>' +
+        '<input type="number" inputmode="numeric" min="0" max="999" class="gr-qin" aria-label="how many" placeholder="how many">' +
+        '<button type="button" data-a="plus" aria-label="more">+</button>' +
+        '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u="' + u + '" class="' + (it.unit === u ? 'on' : '') + '">' + u + '</button>').join('') + '</div></div>' +
+        '<input type="text" class="gr-nin" maxlength="80" placeholder="how you’ll have it, e.g. boiled for breakfast">' +
+        '<button type="button" class="gr-done" data-a="close">Done</button></div>';
+    return '<li class="gr-row' + (it.done ? ' done' : '') + (open ? ' open' : '') + '" data-id="' + it.id + '">' +
+      '<button type="button" class="gr-tick" data-a="tick" aria-label="' + (it.done ? 'put back on the list' : 'got it') + '"><i>✓</i></button>' +
+      '<button type="button" class="gr-name gr-open" data-a="open"><span class="gr-t">' + esc(it.text) + qty + '</span>' + sub + '</button>' +
+      '<button type="button" class="gr-del" data-a="del" aria-label="remove">×</button>' + swapBtn + editor + '</li>';
+  };
+
+  // shopping order: grouped by kind of food
+  const groups = {};
+  for (const it of todo) (groups[grocGroup(it.text)] = groups[grocGroup(it.text)] || []).push(it);
+  const order = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'].filter(k => groups[k]);
 
   let html = '';
   if (!state.grocery.length) html = '<p class="gr-empty">Your list is empty. Add what you need, or tap a suggestion below.</p>';
-  if (todo.length) html += '<ul class="gr-list">' + todo.map(row).join('') + '</ul>';
+  if (todo.length) {
+    html += '<div class="gr-share"><button type="button" data-a="copy">Copy as text</button><button type="button" data-a="share">Send to Notes</button><span class="gr-msg"></span></div>';
+    html += order.map(k => (order.length > 1 ? '<div class="gr-ghead">' + k + '</div>' : '') + '<ul class="gr-list">' + groups[k].map(row).join('') + '</ul>').join('');
+  }
   if (got.length) {
     html += '<div class="gr-gothead"><span>In the basket · ' + got.length + '</span>' +
             '<button type="button" class="gr-clear">Clear</button></div>' +
@@ -7113,14 +7505,49 @@ function renderGroceries() {
   }
   list.innerHTML = html;
 
+  list.querySelectorAll('.gr-share [data-a]').forEach(b => b.addEventListener('click', async () => {
+    const said = await grocShare(b.dataset.a);
+    const m = list.querySelector('.gr-msg'); if (m && said) { m.textContent = said; setTimeout(() => { m.textContent = ''; }, 2000); }
+  }));
+
   list.querySelectorAll('.gr-row').forEach(li => {
     const it = state.grocery.find(x => x.id === li.dataset.id);
-    li.querySelector('[data-a=tick]').addEventListener('click', () => { it.done = !it.done; save(); renderGroceries(); });
+    li.querySelector('[data-a=tick]').addEventListener('click', () => {
+      it.done = !it.done;
+      if (!state.groceryLog) state.groceryLog = [];
+      if (it.done) state.groceryLog.push({ text: it.text, at: Date.now() });
+      else { const j = state.groceryLog.map(x => x.text).lastIndexOf(it.text); if (j > -1) state.groceryLog.splice(j, 1); }
+      if (grOpen === it.id) grOpen = null;
+      save(); renderGroceries();
+    });
+    li.querySelector('[data-a=open]').addEventListener('click', e => {
+      if (e.target.closest('[data-a=swap]')) return;
+      if (it.done) return;
+      grOpen = grOpen === it.id ? null : it.id; renderGroceries();
+      const n = list.querySelector('.gr-row.open .gr-qin'); if (n && !it.qty) n.focus();
+    });
+    const sw = li.querySelector('[data-a=swap]');
+    if (sw) sw.addEventListener('click', () => { it.text = cap(sw.dataset.to.split(/,| or /)[0].trim()); Object.assign(it, grocGuess(it.text) || { qty: null, unit: '', note: '', auto: false }); save(); renderGroceries(); });
     li.querySelector('[data-a=del]').addEventListener('click', () => {
       const i = state.grocery.indexOf(it);
       state.grocery.splice(i, 1); save(); renderGroceries();
       offerUndo('"' + it.text + '"', () => { state.grocery.splice(i, 0, it); save(); renderGroceries(); });
     });
+    // the details editor
+    const q = li.querySelector('.gr-qin');
+    if (q) {
+      q.value = it.qty || '';
+      const setQ = v => { it.qty = v > 0 ? v : null; it.auto = false; q.value = it.qty || ''; save(); };
+      q.addEventListener('change', () => setQ(Number(q.value) || 0));
+      li.querySelector('[data-a=minus]').addEventListener('click', () => { setQ((it.qty || 0) - 1); renderGroceries(); });
+      li.querySelector('[data-a=plus]').addEventListener('click', () => { if (!it.unit && COUNT_WORDS.test(it.text)) it.unit = 'pcs'; setQ((it.qty || 0) + 1); renderGroceries(); });
+      li.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { it.unit = it.unit === b.dataset.u ? '' : b.dataset.u; it.auto = false; save(); renderGroceries(); }));
+      const nt = li.querySelector('.gr-nin');
+      nt.value = it.note || '';
+      nt.addEventListener('change', () => { it.note = nt.value.trim(); it.auto = false; save(); });
+      nt.addEventListener('keydown', e => { if (e.key === 'Enter') { nt.blur(); grOpen = null; renderGroceries(); } });
+      li.querySelector('[data-a=close]').addEventListener('click', () => { it.note = nt.value.trim(); grOpen = null; save(); renderGroceries(); });
+    }
   });
   const clr = list.querySelector('.gr-clear');
   if (clr) clr.addEventListener('click', () => {
@@ -7131,13 +7558,28 @@ function renderGroceries() {
 
   // suggestions
   const box = document.getElementById('groc-suggest');
+  const onList = new Set(state.grocery.filter(x => !x.done).map(x => x.text.toLowerCase()));
+  const gaps = foodGaps(), rs = restockSoon().filter(x => !onList.has(x.name));
+  let top = '';
+  if (gaps.length || rs.length) {
+    top = '<div class="gr-sug"><div class="gr-sug-head"><b>From what you eat</b><span>last 2 weeks</span></div><ul>' +
+      gaps.map(gp => { const pickIt = gp.items.find(n => !onList.has(n)) || gp.items[0];
+        return '<li><div><b>' + esc(cap(pickIt)) + '</b><small>' + esc(gp.say) + '</small></div><button type="button" class="gr-plus" data-add="' + esc(pickIt) + '" aria-label="add ' + esc(pickIt) + '">+</button></li>'; }).join('') +
+      rs.map(x => '<li><div><b>' + esc(cap(x.name)) + '</b><small>you buy it about every ' + x.days + ' days, last ' + x.since + ' days ago</small></div><button type="button" class="gr-plus" data-add="' + esc(x.name) + '" aria-label="add ' + esc(x.name) + '">+</button></li>').join('') +
+      '</ul></div>';
+  }
   const sg = grocerySuggestions();
+  if (sg) {   // nothing twice: what is already suggested above stays out of the goal list
+    const shown = new Set([...gaps.map(gp => gp.items.find(n => !onList.has(n)) || gp.items[0]), ...rs.map(x => x.name)]);
+    sg.list = sg.list.filter(x => !shown.has(x.name));
+  }
   if (!sg) {
-    box.innerHTML = '<div class="gr-sug"><b>Suggestions</b><p class="gr-empty">Set a health goal on the Log tab and I will suggest foods that help.</p></div>';
+    box.innerHTML = top + '<div class="gr-sug"><b>Suggestions</b><p class="gr-empty">Set a health goal on the Log tab and I will suggest foods that help.</p></div>';
+    box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addGrocery(cap(b.dataset.add))));
     return;
   }
-  if (!sg.list.length) { box.innerHTML = ''; return; }
-  box.innerHTML = '<div class="gr-sug"><div class="gr-sug-head"><b>For your goal</b><span>' + sg.goal.e + ' ' + sg.goal.name + '</span></div>' +
+  if (!sg.list.length) { box.innerHTML = top; box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addGrocery(cap(b.dataset.add)))); return; }
+  box.innerHTML = top + '<div class="gr-sug"><div class="gr-sug-head"><b>For your goal</b><span>' + sg.goal.e + ' ' + sg.goal.name + '</span></div>' +
     '<p class="gr-hint">' + esc(GOAL_HINT[sg.goal.k] || '') + '</p>' +
     '<ul>' + sg.list.map(x => '<li><div><b>' + esc(cap(x.name)) + '</b><small>' +
       (x.times ? 'you eat this · ' + x.times + '× this month' : 'new for you') + ' · ' + esc(x.why) +
@@ -7151,7 +7593,9 @@ function addGrocery(text) {
   if (!text) return;
   if (!state.grocery) state.grocery = [];
   if (state.grocery.some(x => !x.done && x.text.toLowerCase() === text.toLowerCase())) return;   // already on it
-  state.grocery.unshift({ id: Date.now() + '' + Math.random().toString(36).slice(2, 6), text, done: false, at: Date.now() });
+  // fill in how many and how you have it from your food log, when it knows
+  state.grocery.unshift({ id: Date.now() + '' + Math.random().toString(36).slice(2, 6), text, done: false, at: Date.now(),
+                          qty: null, unit: '', note: '', auto: false, ...(grocGuess(text) || {}) });
   save(); renderGroceries();
 }
 
@@ -7176,6 +7620,8 @@ function renderFood() {
 
   renderFoodLog();
   renderBodyNow();
+  renderPlate();
+  renderMonth();
   renderPatterns();
   renderQuick();
   renderPreview();
@@ -10372,7 +10818,11 @@ setInterval(() => {
   }
 }, 1000);
 
+// inside-you lines move on every 10 minutes
+let fuelTick = Math.floor(Date.now() / 600000);
 setInterval(() => {
+  const t = Math.floor(Date.now() / 600000);
+  if (t !== fuelTick) { fuelTick = t; if (!document.getElementById('view-food').hidden && !pickingGoal) renderBodyNow(); }
   if (!document.getElementById('view-day').hidden) renderDay();
   if (!document.getElementById('view-home').hidden && !sorting) {
     const last = state.moods.slice().sort((a, b) => b.at - a.at)[0];
