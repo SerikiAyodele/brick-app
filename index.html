@@ -3444,6 +3444,24 @@ body.showmode #view-day .qp { display: none; }
 .lp4-end input { width: 140px; min-height: 44px; padding: 0 14px; text-align: center; font: 500 16px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 22px; -webkit-appearance: none; appearance: none; }
 .lp4-done { align-self: flex-end; padding: 4px 0; font: 600 15px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
 
+/* one goal for the day */
+.dg-card { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding: 14px 16px; background: color-mix(in srgb, var(--pink) 10%, var(--card)); border: 1px solid color-mix(in srgb, var(--pink) 30%, var(--hair)); border-radius: 18px; }
+.dg-card > div { flex: 1; min-width: 0; }
+.dg-card span { display: block; font-size: 12px; font-weight: 600; color: var(--pink); }
+.dg-card b { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+.dg-card.done b { text-decoration: line-through; color: var(--muted); }
+.dg-tick { flex: none; width: 30px; height: 30px; padding: 0; font-size: 14px; color: transparent; background: var(--card); border: 1.5px solid var(--pink); border-radius: 50%; cursor: pointer; }
+.dg-card.done .dg-tick { color: #fff; background: var(--pink); }
+.dg-edit { flex: none; padding: 4px 0; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: none; border: none; cursor: pointer; }
+.dg-ask { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; padding: 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; animation: fadein .3s ease-out; }
+.dg-ask > b { font-size: 17px; font-weight: 600; }
+.dg-in { display: flex; gap: 8px; }
+.dg-in input { flex: 1; min-width: 0; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
+.dg-in .lf-btn { flex: none; min-height: 44px; padding: 0 18px; }
+.dg-ideas { display: flex; flex-wrap: wrap; gap: 6px; }
+.dg-ideas button { min-height: 34px; padding: 0 12px; text-align: left; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 17px; cursor: pointer; }
+.dg-skip { align-self: flex-start; padding: 4px 0; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: none; border: none; cursor: pointer; }
+
 /* stats cards */
 #stats-body { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .st-card { padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
@@ -3618,6 +3636,7 @@ body, body[data-view] {
       </div>
     </div>
 
+    <div id="day-goal"></div>
     <div id="carry-slot"></div>
 
     <div class="start-row">
@@ -3719,7 +3738,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 21:36</footer>
+  <footer>everything saves on this device · build 21:39</footer>
 </div>
 
 <script>
@@ -3818,8 +3837,18 @@ for (const k in state.days) {
 }
 let openHabit = null;
 let monthOffset = 0;
-// a plan day runs until 4am, so a late night still counts as the same day
-function planKey() { return new Date().getHours() < 4 ? shiftKey(todayKey(), -1) : todayKey(); }
+// a new day starts when the day before it ends: if yesterday's plan is still
+// running (a late night), it is still yesterday. with no plan, at midnight.
+function planKey() {
+  const t = todayKey(), y = shiftKey(t, -1);
+  const d = typeof state !== 'undefined' && state.days ? state.days[y] : null;
+  if (d && d.blocks && d.blocks.length && new Date().getHours() < 12) {
+    let end = toMins(d.start);
+    for (const b of d.blocks) end += Number(b.mins) || 60;
+    if (Date.now() < fromKey(y).getTime() + end * 60000) return y;
+  }
+  return t;
+}
 // minutes since midnight of that plan day (so 1:30am on the night after is 1530)
 function planMin(k) { return Math.floor((Date.now() - fromKey(k).getTime()) / 60000); }
 
@@ -5526,7 +5555,48 @@ function grow(el) {
   el.style.height = el.scrollHeight + 'px';
 }
 
+// one goal for the day: asked once each new day, then shown at the top
+let dayGoalEditing = false;
+function renderDayGoal() {
+  const box = document.getElementById('day-goal');
+  const day = dayFor(viewDay);
+  const isToday = viewDay === planKey();
+  box.innerHTML = '';
+  if (day.goal && !dayGoalEditing) {
+    box.innerHTML = '<div class="dg-card' + (day.goalDone ? ' done' : '') + '"><button type="button" class="dg-tick" aria-label="' + (day.goalDone ? 'not done yet' : 'done') + '">\u2713</button>' +
+      '<div><span>' + (isToday ? 'Today\u2019s one goal' : 'One goal') + '</span><b></b></div><button type="button" class="dg-edit">Edit</button></div>';
+    box.querySelector('b').textContent = day.goal;
+    box.querySelector('.dg-tick').addEventListener('click', () => { day.goalDone = !day.goalDone; save(); renderDayGoal(); });
+    box.querySelector('.dg-edit').addEventListener('click', () => { dayGoalEditing = true; renderDayGoal(); });
+    return;
+  }
+  if (!isToday && !dayGoalEditing) return;
+  if (day.goalSkip && !dayGoalEditing) return;
+
+  // ideas: this week's big goal actions not done yet, and yesterday's goal if it was missed
+  const ideas = [];
+  for (const k of ['health', 'wealth', 'love', 'self']) {
+    for (const b of (typeof bigsOf === 'function' ? bigsOf(k) : [])) { const A = weekAction(b); if (A && !A.done) ideas.push(A.text); }
+  }
+  const yd = state.days[shiftKey(viewDay, -1)];
+  if (yd && yd.goal && !yd.goalDone) ideas.unshift(yd.goal);
+  const uniq = [...new Set(ideas)].slice(0, 3);
+
+  box.innerHTML = '<div class="dg-ask"><b>' + (dayGoalEditing ? 'Change today\u2019s goal' : 'New day. What\u2019s your one goal today?') + '</b>' +
+    '<div class="dg-in"><input type="text" maxlength="100" placeholder="what makes today a win?"><button type="button" class="lf-btn main">Set</button></div>' +
+    (uniq.length ? '<div class="dg-ideas">' + uniq.map(t => '<button type="button" data-t="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>' : '') +
+    '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : 'Not today') + '</button></div>';
+  const inp = box.querySelector('input');
+  inp.value = dayGoalEditing ? (day.goal || '') : '';
+  const set = t => { t = (t || '').trim(); if (!t) { inp.focus(); return; } day.goal = t; day.goalDone = false; day.goalSkip = false; dayGoalEditing = false; save(); renderDayGoal(); };
+  box.querySelector('.lf-btn').addEventListener('click', () => set(inp.value));
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') set(inp.value); });
+  box.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => set(b.dataset.t)));
+  box.querySelector('.dg-skip').addEventListener('click', () => { if (dayGoalEditing) dayGoalEditing = false; else day.goalSkip = true; save(); renderDayGoal(); });
+}
+
 function renderDay() {
+  renderDayGoal();
   renderCarry();
   const day = dayFor(viewDay);
   const d = fromKey(viewDay);
