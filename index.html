@@ -3428,6 +3428,22 @@ body.showmode #view-day .qp { display: none; }
 .gr-nin { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
 .gr-done { align-self: flex-start; padding: 4px 0; font: 600 14px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
 
+/* length picker, round four */
+#view-day .line .at.tapme { cursor: pointer; }
+#view-day .lp4 { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; padding: 14px; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; }
+.lp4-now { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.lp4-now b { font-size: 22px; font-weight: 600; }
+.lp4-now span { font-size: 14px; color: var(--muted); }
+.lp4-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.lp4-row button { flex: 1 1 auto; min-width: 52px; min-height: 40px; padding: 0 10px; font: 500 15px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 20px; cursor: pointer; }
+.lp4-row.add button { background: color-mix(in srgb, var(--pink) 14%, var(--card)); color: var(--pink); font-weight: 600; }
+.lp4-row button.on { color: #fff; background: var(--pink); }
+.lp4-row button.usual:not(.on) { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--pink) 55%, transparent); }
+.lp4-row button:disabled { opacity: .35; }
+.lp4-end { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 15px; color: var(--muted); }
+.lp4-end input { width: 140px; min-height: 44px; padding: 0 14px; text-align: center; font: 500 16px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 22px; -webkit-appearance: none; appearance: none; }
+.lp4-done { align-self: flex-end; padding: 4px 0; font: 600 15px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
+
 /* stats cards */
 #stats-body { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .st-card { padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
@@ -3705,7 +3721,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 21:23</footer>
+  <footer>everything saves on this device · build 21:25</footer>
 </div>
 
 <script>
@@ -5314,39 +5330,43 @@ function usualLength(label) {
   return best && best[1] >= 2 ? Number(best[0]) : null;
 }
 
-/* pick a length: a slider you drag (5 minutes to 4 hours), quick choices,
-   your usual length for this block, or round end times. the big line
-   shows the length and when it ends as you move. */
+/* change a block's length. it stays open while you adjust, so you can tap
+   +5 a few times. three ways: add or take time, a quick length, or pick
+   when it ends on the time wheel. the wheel only saves when you tap Done
+   (iPhone reports every spin as a change, so saving on each one closed it). */
 function lengthPicker(b, from, len) {
-  const set = m => { b.mins = Math.max(5, Math.min(1440, m)); customFor = null; save(); renderDay(); };
+  const keep = m => { b.mins = Math.max(5, Math.min(1440, m)); save(); renderDay(); };
   const box = document.createElement('div');
-  box.className = 'lenpick lp3';
+  box.className = 'lenpick lp4';
   const usual = usualLength(b.label);
   const opts = [15, 30, 45, 60, 90, 120];
-  if (usual && !opts.includes(usual)) opts.unshift(usual);
-  for (const m of opts) {
-    const c = document.createElement('button');
-    c.type = 'button';
-    c.className = 'lp-chip' + (m === len ? ' on' : '') + (m === usual ? ' usual' : '');
-    c.textContent = minsLabel(m);
-    if (m === usual) c.title = 'your usual for this';
-    c.addEventListener('click', () => set(m));
-    box.appendChild(c);
-  }
-  // any length: pick when it ends on the time wheel
-  const end0 = from % 1440;
-  const lab = document.createElement('label');
-  lab.className = 'lp-chip lp-ends3';
-  lab.append('Ends at…');
-  const t = document.createElement('input');
-  t.type = 'time'; t.step = 300; t.value = hhmm(from + len);
-  t.addEventListener('change', () => {
-    if (!/^\d{2}:\d{2}/.test(t.value)) return;
-    let m = toMins(t.value.slice(0, 5)) - end0; if (m <= 0) m += 1440;
-    set(m);
-  });
-  lab.appendChild(t);
-  box.appendChild(lab);
+  if (usual && !opts.includes(usual)) opts.push(usual);
+  opts.sort((x, y) => x - y);
+
+  box.innerHTML =
+    '<div class="lp4-now"><b>' + minsLabel(len) + '</b><span>' + clock(from) + ' to ' + clock(from + len) + '</span></div>' +
+    '<div class="lp4-row add">' + [[-5, '−5'], [5, '+5'], [10, '+10'], [15, '+15'], [30, '+30']].map(([d, t]) =>
+      '<button type="button" data-d="' + d + '"' + (len + d < 5 ? ' disabled' : '') + '>' + t + '</button>').join('') + '</div>' +
+    '<div class="lp4-row">' + opts.map(m => '<button type="button" data-m="' + m + '" class="' + (m === len ? 'on' : '') + (m === usual ? ' usual' : '') + '">' + minsLabel(m) + '</button>').join('') + '</div>' +
+    '<label class="lp4-end"><span>Ends at</span><input type="time" step="300"></label>' +
+    '<button type="button" class="lp4-done">Done</button>';
+  box.querySelectorAll('[data-d]').forEach(x => x.addEventListener('click', () => keep(len + Number(x.dataset.d))));
+  box.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
+  const t = box.querySelector('input');
+  t.value = hhmm(from + len);
+  let picked = null;
+  const commit = () => {
+    if (!picked || !/^\d{2}:\d{2}/.test(picked)) return;
+    let m = toMins(picked.slice(0, 5)) - (from % 1440);
+    if (m <= 0) m += 1440;                               // ends after midnight
+    picked = null;
+    keep(m);
+  };
+  t.addEventListener('input', () => { picked = t.value; });
+  t.addEventListener('change', () => { picked = t.value; });
+  t.addEventListener('blur', commit);                    // the wheel's Done
+  t.addEventListener('keydown', e => { if (e.key === 'Enter') t.blur(); });
+  box.querySelector('.lp4-done').addEventListener('click', () => { commit(); customFor = null; renderDay(); });
   return box;
 }
 
@@ -5568,9 +5588,9 @@ function renderDay() {
     const when = document.createElement('div');
     when.className = 'at';
     when.innerHTML = clock(from) + '<small class="endat">' + clock(at) + '</small>';
-    const endBtn = when.querySelector('.endat');
-    endBtn.title = 'tap to set how long this runs';
-    endBtn.addEventListener('click', () => { customFor = i; renderDay(); });
+    when.title = 'tap to change how long this runs';
+    when.classList.add('tapme');
+    when.addEventListener('click', () => { customFor = customFor === i ? null : i; renderDay(); });
 
     const locked = !b.done && i !== firstOpen;
     if (locked) row.classList.add('locked');
