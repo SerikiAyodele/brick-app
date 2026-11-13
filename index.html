@@ -3540,8 +3540,6 @@ body, body[data-view] {
         <button class="fx-close" id="focus-close" type="button" aria-label="close focus">×</button>
       </div>
     </div>
-    <div class="fx-wx" aria-hidden="true"></div>
-    <div class="fx-zoo" aria-hidden="true"></div>
 
     <div class="fx-stage">
       <svg class="fx-ring" viewBox="0 0 300 300" aria-hidden="true">
@@ -3721,7 +3719,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 21:33</footer>
+  <footer>everything saves on this device · build 21:36</footer>
 </div>
 
 <script>
@@ -4909,82 +4907,132 @@ function pastCard(day) {
    wander across now and then, and the black background warms so slowly
    you hardly notice. leave the app and the plant starts again. */
 
+// only flowers, drawn with light and shade so they look round (3D)
+// petal: [light tip, dark base]; mid: centre colour; n: petals per ring; rings; shape
 const ROOM_PLANTS = [
-  { k: 'pepper',   name: 'Ata rodo',      sub: 'scotch bonnet pepper', leaf: '#6fae4f' },
-  { k: 'tomato',   name: 'Tomato',        sub: 'tomati',               leaf: '#7cb85a' },
-  { k: 'okra',     name: 'Okra',          sub: 'ila',                  leaf: '#5f9e48' },
-  { k: 'zobo',     name: 'Zobo',          sub: 'roselle, for the drink', leaf: '#4f8f45' },
-  { k: 'gardenegg',name: 'Garden egg',    sub: 'igba, anara',          leaf: '#6aa553' },
-  { k: 'ugwu',     name: 'Ugwu',          sub: 'fluted pumpkin leaf',  leaf: '#3f7f3a' },
-  { k: 'hibiscus', name: 'Hibiscus',      sub: 'red flower',           leaf: '#5d9a4a' },
-  { k: 'ixora',    name: 'Ixora',         sub: 'the hedge flower',     leaf: '#4c8a44' },
-  { k: 'pride',    name: 'Pride of Barbados', sub: 'flame flower',     leaf: '#6aa553' }
+  { k: 'rose',      name: 'Rose',          sub: 'soft pink',        leaf: '#4f9a4f', petal: ['#ffd1dc', '#e0607e'], mid: '#c94468', n: 5, rings: 4, shape: 'round' },
+  { k: 'peony',     name: 'Peony',         sub: 'full and fluffy',  leaf: '#5aa055', petal: ['#ffe4ec', '#f08cab'], mid: '#f6b8c9', n: 7, rings: 4, shape: 'round' },
+  { k: 'sunflower', name: 'Sunflower',     sub: 'turns to the sun', leaf: '#5f9e48', petal: ['#ffe36b', '#f0a417'], mid: '#6b3d1e', n: 16, rings: 2, shape: 'point', disc: true },
+  { k: 'lotus',     name: 'Lotus',         sub: 'grows from mud',   leaf: '#3f8f6a', petal: ['#fff0f5', '#ec7fa7'], mid: '#f7d65c', n: 8, rings: 3, shape: 'point' },
+  { k: 'hibiscus',  name: 'Hibiscus',      sub: 'red flower',       leaf: '#4f8f45', petal: ['#ff8a8a', '#c4203a'], mid: '#f2d34f', n: 5, rings: 1, shape: 'round' },
+  { k: 'tulip',     name: 'Tulip',         sub: 'a cup of colour',  leaf: '#5a9e55', petal: ['#ffb07a', '#e2442f'], mid: '#e2442f', tulip: true },
+  { k: 'lily',      name: 'Lily',          sub: 'white and calm',   leaf: '#4d9a5a', petal: ['#ffffff', '#e3d8f0'], mid: '#f0b53a', n: 6, rings: 1, shape: 'point' },
+  { k: 'blossom',   name: 'Cherry blossom',sub: 'tiny and many',    leaf: '#6aa553', petal: ['#ffeef3', '#f6a8c0'], mid: '#e8708f', n: 5, rings: 1, shape: 'round', many: true },
+  { k: 'lavender',  name: 'Cosmos',        sub: 'light as air',     leaf: '#5f9e48', petal: ['#f3e4ff', '#a678d6'], mid: '#f2c12e', n: 8, rings: 1, shape: 'round' }
 ];
 
 const ROOM_POTS = [
   { name: 'terracotta', body: '#c9714a', rim: '#d9825a' },
   { name: 'blue ceramic', body: '#4f7fb3', rim: '#6a98c8' },
   { name: 'cream clay', body: '#e2d6c2', rim: '#efe5d4' },
-  { name: 'black clay', body: '#3b302a', rim: '#4d3f37' },
-  { name: 'ankara', body: '#e0a514', rim: '#f0b928', stripes: ['#e8417d', '#1f8a8a'] },
-  { name: 'woven', body: '#b58a5a', rim: '#c79b69', weave: true }
+  { name: 'baby pink', body: '#eab0bf', rim: '#f4c4d0' },
+  { name: 'sage', body: '#8fb59a', rim: '#a5c8ae' },
+  { name: 'gold', body: '#d6a843', rim: '#e8bf5c' }
 ];
 
-// the grown part of each plant, drawn on top of the stem (viewBox 40 x 50)
-function plantTop(k, stage) {
+// shading shared by every drawing: gradients for petals, leaves, stem, pot
+function flowerDefs(p) {
+  const [lt, dk] = p.petal;
+  return '<defs>' +
+    '<linearGradient id="flP" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="' + dk + '"/><stop offset=".75" stop-color="' + lt + '"/><stop offset="1" stop-color="#fff" stop-opacity=".9"/></linearGradient>' +
+    '<linearGradient id="flPd" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="' + dk + '"/><stop offset="1" stop-color="' + dk + '" stop-opacity=".75"/></linearGradient>' +
+    '<radialGradient id="flM" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".35" stop-color="' + p.mid + '"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient>' +
+    '<linearGradient id="flL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9f2c6"/><stop offset=".35" stop-color="' + p.leaf + '"/><stop offset="1" stop-color="#1f4a24"/></linearGradient>' +
+    '<linearGradient id="flS" gradientUnits="userSpaceOnUse" x1="19.2" y1="0" x2="20.8" y2="0"><stop offset="0" stop-color="#3d6e33"/><stop offset=".5" stop-color="#8cc46f"/><stop offset="1" stop-color="#3d6e33"/></linearGradient>' +
+    '<linearGradient id="flPot" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".35" stop-color="#fff" stop-opacity=".28"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></linearGradient>' +
+    '<radialGradient id="flSoil" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#6b4a32"/><stop offset="1" stop-color="#2e1d12"/></radialGradient>' +
+    '<filter id="flSh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy=".8" stdDeviation=".7" flood-color="#000" flood-opacity=".45"/></filter>' +
+    '</defs>';
+}
+
+// one petal pointing up from (cx, cy), then turned by angle a
+function petal(cx, cy, r, a, shape, fill, sx) {
+  const w = shape === 'point' ? r * .42 : r * .62;
+  const d = shape === 'point'
+    ? 'M' + cx + ' ' + cy + ' C' + (cx - w) + ' ' + (cy - r * .45) + ' ' + (cx - w * .5) + ' ' + (cy - r * .9) + ' ' + cx + ' ' + (cy - r) +
+      ' C' + (cx + w * .5) + ' ' + (cy - r * .9) + ' ' + (cx + w) + ' ' + (cy - r * .45) + ' ' + cx + ' ' + cy + 'Z'
+    : 'M' + cx + ' ' + cy + ' C' + (cx - w * 1.2) + ' ' + (cy - r * .4) + ' ' + (cx - w) + ' ' + (cy - r * 1.05) + ' ' + cx + ' ' + (cy - r) +
+      ' C' + (cx + w) + ' ' + (cy - r * 1.05) + ' ' + (cx + w * 1.2) + ' ' + (cy - r * .4) + ' ' + cx + ' ' + cy + 'Z';
+  return '<path d="' + d + '" fill="url(#' + fill + ')" stroke="#000" stroke-opacity=".08" stroke-width=".2" transform="rotate(' + a + ' ' + cx + ' ' + cy + ')"/>';
+}
+
+// a full flower head, tilted a little toward you so it looks round
+function flowerHead(cx, cy, r, p) {
+  if (p.tulip) {
+    return '<g filter="url(#flSh)">' +
+      '<path d="M' + (cx - r * .8) + ' ' + (cy - r * .2) + ' Q' + (cx - r * .9) + ' ' + (cy - r * 1.3) + ' ' + (cx - r * .3) + ' ' + (cy - r * 1.4) + ' Q' + cx + ' ' + (cy - r * .6) + ' ' + cx + ' ' + (cy + r * .5) + ' Z" fill="url(#flPd)"/>' +
+      '<path d="M' + (cx + r * .8) + ' ' + (cy - r * .2) + ' Q' + (cx + r * .9) + ' ' + (cy - r * 1.3) + ' ' + (cx + r * .3) + ' ' + (cy - r * 1.4) + ' Q' + cx + ' ' + (cy - r * .6) + ' ' + cx + ' ' + (cy + r * .5) + ' Z" fill="url(#flPd)"/>' +
+      '<path d="M' + (cx - r * .75) + ' ' + (cy - r * .5) + ' Q' + (cx - r * .5) + ' ' + (cy + r * .7) + ' ' + cx + ' ' + (cy + r * .6) + ' Q' + (cx + r * .5) + ' ' + (cy + r * .7) + ' ' + (cx + r * .75) + ' ' + (cy - r * .5) +
+        ' Q' + (cx + r * .3) + ' ' + (cy - r * 1.6) + ' ' + cx + ' ' + (cy - r * 1.2) + ' Q' + (cx - r * .3) + ' ' + (cy - r * 1.6) + ' ' + (cx - r * .75) + ' ' + (cy - r * .5) + 'Z" fill="url(#flP)"/>' +
+      '<path d="M' + (cx - r * .25) + ' ' + (cy - r * .9) + ' Q' + (cx - r * .4) + ' ' + cy + ' ' + (cx - r * .1) + ' ' + (cy + r * .4) + '" stroke="#fff" stroke-opacity=".35" stroke-width=".5" fill="none"/></g>';
+  }
+  let out = '';
+  for (let L = 0; L < p.rings; L++) {
+    const rr = r * (1 - L * (p.rings > 2 ? .2 : .28));
+    const off = L * (180 / p.n) + (L % 2 ? 9 : 0);
+    const fill = L === 0 && p.rings > 1 ? 'flPd' : 'flP';
+    for (let i = 0; i < p.n; i++) out += petal(cx, cy, rr, off + i * 360 / p.n, p.shape, fill);
+  }
+  const midR = p.disc ? r * .42 : r * .2;
+  out += '<circle cx="' + cx + '" cy="' + cy + '" r="' + midR + '" fill="url(#flM)"/>';
+  if (p.disc) for (let i = 0; i < 14; i++) {
+    const a = i * 2.4, d = Math.sqrt(i + .5) * midR * .24;
+    out += '<circle cx="' + (cx + Math.cos(a) * d).toFixed(2) + '" cy="' + (cy + Math.sin(a) * d).toFixed(2) + '" r="' + (midR * .08).toFixed(2) + '" fill="#2a160a" opacity=".6"/>';
+  }
+  if (p.k === 'lily' || p.k === 'lotus') for (let i = 0; i < 5; i++) {
+    const a = (-90 + (i - 2) * 22) * Math.PI / 180;
+    out += '<line x1="' + cx + '" y1="' + cy + '" x2="' + (cx + Math.cos(a) * r * .55).toFixed(2) + '" y2="' + (cy + Math.sin(a) * r * .55).toFixed(2) + '" stroke="#7a9a3a" stroke-width=".25"/>' +
+           '<circle cx="' + (cx + Math.cos(a) * r * .55).toFixed(2) + '" cy="' + (cy + Math.sin(a) * r * .55).toFixed(2) + '" r=".55" fill="' + p.mid + '"/>';
+  }
+  return '<g filter="url(#flSh)" transform="translate(' + cx + ' ' + cy + ') scale(1 .82) translate(' + (-cx) + ' ' + (-cy) + ')">' + out + '</g>';
+}
+
+// the top: a closed bud at stage 4, the open flower at stage 5
+function plantTop(p, stage) {
   if (stage < 4) return '';
-  const bud = c => '<ellipse cx="20" cy="11" rx="2.6" ry="3.4" fill="' + c + '"/>';
   if (stage === 4) {
-    const c = { hibiscus: '#c23b4a', ixora: '#e0582e', pride: '#e8761f', zobo: '#9e1b32', okra: '#e8d36a' }[k] || '#6f9f5c';
-    return bud(c);
+    return '<g filter="url(#flSh)"><path d="M20 13 C17 11 17.5 7 20 5 C22.5 7 23 11 20 13Z" fill="url(#flP)"/>' +
+           '<path d="M20 13.5 C18 12.5 17.6 10.5 18.2 9.6 L20 11 L21.8 9.6 C22.4 10.5 22 12.5 20 13.5Z" fill="url(#flL)"/></g>';
   }
-  const flower = (cx, cy, r, c, mid) => [0, 72, 144, 216, 288].map(a =>
-    '<ellipse cx="' + cx + '" cy="' + (cy - r) + '" rx="' + (r * .75) + '" ry="' + r + '" fill="' + c + '" transform="rotate(' + a + ' ' + cx + ' ' + cy + ')"/>').join('') +
-    '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * .5) + '" fill="' + mid + '"/>';
-  switch (k) {
-    case 'pepper':   return ['#e8411e', '#f07a17', '#d42a1e'].map((c, i) =>
-                       '<path d="M' + (13 + i * 7) + ' ' + (14 + (i % 2) * 6) + ' q3 1 2 5 q-3 3 -5 0 q-1 -4 3 -5z" fill="' + c + '"/>').join('') + bud('#6f9f5c');
-    case 'tomato':   return [[13, 16], [26, 19], [19, 9]].map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="3.6" fill="#d8322b"/><path d="M' + (x - 1.5) + ' ' + (y - 3.4) + ' l1.5 1 l1.5 -1" stroke="#4c8a44" stroke-width="1" fill="none"/>').join('');
-    case 'okra':     return '<path d="M13 21 q-1 -8 2 -11 q1 4 -2 11z M27 21 q1 -8 -2 -11 q-1 4 2 11z" fill="#6aa553"/>' + flower(20, 9, 3.4, '#f2dd6b', '#7a2a3a');
-    case 'zobo':     return [[13, 17], [26, 15], [20, 8]].map(([x, y]) => '<path d="M' + x + ' ' + (y + 3) + ' q-3 -3 0 -7 q3 4 0 7z" fill="#a51c35"/><path d="M' + x + ' ' + (y + 3) + ' q3 -3 0 -7" fill="#c3243f"/>').join('');
-    case 'gardenegg':return [[13, 17], [27, 18], [20, 9]].map(([x, y]) => '<ellipse cx="' + x + '" cy="' + y + '" rx="3.2" ry="4" fill="#eef0d8"/><ellipse cx="' + x + '" cy="' + (y - 3.6) + '" rx="2" ry="1" fill="#5f9e48"/>').join('');
-    case 'ugwu':     return '<path d="M20 14 q-12 -2 -13 -9 q8 -1 13 9z M20 14 q12 -2 13 -9 q-8 -1 -13 9z" fill="#2f6e32"/>' + flower(20, 8, 2.8, '#f2c12e', '#e09016');
-    case 'hibiscus': return flower(20, 9, 4.8, '#d22f45', '#f2d34f');
-    case 'ixora':    return [[16, 9], [20, 7], [24, 9], [18, 12], [22, 12], [20, 10]].map(([x, y]) => flower(x, y, 1.6, '#ef5a2c', '#ffd27a')).join('');
-    case 'pride':    return [[15, 10], [25, 10], [20, 6]].map(([x, y]) => flower(x, y, 2.6, '#e8611f', '#f6c23a')).join('');
-  }
-  return flower(20, 10, 4, 'var(--pink)', '#e8c46a');
+  if (p.many) return [[13, 14, 3.4], [27, 13, 3.6], [20, 8, 4.2], [16, 6, 2.8], [24.5, 6.5, 2.8]].map(([x, y, r]) => flowerHead(x, y, r, p)).join('');
+  return flowerHead(20, 10, p.tulip ? 5.4 : p.k === 'sunflower' ? 8 : 7, p);
 }
 
 function potSVG(pot) {
-  let extra = '';
-  if (pot.stripes) extra = '<path d="M11 41 H29 M11.7 44 H28.3 M12.1 47 H27.9" stroke="' + pot.stripes[0] + '" stroke-width="1.2"/>' +
-                           '<path d="M11.3 42.5 H28.7 M11.9 45.5 H28.1" stroke="' + pot.stripes[1] + '" stroke-width="1"/>';
-  if (pot.weave) extra = '<path d="M13 39 L15 48 M17 39 L18 48 M21 39 L21 48 M25 39 L24 48 M28 39 L26 48" stroke="#8a6440" stroke-width=".8"/>' +
-                         '<path d="M10.5 42 H29.5 M11.2 45 H28.8" stroke="#8a6440" stroke-width=".8"/>';
-  return '<path d="M10 38 H30 L27.8 48.5 H12.2 Z" fill="' + pot.body + '"/>' + extra +
-         '<rect x="8.5" y="36" width="23" height="3.6" rx="1.5" fill="' + pot.rim + '"/>';
+  return '<g filter="url(#flSh)"><path d="M10 38 H30 L27.8 48.5 Q20 49.6 12.2 48.5 Z" fill="' + pot.body + '"/>' +
+         '<path d="M10 38 H30 L27.8 48.5 Q20 49.6 12.2 48.5 Z" fill="url(#flPot)"/>' +
+         '<ellipse cx="20" cy="49" rx="9" ry="1" fill="#000" opacity=".25"/>' +
+         '<rect x="8.5" y="35.6" width="23" height="4" rx="1.6" fill="' + pot.rim + '"/>' +
+         '<rect x="8.5" y="35.6" width="23" height="4" rx="1.6" fill="url(#flPot)"/>' +
+         '<ellipse cx="20" cy="36.2" rx="10.4" ry="1.1" fill="url(#flSoil)"/></g>';
 }
 
-// 0 seed · 1 sprout · 2 leaves · 3 more leaves · 4 bud · 5 grown
+const leafPath = (x, y, dx, dy) => {
+  // a leaf from (x, y) out to (x+dx, y+dy), curved, with a vein down the middle
+  const mx = x + dx / 2, my = y + dy / 2, nx = -dy * .35, ny = dx * .35;
+  return '<path d="M' + x + ' ' + y + ' Q' + (mx + nx) + ' ' + (my + ny) + ' ' + (x + dx) + ' ' + (y + dy) + ' Q' + (mx - nx) + ' ' + (my - ny) + ' ' + x + ' ' + y + 'Z" fill="url(#flL)"/>' +
+         '<path d="M' + x + ' ' + y + ' Q' + (mx + nx * .2) + ' ' + (my + ny * .2) + ' ' + (x + dx * .9) + ' ' + (y + dy * .9) + '" stroke="#d9f2c6" stroke-opacity=".5" stroke-width=".3" fill="none"/>';
+};
+
+// 0 seed · 1 sprout · 2 leaves · 3 more leaves · 4 bud · 5 in bloom
 function plantSVG(stage, was, plant, pot) {
-  plant = plant || ROOM_PLANTS[6]; pot = pot || ROOM_POTS[0];
-  const leaf = plant.leaf;
+  plant = plant || ROOM_PLANTS[0]; pot = pot || ROOM_POTS[0];
   const g = n => (n > was ? ' class="grow"' : '');
+  const stem = (y1, y2) => '<path d="M20 ' + y1 + ' V' + y2 + '" stroke="url(#flS)" stroke-width="1.6" stroke-linecap="round"/>';
   const p = [];
-  if (stage === 0) p.push('<ellipse cx="20" cy="37" rx="2.6" ry="1.8" fill="#a0784f"/>');
-  if (stage >= 1) p.push('<g' + g(1) + '><path d="M20 38 V31" stroke="#5f8f4c" stroke-width="1.8" stroke-linecap="round"/>' +
-                         '<path d="M20 32 q-5 -1 -6 -5 q5 0 6 5z M20 32 q5 -1 6 -5 q-5 0 -6 5z" fill="' + leaf + '"/></g>');
-  if (stage >= 2) p.push('<g' + g(2) + '><path d="M20 31 V24" stroke="#5f8f4c" stroke-width="1.8" stroke-linecap="round"/>' +
-                         '<path d="M20 27 q-8 -1 -10 -7 q8 0 10 7z" fill="' + leaf + '"/></g>');
-  if (stage >= 3) p.push('<g' + g(3) + '><path d="M20 24 V17" stroke="#5f8f4c" stroke-width="1.8" stroke-linecap="round"/>' +
-                         '<path d="M20 21 q8 -1 10 -7 q-8 0 -10 7z" fill="' + leaf + '" opacity=".9"/></g>');
-  if (stage >= 4) p.push('<g' + g(4) + '><path d="M20 17 V12" stroke="#5f8f4c" stroke-width="1.8" stroke-linecap="round"/></g>');
-  if (stage >= 4) p.push('<g' + (stage > was ? ' class="' + (stage === 5 ? 'bloom' : 'grow') + '"' : '') + '>' + plantTop(plant.k, stage) + '</g>');
-  return '<svg viewBox="0 0 40 50" aria-hidden="true"><g class="sway">' + p.join('') + '</g>' + potSVG(pot) + '</svg>';
+  if (stage === 0) p.push('<ellipse cx="20" cy="35.6" rx="1.8" ry="1.2" fill="#a0784f"/><ellipse cx="19.6" cy="35.2" rx=".6" ry=".35" fill="#fff" opacity=".4"/>');
+  if (stage >= 1) p.push('<g' + g(1) + '>' + stem(36, 30) + leafPath(20, 31.5, -5, -3.5) + leafPath(20, 31.5, 5, -3.5) + '</g>');
+  if (stage >= 2) p.push('<g' + g(2) + '>' + stem(30.2, 23) + leafPath(20, 26.5, -8.5, -5) + '</g>');
+  if (stage >= 3) p.push('<g' + g(3) + '>' + stem(23.2, 16.5) + leafPath(20, 20.5, 8, -5) + '</g>');
+  if (stage >= 4) p.push('<g' + g(4) + '>' + stem(16.7, 11.5) + '</g>');
+  if (stage >= 4) p.push('<g' + (stage > was ? ' class="' + (stage === 5 ? 'bloom' : 'grow') + '"' : '') + '>' + plantTop(plant, stage) + '</g>');
+  // each drawing gets its own shading names, so two on one page do not mix colours
+  const uid = 'fl' + (++plantSVG.n || (plantSVG.n = 1)) + '_';
+  return ('<svg viewBox="0 0 40 50" aria-hidden="true">' + flowerDefs(plant) + '<g class="sway">' + p.join('') + '</g>' + potSVG(pot) + '</svg>')
+    .replace(/(url\(#|id=")fl/g, '$1' + uid);
 }
 
-// words on the screen: abundance, then a fact about the mind, every 15 minutes
+// words on the screen: a new abundance line every 3 minutes
 const ROOM_ABUNDANCE = [
   'There is enough time for what matters today.',
   'Good things are already on their way to me.',
@@ -5075,9 +5123,7 @@ function startRoom(b, end) {
   el.classList.remove('grown');
   el.hidden = false;
   document.body.classList.add('focusing');
-  roomWeather();
   roomText();
-  roomAnimals();
   tickFocus();
   focus.timer = setInterval(tickFocus, 1000);
 }
@@ -5100,76 +5146,27 @@ function focusGoals() {
 }
 
 function closeFocus() {
-  if (focus) { clearInterval(focus.timer); clearTimeout(focus.zoo); }
+  if (focus) clearInterval(focus.timer);
   focus = null;
   const el = document.getElementById('focus');
   el.hidden = true;
-  el.querySelector('.fx-zoo').innerHTML = '';
-  el.querySelector('.fx-wx').innerHTML = '';
   document.body.classList.remove('focusing');
   renderDay();   // goals may have been ticked
   if (!document.getElementById('view-home').hidden) renderHome();
 }
 
-// weather: a new one every 10 minutes. stars only at night
-function roomWeather() {
-  const el = document.getElementById('focus');
-  const h = new Date().getHours();
-  const options = ROOM_WEATHER.filter(w => w.k !== 'stars' || h >= 19 || h < 6);
-  const w = pick(options.filter(x => x.k !== focus.wx) );
-  focus.wx = w.k; focus.wxAt = Date.now();
-  const layer = el.querySelector('.fx-wx');
-  layer.className = 'fx-wx wx-' + w.k;
-  let bits = '';
-  const n = { rain: 46, stars: 40, harmattan: 26, wind: 10, cloud: 3, sun: 1 }[w.k];
-  for (let i = 0; i < n; i++) {
-    bits += '<i style="left:' + (Math.random() * 100).toFixed(1) + '%;top:' + (Math.random() * 100).toFixed(1) + '%;' +
-            'animation-delay:-' + (Math.random() * 6).toFixed(2) + 's;animation-duration:' + (w.k === 'cloud' ? 60 + Math.random() * 60 : 1 + Math.random() * 4).toFixed(2) + 's"></i>';
-  }
-  layer.innerHTML = bits + '<span class="wx-name">' + w.name + '</span>';
-  el.classList.toggle('windy', w.k === 'wind');
-}
-
 function roomText() {
   const el = document.getElementById('focus').querySelector('.fx-quote');
-  const fact = focus.textN % 2 === 1;
   el.classList.remove('in');
   setTimeout(() => {
     if (!focus) return;
-    el.innerHTML = '<small>' + (fact ? 'Did you know' : 'Abundance') + '</small>' + esc(pick(fact ? ROOM_FACTS : ROOM_ABUNDANCE));
+    const last = el.dataset.q;
+    const q = pick(ROOM_ABUNDANCE.filter(x => x !== last));
+    el.dataset.q = q;
+    el.innerHTML = '<small>Abundance</small>' + esc(q);
     el.classList.add('in');
   }, 400);
   focus.textN++; focus.textAt = Date.now();
-}
-
-// now and then an animal wanders across: any animal, any size, any colour
-function roomAnimals() {
-  if (!focus) return;
-  focus.zoo = setTimeout(() => {
-    if (!focus) return;
-    const zoo = document.querySelector('#focus .fx-zoo');
-    const pot = document.querySelector('#focus .fx-plant');
-    const ground = pot ? pot.getBoundingClientRect().bottom : window.innerHeight * .55;
-    const a = document.createElement('span');
-    const size = Math.round(14 + Math.pow(Math.random(), 1.6) * 100);
-    const right = Math.random() < .5;
-    a.className = 'zoo';
-    a.style.top = (ground - size * 1.02) + 'px';          // feet on the same ground as the pot
-    a.style.fontSize = size + 'px';
-    a.style.animationName = right ? 'zooRight' : 'zooLeft';
-    a.style.animationDuration = (16 + Math.random() * 24).toFixed(1) + 's';
-    // the body steps: a small bob and rock, slower for big animals
-    const body = document.createElement('span');
-    body.className = 'zoo-body';
-    body.textContent = pick(pick(ZOO));
-    body.style.setProperty('--flip', right ? -1 : 1);
-    body.style.animationDuration = (0.28 + size / 260).toFixed(2) + 's';
-    body.style.filter = Math.random() < .55 ? 'hue-rotate(' + Math.round(Math.random() * 360) + 'deg) saturate(1.4)' : 'none';
-    a.appendChild(body);
-    a.addEventListener('animationend', e => { if (e.target === a) a.remove(); });
-    zoo.appendChild(a);
-    roomAnimals();
-  }, 8000 + Math.random() * 30000);
 }
 
 // the mood button: log how you feel without leaving the room
@@ -5207,8 +5204,7 @@ function tickFocus() {
   const mix = (a, b2) => Math.round(a + (b2 - a) * k);
   el.style.backgroundColor = 'rgb(' + mix(13, 34) + ',' + mix(12, 23) + ',' + mix(13, 16) + ')';
 
-  if (now - focus.textAt >= 15 * 60000) roomText();
-  if (now - focus.wxAt >= 10 * 60000) roomWeather();
+  if (now - focus.textAt >= 3 * 60000) roomText();
 
   const left = Math.max(0, focus.end - now);
   const m = Math.floor(left / 60000), sec = Math.floor(left / 1000) % 60;
