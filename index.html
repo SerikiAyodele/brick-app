@@ -3721,7 +3721,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 21:25</footer>
+  <footer>everything saves on this device · build 21:33</footer>
 </div>
 
 <script>
@@ -4127,7 +4127,7 @@ function isAgendaBlock(label) {
 // work that should have a clear outcome: what will be finished by the end
 function isWorkBlock(label) {
   const t = label || '';
-  return !isAgendaBlock(t) && /\b(work|deep work|study|studying|project|code|coding|write|writing|build|building|design|report|deck|research)\b/i.test(t);
+  return !isAgendaBlock(t) && /\b(work|deep work|study|studying|project|code|coding|write|writing|build|building|design|report|deck|research|read|reading|book)\b/i.test(t);
 }
 const outcomeField = label => (isFocusBlock(label) || isWorkBlock(label)) ? 'goals' : isAgendaBlock(label) ? 'agenda' : null;
 
