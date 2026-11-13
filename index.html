@@ -3738,7 +3738,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 21:40</footer>
+  <footer>everything saves on this device · build 21:42</footer>
 </div>
 
 <script>
@@ -5564,14 +5564,17 @@ function renderDayGoal() {
   box.innerHTML = '';
   if (day.goal && !dayGoalEditing) {
     box.innerHTML = '<div class="dg-card' + (day.goalDone ? ' done' : '') + '"><button type="button" class="dg-tick" aria-label="' + (day.goalDone ? 'not done yet' : 'done') + '">\u2713</button>' +
-      '<div><span>' + (isToday ? 'Today\u2019s one goal' : 'One goal') + '</span><b></b></div><button type="button" class="dg-edit">Edit</button></div>';
+      '<div><span>' + (isToday ? 'Today\u2019s one goal' : viewDay === shiftKey(planKey(), 1) ? 'Tomorrow\u2019s one goal' : 'One goal') + '</span><b></b></div><button type="button" class="dg-edit">Edit</button></div>';
     box.querySelector('b').textContent = day.goal;
     box.querySelector('.dg-tick').addEventListener('click', () => { day.goalDone = !day.goalDone; save(); renderDayGoal(); });
     box.querySelector('.dg-edit').addEventListener('click', () => { dayGoalEditing = true; renderDayGoal(); });
     return;
   }
-  if (!isToday && !dayGoalEditing) return;
+  // ask on today and on days ahead, so you can set tomorrow's goal while you plan it
+  if (viewDay < planKey() && !dayGoalEditing) return;
   if (day.goalSkip && !dayGoalEditing) return;
+  const ahead = viewDay > planKey();
+  const dayName = viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()]);
 
   // ideas: this week's big goal actions not done yet, and yesterday's goal if it was missed
   const ideas = [];
@@ -5582,10 +5585,10 @@ function renderDayGoal() {
   if (yd && yd.goal && !yd.goalDone) ideas.unshift(yd.goal);
   const uniq = [...new Set(ideas)].slice(0, 3);
 
-  box.innerHTML = '<div class="dg-ask"><b>' + (dayGoalEditing ? 'Change today\u2019s goal' : 'New day. What\u2019s your one goal today?') + '</b>' +
+  box.innerHTML = '<div class="dg-ask"><b>' + (dayGoalEditing ? 'Change this day\u2019s goal' : ahead ? 'One goal for ' + dayName + '?' : 'New day. What\u2019s your one goal today?') + '</b>' +
     '<div class="dg-in"><input type="text" maxlength="100" placeholder="what makes today a win?"><button type="button" class="lf-btn main">Set</button></div>' +
     (uniq.length ? '<div class="dg-ideas">' + uniq.map(t => '<button type="button" data-t="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>' : '') +
-    '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : 'Not today') + '</button></div>';
+    '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : ahead ? 'Later' : 'Not today') + '</button></div>';
   const inp = box.querySelector('input');
   inp.value = dayGoalEditing ? (day.goal || '') : '';
   const set = t => { t = (t || '').trim(); if (!t) { inp.focus(); return; } day.goal = t; day.goalDone = false; day.goalSkip = false; dayGoalEditing = false; save(); renderDayGoal(); };
