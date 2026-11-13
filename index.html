@@ -3738,7 +3738,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 21:39</footer>
+  <footer>everything saves on this device · build 21:40</footer>
 </div>
 
 <script>
@@ -5145,7 +5145,7 @@ function startRoom(b, end) {
   el.querySelector('.fx-growing').textContent = 'Growing ' + plant.name + ' · ' + plant.sub;
   focusGoals();
   const note = el.querySelector('.fx-note');
-  note.textContent = 'It keeps growing. I will tell you at the end how often you left.';
+  note.textContent = '';
   note.classList.remove('warn');
   el.querySelector('.fx-done').hidden = true;
   el.querySelector('.fx-moodsheet').hidden = true;
