@@ -3788,7 +3788,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 13:58</footer>
+  <footer>everything saves on this device · build 13:59</footer>
 </div>
 
 <script>
@@ -7026,12 +7026,25 @@ function foodMoodAt(recent, t) {
   const hit = STEP_MOOD.find(([re]) => re.test(best.text));
   return { mood: hit ? hit[1] : 'okay', why: best.text + ', from ' + best.f.what };
 }
+// nothing logged and no food working on you: a best guess, so the circle is never empty.
+// your last check-in if it was recent, else hunger and the time of day
+function guessMoodAt(t, now) {
+  const last = state.moods.filter(m => m.at <= now && t - m.at <= 2 * 3600000).sort((a, b) => b.at - a.at)[0];
+  const meal = state.food.filter(f => !isDrink(f) && f.at <= Math.min(t, now)).sort((a, b) => b.at - a.at)[0];
+  const gap = meal ? (t - meal.at) / 3600000 : 99;
+  const h = new Date(t).getHours();
+  if (gap >= 4 && gap < 24 && h >= 7) return { mood: 'tired', why: 'no meal for ' + Math.floor(gap) + ' hours' };
+  if (h >= 23 || h < 5) return { mood: 'tired', why: 'it is late' };
+  if (last) return { mood: last.mood, why: 'like your last check-in' };
+  if (h >= 14 && h < 16) return { mood: 'tired', why: 'the afternoon dip' };
+  return { mood: 'okay', why: 'nothing strong working on you' };
+}
 function moodMoments(recent, now) {
   const at = [now - 60 * 60000, now, now + 60 * 60000];
   const names = ['1h ago', 'Now', 'In 1h'];
   const rs = at.map((t, i) => {
     const logged = i < 2 ? state.moods.filter(m => Math.abs(m.at - t) <= (i === 0 ? 30 : 20) * 60000 && m.at <= now).sort((a, b) => Math.abs(a.at - t) - Math.abs(b.at - t))[0] : null;
-    return logged ? { mood: logged.mood, why: 'you logged it' } : foodMoodAt(recent, t) || { mood: null, why: '' };
+    return logged ? { mood: logged.mood, why: 'you logged it' } : foodMoodAt(recent, t) || guessMoodAt(t, now);
   });
   const cols = rs.map((r, i) => { const md = r.mood && MOODS.find(m => m.k === r.mood);
     return '<div class="mj' + (i === 1 ? ' now' : '') + '" style="--c:' + (md ? md.c : 'var(--muted)') + '"><span>' + (md ? md.e : '\u2022') + '</span>' +
