@@ -3765,7 +3765,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:09</footer>
+  <footer>everything saves on this device · build 09:10</footer>
 </div>
 
 <script>
@@ -6767,8 +6767,7 @@ const GOALS = [
 
   { k: 'lighter', e: '\u{1F343}', name: 'Eat lighter', blurb: 'less heavy and fried food',
     verdict: (f, ks) => ks.includes('fried') ? ['watch', 'fried and heavy']
-      : ks.includes('fibre') || ks.includes('water') ? ['good', 'light choice']
-      : ks.includes('protein') && !ks.includes('carbs') ? ['good', 'filling but light'] : null,
+      : ks.includes('fibre') || ks.includes('water') ? ['good', 'light choice'] : null,
     note: () => {
       const t = todayKey();
       const n = state.food.filter(f => key(new Date(f.at)) === t && has(f, 'fried')).length;
