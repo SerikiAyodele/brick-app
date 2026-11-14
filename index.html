@@ -3778,7 +3778,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:24</footer>
+  <footer>everything saves on this device · build 09:26</footer>
 </div>
 
 <script>
@@ -7621,8 +7621,8 @@ function grocerySuggestions() {
    food log: how often you had it in the last 2 weeks, and how you usually
    have it. the list can be copied as text or sent to Notes. */
 const COUNT_WORDS = /\b(eggs?|bananas?|oranges?|apples?|mangoe?s?|avocados?|plantains?|tomato(es)?|onions?|peppers?|cucumbers?|carrots?|lemons?|limes?|sardines?|tins?|cans?|bread|loaf|loaves|yoghurts?|yogurts?)\b/i;
-const UNITS = ['', 'pcs', 'naira', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
-const unitLabel = u => u === 'pcs' ? 'pieces' : u === 'naira' ? '₦ naira' : u;
+const UNITS = ['', 'pcs', 'naira', 'knaira', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
+const unitLabel = u => u === 'pcs' ? 'pieces' : u === 'naira' ? '₦ naira' : u === 'knaira' ? '₦ thousand' : u;
 let grOpen = null;   // item id with its details open
 // ways to have it, picked for the item: blend peppers, clean and chop meat, slice fruit
 const MEAT_RE = /\b(chicken|turkey|beef|goat|meat|fish|catfish|tilapia|mackerel|titus|croaker|salmon|prawns?|shrimps?|snails?|ponmo|kpomo|assorted|gizzards?|liver|lamb|pork|suya)\b/i;
@@ -7683,7 +7683,7 @@ function grocGuess(text) {
 
 // how much, in words: "6", "2 kg", or with a second amount "2 pack · 12 pieces"
 function grocAmt(it) {
-  const one = (n, u, both, sz) => u === 'naira' ? '₦' + Number(n).toLocaleString('en-NG') : n + (u ? (u === 'pcs' ? (n === 1 ? ' piece' : ' pieces') : ' ' + u) : '');
+  const one = (n, u, both, sz) => u === 'naira' ? '₦' + Number(n).toLocaleString('en-NG') : u === 'knaira' ? '₦' + (Number(n) * 1000).toLocaleString('en-NG') : n + (u ? (u === 'pcs' ? (n === 1 ? ' piece' : ' pieces') : ' ' + u) : '');
   const two = it.qty2 > 0;
   // big or small goes with the first amount: "6 big pieces", "2 kg · big"
   const sz = it.size ? (it.unit === 'pcs' && it.qty ? null : it.size) : null;
