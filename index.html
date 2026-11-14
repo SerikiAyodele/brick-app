@@ -3760,7 +3760,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:03</footer>
+  <footer>everything saves on this device · build 09:04</footer>
 </div>
 
 <script>
@@ -3847,6 +3847,13 @@ function fromKey(k) { const [y,m,d] = k.split('-').map(Number); return new Date(
 function shiftKey(k, by) { const d = fromKey(k); d.setDate(d.getDate() + by); return key(d); }
 
 let state = load();
+// sleep comes from the Sleep block in your plan: bring today's saved times in line
+setTimeout(() => {
+  try {
+    const k = todayKey(), p = planSleep(k), e = (state.sleep || []).find(x => x.k === k);
+    if (p && e && (e.bed !== p.bed || e.wake !== p.wake)) { e.bed = p.bed; e.wake = p.wake; e.fromPlan = true; save(); if (typeof renderHome === 'function') renderHome(); }
+  } catch {}
+}, 0);
 // once: split typed amounts and how you'll have it out of grocery names
 // ("12 eggs, boiled" becomes Eggs, 12, boiled). a copy of the list is kept first.
 try {
@@ -9441,7 +9448,32 @@ function renderHomeNow() {
    one entry per morning: when you went to bed, when you woke, how it felt.
    kept under the date you woke up. */
 const SLEEP_FEEL = [['\u{1F62B}', 'awful'], ['\u{1F615}', 'poor'], ['\u{1F610}', 'okay'], ['\u{1F642}', 'good'], ['\u{1F634}', 'great']];
-const sleepOn = k => (state.sleep || []).find(x => x.k === k) || null;
+// the night that ends on morning k, from your plan: a "Sleep" block in the
+// day before (or early in day k). bed is when it starts, wake is when it ends.
+const SLEEP_RE = /^\s*(sleep|bed|bedtime|go to bed|night sleep)\b/i;
+function planSleep(k) {
+  const find = (dk, early) => {
+    const d = state.days && state.days[dk];
+    if (!d || !Array.isArray(d.blocks)) return null;
+    let at = toMins(d.start), hit = null;
+    for (const b of d.blocks) {
+      const len = Number(b.mins) || 60;
+      if (SLEEP_RE.test(b.label || '') && len >= 120 && (!early || at < 720)) hit = { from: at, to: at + len };
+      at += len;
+    }
+    return hit;
+  };
+  const h = find(shiftKey(k, -1), false) || find(k, true);
+  return h ? { bed: hhmm(h.from), wake: hhmm(h.to) } : null;
+}
+// your sleep for morning k: times from the plan when it has a Sleep block,
+// how it felt from what you logged
+const sleepOn = k => {
+  const m = (state.sleep || []).find(x => x.k === k) || null;
+  const p = planSleep(k);
+  if (!p) return m;
+  return Object.assign({ k, q: 0 }, m || {}, p, { fromPlan: true });
+};
 function sleepMins(e) { if (!e) return null; let m = toMins(e.wake) - toMins(e.bed); if (m <= 0) m += 1440; return m; }
 let sleepEditing = false;
 
