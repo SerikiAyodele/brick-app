@@ -3613,6 +3613,9 @@ body, body[data-view] {
 .mj.now span { width: 68px; height: 68px; font-size: 34px; box-shadow: 0 0 0 4px var(--c), 0 6px 18px color-mix(in srgb, var(--c) 40%, transparent); }
 .mj b { font-size: 13px; font-weight: 600; text-transform: capitalize; }
 .mj small { font-size: 11px; color: var(--muted); }
+.mj-why, .mj-tip { margin: 10px 0 0; font-size: 14px; line-height: 1.45; }
+.mj-why { color: var(--muted); }
+.mj-why b, .mj-tip b { font-weight: 600; color: var(--ink); }
 .mj-line { flex: 1; height: 2px; margin-top: 27px; background: linear-gradient(90deg, var(--hair), color-mix(in srgb, var(--pink) 50%, var(--hair)), var(--hair)); border-radius: 1px; }
 .mjs .mj.now + .mj-line, .mjs .mj-line:has(+ .mj.now) { margin-top: 34px; }
 
@@ -3846,7 +3849,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 15:37</footer>
+  <footer>everything saves on this device · build 15:44</footer>
 </div>
 
 <script>
@@ -6483,7 +6486,7 @@ let journeyAsk = null;     // the 3 use questions are open: your answers so far
 /* quitting something: 3 optional questions. how long, how often and how much
    shape how hard it is (daily, heavy, long use means stronger, longer
    withdrawal), so the answers fit the timeline to you. */
-const QUIT_RE = /\b(quit|quitting|stop|stopping|no more|give up|giving up|cut out|cut down|off)\b/i;
+const QUIT_RE = /\b(quit|quitting|no more|give up|giving up|cut out|cut down on)\b|\bstop (taking|using|eating|drinking|smoking|vaping|having)\b/i;
 const isQuit = j => j.kind === 'cannabis' || QUIT_RE.test(j.name);
 function useQuestions(j) {
   return [
@@ -6545,7 +6548,9 @@ function journeyHtml() {
       '<button type="button" class="lf-btn" data-jr="cancel">Cancel</button></div></div>';
   }
   if (journeyAsk) {
-    return '<div class="jr" style="--c:#7daf86"><div class="jr-head"><div><span>Optional</span><b>Make the tips fit you</b></div></div>' +
+    return '<div class="jr" style="--c:#7daf86"><div class="jr-head"><div><span>' + esc(j.name) + '</span><b>Make the tips fit you</b></div></div>' +
+      '<div class="jr-form jr-q"><label for="jr-day1">When was day 1?</label><input id="jr-day1" type="date" value="' + j.start + '" max="' + todayKey() + '"></div>' +
+      '<p class="jr-fit">The rest is optional.</p>' +
       useQuestions(j).map(q => '<div class="jr-q"><p>' + q.q + '</p><div class="md-why">' +
         q.a.map((t, i) => { const v = t === 'Not sure' ? 'x' : i; return '<button type="button" class="' + (journeyAsk[q.k] === v ? 'on' : '') + '" data-jq="' + q.k + ':' + v + '">' + t + '</button>'; }).join('') +
         '</div></div>').join('') +
@@ -6604,8 +6609,12 @@ function wireJourney(box, redraw) {
       save(); redraw(); return;
     }
     if (a === 'ask') { const j = activeJourney(); journeyAsk = { ...((j && j.use) || {}) }; redraw(); return; }
-    if (a === 'askskip') { journeyAsk = null; redraw(); return; }
-    if (a === 'asksave') { const j = activeJourney(); if (j && Object.keys(journeyAsk).length) j.use = journeyAsk; journeyAsk = null; save(); redraw(); return; }
+    if (a === 'askskip' || a === 'asksave') {
+      const j = activeJourney(), d1 = document.getElementById('jr-day1');
+      if (j && d1 && d1.value) j.start = d1.value > todayKey() ? todayKey() : d1.value;   // the day 1 date counts even on skip
+      if (j && a === 'asksave' && Object.keys(journeyAsk).length) j.use = journeyAsk;
+      journeyAsk = null; journeyStageOpen = null; save(); redraw(); return;
+    }
     if (a === 'end') {
       const j = activeJourney();
       if (!j) return;
@@ -7318,9 +7327,33 @@ function moodMoments(recent, now) {
   const cols = rs.map((r, i) => { const md = r.mood && MOODS.find(m => m.k === r.mood);
     return '<div class="mj' + (i === 1 ? ' now' : '') + '" style="--c:' + (md ? md.c : 'var(--muted)') + '"><span>' + (md ? md.e : '\u2022') + '</span>' +
            '<b>' + (r.mood || '\u2013') + '</b><small>' + names[i] + '</small></div>'; }).join('<i class="mj-line"></i>');
-  // one line: why the next 15 minutes look the way they do
-  const nx = rs[2], why = nx.why ? 'In 1h: ' + nx.why : '';
-  return '<div class="mjs">' + cols + '</div>';
+  // under the circles: why you will feel that way in 1h, then the one thing
+  // that would make you feel better by then
+  const nx = rs[2], nm = MOODS.find(m => m.k === nx.mood);
+  const tip = betterIn1h(nx.mood, recent, now, rs[1].mood), tm = MOODS.find(m => m.k === tip.mood);
+  return '<div class="mjs">' + cols + '</div>' +
+    '<p class="mj-why"><b>In 1h:</b> ' + (nm ? nm.e + ' ' : '') + esc(nx.mood || 'okay') + (nx.why && nx.why !== 'you logged it' ? ', ' + esc(nx.why) : '') + '</p>' +
+    '<p class="mj-tip"><b>Tip:</b> ' + esc(tip.do) + (tip.mood === nx.mood ? '. You\u2019ll stay ' + (tm ? tm.e + ' ' : '') + tip.mood + '.'
+                                                       : '. In 1h you\u2019ll feel ' + (tm ? tm.e + ' ' : '') + tip.mood + '.') + '</p>';
+}
+// the next best thing to do, and how you could feel in 1h if you do it. rules, first match wins
+function betterIn1h(mood, recent, now, moodNow) {
+  const h = new Date(now).getHours();
+  const meal = state.food.filter(f => !isDrink(f) && f.at <= now).sort((a, b) => b.at - a.at)[0];
+  const gap = meal ? (now - meal.at) / 3600000 : 99;
+  const water = state.food.some(f => entryKinds(f).includes('water') && now - f.at < 3 * 3600000);
+  const j = activeJourney(), jd = j && j.kind === 'cannabis' ? journeyDay(j, now) : 0;
+  const low = ['tired', 'unfocused', 'bored', 'unmotivated', 'low'].includes(mood);
+  const tense = ['stressed', 'anxious'].includes(mood) || ['stressed', 'anxious'].includes(moodNow);
+  if (h >= 22 || h < 5) return { do: 'Phone away and dim the lights now', mood: 'calm' };
+  if (gap >= 4 && gap < 24 && h >= 7 && h < 21) return { do: 'Eat ' + foodsFor('protein', ['eggs', 'beans', 'groundnuts']) + ' now', mood: 'focused' };
+  if (tense && jd && jd <= 14) return { do: 'Take a 10 minute walk, it eases cravings and nerves', mood: 'calm' };
+  if (tense) return { do: 'Take 5 slow breaths, then a short walk', mood: 'calm' };
+  if (!water && h >= 8 && h < 21) return { do: 'Drink a big glass of water', mood: low ? 'focused' : mood || 'focused' };
+  if (low && h >= 13 && h < 17) return { do: 'Take a 10 minute walk outside', mood: 'focused' };
+  if (low) return { do: 'Step outside or message a friend', mood: 'good' };
+  if (jd && jd <= 14) return { do: 'Plan your evening now, that is when cravings hit', mood: 'calm' };
+  return { do: 'Keep meals light and keep sipping water', mood: mood || 'good' };
 }
 
 /* ---- eat next ----
@@ -10216,8 +10249,8 @@ function renderHome() {
   const jrLine = jr ? '<span class="lf-t-trend">\u{1F331} Day ' + journeyDay(jr, Date.now()) + ' \u00b7 ' + esc(jr.name) + '</span>' : '';
   for (const a of AREAS) {
     const gs = areaGoals(a.k);
-    if (!gs.length && a.k === 'health' && jr) {
-      html += '<button type="button" class="lf-tile" data-open="health" style="--c:' + a.c + '"><span class="lf-t-name">' + a.name + '</span>' + jrLine + '</button>';
+    if (!gs.length && a.k === 'health') {     // Health always opens its page: journey first, then goals
+      html += '<button type="button" class="lf-tile' + (jr ? '' : ' empty') + '" data-open="health" style="--c:' + a.c + '"><span class="lf-t-name">' + a.name + '</span>' + (jr ? jrLine : '<span class="lf-t-add">+ Set a goal</span>') + '</button>';
       continue;
     }
     if (!gs.length) {
@@ -11375,6 +11408,13 @@ function lifeWizard(box) {
     const g = m === 'custom' ? { text, m, own: true, target: 5, days: [] } : { text, m, own };
     if (m === 'dyn') g.dyn = dyn;
     g.setAt = Date.now();
+    // a health goal to quit something is also a journey: start it and ask the 3 questions
+    if (a.k === 'health' && !activeJourney() && (QUIT_RE.test(text) || JOURNEY_PLANS.cannabis.match.test(text))) {
+      const jn = { id: Date.now(), name: cap(text), start: todayKey(), kind: JOURNEY_PLANS.cannabis.match.test(text) ? 'cannabis' : 'habit', end: null, fromGoal: true };
+      state.journeys = state.journeys || [];
+      state.journeys.push(jn);
+      journeyAsk = {}; journeyStageOpen = null;
+    }
     if (st.replace !== undefined) {
       const was = goals[st.replace] || {};
       if (m === 'custom' && was.m === 'custom') g.days = was.days || [];   // keep the days you ticked
