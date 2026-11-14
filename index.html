@@ -3410,6 +3410,21 @@ body.showmode #view-day .qp { display: none; }
 .mo-card li small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); line-height: 1.4; }
 .mo-fine { margin: 12px 0 0; font-size: 12px; color: var(--muted); }
 
+/* how do you feel, after a block */
+.ma { position: fixed; z-index: 60; left: 12px; right: 12px; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); max-width: 26rem; margin: 0 auto;
+  padding: 14px 14px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 22px; box-shadow: 0 12px 34px rgba(0,0,0,.28);
+  transform: translateY(24px); opacity: 0; transition: transform .3s cubic-bezier(.22,1,.36,1), opacity .25s; }
+.ma.in { transform: none; opacity: 1; }
+.ma-top { display: flex; align-items: center; justify-content: space-between; }
+.ma-top b { font-size: 16px; font-weight: 600; }
+.ma-x { width: 36px; height: 36px; font-size: 14px; color: var(--muted); background: none; border: none; cursor: pointer; }
+.ma > small { display: block; margin: -4px 0 10px; font-size: 12px; color: var(--muted); }
+.ma-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.ma-grid button { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 58px; padding: 6px 2px;
+  font: 500 11px "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 16%, var(--card)); border: none; border-radius: 14px; cursor: pointer; }
+.ma-grid button span { font-size: 22px; line-height: 1.1; }
+.ma-grid button:active { transform: scale(.94); }
+.ma-ok { grid-column: 1 / -1; margin: 10px 0; text-align: center; font-size: 15px; font-weight: 600; }
 /* grocery details and sharing */
 .gr-share { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; }
 .gr-share button { min-height: 36px; padding: 0 14px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 18px; cursor: pointer; }
@@ -3745,7 +3760,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 08:57</footer>
+  <footer>everything saves on this device · build 09:00</footer>
 </div>
 
 <script>
@@ -5710,6 +5725,7 @@ function renderDay() {
           justTicked = i;
           save(); renderDay(); renderHabits();
           if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);
+          else setTimeout(() => askMoodAfter(b), 500);
         }, 650);
       });
       ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => tick.addEventListener(ev, stop));
@@ -5753,6 +5769,7 @@ function renderDay() {
       save(); renderDay(); renderHabits();
       if (!b.done) return;
       if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);   // that was the last one
+      else setTimeout(() => askMoodAfter(b), 500);
     });
 
     if (sortingDay) {
@@ -6084,6 +6101,36 @@ const MOODS = [
   { k: 'anxious',     e: '\u{1F32A}', c: '#e3a27a' },
   { k: 'low',         e: '\u{1F327}', c: '#a99bd4' }
 ];
+
+/* ---- how do you feel, after a block ----
+   when you tick a block on today's plan, a row of faces pops up. one tap
+   saves it with what you just finished. at most once an hour, so it never nags. */
+function askMoodAfter(b) {
+  if (viewDay !== planKey()) return;
+  const last = state.moods.slice().sort((a, c) => c.at - a.at)[0];
+  if (last && Date.now() - last.at < MOOD_EVERY) return;
+  let el = document.getElementById('mood-after');
+  if (el) el.remove();
+  el = document.createElement('div');
+  el.id = 'mood-after';
+  el.className = 'ma';
+  el.innerHTML = '<div class="ma-top"><b>How do you feel?</b><button type="button" class="ma-x" aria-label="not now">✕</button></div>' +
+    '<small>after ' + esc(b.label || 'that') + '</small>' +
+    '<div class="ma-grid">' + MOODS.map(m => '<button type="button" data-m="' + m.k + '" style="--c:' + m.c + '"><span>' + m.e + '</span>' + m.k + '</button>').join('') + '</div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('in'));
+  const close = () => { el.classList.remove('in'); setTimeout(() => el.remove(), 300); };
+  const auto = setTimeout(close, 25000);
+  el.querySelector('.ma-x').addEventListener('click', () => { clearTimeout(auto); close(); });
+  el.querySelectorAll('[data-m]').forEach(btn => btn.addEventListener('click', () => {
+    clearTimeout(auto);
+    state.moods.push({ at: Date.now(), mood: btn.dataset.m, part: partOfDay(new Date().getHours()), note: '', after: b.label || '' });
+    save();
+    el.querySelector('.ma-grid').innerHTML = '<p class="ma-ok">' + MOODS.find(m => m.k === btn.dataset.m).e + ' saved</p>';
+    setTimeout(close, 900);
+    if (!document.getElementById('view-home').hidden) renderHome();
+  }));
+}
 
 function partOfDay(h) {
   if (h < 12) return 'morning';
