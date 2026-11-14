@@ -2775,14 +2775,19 @@ body.showmode #view-day .addlist { display: none; }
   max-width: 26rem; margin: 0 auto; padding: 16px;
   background: var(--card); border: 1px solid var(--hair); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
 }
+#focus > .fx-moodsheet { position: fixed; z-index: 20; }
+#focus > .fx-moodsheet[hidden] { display: none; }
+.fxm-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.fxm-top b { margin: 0 !important; }
+.fxm-x { width: 36px; height: 36px; font-size: 14px; color: var(--muted); background: none !important; border: none; cursor: pointer; display: block !important; padding: 0 !important; }
 .focus .fx-moodsheet b { display: block; margin-bottom: 12px; font-size: 16px; font-weight: 600; text-align: center; }
-.focus .fx-moodsheet div { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-.focus .fx-moodsheet button {
+.focus .fx-moodsheet .fxm-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.focus .fx-moodsheet .fxm-grid button {
   display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px;
   font: 500 11px "Poppins", sans-serif; color: var(--ink);
   background: color-mix(in srgb, var(--c) 14%, var(--card)); border: none; border-radius: 14px; cursor: pointer;
 }
-.focus .fx-moodsheet button span { font-size: 22px; }
+.focus .fx-moodsheet .fxm-grid button span { font-size: 22px; }
 .focus.windy .fx-plant .sway { animation-duration: 1.6s; }
 
 /* weather */
@@ -3600,7 +3605,6 @@ body, body[data-view] {
         <h1 class="fx-name"></h1>
       </div>
       <div class="fx-topbtns">
-        <button class="fx-mood" id="focus-mood" type="button">Mood</button>
         <button class="fx-close" id="focus-close" type="button" aria-label="close focus">×</button>
       </div>
     </div>
@@ -3784,7 +3788,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:36</footer>
+  <footer>everything saves on this device · build 13:41</footer>
 </div>
 
 <script>
@@ -5264,15 +5268,16 @@ function roomText() {
   focus.textN++; focus.textAt = Date.now();
 }
 
-// the mood button: log how you feel without leaving the room
+// how do you feel: pops up by itself when a check-in is due (an hour after the last)
 function roomMood() {
   const sh = document.querySelector('#focus .fx-moodsheet');
-  if (!sh.hidden) { sh.hidden = true; return; }
-  sh.innerHTML = '<b>How do you feel?</b><div>' + MOODS.map(m =>
+  if (!sh.hidden) return;
+  sh.innerHTML = '<div class="fxm-top"><b>How do you feel?</b><button type="button" class="fxm-x" aria-label="not now">✕</button></div><div class="fxm-grid">' + MOODS.map(m =>
     '<button type="button" data-m="' + m.k + '" style="--c:' + m.c + '"><span>' + m.e + '</span>' + m.k + '</button>').join('') + '</div>';
   sh.hidden = false;
+  sh.querySelector('.fxm-x').addEventListener('click', () => { sh.hidden = true; if (focus) focus.moodSnooze = Date.now(); });
   sh.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => {
-    state.moods.push({ at: Date.now(), mood: b.dataset.m, part: partOfDay(new Date().getHours()), note: '' });
+    state.moods.push({ at: Date.now(), mood: b.dataset.m, part: partOfDay(new Date().getHours()), note: '', after: focus && focus.b ? focus.b.label || '' : '' });
     save();
     sh.innerHTML = '<b>Logged ' + b.dataset.m + ' ✓</b>';
     setTimeout(() => { sh.hidden = true; }, 1100);
@@ -5300,6 +5305,9 @@ function tickFocus() {
   el.style.backgroundColor = 'rgb(' + mix(13, 34) + ',' + mix(12, 23) + ',' + mix(13, 16) + ')';
 
   if (now - focus.textAt >= 3 * 60000) roomText();
+  // a check-in is due: ask here, unless you said not now in the last 15 minutes
+  const lastMood = state.moods.reduce((m, x) => Math.max(m, x.at), 0);
+  if (stage < 5 && now - lastMood >= MOOD_EVERY && now - (focus.moodSnooze || 0) >= 15 * 60000 && now - focus.start >= 60000) roomMood();
 
   const left = Math.max(0, focus.end - now);
   const m = Math.floor(left / 60000), sec = Math.floor(left / 1000) % 60;
@@ -6104,7 +6112,6 @@ document.getElementById('day-undo').addEventListener('click', undoDay);
 document.getElementById('show-toggle').addEventListener('click', () => { if (showOn()) exitShow(); else startShow(); });
 document.getElementById('show-exit').addEventListener('click', exitShow);
 document.getElementById('focus-close').addEventListener('click', closeFocus);
-document.getElementById('focus-mood').addEventListener('click', roomMood);
 document.getElementById('focus-done').addEventListener('click', closeFocus);
 startInput.addEventListener('blur', commitStart);
 
