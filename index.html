@@ -3449,6 +3449,7 @@ body.showmode #view-day .qp { display: none; }
 .gr-share { flex-wrap: wrap; }
 .gr-more2 { align-self: flex-start; padding: 4px 0; font: 500 14px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
 .gr-and { min-width: 38px; text-align: center; font-size: 13px; color: var(--muted); }
+.gr-cut { width: 76px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
 .gr-qin2 { width: 76px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
 .gr-x2 { width: 38px; height: 38px; font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer; }
 .gr-lbl { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--ink); }
@@ -3769,7 +3770,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:12</footer>
+  <footer>everything saves on this device · build 09:15</footer>
 </div>
 
 <script>
@@ -7562,7 +7563,26 @@ function grocerySuggestions() {
 const COUNT_WORDS = /\b(eggs?|bananas?|oranges?|apples?|mangoe?s?|avocados?|plantains?|tomato(es)?|onions?|peppers?|cucumbers?|carrots?|lemons?|limes?|sardines?|tins?|cans?|bread|loaf|loaves|yoghurts?|yogurts?)\b/i;
 const UNITS = ['', 'pcs', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
 let grOpen = null;   // item id with its details open
-const PREPS = ['boiled', 'fried', 'grilled', 'baked', 'raw', 'in stew', 'in soup', 'smoothie', 'snack'];
+// ways to have it, picked for the item: blend peppers, clean and chop meat, slice fruit
+const MEAT_RE = /\b(chicken|turkey|beef|goat|meat|fish|catfish|tilapia|mackerel|titus|croaker|salmon|prawns?|shrimps?|snails?|ponmo|kpomo|assorted|gizzards?|liver|lamb|pork|suya)\b/i;
+function prepsFor(text) {
+  const t = String(text || '').toLowerCase();
+  if (/\beggs?\b/.test(t)) return ['boiled', 'fried', 'scrambled', 'omelette'];
+  if (MEAT_RE.test(t)) return ['cleaned', 'chopped', 'whole', 'grilled', 'fried', 'in stew', 'peppersoup'];
+  if (/\b(peppers?|tatashe|rodo|tomato(es)?|onions?|scotch bonnet|ginger|garlic)\b/.test(t)) return ['roughly blended', 'smoothly blended', 'chopped', 'sliced'];
+  if (/\bokra\b|\bogbono\b/.test(t)) return ['chopped', 'grated', 'blended'];
+  if (/\b(spinach|ugwu|efo|ewedu|bitter ?leaf|kale|lettuce|cabbage|greens|vegetables?|veg|scent leaf|waterleaf)\b/.test(t)) return ['cleaned', 'chopped', 'shredded'];
+  if (/\bbeans\b/.test(t)) return ['cooked', 'moi moi', 'akara', 'porridge'];
+  if (/\byam\b/.test(t)) return ['boiled', 'fried', 'pounded', 'porridge'];
+  if (/\bplantains?\b|\bdodo\b/.test(t)) return ['fried', 'boiled', 'roasted'];
+  if (/\brice\b/.test(t)) return ['jollof', 'fried rice', 'white rice'];
+  if (/\b(bananas?|apples?|oranges?|mangoe?s?|pineapples?|pawpaw|watermelon|berries|avocados?|fruits?|grapes?|lemons?|limes?)\b/.test(t)) return ['whole', 'sliced', 'smoothly blended', 'juiced'];
+  if (/\b(carrots?|cucumbers?|potato(es)?|sweet potato(es)?)\b/.test(t)) return ['sliced', 'chopped', 'grated', 'boiled'];
+  if (grocGroup(text) === 'Drinks') return ['chilled'];
+  return ['boiled', 'fried', 'grilled', 'baked', 'raw', 'chopped', 'blended'];
+}
+const prepRe = w => new RegExp('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (w === 'chopped' ? '( into \\d+ pieces?)?' : '') + '\\b,?\\s*', 'i');
+const cutPieces = it => { const m = String(it.note || '').match(/\bchopped into (\d+) pieces?\b/i); return m ? Number(m[1]) : null; };
 
 function grocGroup(text) {
   const ks = foodKinds(text);
@@ -7801,7 +7821,10 @@ function renderGroceries() {
             '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u2="' + u + '" class="' + (it.unit2 === u ? 'on' : '') + '">' + (u === 'pcs' ? 'pieces' : u) + '</button>').join('') + '</div></div>'
           : '<button type="button" class="gr-more2" data-a="more2">+ another amount</button>') +
         '<p class="gr-lbl">How you’ll have it <span>optional</span></p>' +
-        '<div class="gr-preps">' + PREPS.map(w => '<button type="button" data-prep="' + w + '" class="' + (new RegExp('\\b' + w + '\\b', 'i').test(it.note || '') ? 'on' : '') + '">' + w + '</button>').join('') + '</div>' +
+        '<div class="gr-preps">' + prepsFor(it.text).map(w => '<button type="button" data-prep="' + w + '" class="' + (prepRe(w).test(it.note || '') ? 'on' : '') + '">' + w + '</button>').join('') + '</div>' +
+        // chopped meat or fish: into how many pieces
+        (MEAT_RE.test(it.text) && /\bchopped\b/i.test(it.note || '')
+          ? '<div class="gr-qrow"><span class="gr-and">into</span><input type="number" inputmode="numeric" min="1" max="99" class="gr-cut" aria-label="how many pieces" placeholder="how many"><span class="gr-and">pieces</span></div>' : '') +
         '<input type="text" class="gr-nin" maxlength="80" placeholder="or type it, e.g. for breakfast">' +
         '<button type="button" class="gr-done" data-a="close">Done</button></div>';
     return '<li class="gr-row' + (it.done ? ' done' : '') + (open ? ' open' : '') + '" data-id="' + it.id + '">' +
@@ -7884,15 +7907,31 @@ function renderGroceries() {
       nt.value = it.note || '';
       nt.addEventListener('change', () => { it.note = nt.value.trim(); it.auto = false; save(); });
       nt.addEventListener('keydown', e => { if (e.key === 'Enter') { nt.blur(); grOpen = null; renderGroceries(); } });
-      // tap a way to have it: one at a time, the rest of your note stays
+      // tap ways to have it: each one on or off, the rest of your note stays
       li.querySelectorAll('[data-prep]').forEach(b => b.addEventListener('click', () => {
         const w = b.dataset.prep, on = b.classList.contains('on');
-        let rest = nt.value;
-        for (const p of PREPS) rest = rest.replace(new RegExp('\\b' + p + '\\b,?\\s*', 'i'), '');
-        rest = rest.replace(/^[\s,]+|[\s,]+$/g, '');
-        it.note = (on ? rest : [w, rest].filter(Boolean).join(', ')).trim();
-        it.auto = false; save(); renderGroceries();
+        const tidy = t => t.replace(/,\s*,/g, ',').replace(/^[\s,]+|[\s,]+$/g, '').trim();
+        const ws = prepsFor(it.text);
+        let note = tidy(nt.value.replace(prepRe(w), ''));
+        if (!on) {
+          // keep them in the order shown: cleaned, chopped, ...
+          const have = ws.filter(x => x === w || prepRe(x).test(note));
+          let rest = note; for (const x of have) rest = tidy(rest.replace(prepRe(x), ''));
+          const keep = have.map(x => x === 'chopped' && cutPieces({ note: nt.value }) ? 'chopped into ' + cutPieces({ note: nt.value }) + ' pieces' : x === w ? w : (nt.value.match(prepRe(x)) || [x])[0].replace(/,?\s*$/, ''));
+          note = [keep.join(', '), rest].filter(Boolean).join(', ');
+        }
+        it.note = note; it.auto = false; save(); renderGroceries();
+        if (!on && w === 'chopped' && MEAT_RE.test(it.text)) { const c = list.querySelector('.gr-row.open .gr-cut'); if (c) c.focus(); }
       }));
+      const cut = li.querySelector('.gr-cut');
+      if (cut) {
+        cut.value = cutPieces(it) || '';
+        cut.addEventListener('change', () => {
+          const n = Math.max(0, Math.round(Number(cut.value) || 0));
+          it.note = String(it.note || '').replace(/\bchopped( into \d+ pieces?)?/i, n ? 'chopped into ' + n + ' pieces' : 'chopped');
+          save(); renderGroceries();
+        });
+      }
       li.querySelector('[data-a=close]').addEventListener('click', () => { setT(); it.note = nt.value.trim(); grOpen = null; save(); renderGroceries(); });
     }
   });
