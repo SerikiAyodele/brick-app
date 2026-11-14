@@ -3430,6 +3430,18 @@ body.showmode #view-day .qp { display: none; }
 .ma-grid button span { font-size: 22px; line-height: 1.1; }
 .ma-grid button:active { transform: scale(.94); }
 .ma-ok { grid-column: 1 / -1; margin: 10px 0; text-align: center; font-size: 15px; font-weight: 600; }
+/* now pill: your current block, on pages other than Plan and Home */
+.nowpill { position: fixed; z-index: 40; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 8px;
+  max-width: calc(100vw - 32px); min-height: 40px; padding: 0 16px 0 14px; font: 500 14px "Poppins", sans-serif; color: var(--ink);
+  background: color-mix(in srgb, var(--card) 88%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--hair); border-radius: 20px; box-shadow: 0 6px 20px rgba(0,0,0,.18); cursor: pointer;
+  transform: translate(-50%, 12px); opacity: 0; pointer-events: none; transition: transform .3s cubic-bezier(.22,1,.36,1), opacity .25s; }
+.nowpill.on { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+.nowpill i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--pink); animation: npPulse 2s ease-in-out infinite; }
+@keyframes npPulse { 50% { opacity: .35; } }
+.nowpill b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; }
+.nowpill span { flex: none; color: var(--muted); }
+body.focusing .nowpill { display: none; }
 /* grocery details and sharing */
 .gr-share { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; }
 .gr-share button { min-height: 36px; padding: 0 14px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 18px; cursor: pointer; }
@@ -3788,7 +3800,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 13:59</footer>
+  <footer>everything saves on this device · build 15:15</footer>
 </div>
 
 <script>
@@ -11337,6 +11349,37 @@ const TABS = {
   life:   [document.getElementById('tab-life'),   document.getElementById('view-life')]
 };
 
+/* ---- now pill ----
+   away from Plan and Home, a small pill above the bottom bar shows the block
+   you are on and the time left. tap it to go back to your plan. */
+function updateNowPill() {
+  let pill = document.getElementById('nowpill');
+  if (!pill) {
+    pill = document.createElement('button');
+    pill.type = 'button'; pill.id = 'nowpill'; pill.className = 'nowpill';
+    pill.addEventListener('click', () => { show('day'); window.scrollTo(0, 0); });
+    document.body.appendChild(pill);
+  }
+  const v = document.body.dataset.view;
+  const t = planKey(), d = state.days && state.days[t];
+  let cur = null;
+  if (d && d.blocks && d.blocks.length && v !== 'day' && v !== 'home' && !document.body.classList.contains('focusing')) {
+    const nowM = planMin(t);
+    let at = toMins(d.start);
+    for (const b of d.blocks) {
+      const len = Number(b.mins) || 60;
+      if (nowM >= at && nowM < at + len) { cur = { b, to: at + len }; break; }
+      at += len;
+    }
+  }
+  if (!cur) { pill.classList.remove('on'); return; }
+  const left = (cur.to - planMin(t)) * 60000;
+  pill.innerHTML = '<i></i><b>' + esc(cur.b.label || 'Now') + '</b><span>' + fmtIn(left) + ' left</span>';
+  pill.setAttribute('aria-label', (cur.b.label || 'now') + ', ' + fmtIn(left) + ' left. Open plan');
+  pill.classList.add('on');
+}
+setInterval(updateNowPill, 15000);
+
 function show(which) {
   for (const k in TABS) {
     const [tab, view] = TABS[k];
@@ -11358,6 +11401,7 @@ function show(which) {
   if (which === 'day')   { renderDay(); showUpNext(); }
   if (which === 'ideas') renderIdeas();
   if (which === 'life')  renderLife();
+  updateNowPill();
   try { localStorage.setItem(KEY + '.tab', which); } catch {}
 }
 
