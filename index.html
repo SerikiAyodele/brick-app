@@ -3462,6 +3462,10 @@ body.showmode #view-day .qp { display: none; }
 .gr-size { margin-top: -2px; }
 .gr-type { color: var(--muted); }
 .gr-tyin { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
+.gr-findrow { margin: 12px 0 0; }
+.gr-find { width: 100%; min-height: 40px; padding: 8px 14px; font: 400 16px "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.gr-none { display: block; margin: 10px 2px 0; font-size: 13px; color: var(--muted); }
+.gr-none[hidden], .gr-row[hidden], .gr-list[hidden], .gr-ghead[hidden], .gr-gothead[hidden] { display: none; }
 .gr-lbl { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--ink); }
 .gr-lbl span { margin-left: 6px; font-weight: 400; color: var(--muted); }
 .gr-preps { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -3780,7 +3784,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:30</footer>
+  <footer>everything saves on this device · build 09:34</footer>
 </div>
 
 <script>
@@ -7698,6 +7702,7 @@ function grocAmt(it) {
 let grSecond = null;   // item id showing an empty second amount
 let grPrep = null;     // item id with prep open
 let grType = null;     // item id with type open
+let grFind = '';       // what you searched the list for
 const grName = it => it.text + (it.type ? ' · ' + it.type : '');
 
 // the kind of the item, as you would find it in Lagos markets and shops
@@ -7975,7 +7980,32 @@ function renderGroceries() {
             '<button type="button" class="gr-clear">Clear</button></div>' +
             '<ul class="gr-list got">' + got.map(row).join('') + '</ul>';
   }
+  if (state.grocery.length > 3) html = '<div class="gr-findrow"><input type="search" class="gr-find" placeholder="Search your list" aria-label="search your list" autocomplete="off"><span class="gr-none" hidden>Nothing on your list matches</span></div>' + html;
   list.innerHTML = html;
+  // search: hides what does not match, as you type
+  const find = list.querySelector('.gr-find');
+  if (find) {
+    find.value = grFind;
+    const apply = () => {
+      const q = grNorm(find.value);
+      let any = false;
+      list.querySelectorAll('.gr-row').forEach(li => {
+        const it = state.grocery.find(x => x.id === li.dataset.id);
+        const hay = grNorm([it.text, it.type, it.note].filter(Boolean).join(' '));
+        const ok = !q || hay.split(' ').some(w => w.startsWith(q.split(' ')[0])) && q.split(' ').every(p => hay.includes(p));
+        li.hidden = !ok; if (ok) any = true;
+      });
+      list.querySelectorAll('.gr-list').forEach(ul => {
+        const shown = [...ul.children].some(li => !li.hidden);
+        ul.hidden = !shown;
+        const head = ul.previousElementSibling;
+        if (head && (head.classList.contains('gr-ghead') || head.classList.contains('gr-gothead'))) head.hidden = !shown;
+      });
+      list.querySelector('.gr-none').hidden = !q || any;
+    };
+    find.addEventListener('input', () => { grFind = find.value; apply(); });
+    apply();
+  }
 
   list.querySelectorAll('.gr-share [data-a]').forEach(b => b.addEventListener('click', async () => {
     const said = b.dataset.a === 'image' ? await grocSaveImage() : await grocShare(b.dataset.a);
