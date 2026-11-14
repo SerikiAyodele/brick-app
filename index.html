@@ -27,7 +27,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap">
 
 <style>
 /* Blocks that snap together. Graph paper underneath, studs on top,
@@ -3760,7 +3760,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:00</footer>
+  <footer>everything saves on this device · build 09:03</footer>
 </div>
 
 <script>
@@ -3847,6 +3847,19 @@ function fromKey(k) { const [y,m,d] = k.split('-').map(Number); return new Date(
 function shiftKey(k, by) { const d = fromKey(k); d.setDate(d.getDate() + by); return key(d); }
 
 let state = load();
+// once: split typed amounts and how you'll have it out of grocery names
+// ("12 eggs, boiled" becomes Eggs, 12, boiled). a copy of the list is kept first.
+try {
+  if (!localStorage.getItem(KEY + '.grocTidy') && Array.isArray(state.grocery) && state.grocery.length) {
+    localStorage.setItem(KEY + '.grocery-before-tidy', JSON.stringify(state.grocery));
+    setTimeout(() => {
+      let n = 0;
+      for (const it of state.grocery) if (!it.done && tidyGrocery(it)) n++;
+      if (n) { save(); if (typeof renderGroceries === 'function' && foodView === 'groc') renderGroceries(); }
+      localStorage.setItem(KEY + '.grocTidy', '1');
+    }, 0);
+  } else localStorage.setItem(KEY + '.grocTidy', '1');
+} catch {}
 
 // once: "Meeting with X" blocks become "Meeting", with X kept as the topic
 for (const k in state.days) {
@@ -7600,77 +7613,121 @@ async function grocShare(how) {
   }
 }
 
-// the list as a picture: brick's look on a sheet of paper (cream, ruled lines,
-// handwritten items, a pink margin). shared to Photos or Files on iPhone.
+// the list as a picture: brick's look on a sheet of paper. big, dark, plain
+// letters so anyone can read it in a shop, even without glasses.
 async function grocImage() {
   const todo = (state.grocery || []).filter(x => !x.done);
   const groups = {};
   for (const it of todo) (groups[grocGroup(it.text)] = groups[grocGroup(it.text)] || []).push(it);
-  const order = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'].filter(g => groups[g]);
-  try { await Promise.all([document.fonts.load('600 40px Poppins'), document.fonts.load('400 40px Poppins'), document.fonts.load('600 52px Caveat')]); } catch {}
+  const items = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'].filter(g => groups[g]).flatMap(g => groups[g]);
+  try { await Promise.all([document.fonts.load('600 40px Poppins'), document.fonts.load('500 40px Poppins')]); } catch {}
 
-  const W = 1080, PAD = 120, LINE = 84;
-  let rows = 0;
-  for (const g of order) rows += 1 + groups[g].length + groups[g].filter(it => it.note).length * .55 + .4;
-  const H = Math.max(1350, Math.round(470 + rows * LINE + 200));
+  const W = 1080, PAD = 110, NAME = 64, NOTE = 42;
   const c = document.createElement('canvas');
-  c.width = W; c.height = H;
   const x = c.getContext('2d');
+  // wrap words to a width
+  const wrap = (t, font, max) => {
+    x.font = font;
+    const out = []; let line = '';
+    for (const w of String(t).split(/\s+/)) {
+      const tryL = line ? line + ' ' + w : w;
+      if (x.measureText(tryL).width > max && line) { out.push(line); line = w; } else line = tryL;
+    }
+    if (line) out.push(line);
+    return out;
+  };
+  const nameFont = '600 ' + NAME + 'px Poppins, sans-serif', noteFont = '500 ' + NOTE + 'px Poppins, sans-serif';
+  const qtyW = 230, textX = PAD + 100, textMax = W - textX - PAD - qtyW;
+  const laid = items.map(it => {
+    const name = wrap(it.text, nameFont, textMax);
+    const note = it.note ? wrap(it.note, noteFont, W - textX - PAD) : [];
+    return { it, name, note, h: name.length * NAME * 1.2 + note.length * NOTE * 1.3 + 56 };
+  });
+  const H = Math.max(1350, 360 + laid.reduce((a, l) => a + l.h, 0) + 160);
+  c.width = W; c.height = H;
 
   // paper
-  x.fillStyle = '#fbf6ec'; x.fillRect(0, 0, W, H);
-  for (let i = 0; i < 2600; i++) {            // a little grain
-    x.fillStyle = 'rgba(120, 90, 60,' + (Math.random() * .035).toFixed(3) + ')';
-    x.fillRect(Math.random() * W, Math.random() * H, 2, 2);
-  }
-  x.strokeStyle = 'rgba(134, 185, 217, .35)'; x.lineWidth = 2;
-  for (let y = 420; y < H - 120; y += LINE) { x.beginPath(); x.moveTo(0, y); x.lineTo(W, y); x.stroke(); }
-  x.strokeStyle = 'rgba(232, 138, 160, .55)'; x.lineWidth = 3;
-  x.beginPath(); x.moveTo(PAD - 30, 0); x.lineTo(PAD - 30, H); x.stroke();
+  x.fillStyle = '#fdf9f1'; x.fillRect(0, 0, W, H);
+  x.strokeStyle = 'rgba(232, 138, 160, .6)'; x.lineWidth = 4;
+  x.beginPath(); x.moveTo(PAD - 40, 0); x.lineTo(PAD - 40, H); x.stroke();
 
   // header: the brick logo, the title, the date
   try {
     const logo = await new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = no; im.src = 'icon-180.png'; });
-    x.save(); x.beginPath(); x.roundRect(PAD, 110, 96, 96, 24); x.clip(); x.drawImage(logo, PAD, 110, 96, 96); x.restore();
+    x.save(); x.beginPath(); x.roundRect(PAD, 96, 100, 100, 26); x.clip(); x.drawImage(logo, PAD, 96, 100, 100); x.restore();
   } catch {}
   const d = new Date();
-  x.fillStyle = '#3a2a22'; x.font = '600 76px Poppins, sans-serif'; x.textBaseline = 'alphabetic';
-  x.fillText('Groceries', PAD + 124, 188);
-  x.fillStyle = '#9a8676'; x.font = '400 34px Poppins, sans-serif';
-  x.fillText(cap(FULL[d.getDay()]) + ' ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()]) + ' · ' + todo.length + ' item' + (todo.length === 1 ? '' : 's'), PAD, 290);
+  x.fillStyle = '#1d1512'; x.font = '600 84px Poppins, sans-serif'; x.textBaseline = 'alphabetic';
+  x.fillText('Groceries', PAD + 128, 178);
+  x.fillStyle = '#4a3b33'; x.font = '500 40px Poppins, sans-serif';
+  x.fillText(cap(FULL[d.getDay()]) + ' ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()]), PAD, 276);
 
-  // the items, grouped, each with an empty circle to tick in pen
-  let y = 420 - 22;
-  const pinks = { 'Protein': '#e88aa0', 'Veg and fruit': '#7daf86', 'Staples': '#d9a35f', 'Drinks': '#86b9d9', 'Other': '#b49ac9' };
-  for (const g of order) {
-    y += LINE;
-    x.fillStyle = pinks[g]; x.font = '600 30px Poppins, sans-serif';
-    x.fillText(g.toUpperCase(), PAD, y);
-    for (const it of groups[g]) {
-      y += LINE;
-      x.strokeStyle = '#3a2a22'; x.lineWidth = 3;
-      x.beginPath(); x.arc(PAD + 18, y - 16, 18, 0, Math.PI * 2); x.stroke();
-      x.fillStyle = '#2f2420'; x.font = '600 56px Caveat, cursive';
-      let t = it.text;
-      while (x.measureText(t).width > W - PAD * 2 - 220 && t.length > 4) t = t.slice(0, -2);
-      if (t !== it.text) t += '…';
-      x.fillText(t, PAD + 62, y);
-      if (it.qty) {
-        x.fillStyle = '#d4607e'; x.font = '600 52px Caveat, cursive'; x.textAlign = 'right';
-        x.fillText('× ' + it.qty + (it.unit && it.unit !== 'pcs' ? ' ' + it.unit : ''), W - PAD, y);
-        x.textAlign = 'left';
-      }
-      if (it.note) {
-        y += LINE * .55;
-        x.fillStyle = '#9a8676'; x.font = '400 28px Poppins, sans-serif';
-        x.fillText(it.note.length > 52 ? it.note.slice(0, 50) + '…' : it.note, PAD + 62, y - 6);
-      }
+  // the items: a big circle to tick in pen, the name, how many, and how you'll have it
+  let y = 360;
+  laid.forEach((l, i) => {
+    if (i) { x.strokeStyle = '#e6dccd'; x.lineWidth = 2; x.beginPath(); x.moveTo(PAD, y - 4); x.lineTo(W - PAD, y - 4); x.stroke(); }
+    let ty = y + NAME + 6;
+    x.strokeStyle = '#1d1512'; x.lineWidth = 4;
+    x.beginPath(); x.arc(PAD + 30, ty - NAME * .34, 28, 0, Math.PI * 2); x.stroke();
+    x.fillStyle = '#1d1512'; x.font = nameFont; x.textAlign = 'left';
+    l.name.forEach((t, j) => x.fillText(t, textX, ty + j * NAME * 1.2));
+    if (l.it.qty) {
+      x.fillStyle = '#b02a52'; x.font = '700 ' + NAME + 'px Poppins, sans-serif'; x.textAlign = 'right';
+      x.fillText(l.it.qty + (l.it.unit && l.it.unit !== 'pcs' ? ' ' + l.it.unit : ''), W - PAD, ty);
+      x.textAlign = 'left';
     }
-    y += LINE * .4;
-  }
-  x.fillStyle = '#c2b2a2'; x.font = '500 26px Poppins, sans-serif'; x.textAlign = 'center';
+    ty += (l.name.length - 1) * NAME * 1.2;
+    x.fillStyle = '#4a3b33'; x.font = noteFont;
+    l.note.forEach((t, j) => x.fillText(t, textX, ty + 16 + (j + 1) * NOTE * 1.3));
+    y += l.h;
+  });
+  x.fillStyle = '#8a776a'; x.font = '500 28px Poppins, sans-serif'; x.textAlign = 'center';
   x.fillText('made with brick', W / 2, H - 60);
   return new Promise(ok => c.toBlob(ok, 'image/png'));
+}
+
+// a typed item like "12 eggs, boiled for breakfast" or "rice 2kg (jollof)":
+// the name, how many, the unit, and how you'll have it, split out
+const UNIT_WORDS = { kg: 'kg', kgs: 'kg', kilo: 'kg', kilos: 'kg', g: 'g', grams: 'g', gram: 'g', l: 'L', litre: 'L', litres: 'L', liter: 'L', liters: 'L',
+  pack: 'pack', packs: 'pack', bunch: 'bunch', bunches: 'bunch', tin: 'tin', tins: 'tin', can: 'tin', cans: 'tin', bag: 'bag', bags: 'bag',
+  pcs: 'pcs', pc: 'pcs', piece: 'pcs', pieces: 'pcs', crate: 'pack', crates: 'pack', dozen: 'pcs' };
+function parseGrocery(raw) {
+  let t = String(raw || '').trim(), note = '';
+  const paren = t.match(/\(([^)]*)\)/);
+  if (paren) { note = paren[1].trim(); t = t.replace(paren[0], ' ').trim(); }
+  const cut = t.match(/\s*(,|;|\s-\s|\s–\s|:|\bfor\b|\bto\b\s+(?:boil|fry|grill|bake|make|cook|blend|roast|steam)|\b(?:boiled|fried|grilled|baked|roasted|steamed|blended|mashed|raw|sliced)\b)/i);
+  if (cut && cut.index > 0) {
+    const rest = t.slice(cut.index).replace(/^\s*(,|;|-|–|:)\s*/, '').trim();
+    note = [rest, note].filter(Boolean).join(', ');
+    t = t.slice(0, cut.index).trim();
+  }
+  let qty = null, unit = '';
+  const unitRe = '(' + Object.keys(UNIT_WORDS).join('|') + ')';
+  let m = t.match(new RegExp('^(?:x\\s*)?(\\d+(?:\\.\\d+)?)\\s*(?:x\\b)?\\s*' + unitRe + '?\\b\\s*(?:of\\s+)?', 'i'));
+  if (m && m[0].trim() && t.slice(m[0].length).trim()) {
+    qty = Number(m[1]); unit = m[2] ? UNIT_WORDS[m[2].toLowerCase()] : ''; t = t.slice(m[0].length).trim();
+    if (m[2] && /dozen/i.test(m[2])) qty *= 12;
+  } else {
+    m = t.match(new RegExp('\\s+(?:x\\s*)?(\\d+(?:\\.\\d+)?)\\s*' + unitRe + '?\\s*$', 'i'));
+    if (m && t.slice(0, m.index).trim()) {
+      qty = Number(m[1]); unit = m[2] ? UNIT_WORDS[m[2].toLowerCase()] : ''; t = t.slice(0, m.index).trim();
+      if (m[2] && /dozen/i.test(m[2])) qty *= 12;
+    }
+  }
+  if (qty !== null && !unit && COUNT_WORDS.test(t)) unit = 'pcs';
+  t = t.replace(/\s+/g, ' ').trim();
+  return { text: t ? cap(t) : String(raw).trim(), qty, unit, note };
+}
+// tidy one item in place: only fills what is empty, never loses words
+function tidyGrocery(it) {
+  const p = parseGrocery(it.text);
+  if (p.text === it.text && p.qty === null && !p.note) return false;
+  it.text = p.text;
+  if (p.qty !== null && !it.qty) { it.qty = p.qty; it.unit = p.unit || it.unit || ''; }
+  else if (p.qty !== null && it.qty) it.text = it.text;   // keep the amount you set by hand
+  if (p.note) it.note = it.note && !it.auto ? it.note + ', ' + p.note : p.note;
+  it.auto = false;
+  return true;
 }
 
 async function grocSaveImage() {
@@ -7831,8 +7888,13 @@ function addGrocery(text) {
   if (!state.grocery) state.grocery = [];
   if (state.grocery.some(x => !x.done && x.text.toLowerCase() === text.toLowerCase())) return;   // already on it
   // fill in how many and how you have it from your food log, when it knows
-  state.grocery.unshift({ id: Date.now() + '' + Math.random().toString(36).slice(2, 6), text, done: false, at: Date.now(),
-                          qty: null, unit: '', note: '', auto: false, ...(grocGuess(text) || {}) });
+  const typed = parseGrocery(text);
+  const guess = grocGuess(typed.text) || {};
+  const item = { id: Date.now() + '' + Math.random().toString(36).slice(2, 6), text: typed.text, done: false, at: Date.now(),
+                 qty: null, unit: '', note: '', auto: false, ...guess };
+  if (typed.qty !== null) { item.qty = typed.qty; item.unit = typed.unit; item.auto = false; }
+  if (typed.note) { item.note = typed.note; item.auto = false; }
+  state.grocery.unshift(item);
   save(); renderGroceries();
 }
 
