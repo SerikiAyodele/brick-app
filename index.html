@@ -3784,7 +3784,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:34</footer>
+  <footer>everything saves on this device · build 09:36</footer>
 </div>
 
 <script>
@@ -7627,7 +7627,7 @@ function grocerySuggestions() {
    food log: how often you had it in the last 2 weeks, and how you usually
    have it. the list can be copied as text or sent to Notes. */
 const COUNT_WORDS = /\b(eggs?|bananas?|oranges?|apples?|mangoe?s?|avocados?|plantains?|tomato(es)?|onions?|peppers?|cucumbers?|carrots?|lemons?|limes?|sardines?|tins?|cans?|bread|loaf|loaves|yoghurts?|yogurts?)\b/i;
-const UNITS = ['', 'pcs', 'naira', 'knaira', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
+const UNITS = ['', 'pcs', 'naira', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
 const unitLabel = u => u === 'pcs' ? 'pieces' : u === 'naira' ? '₦ naira' : u === 'knaira' ? '₦ thousand' : u;
 let grOpen = null;   // item id with its details open
 // ways to have it, picked for the item: blend peppers, clean and chop meat, slice fruit
@@ -7748,14 +7748,17 @@ function grocLine(it) {
   return grName(it) + q + (it.note ? ' (' + it.note + ')' : '');
 }
 
+// the order you added things, oldest first
+const grocQueue = a => a.slice().sort((x, y) => (x.at || 0) - (y.at || 0));
+// for sharing: sorted by kind of food (protein, veg and fruit, staples, drinks), no headings
+const GR_ORDER = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'];
+const grocSorted = a => grocQueue(a).sort((x, y) => GR_ORDER.indexOf(grocGroup(x.text)) - GR_ORDER.indexOf(grocGroup(y.text)));
+
 function grocText() {
-  const todo = (state.grocery || []).filter(x => !x.done);
+  const todo = grocSorted((state.grocery || []).filter(x => !x.done));
   const d = new Date();
-  const groups = {};
-  for (const it of todo) (groups[grocGroup(it.text)] = groups[grocGroup(it.text)] || []).push(it);
-  const order = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'];
   return 'Groceries, ' + cap(FULL[d.getDay()].slice(0, 3)) + ' ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '\n\n' +
-    order.filter(g => groups[g]).map(g => g + '\n' + groups[g].map(it => '- ' + grocLine(it)).join('\n')).join('\n\n');
+    todo.map(it => '- ' + grocLine(it)).join('\n');
 }
 
 async function grocShare(how) {
@@ -7777,9 +7780,7 @@ async function grocShare(how) {
 // letters so anyone can read it in a shop, even without glasses.
 async function grocImage() {
   const todo = (state.grocery || []).filter(x => !x.done);
-  const groups = {};
-  for (const it of todo) (groups[grocGroup(it.text)] = groups[grocGroup(it.text)] || []).push(it);
-  const items = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'].filter(g => groups[g]).flatMap(g => groups[g]);
+  const items = grocSorted(todo);
   try { await Promise.all([document.fonts.load('600 40px Poppins'), document.fonts.load('500 40px Poppins')]); } catch {}
 
   const W = 1080, PAD = 110, NAME = 64, NOTE = 42;
@@ -7964,10 +7965,9 @@ function renderGroceries() {
       '<button type="button" class="gr-del" data-a="del" aria-label="remove">×</button>' + swapBtn + editor + '</li>';
   };
 
-  // shopping order: grouped by kind of food
-  const groups = {};
-  for (const it of todo) (groups[grocGroup(it.text)] = groups[grocGroup(it.text)] || []).push(it);
-  const order = ['Protein', 'Veg and fruit', 'Staples', 'Drinks', 'Other'].filter(k => groups[k]);
+  // a queue: first added at the top, new ones at the bottom
+  const groups = { all: grocQueue(todo) };
+  const order = todo.length ? ['all'] : [];
 
   let html = '';
   if (!state.grocery.length) html = '<p class="gr-empty">Your list is empty. Add what you need, or tap a suggestion below.</p>';
@@ -8153,7 +8153,7 @@ function addGrocery(text) {
                  qty: null, unit: '', note: '', auto: false, ...guess };
   if (typed.qty !== null) { item.qty = typed.qty; item.unit = typed.unit; item.auto = false; }
   if (typed.note) { item.note = typed.note; item.auto = false; }
-  state.grocery.unshift(item);
+  state.grocery.push(item);
   save(); renderGroceries();
 }
 
@@ -8353,7 +8353,7 @@ document.getElementById('groc-add').addEventListener('click', () => {
   const before = (state.grocery || []).length;
   setTimeout(renderGrocHints, 0);
   addGrocery(inp.value);
-  if ((state.grocery || []).length > before) { grOpen = state.grocery[0].id; renderGroceries(); }   // show its options
+  if ((state.grocery || []).length > before) { grOpen = state.grocery[state.grocery.length - 1].id; renderGroceries(); }   // show its options
   inp.value = ''; inp.focus();
 });
 document.getElementById('groc-input').addEventListener('input', renderGrocHints);
