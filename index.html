@@ -3777,7 +3777,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:21</footer>
+  <footer>everything saves on this device · build 09:22</footer>
 </div>
 
 <script>
@@ -7682,7 +7682,7 @@ function grocGuess(text) {
 
 // how much, in words: "6", "2 kg", or with a second amount "2 pack · 12 pieces"
 function grocAmt(it) {
-  const one = (n, u, both) => u === 'naira' ? '₦' + Number(n).toLocaleString('en-NG') : n + (u ? (u === 'pcs' ? (both ? (n === 1 ? ' piece' : ' pieces') : '') : ' ' + u) : '');
+  const one = (n, u, both) => u === 'naira' ? '₦' + Number(n).toLocaleString('en-NG') : n + (u ? (u === 'pcs' ? (n === 1 ? ' piece' : ' pieces') : ' ' + u) : '');
   const two = it.qty2 > 0;
   const a = it.qty ? one(it.qty, it.unit, two) : '';
   const b = two ? one(it.qty2, it.unit2, true) : '';
@@ -7864,7 +7864,7 @@ function renderGroceries() {
     const v = g && ks.length ? g.verdict({ what: it.text, at: Date.now(), meal: 'lunch' }, ks) : null;
     const sw = !it.done && v && v[0] === 'watch' ? swapFor(it.text) : null;
     const open = grOpen === it.id && !it.done;
-    const qty = grocAmt(it) ? '<em class="gr-q">' + (grocAmt(it)[0] === '₦' ? '' : '×') + esc(grocAmt(it)) + '</em>' : '';
+    const qty = grocAmt(it) ? '<em class="gr-q">' + esc(grocAmt(it)) + '</em>' : '';
     const sub = it.done ? '' :
       (it.note ? '<small class="gr-note">' + esc(it.note) + (it.auto ? ' · <i>from what you eat</i>' : '') + '</small>' : '') +
       (v && (v[0] === 'good' || sw) ? '<small class="gr-v ' + v[0] + '">' + (v[0] === 'good' ? '✓ ' : '⚠ ') + esc(v[1]) + '</small>' : '');
