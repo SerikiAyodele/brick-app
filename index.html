@@ -2113,6 +2113,44 @@ body[data-view="day"] { background-image: none; }
 .md-note label { display: block; margin-bottom: 10px; font-size: 15px; }
 .md-note input { width: 100%; font-size: 16px; padding: 12px 14px; border-radius: 14px; }
 .md-note-b { display: flex; gap: 10px; margin-top: 12px; }
+/* why chips under the why box */
+.md-why { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.md-why button { min-height: 40px; font-size: 14px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--hair); background: transparent; color: var(--ink); }
+.md-why button.jr-chip { border-color: color-mix(in srgb, #7daf86 50%, var(--hair)); }
+.md-jr { display: block; font-size: 12px; color: #7daf86; margin-top: 2px; }
+
+/* journeys: a timeline on the Health page */
+.jr { margin: 16px 0; padding: 16px; border: 1px solid var(--hair); border-radius: 20px; background: var(--card); }
+.jr-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.jr-head span { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.jr-head b { display: block; font-size: 20px; font-weight: 600; }
+.jr-head em { font-style: normal; font-size: 28px; font-weight: 600; color: var(--c); white-space: nowrap; }
+.jr-line { list-style: none; margin: 14px 0 0; padding: 0; }
+.jr-line li { position: relative; padding: 0 0 14px 24px; cursor: pointer; }
+.jr-line li::before { content: ''; position: absolute; left: 5px; top: 18px; bottom: -2px; width: 2px; background: var(--hair); }
+.jr-line li:last-child::before { display: none; }
+.jr-line li i { position: absolute; left: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--hair); background: var(--card); }
+.jr-line li.past i { background: var(--c); border-color: var(--c); opacity: .5; }
+.jr-line li.now i { background: var(--c); border-color: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 25%, transparent); }
+.jr-line li small { display: block; font-size: 12px; color: var(--muted); }
+.jr-line li b { font-size: 16px; font-weight: 600; }
+.jr-line li.next b { color: var(--muted); }
+.jr-here { display: inline-block; margin-left: 6px; font-size: 12px; color: var(--c); }
+.jr-more { margin-top: 8px; }
+.jr-more p { margin: 10px 0 4px; font-size: 13px; color: var(--muted); }
+.jr-more ul { margin: 0; padding-left: 18px; }
+.jr-more li { padding: 2px 0; cursor: auto; font-size: 15px; }
+.jr-more li::before { display: none; }
+.jr-days { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.jr-days span { display: flex; flex-direction: column; align-items: center; min-width: 34px; font-size: 18px; }
+.jr-days small { font-size: 11px; color: var(--muted); }
+.jr-note { font-size: 12px; color: var(--muted); margin: 14px 0 0; }
+.jr-acts { display: flex; gap: 10px; margin-top: 12px; }
+.jr-form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.jr-form input { width: 100%; font-size: 16px; padding: 12px 14px; border-radius: 14px; }
+.jr-form label { font-size: 13px; color: var(--muted); }
+.jr-add { display: block; width: 100%; text-align: left; }
+.jr-add small { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
 
 .md-seg { display: flex; gap: 4px; margin: 26px 0 14px; padding: 4px; background: var(--hair); border-radius: 22px; }
 .md-seg-b {
@@ -3790,7 +3828,7 @@ body, body[data-view] {
 
   <!-- ============ MOOD ============ -->
   <section id="view-mood" role="tabpanel" aria-labelledby="tab-mood" hidden>
-    <header class="pghead"><h1>Mood</h1><span id="mood-sub"></span></header>
+    <header class="pghead"><h1>Health log</h1><span id="mood-sub"></span></header>
     <p class="md-ask" id="greet"></p>
 
     <div id="mood-slot"></div>
@@ -3800,7 +3838,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 15:15</footer>
+  <footer>everything saves on this device · build 15:27</footer>
 </div>
 
 <script>
@@ -3811,7 +3849,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [] };
 
 function load() {
   try {
@@ -3845,7 +3883,8 @@ function load() {
         penaltyLink: typeof d.penaltyLink === 'string' ? d.penaltyLink : '',
         goalSetAt: Number(d.goalSetAt) || 0,
         goalUnlockUntil: Number(d.goalUnlockUntil) || 0,
-        sleep:     Array.isArray(d.sleep) ? d.sleep : []
+        sleep:     Array.isArray(d.sleep) ? d.sleep : [],
+        journeys:  Array.isArray(d.journeys) ? d.journeys : []
       };
     }
     const old = localStorage.getItem(OLD);
@@ -6236,8 +6275,9 @@ function renderMood() {
                   (tally[m.k] ? '<span class="md-n">' + tally[m.k] + '</span>' : '');
     b.setAttribute('aria-label', 'log ' + m.k + (tally[m.k] ? ', ' + tally[m.k] + ' today' : ''));
     b.addEventListener('click', () => {
-      state.moods.push({ at: Date.now(), mood: m.k, part, note: '' });
-      justLogged = m.k;
+      const at = Date.now();
+      state.moods.push({ at, mood: m.k, part, note: '' });
+      justLogged = m.k; noteFor = at;
       save(); renderMood();
     });
     grid.appendChild(b);
@@ -6262,12 +6302,23 @@ function renderMood() {
     const found = MOODS.find(x => x.k === entry.mood);
     const nb = document.createElement('div');
     nb.className = 'md-note';
-    nb.innerHTML = '<label for="note-input">Note on <b>' + (found ? found.e + ' ' : '') + entry.mood + '</b></label>' +
-      '<input id="note-input" type="text" maxlength="200" placeholder="what is going on? (optional)">' +
+    // quick reasons: your journey day, what you ate, and a few common ones
+    const why = [];
+    const jx = journeyAt(entry.at);
+    if (jx) why.push(['jr-chip', jx.j.name + ', day ' + jx.day]);
+    const fw = foodMoodAt(state.food.filter(f => entry.at - f.at < 4 * 3600000), entry.at);
+    if (fw) why.push(['', fw.why]);
+    for (const w of ['slept badly', 'hungry', 'work', 'people', 'did not move']) why.push(['', w]);
+    nb.innerHTML = '<label for="note-input">Why do you feel <b>' + (found ? found.e + ' ' : '') + entry.mood + '</b>?</label>' +
+      '<input id="note-input" type="text" maxlength="200" placeholder="e.g. slept badly">' +
+      '<div class="md-why">' + why.map(w => '<button type="button" class="' + w[0] + '">' + esc(w[1]) + '</button>').join('') + '</div>' +
       '<div class="md-note-b"><button type="button" class="lf-btn main" data-a="save">Save</button>' +
       '<button type="button" class="lf-btn" data-a="skip">' + (entry.note ? 'Done' : 'Skip') + '</button></div>';
     const inp = nb.querySelector('input');
     inp.value = entry.note || '';
+    nb.querySelectorAll('.md-why button').forEach(b => b.addEventListener('click', () => {
+      inp.value = inp.value.trim() ? inp.value.trim() + ', ' + b.textContent : b.textContent; inp.focus();
+    }));
     nb.querySelector('[data-a=save]').addEventListener('click', () => { entry.note = inp.value.trim(); noteFor = null; save(); renderMood(); });
     nb.querySelector('[data-a=skip]').addEventListener('click', () => { noteFor = null; renderMood(); });
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') nb.querySelector('[data-a=save]').click(); });
@@ -6344,7 +6395,8 @@ function renderMoodLog() {
       row.style.setProperty('--c', found ? found.c : '#d9718e');
       row.innerHTML = '<span class="md-t">' + clock(d.getHours() * 60 + d.getMinutes()) + '</span>' +
         '<span class="md-what"><b>' + (found ? found.e + ' ' : '') + esc(m.mood) + '</b>' +
-        '<small' + (m.note ? ' class="priv"' : '') + '>' + (m.note ? esc(m.note) : 'add a note') + '</small></span>';
+        '<small' + (m.note ? ' class="priv"' : '') + '>' + (m.note ? esc(m.note) : 'add why') + '</small>' +
+        (journeyTag(m.at) ? '<span class="md-jr">' + esc(journeyTag(m.at)) + '</span>' : '') + '</span>';
       if (!m.note) row.querySelector('small').classList.add('ghost');
       row.addEventListener('click', () => { noteFor = m.at; renderMood(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
@@ -6367,6 +6419,140 @@ function renderMoodLog() {
     }
     log.appendChild(card);
   }
+}
+
+/* =========== journeys ===========
+   a change you are making, like quitting edibles. it has a start day and a
+   timeline of stages, each with what to expect and tips. one is active at a
+   time. it shows on the Health tile at Home, on the Health page, and every
+   check in in the health log is tagged with its day. */
+
+const JOURNEY_PLANS = {
+  cannabis: {
+    match: /edible|weed|cannabis|\bthc\b|marijuana|gumm(y|ies)|\bpot\b|\bsmok/i,
+    stages: [
+      { from: 1, to: 3, name: 'The first days',
+        feel: ['Restless or on edge', 'Hard to fall asleep', 'Not very hungry', 'A bit anxious or snappy'],
+        tips: ['Eat small meals, even if you are not hungry', 'Drink lots of water', 'Go for a walk, it takes the edge off', 'Plan your evenings, that is when you used to take one'] },
+      { from: 4, to: 7, name: 'The peak',
+        feel: ['Cravings at their strongest', 'Mood goes up and down', 'Very vivid dreams', 'Sweats, headaches or an upset stomach'],
+        tips: ['A craving passes in about 15 minutes, wait it out', 'Move your body, it is one of the best things for this', 'No caffeine after noon', 'A warm shower before bed helps you sleep'] },
+      { from: 8, to: 14, name: 'Easing off',
+        feel: ['Most of it starts to fade', 'Sleep is still a bit off', 'Dreams are still vivid', 'A clearer head in the day'],
+        tips: ['Same bedtime every night', 'Keep your phone out of bed', 'Notice the wins: money saved, sharper mornings'] },
+      { from: 15, to: 30, name: 'Settling in',
+        feel: ['Sleep slowly comes back', 'Some bored or low days', 'Cravings come from cues, like a time or a place'],
+        tips: ['Build a new evening routine', 'Know your cues and plan for them', 'If low days keep going, talk to a doctor'] },
+      { from: 31, to: null, name: 'Your new normal',
+        feel: ['Cravings are rare', 'More energy and a steadier mood'],
+        tips: ['A slip is not a reset, start again the next day', 'Keep doing what worked'] }
+    ]
+  },
+  habit: {
+    stages: [
+      { from: 1, to: 3, name: 'Starting',
+        feel: ['Keen, but it feels strange', 'Old habits pull at you'],
+        tips: ['Make it easy: remove what sets off the old habit', 'Tell someone what you are doing'] },
+      { from: 4, to: 14, name: 'The hard part',
+        feel: ['The first push wears off', 'Easy to make excuses'],
+        tips: ['On bad days, do the smallest version', 'Log how you feel, it shows what helps'] },
+      { from: 15, to: 30, name: 'Getting easier',
+        feel: ['It takes less effort', 'Slips still happen'],
+        tips: ['A slip is not a reset', 'Look back at your log to see how far you came'] },
+      { from: 31, to: 66, name: 'Becoming normal',
+        feel: ['It starts to feel like you'],
+        tips: ['Keep the cues that work', 'Think about what comes next'] },
+      { from: 67, to: null, name: 'This is you now',
+        feel: ['It runs on its own'],
+        tips: ['Start your next journey when you are ready'] }
+    ]
+  }
+};
+
+let journeyForm = false;   // the start a journey form is open
+let journeyStageOpen = null;   // the stage tapped open, null means today's
+
+function activeJourney() { return (state.journeys || []).find(j => !j.end) || null; }
+function journeyPlan(j) { return JOURNEY_PLANS[j.kind] || JOURNEY_PLANS.habit; }
+function journeyDay(j, at) { return Math.round((fromKey(key(new Date(at))) - fromKey(j.start)) / 86400000) + 1; }
+function journeyStage(j, day) {
+  const st = journeyPlan(j).stages;
+  return st.find(s => day >= s.from && (s.to === null || day <= s.to)) || st[0];
+}
+// the journey a check in happened in, and its day
+function journeyAt(at) {
+  for (const j of state.journeys || []) {
+    if (key(new Date(at)) >= j.start && (!j.end || at <= j.end)) return { j, day: journeyDay(j, at) };
+  }
+  return null;
+}
+function journeyTag(at) { const x = journeyAt(at); return x ? 'Day ' + x.day + ' · ' + x.j.name : ''; }
+
+function journeyHtml() {
+  const j = activeJourney();
+  if (!j) {
+    if (!journeyForm) return '<div class="jr"><button type="button" class="jr-add lf-addlink" data-jr="new">+ Start a journey' +
+      '<small>Quitting or starting something? See what to expect, day by day.</small></button></div>';
+    return '<div class="jr"><b>Start a journey</b><div class="jr-form">' +
+      '<label for="jr-name">What are you doing?</label><input id="jr-name" type="text" maxlength="60" placeholder="e.g. Quit edibles">' +
+      '<label for="jr-start">Day 1 was</label><input id="jr-start" type="date" value="' + todayKey() + '" max="' + todayKey() + '">' +
+      '</div><div class="jr-acts"><button type="button" class="lf-btn main" data-jr="start">Start</button>' +
+      '<button type="button" class="lf-btn" data-jr="cancel">Cancel</button></div></div>';
+  }
+  const day = journeyDay(j, Date.now()), now = journeyStage(j, day);
+  const open = journeyStageOpen === null ? journeyPlan(j).stages.indexOf(now) : journeyStageOpen;
+  let html = '<div class="jr" style="--c:#7daf86"><div class="jr-head"><div><span>Journey</span><b>' + esc(j.name) + '</b></div><em>Day ' + day + '</em></div><ol class="jr-line">';
+  journeyPlan(j).stages.forEach((s, n) => {
+    const when = s.to === null ? 'Day ' + s.from + ' on' : 'Days ' + s.from + ' to ' + s.to;
+    const cls = s === now ? 'now' : s.from > day ? 'next' : 'past';
+    html += '<li class="' + cls + '" data-jr-stage="' + n + '"><i></i><small>' + when + '</small><b>' + s.name + '</b>' +
+      (s === now ? '<span class="jr-here">You are here</span>' : '') +
+      (n === open ? '<div class="jr-more"><p>What to expect</p><ul>' + s.feel.map(f => '<li>' + f + '</li>').join('') + '</ul>' +
+                    '<p>Tips</p><ul>' + s.tips.map(f => '<li>' + f + '</li>').join('') + '</ul></div>' : '') +
+      '</li>';
+  });
+  html += '</ol>';
+  // how you felt each day, the mood you logged most, last 14 days
+  const days = [];
+  for (let d = Math.max(1, day - 13); d <= day; d++) {
+    const k = shiftKey(j.start, d - 1);
+    const tally = {};
+    for (const m of state.moods) if (key(new Date(m.at)) === k) tally[m.mood] = (tally[m.mood] || 0) + 1;
+    const top = MOODS.filter(m => tally[m.k]).sort((a, b) => tally[b.k] - tally[a.k])[0];
+    days.push('<span title="day ' + d + '">' + (top ? top.e : '·') + '<small>' + d + '</small></span>');
+  }
+  html += '<p class="jr-more" style="margin:4px 0 0;font-size:13px;color:var(--muted)">How you felt each day</p><div class="jr-days">' + days.join('') + '</div>' +
+    '<p class="jr-note">General guidance, not medical advice. If you feel very low or unsafe, talk to a doctor.</p>' +
+    '<div class="jr-acts"><button type="button" class="lf-btn" data-jr="end">End journey</button></div></div>';
+  return html;
+}
+
+function wireJourney(box, redraw) {
+  box.querySelectorAll('[data-jr]').forEach(b => b.addEventListener('click', () => {
+    const a = b.dataset.jr;
+    if (a === 'new') { journeyForm = true; redraw(); setTimeout(() => { const i = document.getElementById('jr-name'); if (i) i.focus(); }, 30); return; }
+    if (a === 'cancel') { journeyForm = false; redraw(); return; }
+    if (a === 'start') {
+      const name = document.getElementById('jr-name').value.trim();
+      const start = document.getElementById('jr-start').value || todayKey();
+      if (!name) { document.getElementById('jr-name').focus(); return; }
+      const kind = JOURNEY_PLANS.cannabis.match.test(name) ? 'cannabis' : 'habit';
+      state.journeys = state.journeys || [];
+      state.journeys.push({ id: Date.now(), name, start: start > todayKey() ? todayKey() : start, kind, end: null });
+      journeyForm = false; journeyStageOpen = null; save(); redraw(); return;
+    }
+    if (a === 'end') {
+      const j = activeJourney();
+      if (!j) return;
+      j.end = Date.now(); save(); redraw();
+      offerUndo(j.name + ' journey', () => { j.end = null; save(); redraw(); });
+    }
+  }));
+  box.querySelectorAll('[data-jr-stage]').forEach(li => li.addEventListener('click', e => {
+    if (e.target.closest('.jr-more')) return;
+    const n = Number(li.dataset.jrStage);
+    journeyStageOpen = n; redraw();
+  }));
 }
 
 /* =========== stats =========== */
@@ -9580,7 +9766,7 @@ const MENU = [
   { tab: 'day',    name: 'plan',  blurb: 'plan it in blocks, tick them off',   c: '#d9718e' },
   { tab: 'gym',    name: 'move',    blurb: 'mon, wed and fri sessions',          c: '#86b9d9' },
   { tab: 'food',   name: 'fuel',    blurb: 'what you ate and drank',             c: '#e3a27a' },
-  { tab: 'mood',   name: 'mood',    blurb: 'check in on how you are feeling',    c: '#a99bd4' },
+  { tab: 'mood',   name: 'health log', blurb: 'how you feel and why',    c: '#a99bd4' },
   { tab: 'ideas',  name: 'tweets',  blurb: 'your private feed',                  c: '#6fa3c8' },
   { tab: 'stats',  name: 'stats',   blurb: 'how you are actually doing',         c: '#a99bd4' },
   { tab: 'habits', name: 'habits',  blurb: 'grown from what you actually plan',  c: '#93bf7f' }
@@ -9955,8 +10141,14 @@ function renderHome() {
   let html = '<div class="hm-life-head"><b>Your life</b><button type="button" class="hm-big" data-big="1">Big goals \u203a</button></div>' +
     '<div class="lf-total"><b>' + (overall === null ? '–' : overall) + '</b><i>%</i><span>' +
       (overall === null ? 'set a goal to start' : 'of the way to your goals ' + perName().toLowerCase()) + '</span></div><div class="lf-grid">';
+  const jr = activeJourney();
+  const jrLine = jr ? '<span class="lf-t-trend">\u{1F331} Day ' + journeyDay(jr, Date.now()) + ' \u00b7 ' + esc(jr.name) + '</span>' : '';
   for (const a of AREAS) {
     const gs = areaGoals(a.k);
+    if (!gs.length && a.k === 'health' && jr) {
+      html += '<button type="button" class="lf-tile" data-open="health" style="--c:' + a.c + '"><span class="lf-t-name">' + a.name + '</span>' + jrLine + '</button>';
+      continue;
+    }
     if (!gs.length) {
       html += '<button type="button" class="lf-tile empty" data-add="' + a.k + '" style="--c:' + a.c + '">' +
               '<span class="lf-t-name">' + a.name + '</span><span class="lf-t-add">+ Set a goal</span></button>';
@@ -9967,7 +10159,7 @@ function renderHome() {
     html += '<button type="button" class="lf-tile" data-open="' + a.k + '" style="--c:' + a.c + '">' +
       '<span class="lf-t-name">' + a.name + '</span><span class="lf-t-num">' + now + '<i>%</i></span>' +
       '<span class="lf-t-bar"><u style="width:' + now + '%"></u></span>' +
-      '<span class="lf-t-trend">' + onT + ' of ' + gs.length + ' on track</span></button>';
+      '<span class="lf-t-trend">' + onT + ' of ' + gs.length + ' on track</span>' + (a.k === 'health' ? jrLine : '') + '</button>';
   }
   slot.innerHTML = html + '</div>';
   slot.querySelector('[data-big]').addEventListener('click', () => { lifeTab = 'big'; lifeOpen = null; lifeSetup = null; show('life'); window.scrollTo(0, 0); });
@@ -10597,8 +10789,8 @@ function lifeDetail(box, a) {
   const now = areaScore(a.k, ks);
 
   let html = '<button type="button" class="lf-back">← Home</button>' +
-    '<div class="lf-dhead" style="--c:' + a.c + '"><h1>' + a.name + '</h1><b>' + now + '<i>%</i></b></div>' +
-    bigLine(a) + '<div class="lf-goal per-row"><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
+    '<div class="lf-dhead" style="--c:' + a.c + '"><h1>' + a.name + '</h1>' + (gs.length ? '<b>' + now + '<i>%</i></b>' : '') + '</div>' +
+    bigLine(a) + (a.k === 'health' ? journeyHtml() : '') + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
   gs.forEach((g, n) => {
     const sc = goalScore(g, ks), [st, stText] = goalStatus(sc.pct);
     const priv = g.private || a.k === 'love';
@@ -10639,6 +10831,7 @@ function lifeDetail(box, a) {
   box.innerHTML = html;
 
   box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; lifeExpanded = null; show('home'); window.scrollTo(0, 0); });
+  if (a.k === 'health') wireJourney(box, renderLife);
   wirePeriod(box, renderLife);
   box.querySelector('.w3-link').addEventListener('click', () => openWhy3(a.c));
   box.querySelectorAll('[data-open-goal]').forEach(li => li.addEventListener('click', e => {
@@ -11350,7 +11543,7 @@ const TABS = {
 };
 
 /* ---- now pill ----
-   away from Plan and Home, a small pill above the bottom bar shows the block
+   away from Plan, a small pill above the bottom bar shows the block
    you are on and the time left. tap it to go back to your plan. */
 function updateNowPill() {
   let pill = document.getElementById('nowpill');
@@ -11363,7 +11556,7 @@ function updateNowPill() {
   const v = document.body.dataset.view;
   const t = planKey(), d = state.days && state.days[t];
   let cur = null;
-  if (d && d.blocks && d.blocks.length && v !== 'day' && v !== 'home' && !document.body.classList.contains('focusing')) {
+  if (d && d.blocks && d.blocks.length && v !== 'day' && !document.body.classList.contains('focusing')) {
     const nowM = planMin(t);
     let at = toMins(d.start);
     for (const b of d.blocks) {
