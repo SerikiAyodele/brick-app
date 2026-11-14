@@ -3441,7 +3441,7 @@ body.showmode #view-day .qp { display: none; }
 .gr-ed { flex-basis: 100%; display: flex; flex-direction: column; gap: 10px; padding: 4px 6px 12px 48px; }
 .gr-qrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .gr-qrow > button { width: 38px; height: 38px; font-size: 18px; color: var(--ink); background: var(--hair); border: none; border-radius: 50%; cursor: pointer; }
-.gr-qin { width: 76px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
+.gr-qin { width: 96px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
 .gr-units { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; }
 .gr-units button { min-height: 32px; padding: 0 12px; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: var(--hair); border: none; border-radius: 16px; cursor: pointer; }
 .gr-units button.on { color: #fff; background: var(--pink); }
@@ -3455,6 +3455,10 @@ body.showmode #view-day .qp { display: none; }
 .gr-prepbox { display: flex; flex-direction: column; gap: 10px; }
 .gr-prepbox[hidden] { display: none; }
 .gr-more2[hidden] { display: none; }
+.gr-hints { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+.gr-hints:empty { display: none; }
+.gr-hints button { display: flex; align-items: baseline; gap: 6px; min-height: 36px; padding: 0 12px; font: 500 14px "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
+.gr-hints small { font-size: 11px; font-weight: 400; color: var(--muted); }
 .gr-lbl { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--ink); }
 .gr-lbl span { margin-left: 6px; font-weight: 400; color: var(--muted); }
 .gr-preps { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -3773,7 +3777,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:17</footer>
+  <footer>everything saves on this device · build 09:21</footer>
 </div>
 
 <script>
@@ -7529,18 +7533,70 @@ function restockSoon() {
   return out.slice(0, 4);
 }
 
+// is this food already on the list, even typed a bit differently (egg / 2 eggs / Eggs)
+const grNorm = t => String(t || '').toLowerCase().replace(/yoghurt/g, 'yogurt').replace(/[^a-z ]/g, ' ')
+  .split(/\s+/).filter(Boolean).map(w => w.replace(/(es|s)$/, '')).join(' ');
+function onGrocList(name) {
+  const n = grNorm(name);
+  if (!n) return false;
+  return (state.grocery || []).some(x => {
+    if (x.done) return false;
+    const m = grNorm(x.text);
+    return m === n || (' ' + m + ' ').includes(' ' + n + ' ') || (' ' + n + ' ').includes(' ' + m + ' ');
+  });
+}
+
+// foods brick knows, for suggestions while you type
+const NOT_FOOD = new Set(['caffeine', 'sugar', 'sugary', 'sweet', 'sweets', 'protein', 'fried', 'alcohol', 'booze', 'liquor', 'dessert',
+  'vegetable', 'veg', 'fruit', 'infused', 'thc', 'weed', 'cannabis', 'marijuana', 'ganja', 'kush', 'hash', 'space cake', 'pot brownie',
+  'kfc', 'chicken republic', 'star', 'gulder', 'heineken', 'guinness', 'smirnoff', 'monster', 'red bull', 'energy drink', 'candy bar', 'chips']);
+let FOOD_NAMES = null;
+function foodNames() {
+  if (FOOD_NAMES) return FOOD_NAMES;
+  const set = new Set();
+  for (const k in KINDS) for (const w of KINDS[k].words) if (!NOT_FOOD.has(w) && w.length > 2) set.add(w);
+  for (const w of GROCERY_IDEAS.concat(SLEEP_IDEAS)) set.add(w);
+  FOOD_NAMES = [...set];
+  return FOOD_NAMES;
+}
+function grocHints(raw) {
+  const t = parseGrocery(raw).text.toLowerCase().trim();
+  const words = String(raw || '').toLowerCase().trim().split(/\s+/);
+  const last = words[words.length - 1] || '';
+  if (t.length < 2 || /^\d/.test(last)) return [];
+  const mine = [...(state.grocery || []), ...(state.groceryLog || [])].map(x => x.text.toLowerCase());
+  const pool = [...new Set([...mine, ...foodNames()])];
+  const score = n => n.startsWith(t) ? 0 : n.split(' ').some(w => w.startsWith(t)) ? 1 : n.split(' ').some(w => w.startsWith(last)) && last.length >= 2 ? 2 : 9;
+  return pool.map(n => [n, score(n)]).filter(([n, sc]) => sc < 9 && n !== t && !onGrocList(n))
+    .sort((a, b) => a[1] - b[1] || a[0].length - b[0].length).slice(0, 5).map(([n]) => n);
+}
+function renderGrocHints() {
+  const inp = document.getElementById('groc-input');
+  let box = document.getElementById('groc-hints');
+  if (!box) { box = document.createElement('div'); box.id = 'groc-hints'; box.className = 'gr-hints'; inp.parentNode.after(box); }
+  const hs = grocHints(inp.value);
+  box.innerHTML = hs.map(n => { const k = foodKinds(n)[0];
+    return '<button type="button" data-hint="' + esc(n) + '">' + esc(cap(n)) + (k ? '<small>' + KINDS[k].name + '</small>' : '') + '</button>'; }).join('');
+  box.querySelectorAll('[data-hint]').forEach(b => b.addEventListener('click', () => {
+    // keep a number or note you typed, swap the name for the real food
+    const p = parseGrocery(inp.value);
+    const amt = p.qty !== null ? p.qty + (p.unit && p.unit !== 'pcs' ? ' ' + p.unit : '') + ' ' : '';
+    inp.value = amt + b.dataset.hint + (p.note ? ', ' + p.note : '');
+    document.getElementById('groc-add').click();
+  }));
+}
+
 function grocerySuggestions() {
   const g = myGoal();
   if (!g) return null;
   const since = Date.now() - 30 * 86400000;
   const recent = state.food.filter(f => f.at >= since);
-  const onList = new Set((state.grocery || []).filter(x => !x.done).map(x => x.text.toLowerCase()));
   const helps = GOAL_HELPS[g.k] || [];
   const pool = g.k === 'sleep' ? SLEEP_IDEAS : GROCERY_IDEAS;
 
   const out = [];
   for (const name of pool) {
-    if (onList.has(name)) continue;
+    if (onGrocList(name)) continue;
     const ks = foodKinds(name);
     const good = g.k === 'sleep' ? true : ks.some(k => helps.includes(k));
     if (!good) continue;
@@ -7564,7 +7620,8 @@ function grocerySuggestions() {
    food log: how often you had it in the last 2 weeks, and how you usually
    have it. the list can be copied as text or sent to Notes. */
 const COUNT_WORDS = /\b(eggs?|bananas?|oranges?|apples?|mangoe?s?|avocados?|plantains?|tomato(es)?|onions?|peppers?|cucumbers?|carrots?|lemons?|limes?|sardines?|tins?|cans?|bread|loaf|loaves|yoghurts?|yogurts?)\b/i;
-const UNITS = ['', 'pcs', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
+const UNITS = ['', 'pcs', 'naira', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
+const unitLabel = u => u === 'pcs' ? 'pieces' : u === 'naira' ? '₦ naira' : u;
 let grOpen = null;   // item id with its details open
 // ways to have it, picked for the item: blend peppers, clean and chop meat, slice fruit
 const MEAT_RE = /\b(chicken|turkey|beef|goat|meat|fish|catfish|tilapia|mackerel|titus|croaker|salmon|prawns?|shrimps?|snails?|ponmo|kpomo|assorted|gizzards?|liver|lamb|pork|suya)\b/i;
@@ -7625,7 +7682,7 @@ function grocGuess(text) {
 
 // how much, in words: "6", "2 kg", or with a second amount "2 pack · 12 pieces"
 function grocAmt(it) {
-  const one = (n, u, both) => n + (u ? (u === 'pcs' ? (both ? (n === 1 ? ' piece' : ' pieces') : '') : ' ' + u) : '');
+  const one = (n, u, both) => u === 'naira' ? '₦' + Number(n).toLocaleString('en-NG') : n + (u ? (u === 'pcs' ? (both ? (n === 1 ? ' piece' : ' pieces') : '') : ' ' + u) : '');
   const two = it.qty2 > 0;
   const a = it.qty ? one(it.qty, it.unit, two) : '';
   const b = two ? one(it.qty2, it.unit2, true) : '';
@@ -7807,7 +7864,7 @@ function renderGroceries() {
     const v = g && ks.length ? g.verdict({ what: it.text, at: Date.now(), meal: 'lunch' }, ks) : null;
     const sw = !it.done && v && v[0] === 'watch' ? swapFor(it.text) : null;
     const open = grOpen === it.id && !it.done;
-    const qty = grocAmt(it) ? '<em class="gr-q">×' + esc(grocAmt(it)) + '</em>' : '';
+    const qty = grocAmt(it) ? '<em class="gr-q">' + (grocAmt(it)[0] === '₦' ? '' : '×') + esc(grocAmt(it)) + '</em>' : '';
     const sub = it.done ? '' :
       (it.note ? '<small class="gr-note">' + esc(it.note) + (it.auto ? ' · <i>from what you eat</i>' : '') + '</small>' : '') +
       (v && (v[0] === 'good' || sw) ? '<small class="gr-v ' + v[0] + '">' + (v[0] === 'good' ? '✓ ' : '⚠ ') + esc(v[1]) + '</small>' : '');
@@ -7816,14 +7873,14 @@ function renderGroceries() {
       '<div class="gr-ed">' +
         '<input type="text" class="gr-tin" maxlength="60" aria-label="name" placeholder="what to buy">' +
         '<div class="gr-qrow"><button type="button" data-a="minus" aria-label="less">−</button>' +
-        '<input type="number" inputmode="numeric" min="0" max="999" class="gr-qin" aria-label="how many" placeholder="how many">' +
+        '<input type="number" inputmode="numeric" min="0" max="9999999" class="gr-qin" aria-label="how many" placeholder="how many">' +
         '<button type="button" data-a="plus" aria-label="more">+</button>' +
-        '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u="' + u + '" class="' + (it.unit === u ? 'on' : '') + '">' + (u === 'pcs' ? 'pieces' : u) + '</button>').join('') + '</div></div>' +
+        '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u="' + u + '" class="' + (it.unit === u ? 'on' : '') + '">' + unitLabel(u) + '</button>').join('') + '</div></div>' +
         (it.qty2 > 0 || grSecond === it.id
           ? '<div class="gr-qrow gr-q2"><span class="gr-and">and</span>' +
-            '<input type="number" inputmode="numeric" min="0" max="999" class="gr-qin2" aria-label="second amount" placeholder="how many">' +
+            '<input type="number" inputmode="numeric" min="0" max="9999999" class="gr-qin2" aria-label="second amount" placeholder="how many">' +
             '<button type="button" data-a="x2" aria-label="remove second amount" class="gr-x2">✕</button>' +
-            '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u2="' + u + '" class="' + (it.unit2 === u ? 'on' : '') + '">' + (u === 'pcs' ? 'pieces' : u) + '</button>').join('') + '</div></div>'
+            '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u2="' + u + '" class="' + (it.unit2 === u ? 'on' : '') + '">' + unitLabel(u) + '</button>').join('') + '</div></div>'
           : '<button type="button" class="gr-more2" data-a="more2">+ another amount</button>') +
         '<button type="button" class="gr-more2" data-a="prep"' + (grPrep === it.id ? ' hidden' : '') + '>+ how you’ll have it</button>' +
         '<div class="gr-prepbox"' + (grPrep === it.id ? '' : ' hidden') + '>' +
@@ -7955,8 +8012,9 @@ function renderGroceries() {
 
   // suggestions
   const box = document.getElementById('groc-suggest');
-  const onList = new Set(state.grocery.filter(x => !x.done).map(x => x.text.toLowerCase()));
-  const gaps = foodGaps(), rs = restockSoon().filter(x => !onList.has(x.name));
+  const onList = { has: onGrocList };
+  // once something for a gap is on your list, that gap is covered and goes
+  const gaps = foodGaps().filter(gp => !gp.items.some(onGrocList)), rs = restockSoon().filter(x => !onGrocList(x.name));
   let top = '';
   if (gaps.length || rs.length) {
     top = '<div class="gr-sug"><div class="gr-sug-head"><b>From what you eat</b><span>last 2 weeks</span></div><ul>' +
@@ -8195,10 +8253,12 @@ document.querySelectorAll('[data-fv]').forEach(b => b.addEventListener('click', 
 document.getElementById('groc-add').addEventListener('click', () => {
   const inp = document.getElementById('groc-input');
   const before = (state.grocery || []).length;
+  setTimeout(renderGrocHints, 0);
   addGrocery(inp.value);
   if ((state.grocery || []).length > before) { grOpen = state.grocery[0].id; renderGroceries(); }   // show its options
   inp.value = ''; inp.focus();
 });
+document.getElementById('groc-input').addEventListener('input', renderGrocHints);
 document.getElementById('groc-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('groc-add').click();
 });
