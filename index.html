@@ -3765,7 +3765,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:06</footer>
+  <footer>everything saves on this device · build 09:09</footer>
 </div>
 
 <script>
@@ -7780,7 +7780,7 @@ function renderGroceries() {
         '<div class="gr-qrow"><button type="button" data-a="minus" aria-label="less">−</button>' +
         '<input type="number" inputmode="numeric" min="0" max="999" class="gr-qin" aria-label="how many" placeholder="how many">' +
         '<button type="button" data-a="plus" aria-label="more">+</button>' +
-        '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u="' + u + '" class="' + (it.unit === u ? 'on' : '') + '">' + u + '</button>').join('') + '</div></div>' +
+        '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u="' + u + '" class="' + (it.unit === u ? 'on' : '') + '">' + (u === 'pcs' ? 'pieces' : u) + '</button>').join('') + '</div></div>' +
         '<p class="gr-lbl">How you’ll have it <span>optional</span></p>' +
         '<div class="gr-preps">' + PREPS.map(w => '<button type="button" data-prep="' + w + '" class="' + (new RegExp('\\b' + w + '\\b', 'i').test(it.note || '') ? 'on' : '') + '">' + w + '</button>').join('') + '</div>' +
         '<input type="text" class="gr-nin" maxlength="80" placeholder="or type it, e.g. for breakfast">' +
