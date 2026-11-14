@@ -3788,7 +3788,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 13:41</footer>
+  <footer>everything saves on this device · build 13:58</footer>
 </div>
 
 <script>
@@ -5314,6 +5314,10 @@ function tickFocus() {
   el.querySelector('.fx-left').textContent = stage === 5 ? 'Fully grown'
     : (m >= 60 ? Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0') + ':' + String(sec).padStart(2, '0')
                : m + ':' + String(sec).padStart(2, '0'));
+  if (stage < 5) {
+    const gone = Math.floor((now - focus.start) / 60000);
+    el.querySelector('.fx-ends').textContent = 'left · ' + (gone >= 60 ? Math.floor(gone / 60) + 'h ' + (gone % 60) + 'm' : gone + ' min') + ' gone · ends ' + clockOf(focus.end);
+  }
   el.querySelector('.fx-arc').style.strokeDashoffset = 879.6 * (1 - k);
   el.querySelector('.fx-plant').classList.toggle('done', stage === 5);
 
