@@ -3452,6 +3452,9 @@ body.showmode #view-day .qp { display: none; }
 .gr-cut { width: 76px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
 .gr-qin2 { width: 76px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
 .gr-x2 { width: 38px; height: 38px; font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer; }
+.gr-prepbox { display: flex; flex-direction: column; gap: 10px; }
+.gr-prepbox[hidden] { display: none; }
+.gr-more2[hidden] { display: none; }
 .gr-lbl { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--ink); }
 .gr-lbl span { margin-left: 6px; font-weight: 400; color: var(--muted); }
 .gr-preps { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -3770,7 +3773,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:16</footer>
+  <footer>everything saves on this device · build 09:17</footer>
 </div>
 
 <script>
@@ -7629,6 +7632,7 @@ function grocAmt(it) {
   return [a, b].filter(Boolean).join(' · ');
 }
 let grSecond = null;   // item id showing an empty second amount
+let grPrep = null;     // item id with How you'll have it open
 
 function grocLine(it) {
   const q = grocAmt(it) ? ' x ' + grocAmt(it) : '';
@@ -7821,12 +7825,15 @@ function renderGroceries() {
             '<button type="button" data-a="x2" aria-label="remove second amount" class="gr-x2">✕</button>' +
             '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u2="' + u + '" class="' + (it.unit2 === u ? 'on' : '') + '">' + (u === 'pcs' ? 'pieces' : u) + '</button>').join('') + '</div></div>'
           : '<button type="button" class="gr-more2" data-a="more2">+ another amount</button>') +
-        '<p class="gr-lbl">How you’ll have it <span>optional</span></p>' +
+        '<button type="button" class="gr-more2" data-a="prep"' + (grPrep === it.id ? ' hidden' : '') + '>+ how you’ll have it</button>' +
+        '<div class="gr-prepbox"' + (grPrep === it.id ? '' : ' hidden') + '>' +
+        '<p class="gr-lbl">How you’ll have it</p>' +
         '<div class="gr-preps">' + prepsFor(it.text).map(w => '<button type="button" data-prep="' + w + '" class="' + (prepRe(w).test(it.note || '') ? 'on' : '') + '">' + w + '</button>').join('') + '</div>' +
         // chopped meat or fish: into how many pieces
         (MEAT_RE.test(it.text) && /\bchopped\b/i.test(it.note || '')
           ? '<div class="gr-qrow"><span class="gr-and">into</span><input type="number" inputmode="numeric" min="1" max="99" class="gr-cut" aria-label="how many pieces" placeholder="how many"><span class="gr-and">pieces</span></div>' : '') +
         '<input type="text" class="gr-nin" maxlength="80" placeholder="or type it, e.g. for breakfast">' +
+        '</div>' +
         '<button type="button" class="gr-done" data-a="close">Done</button></div>';
     return '<li class="gr-row' + (it.done ? ' done' : '') + (open ? ' open' : '') + '" data-id="' + it.id + '">' +
       '<button type="button" class="gr-tick" data-a="tick" aria-label="' + (it.done ? 'put back on the list' : 'got it') + '"><i>✓</i></button>' +
@@ -7906,6 +7913,7 @@ function renderGroceries() {
       tn.addEventListener('keydown', e => { if (e.key === 'Enter') { setT(); grOpen = null; renderGroceries(); } });
       const nt = li.querySelector('.gr-nin');
       nt.value = it.note || '';
+      li.querySelector('[data-a=prep]').addEventListener('click', () => { grPrep = it.id; renderGroceries(); });
       nt.addEventListener('change', () => { it.note = nt.value.trim(); it.auto = false; save(); });
       nt.addEventListener('keydown', e => { if (e.key === 'Enter') { nt.blur(); grOpen = null; renderGroceries(); } });
       // tap ways to have it: each one on or off, the rest of your note stays
