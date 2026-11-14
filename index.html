@@ -3447,6 +3447,10 @@ body.showmode #view-day .qp { display: none; }
 .gr-units button.on { color: #fff; background: var(--pink); }
 .gr-tin { width: 100%; font: 500 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
 .gr-share { flex-wrap: wrap; }
+.gr-more2 { align-self: flex-start; padding: 4px 0; font: 500 14px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
+.gr-and { min-width: 38px; text-align: center; font-size: 13px; color: var(--muted); }
+.gr-qin2 { width: 76px; text-align: center; font: 500 16px "Poppins", sans-serif; padding: 8px; border-radius: 12px; }
+.gr-x2 { width: 38px; height: 38px; font-size: 13px; color: var(--muted); background: none; border: none; cursor: pointer; }
 .gr-lbl { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--ink); }
 .gr-lbl span { margin-left: 6px; font-weight: 400; color: var(--muted); }
 .gr-preps { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -3765,7 +3769,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:10</footer>
+  <footer>everything saves on this device · build 09:12</footer>
 </div>
 
 <script>
@@ -7595,8 +7599,18 @@ function grocGuess(text) {
   };
 }
 
+// how much, in words: "6", "2 kg", or with a second amount "2 pack · 12 pieces"
+function grocAmt(it) {
+  const one = (n, u, both) => n + (u ? (u === 'pcs' ? (both ? ' pieces' : '') : ' ' + u) : '');
+  const two = it.qty2 > 0;
+  const a = it.qty ? one(it.qty, it.unit, two) : '';
+  const b = two ? one(it.qty2, it.unit2, true) : '';
+  return [a, b].filter(Boolean).join(' · ');
+}
+let grSecond = null;   // item id showing an empty second amount
+
 function grocLine(it) {
-  const q = it.qty ? ' x' + it.qty + (it.unit && it.unit !== 'pcs' ? ' ' + it.unit : '') : '';
+  const q = grocAmt(it) ? ' x ' + grocAmt(it) : '';
   return it.text + q + (it.note ? ' (' + it.note + ')' : '');
 }
 
@@ -7683,9 +7697,9 @@ async function grocImage() {
     x.beginPath(); x.arc(PAD + 30, ty - NAME * .34, 28, 0, Math.PI * 2); x.stroke();
     x.fillStyle = '#1d1512'; x.font = nameFont; x.textAlign = 'left';
     l.name.forEach((t, j) => x.fillText(t, textX, ty + j * NAME * 1.2));
-    if (l.it.qty) {
-      x.fillStyle = '#b02a52'; x.font = '700 ' + NAME + 'px Poppins, sans-serif'; x.textAlign = 'right';
-      x.fillText(l.it.qty + (l.it.unit && l.it.unit !== 'pcs' ? ' ' + l.it.unit : ''), W - PAD, ty);
+    if (grocAmt(l.it)) {
+      x.fillStyle = '#b02a52'; x.font = '700 ' + (l.it.qty2 > 0 ? 46 : NAME) + 'px Poppins, sans-serif'; x.textAlign = 'right';
+      x.fillText(grocAmt(l.it), W - PAD, ty);
       x.textAlign = 'left';
     }
     ty += (l.name.length - 1) * NAME * 1.2;
@@ -7768,7 +7782,7 @@ function renderGroceries() {
     const v = g && ks.length ? g.verdict({ what: it.text, at: Date.now(), meal: 'lunch' }, ks) : null;
     const sw = !it.done && v && v[0] === 'watch' ? swapFor(it.text) : null;
     const open = grOpen === it.id && !it.done;
-    const qty = it.qty ? '<em class="gr-q">×' + it.qty + (it.unit && it.unit !== 'pcs' ? ' ' + esc(it.unit) : '') + '</em>' : '';
+    const qty = grocAmt(it) ? '<em class="gr-q">×' + esc(grocAmt(it)) + '</em>' : '';
     const sub = it.done ? '' :
       (it.note ? '<small class="gr-note">' + esc(it.note) + (it.auto ? ' · <i>from what you eat</i>' : '') + '</small>' : '') +
       (v && (v[0] === 'good' || sw) ? '<small class="gr-v ' + v[0] + '">' + (v[0] === 'good' ? '✓ ' : '⚠ ') + esc(v[1]) + '</small>' : '');
@@ -7780,6 +7794,12 @@ function renderGroceries() {
         '<input type="number" inputmode="numeric" min="0" max="999" class="gr-qin" aria-label="how many" placeholder="how many">' +
         '<button type="button" data-a="plus" aria-label="more">+</button>' +
         '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u="' + u + '" class="' + (it.unit === u ? 'on' : '') + '">' + (u === 'pcs' ? 'pieces' : u) + '</button>').join('') + '</div></div>' +
+        (it.qty2 > 0 || grSecond === it.id
+          ? '<div class="gr-qrow gr-q2"><span class="gr-and">and</span>' +
+            '<input type="number" inputmode="numeric" min="0" max="999" class="gr-qin2" aria-label="second amount" placeholder="how many">' +
+            '<button type="button" data-a="x2" aria-label="remove second amount" class="gr-x2">✕</button>' +
+            '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u2="' + u + '" class="' + (it.unit2 === u ? 'on' : '') + '">' + (u === 'pcs' ? 'pieces' : u) + '</button>').join('') + '</div></div>'
+          : '<button type="button" class="gr-more2" data-a="more2">+ another amount</button>') +
         '<p class="gr-lbl">How you’ll have it <span>optional</span></p>' +
         '<div class="gr-preps">' + PREPS.map(w => '<button type="button" data-prep="' + w + '" class="' + (new RegExp('\\b' + w + '\\b', 'i').test(it.note || '') ? 'on' : '') + '">' + w + '</button>').join('') + '</div>' +
         '<input type="text" class="gr-nin" maxlength="80" placeholder="or type it, e.g. for breakfast">' +
@@ -7845,6 +7865,16 @@ function renderGroceries() {
       li.querySelector('[data-a=minus]').addEventListener('click', () => { setQ((it.qty || 0) - 1); renderGroceries(); });
       li.querySelector('[data-a=plus]').addEventListener('click', () => { if (!it.unit && COUNT_WORDS.test(it.text)) it.unit = 'pcs'; setQ((it.qty || 0) + 1); renderGroceries(); });
       li.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { it.unit = it.unit === b.dataset.u ? '' : b.dataset.u; it.auto = false; save(); renderGroceries(); }));
+      // a second amount, like 2 packs and 12 pieces
+      const m2 = li.querySelector('[data-a=more2]');
+      if (m2) m2.addEventListener('click', () => { grSecond = it.id; renderGroceries(); const n = list.querySelector('.gr-row.open .gr-qin2'); if (n) n.focus(); });
+      const q2 = li.querySelector('.gr-qin2');
+      if (q2) {
+        q2.value = it.qty2 || '';
+        q2.addEventListener('change', () => { const v = Number(q2.value) || 0; it.qty2 = v > 0 ? v : null; if (it.qty2 && !it.unit2) it.unit2 = 'pcs'; it.auto = false; save(); renderGroceries(); });
+        li.querySelectorAll('[data-u2]').forEach(b => b.addEventListener('click', () => { it.unit2 = it.unit2 === b.dataset.u2 ? '' : b.dataset.u2; save(); renderGroceries(); }));
+        li.querySelector('[data-a=x2]').addEventListener('click', () => { it.qty2 = null; it.unit2 = ''; grSecond = null; save(); renderGroceries(); });
+      }
       const tn = li.querySelector('.gr-tin');
       tn.value = it.text;
       const setT = () => { const v = tn.value.trim(); if (v && v !== it.text) { it.text = v; save(); } else tn.value = it.text; };
