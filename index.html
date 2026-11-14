@@ -2116,6 +2116,10 @@ body[data-view="day"] { background-image: none; }
 /* why chips under the why box */
 .md-why { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .md-why button { min-height: 40px; font-size: 14px; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--hair); background: transparent; color: var(--ink); }
+.md-why button.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.lf-rm { width: 100%; margin-top: 10px; }
+.lf-rm label { display: block; font-size: 15px; }
+.lf-rm input { width: 100%; margin-top: 10px; font-size: 16px; padding: 12px 14px; border-radius: 14px; }
 .md-why button.jr-chip { border-color: color-mix(in srgb, #7daf86 50%, var(--hair)); }
 .md-jr { display: block; font-size: 12px; color: #7daf86; margin-top: 2px; }
 
@@ -2144,6 +2148,10 @@ body[data-view="day"] { background-image: none; }
 .jr-days { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .jr-days span { display: flex; flex-direction: column; align-items: center; min-width: 34px; font-size: 18px; }
 .jr-days small { font-size: 11px; color: var(--muted); }
+.jr-q p { margin: 14px 0 0; font-size: 15px; }
+.jr-fit { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+.jr-fit button, .jr-fitask { background: none; border: none; padding: 10px 0; min-height: 40px; font: 600 13px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
+.jr-you { color: var(--c) !important; font-weight: 600; }
 .jr-note { font-size: 12px; color: var(--muted); margin: 14px 0 0; }
 .jr-acts { display: flex; gap: 10px; margin-top: 12px; }
 .jr-form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
@@ -3838,7 +3846,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 15:27</footer>
+  <footer>everything saves on this device · build 15:37</footer>
 </div>
 
 <script>
@@ -6470,6 +6478,43 @@ const JOURNEY_PLANS = {
 };
 
 let journeyForm = false;   // the start a journey form is open
+let journeyAsk = null;     // the 3 use questions are open: your answers so far
+
+/* quitting something: 3 optional questions. how long, how often and how much
+   shape how hard it is (daily, heavy, long use means stronger, longer
+   withdrawal), so the answers fit the timeline to you. */
+const QUIT_RE = /\b(quit|quitting|stop|stopping|no more|give up|giving up|cut out|cut down|off)\b/i;
+const isQuit = j => j.kind === 'cannabis' || QUIT_RE.test(j.name);
+function useQuestions(j) {
+  return [
+    { k: 'long', q: 'How long have you been doing it?', a: ['Under a month', '1 to 6 months', '6 to 12 months', 'Over a year'] },
+    { k: 'often', q: 'How often?', a: ['A few times a week or less', 'Most days', 'Every day', 'Many times a day'] },
+    { k: 'much', q: 'How much each time?', a: j.kind === 'cannabis' ? ['Under 10 mg', '10 to 25 mg', '25 to 50 mg', 'Over 50 mg', 'Not sure'] : ['A little', 'Some', 'A lot', 'Not sure'] }
+  ];
+}
+// light, regular or heavy, from your answers. not sure or skipped counts as middle
+function useLevel(u) {
+  if (!u) return null;
+  const n = v => (typeof v === 'number') ? v : null;   // 'x' is not sure
+  const o = n(u.often), l = n(u.long), m = n(u.much);
+  if (o === null && l === null && m === null) return null;
+  const O = o === null ? 1 : o, L = l === null ? 1 : l, M = m === null ? 1 : m;
+  if (O >= 2 && (L >= 2 || M >= 2)) return 'heavy';
+  if (O === 0 || (L === 0 && M <= 1)) return 'light';
+  return 'regular';
+}
+const USE_FIT = {
+  heavy: 'Fitted to you: frequent use for a while. Expect it to be stronger and to last a bit longer.',
+  regular: 'Fitted to you: regular use.',
+  light: 'Fitted to you: lighter use. It may be mild.'
+};
+// a line for each cannabis stage, and extra tips, by how heavy your use was
+const USE_STAGE = {
+  heavy: { say: ['You used often for a while, so this part can feel stronger.', 'For frequent users the peak can last until about day 10.', 'Sleep may still be off. That is normal after heavy use.', 'After heavy use, sleep can take 4 to 6 weeks to settle.', ''],
+           tips: [['If stopping all at once is too much, cutting down over 1 to 2 weeks is also a good way'], [], [], ['If sleep is still very bad after a month, talk to a doctor'], []] },
+  light: { say: ['With lighter use, you may feel only some of this, or none.', 'This may be mild for you, or already passing.', 'You may already feel back to normal.', '', ''],
+           tips: [[], [], [], [], []] }
+};
 let journeyStageOpen = null;   // the stage tapped open, null means today's
 
 function activeJourney() { return (state.journeys || []).find(j => !j.end) || null; }
@@ -6499,16 +6544,30 @@ function journeyHtml() {
       '</div><div class="jr-acts"><button type="button" class="lf-btn main" data-jr="start">Start</button>' +
       '<button type="button" class="lf-btn" data-jr="cancel">Cancel</button></div></div>';
   }
+  if (journeyAsk) {
+    return '<div class="jr" style="--c:#7daf86"><div class="jr-head"><div><span>Optional</span><b>Make the tips fit you</b></div></div>' +
+      useQuestions(j).map(q => '<div class="jr-q"><p>' + q.q + '</p><div class="md-why">' +
+        q.a.map((t, i) => { const v = t === 'Not sure' ? 'x' : i; return '<button type="button" class="' + (journeyAsk[q.k] === v ? 'on' : '') + '" data-jq="' + q.k + ':' + v + '">' + t + '</button>'; }).join('') +
+        '</div></div>').join('') +
+      '<div class="jr-acts"><button type="button" class="lf-btn main" data-jr="asksave">Done</button>' +
+      '<button type="button" class="lf-btn" data-jr="askskip">Skip</button></div></div>';
+  }
   const day = journeyDay(j, Date.now()), now = journeyStage(j, day);
   const open = journeyStageOpen === null ? journeyPlan(j).stages.indexOf(now) : journeyStageOpen;
-  let html = '<div class="jr" style="--c:#7daf86"><div class="jr-head"><div><span>Journey</span><b>' + esc(j.name) + '</b></div><em>Day ' + day + '</em></div><ol class="jr-line">';
+  const lvl = isQuit(j) ? useLevel(j.use) : null;
+  const per = j.kind === 'cannabis' && USE_STAGE[lvl];
+  let html = '<div class="jr" style="--c:#7daf86"><div class="jr-head"><div><span>Journey</span><b>' + esc(j.name) + '</b></div><em>Day ' + day + '</em></div>' +
+    (!isQuit(j) ? '' : lvl ? '<p class="jr-fit">' + USE_FIT[lvl] + ' <button type="button" data-jr="ask">Change</button></p>'
+                             : '<button type="button" class="jr-fitask" data-jr="ask">Make tips fit you \u00b7 3 questions</button>') +
+    '<ol class="jr-line">';
   journeyPlan(j).stages.forEach((s, n) => {
     const when = s.to === null ? 'Day ' + s.from + ' on' : 'Days ' + s.from + ' to ' + s.to;
     const cls = s === now ? 'now' : s.from > day ? 'next' : 'past';
     html += '<li class="' + cls + '" data-jr-stage="' + n + '"><i></i><small>' + when + '</small><b>' + s.name + '</b>' +
       (s === now ? '<span class="jr-here">You are here</span>' : '') +
-      (n === open ? '<div class="jr-more"><p>What to expect</p><ul>' + s.feel.map(f => '<li>' + f + '</li>').join('') + '</ul>' +
-                    '<p>Tips</p><ul>' + s.tips.map(f => '<li>' + f + '</li>').join('') + '</ul></div>' : '') +
+      (n === open ? '<div class="jr-more">' + (per && per.say[n] ? '<p class="jr-you">For you: ' + per.say[n] + '</p>' : '') +
+                    '<p>What to expect</p><ul>' + s.feel.map(f => '<li>' + f + '</li>').join('') + '</ul>' +
+                    '<p>Tips</p><ul>' + s.tips.concat(per ? per.tips[n] || [] : []).map(f => '<li>' + f + '</li>').join('') + '</ul></div>' : '') +
       '</li>';
   });
   html += '</ol>';
@@ -6538,15 +6597,27 @@ function wireJourney(box, redraw) {
       if (!name) { document.getElementById('jr-name').focus(); return; }
       const kind = JOURNEY_PLANS.cannabis.match.test(name) ? 'cannabis' : 'habit';
       state.journeys = state.journeys || [];
-      state.journeys.push({ id: Date.now(), name, start: start > todayKey() ? todayKey() : start, kind, end: null });
-      journeyForm = false; journeyStageOpen = null; save(); redraw(); return;
+      const j = { id: Date.now(), name, start: start > todayKey() ? todayKey() : start, kind, end: null };
+      state.journeys.push(j);
+      journeyForm = false; journeyStageOpen = null;
+      journeyAsk = isQuit(j) ? {} : null;     // quitting: ask how long, how often, how much (optional)
+      save(); redraw(); return;
     }
+    if (a === 'ask') { const j = activeJourney(); journeyAsk = { ...((j && j.use) || {}) }; redraw(); return; }
+    if (a === 'askskip') { journeyAsk = null; redraw(); return; }
+    if (a === 'asksave') { const j = activeJourney(); if (j && Object.keys(journeyAsk).length) j.use = journeyAsk; journeyAsk = null; save(); redraw(); return; }
     if (a === 'end') {
       const j = activeJourney();
       if (!j) return;
       j.end = Date.now(); save(); redraw();
       offerUndo(j.name + ' journey', () => { j.end = null; save(); redraw(); });
     }
+  }));
+  box.querySelectorAll('[data-jq]').forEach(b => b.addEventListener('click', () => {
+    const [k, i] = b.dataset.jq.split(':'), v = i === 'x' ? 'x' : Number(i);
+    journeyAsk[k] = journeyAsk[k] === v ? undefined : v;   // tap again to clear
+    if (journeyAsk[k] === undefined) delete journeyAsk[k];
+    b.parentNode.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b && journeyAsk[k] !== undefined));
   }));
   box.querySelectorAll('[data-jr-stage]').forEach(li => li.addEventListener('click', e => {
     if (e.target.closest('.jr-more')) return;
@@ -10547,6 +10618,8 @@ function openWhy3(c) {
 let lifeSetup = null;   // { i: area index, text, pick, one } while adding a goal
 let lifeOpen = null;    // area key whose details are open
 let lifeExpanded = null; // "area:index" of the goal card that is opened up
+let goalRemoving = null; // "area:index" of the goal you are about to remove, it asks why first
+const REMOVE_WHY = ['I did it', 'Too hard right now', 'Not important now', 'Wrong goal', 'Too many goals'];
 
 const cap = t => t.replace(/^./, c => c.toUpperCase());
 
@@ -10820,7 +10893,13 @@ function lifeDetail(box, a) {
             (g.stepDone && g.stepDone.k === planKey() ? '<em>\u2713 You did a step today</em>'
              : '<div class="ls-acts"><button type="button" data-stepdone="' + n + '">Did it</button><button type="button" data-stepskip="' + n + '">Not for me</button></div>') +
           '</div>'; })() +
-        '<div class="lf-gm-acts">' + goalEditRow(g, n) +
+        '<div class="lf-gm-acts">' + (goalRemoving === a.k + ':' + n
+          ? '<div class="lf-rm"><label for="rm-why">Why are you removing it?</label>' +
+            '<div class="md-why">' + REMOVE_WHY.map(w => '<button type="button" data-rmpick="' + w + '">' + w + '</button>').join('') + '</div>' +
+            '<input id="rm-why" type="text" maxlength="200" placeholder="or say it in your words">' +
+            '<div class="jr-acts"><button type="button" class="lf-btn main" data-rmyes="' + n + '">Remove</button>' +
+            '<button type="button" class="lf-btn" data-rmno="1">Keep it</button></div></div>'
+          : goalEditRow(g, n)) +
           (a.k === 'love' ? '' : '<button type="button" class="lf-g-lock' + (priv ? ' on' : '') + '" data-lock="' + n + '">' + (priv ? '\u{1F512} Private' : 'Make private') + '</button>') +
         '</div></div>' : '') +
       '</li>';
@@ -10835,7 +10914,7 @@ function lifeDetail(box, a) {
   wirePeriod(box, renderLife);
   box.querySelector('.w3-link').addEventListener('click', () => openWhy3(a.c));
   box.querySelectorAll('[data-open-goal]').forEach(li => li.addEventListener('click', e => {
-    if (e.target.closest('button')) return;
+    if (e.target.closest('button') || e.target.closest('.lf-rm')) return;
     const id = a.k + ':' + li.dataset.openGoal;
     lifeExpanded = lifeExpanded === id ? null : id; renderLife();
   }));
@@ -10869,10 +10948,25 @@ function lifeDetail(box, a) {
     const g = gs[Number(b.dataset.early)];
     payToChange(g.text, () => { g.unlockUntil = Date.now() + 15 * 60000; save(); renderLife(); });   // 15 minutes to make the change
   }));
+  // remove: ask why first, keep the reason so you can look back
   box.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
-    gs.splice(Number(b.dataset.del), 1);
-    areaGoals(a.k); save();
-    if (!gs.length) lifeOpen = null;
+    goalRemoving = a.k + ':' + b.dataset.del; renderLife();
+    setTimeout(() => { const i = document.getElementById('rm-why'); if (i) i.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 30);
+  }));
+  box.querySelectorAll('[data-rmpick]').forEach(b => b.addEventListener('click', () => {
+    box.querySelectorAll('[data-rmpick]').forEach(x => x.classList.toggle('on', x === b));
+    document.getElementById('rm-why').value = b.dataset.rmpick;
+  }));
+  box.querySelectorAll('[data-rmno]').forEach(b => b.addEventListener('click', () => { goalRemoving = null; renderLife(); }));
+  box.querySelectorAll('[data-rmyes]').forEach(b => b.addEventListener('click', () => {
+    const inp = document.getElementById('rm-why'), why = inp.value.trim();
+    if (!why) { inp.placeholder = 'tap a reason, or type one'; inp.focus(); return; }
+    const n = Number(b.dataset.rmyes), g = gs[n];
+    const L = state.life[a.k];
+    L.removed = [...(L.removed || []), { text: g.text, why, at: Date.now() }];
+    gs.splice(n, 1);
+    areaGoals(a.k); goalRemoving = null; lifeExpanded = null; save();
+    if (!gs.length && !(a.k === 'health' && activeJourney())) lifeOpen = null;
     renderLife();
   }));
   setTimeout(() => box.querySelectorAll('.lf-g-bar u').forEach(u => { u.style.width = u.dataset.w + '%'; }), 40);
