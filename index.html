@@ -3460,6 +3460,8 @@ body.showmode #view-day .qp { display: none; }
 .gr-hints button { display: flex; align-items: baseline; gap: 6px; min-height: 36px; padding: 0 12px; font: 500 14px "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
 .gr-hints small { font-size: 11px; font-weight: 400; color: var(--muted); }
 .gr-size { margin-top: -2px; }
+.gr-type { color: var(--muted); }
+.gr-tyin { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
 .gr-lbl { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--ink); }
 .gr-lbl span { margin-left: 6px; font-weight: 400; color: var(--muted); }
 .gr-preps { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -3778,7 +3780,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:26</footer>
+  <footer>everything saves on this device · build 09:30</footer>
 </div>
 
 <script>
@@ -7694,11 +7696,51 @@ function grocAmt(it) {
   return [a, b].filter(Boolean).join(' · ');
 }
 let grSecond = null;   // item id showing an empty second amount
-let grPrep = null;     // item id with How you'll have it open
+let grPrep = null;     // item id with prep open
+let grType = null;     // item id with type open
+const grName = it => it.text + (it.type ? ' · ' + it.type : '');
+
+// the kind of the item, as you would find it in Lagos markets and shops
+function typesFor(text) {
+  const t = String(text || '').toLowerCase();
+  const T = [
+    [/\bplantains?\b/, ['ripe', 'half ripe', 'unripe']],
+    [/\bbananas?\b/, ['ripe', 'unripe']],
+    [/\bapples?\b/, ['red', 'green', 'Gala', 'Granny Smith', 'Fuji']],
+    [/\boranges?\b/, ['local sweet', 'tangerine', 'navel']],
+    [/\bmangoe?s?\b/, ['Julie', 'Opioro', 'Kerosene', 'ripe', 'unripe']],
+    [/\b(pawpaw|papaya)\b/, ['ripe', 'unripe']],
+    [/\bpineapples?\b/, ['ripe', 'half ripe']],
+    [/\bavocados?\b/, ['ripe', 'firm']],
+    [/\bwatermelons?\b/, ['whole', 'half']],
+    [/\bagbalumo\b/, ['ripe', 'soft']],
+    [/\btomato(es)?\b/, ['Jos', 'plum', 'cherry', 'tin paste']],
+    [/\b(peppers?|rodo|tatashe)\b/, ['ata rodo', 'tatashe', 'shombo', 'bell pepper']],
+    [/\bonions?\b/, ['red', 'white', 'spring']],
+    [/\brice\b/, ['ofada', 'long grain', 'parboiled', 'basmati']],
+    [/\bbeans\b/, ['oloyin', 'drum', 'olotu', 'black-eyed']],
+    [/\byam\b/, ['puna', 'water yam', 'yellow yam']],
+    [/\bpotato(es)?\b/, ['Irish', 'sweet']],
+    [/\bfish\b/, ['tilapia', 'catfish', 'titus', 'croaker', 'stockfish', 'dried']],
+    [/\bchicken\b/, ['broiler', 'old layer', 'local', 'frozen']],
+    [/\b(beef|meat)\b/, ['boneless', 'with bone', 'assorted']],
+    [/\beggs?\b/, ['brown', 'white']],
+    [/\bmilk\b/, ['powdered', 'evaporated', 'fresh']],
+    [/\bbread\b/, ['white', 'wheat', 'agege']],
+    [/\bgarri\b/, ['white', 'yellow', 'ijebu']],
+    [/\boil\b/, ['palm oil', 'vegetable oil', 'olive oil']],
+    [/\b(yogh?urt|yoghurt)\b/, ['plain', 'Greek', 'sweetened']],
+    [/\boats\b/, ['rolled', 'quick']],
+    [/\bcoconut\b/, ['dry', 'fresh']],
+    [/\b(corn|maize)\b/, ['fresh', 'dry', 'popcorn']]
+  ];
+  const hit = T.find(([re]) => re.test(t));
+  return hit ? hit[1] : [];
+}
 
 function grocLine(it) {
   const q = grocAmt(it) ? ' x ' + grocAmt(it) : '';
-  return it.text + q + (it.note ? ' (' + it.note + ')' : '');
+  return grName(it) + q + (it.note ? ' (' + it.note + ')' : '');
 }
 
 function grocText() {
@@ -7752,7 +7794,7 @@ async function grocImage() {
   const nameFont = '600 ' + NAME + 'px Poppins, sans-serif', noteFont = '500 ' + NOTE + 'px Poppins, sans-serif';
   const qtyW = 230, textX = PAD + 100, textMax = W - textX - PAD - qtyW;
   const laid = items.map(it => {
-    const name = wrap(it.text, nameFont, textMax);
+    const name = wrap(grName(it), nameFont, textMax);
     const note = it.note ? wrap(it.note, noteFont, W - textX - PAD) : [];
     return { it, name, note, h: name.length * NAME * 1.2 + note.length * NOTE * 1.3 + 56 };
   });
@@ -7895,6 +7937,12 @@ function renderGroceries() {
             '<button type="button" data-a="x2" aria-label="remove second amount" class="gr-x2">✕</button>' +
             '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u2="' + u + '" class="' + (it.unit2 === u ? 'on' : '') + '">' + unitLabel(u) + '</button>').join('') + '</div></div>'
           : '<button type="button" class="gr-more2" data-a="more2">+ another amount</button>') +
+        '<button type="button" class="gr-more2" data-a="type"' + (grType === it.id ? ' hidden' : '') + '>+ type' + (it.type ? ': ' + esc(it.type) : '') + '</button>' +
+        '<div class="gr-prepbox"' + (grType === it.id ? '' : ' hidden') + '>' +
+        '<p class="gr-lbl">Type</p>' +
+        (typesFor(it.text).length ? '<div class="gr-preps">' + typesFor(it.text).map(w => '<button type="button" data-type="' + esc(w) + '" class="' + (it.type === w ? 'on' : '') + '">' + esc(w) + '</button>').join('') + '</div>' : '') +
+        '<input type="text" class="gr-tyin" maxlength="40" placeholder="' + (typesFor(it.text).length ? 'or type it' : 'e.g. ripe, brand, colour') + '">' +
+        '</div>' +
         '<button type="button" class="gr-more2" data-a="prep"' + (grPrep === it.id ? ' hidden' : '') + '>+ prep</button>' +
         '<div class="gr-prepbox"' + (grPrep === it.id ? '' : ' hidden') + '>' +
         '<p class="gr-lbl">Prep</p>' +
@@ -7907,7 +7955,7 @@ function renderGroceries() {
         '<button type="button" class="gr-done" data-a="close">Done</button></div>';
     return '<li class="gr-row' + (it.done ? ' done' : '') + (open ? ' open' : '') + '" data-id="' + it.id + '">' +
       '<button type="button" class="gr-tick" data-a="tick" aria-label="' + (it.done ? 'put back on the list' : 'got it') + '"><i>✓</i></button>' +
-      '<button type="button" class="gr-name gr-open" data-a="open"><span class="gr-t">' + esc(it.text) + qty + '</span>' + sub + '</button>' +
+      '<button type="button" class="gr-name gr-open" data-a="open"><span class="gr-t">' + esc(it.text) + (it.type ? '<span class="gr-type"> · ' + esc(it.type) + '</span>' : '') + qty + '</span>' + sub + '</button>' +
       '<button type="button" class="gr-del" data-a="del" aria-label="remove">×</button>' + swapBtn + editor + '</li>';
   };
 
@@ -7985,6 +8033,12 @@ function renderGroceries() {
       const nt = li.querySelector('.gr-nin');
       nt.value = it.note || '';
       li.querySelector('[data-a=prep]').addEventListener('click', () => { grPrep = it.id; renderGroceries(); });
+      li.querySelector('[data-a=type]').addEventListener('click', () => { grType = it.id; renderGroceries(); });
+      li.querySelectorAll('[data-type]').forEach(b => b.addEventListener('click', () => { it.type = it.type === b.dataset.type ? '' : b.dataset.type; save(); renderGroceries(); }));
+      const ty = li.querySelector('.gr-tyin');
+      ty.value = it.type && !typesFor(it.text).includes(it.type) ? it.type : '';
+      ty.addEventListener('change', () => { it.type = ty.value.trim(); save(); renderGroceries(); });
+      ty.addEventListener('keydown', e => { if (e.key === 'Enter') ty.blur(); });
       nt.addEventListener('change', () => { it.note = nt.value.trim(); it.auto = false; save(); });
       nt.addEventListener('keydown', e => { if (e.key === 'Enter') { nt.blur(); grOpen = null; renderGroceries(); } });
       // tap ways to have it: each one on or off, the rest of your note stays
