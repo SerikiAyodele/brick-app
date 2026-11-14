@@ -3447,6 +3447,11 @@ body.showmode #view-day .qp { display: none; }
 .gr-units button.on { color: #fff; background: var(--pink); }
 .gr-tin { width: 100%; font: 500 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
 .gr-share { flex-wrap: wrap; }
+.gr-lbl { margin: 2px 0 -4px; font-size: 13px; font-weight: 600; color: var(--ink); }
+.gr-lbl span { margin-left: 6px; font-weight: 400; color: var(--muted); }
+.gr-preps { display: flex; flex-wrap: wrap; gap: 6px; }
+.gr-preps button { min-height: 34px; padding: 0 12px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 17px; cursor: pointer; }
+.gr-preps button.on { color: #fff; background: var(--pink); }
 .gr-nin { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
 .gr-done { align-self: flex-start; padding: 4px 0; font: 600 14px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
 
@@ -3760,7 +3765,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 09:04</footer>
+  <footer>everything saves on this device · build 09:06</footer>
 </div>
 
 <script>
@@ -7554,6 +7559,7 @@ function grocerySuggestions() {
 const COUNT_WORDS = /\b(eggs?|bananas?|oranges?|apples?|mangoe?s?|avocados?|plantains?|tomato(es)?|onions?|peppers?|cucumbers?|carrots?|lemons?|limes?|sardines?|tins?|cans?|bread|loaf|loaves|yoghurts?|yogurts?)\b/i;
 const UNITS = ['', 'pcs', 'kg', 'g', 'L', 'pack', 'bunch', 'tin', 'bag'];
 let grOpen = null;   // item id with its details open
+const PREPS = ['boiled', 'fried', 'grilled', 'baked', 'raw', 'in stew', 'in soup', 'smoothie', 'snack'];
 
 function grocGroup(text) {
   const ks = foodKinds(text);
@@ -7775,7 +7781,9 @@ function renderGroceries() {
         '<input type="number" inputmode="numeric" min="0" max="999" class="gr-qin" aria-label="how many" placeholder="how many">' +
         '<button type="button" data-a="plus" aria-label="more">+</button>' +
         '<div class="gr-units">' + UNITS.slice(1).map(u => '<button type="button" data-u="' + u + '" class="' + (it.unit === u ? 'on' : '') + '">' + u + '</button>').join('') + '</div></div>' +
-        '<input type="text" class="gr-nin" maxlength="80" placeholder="how you’ll have it, e.g. boiled for breakfast">' +
+        '<p class="gr-lbl">How you’ll have it <span>optional</span></p>' +
+        '<div class="gr-preps">' + PREPS.map(w => '<button type="button" data-prep="' + w + '" class="' + (new RegExp('\\b' + w + '\\b', 'i').test(it.note || '') ? 'on' : '') + '">' + w + '</button>').join('') + '</div>' +
+        '<input type="text" class="gr-nin" maxlength="80" placeholder="or type it, e.g. for breakfast">' +
         '<button type="button" class="gr-done" data-a="close">Done</button></div>';
     return '<li class="gr-row' + (it.done ? ' done' : '') + (open ? ' open' : '') + '" data-id="' + it.id + '">' +
       '<button type="button" class="gr-tick" data-a="tick" aria-label="' + (it.done ? 'put back on the list' : 'got it') + '"><i>✓</i></button>' +
@@ -7847,6 +7855,15 @@ function renderGroceries() {
       nt.value = it.note || '';
       nt.addEventListener('change', () => { it.note = nt.value.trim(); it.auto = false; save(); });
       nt.addEventListener('keydown', e => { if (e.key === 'Enter') { nt.blur(); grOpen = null; renderGroceries(); } });
+      // tap a way to have it: one at a time, the rest of your note stays
+      li.querySelectorAll('[data-prep]').forEach(b => b.addEventListener('click', () => {
+        const w = b.dataset.prep, on = b.classList.contains('on');
+        let rest = nt.value;
+        for (const p of PREPS) rest = rest.replace(new RegExp('\\b' + p + '\\b,?\\s*', 'i'), '');
+        rest = rest.replace(/^[\s,]+|[\s,]+$/g, '');
+        it.note = (on ? rest : [w, rest].filter(Boolean).join(', ')).trim();
+        it.auto = false; save(); renderGroceries();
+      }));
       li.querySelector('[data-a=close]').addEventListener('click', () => { setT(); it.note = nt.value.trim(); grOpen = null; save(); renderGroceries(); });
     }
   });
@@ -7893,9 +7910,9 @@ function addGrocery(text) {
   text = String(text || '').trim();
   if (!text) return;
   if (!state.grocery) state.grocery = [];
-  if (state.grocery.some(x => !x.done && x.text.toLowerCase() === text.toLowerCase())) return;   // already on it
   // fill in how many and how you have it from your food log, when it knows
   const typed = parseGrocery(text);
+  if (state.grocery.some(x => !x.done && x.text.toLowerCase() === typed.text.toLowerCase())) return;   // already on it
   const guess = grocGuess(typed.text) || {};
   const item = { id: Date.now() + '' + Math.random().toString(36).slice(2, 6), text: typed.text, done: false, at: Date.now(),
                  qty: null, unit: '', note: '', auto: false, ...guess };
@@ -8097,7 +8114,11 @@ document.getElementById('food-add').addEventListener('click', addFood);
 document.getElementById('food-input').addEventListener('input', renderPreview);
 document.querySelectorAll('[data-fv]').forEach(b => b.addEventListener('click', () => setFoodView(b.dataset.fv)));
 document.getElementById('groc-add').addEventListener('click', () => {
-  const inp = document.getElementById('groc-input'); addGrocery(inp.value); inp.value = ''; inp.focus();
+  const inp = document.getElementById('groc-input');
+  const before = (state.grocery || []).length;
+  addGrocery(inp.value);
+  if ((state.grocery || []).length > before) { grOpen = state.grocery[0].id; renderGroceries(); }   // show its options
+  inp.value = ''; inp.focus();
 });
 document.getElementById('groc-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') document.getElementById('groc-add').click();
