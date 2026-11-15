@@ -3530,6 +3530,9 @@ body.showmode #view-day .qp { display: none; }
   font: 500 11px "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 16%, var(--card)); border: none; border-radius: 14px; cursor: pointer; }
 .ma-grid button span { font-size: 22px; line-height: 1.1; }
 .ma-grid button:active { transform: scale(.94); }
+.mf-btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mf-btns .lf-btn { flex: 1 1 auto; min-height: 44px; }
+.mf-in { width: 100%; margin-top: 6px; font: 400 16px "Poppins", sans-serif; padding: 12px 14px; border-radius: 14px; }
 .ma-ok { grid-column: 1 / -1; margin: 10px 0; text-align: center; font-size: 15px; font-weight: 600; }
 /* now pill: your current block, on pages other than Plan and Home */
 .nowpill { position: fixed; z-index: 40; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 8px;
@@ -4254,7 +4257,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 13:09</footer>
+  <footer>everything saves on this device · build 13:12</footer>
 </div>
 
 <script>
@@ -5181,6 +5184,7 @@ function openNameSheet(b) {
         '<div class="ns-list">' +
           row('\u{1F4BC}', 'Work', 'needs an outcome') + row('\u{1F9D8}', 'Rest', 'break, walk, nap…', null, true) +
           row('\u{1F465}', 'Meeting', 'topic and agenda', null, true) + row('\u{1F3CB}️', 'Workout', '') +
+          MEAL_SLOTS.map(([k, name, e]) => { const plan = mealsFor(fromKey(viewDay).getDay())[k]; return row(e, name, plan ? 'planned: ' + plan : 'no meal planned'); }).join('') +
           (mine.length ? '<p class="ns-sub">Your usual</p>' + mine.map(x => row('↻', x.t, minsLabel(Number(x.mins) || 60))).join('') : '') +
         '</div>';
     }
@@ -5208,6 +5212,8 @@ function openNameSheet(b) {
       if (k === 'Meeting') return draw('meet');
       if (k === 'Work') return set('Work', 60);
       if (k === 'Workout') return set('Workout', 60);
+      const ms = MEAL_SLOTS.find(x => x[1] === k);
+      if (ms) { b.meal = ms[0]; return set(k, ms[0] === 'b' ? 30 : 45); }
       const u = usualLabels(5).find(x => x.t === k); set(k, u && Number(u.mins));
     }));
   };
@@ -6034,64 +6040,77 @@ function attachDrag(sheet) {
   if (rows.length < 2) return;
 
   let held = null, startY = 0, rowH = 0, from = 0, to = 0, wait = null, downY = 0;
-  // while a block is held, the page must not scroll under your finger
-  sheet.addEventListener('touchmove', e => { if (held) e.preventDefault(); }, { passive: false });
+
+  const lift = (row, i, y) => {
+    held = row; from = to = i; startY = y;
+    rowH = row.getBoundingClientRect().height;
+    try { navigator.vibrate && navigator.vibrate(12); } catch {}
+    row.classList.add('dragging');
+    rows.forEach(r => { if (r !== row) r.classList.add('shifting'); });
+  };
+  const move = y => {
+    const row = held, dy = y - startY;
+    row.style.transform = 'translateY(' + dy + 'px) scale(1.02)';
+    let next = from + Math.round(dy / rowH);
+    next = Math.max(0, Math.min(rows.length - 1, next));
+    if (next === to) return;
+    to = next;
+    try { navigator.vibrate && navigator.vibrate(6); } catch {}
+    rows.forEach((r, j) => {
+      if (r === row) return;
+      let shift = 0;
+      if (from < to && j > from && j <= to) shift = -rowH;
+      if (from > to && j >= to && j < from) shift = rowH;
+      r.style.transform = shift ? 'translateY(' + shift + 'px)' : '';
+    });
+  };
+  const drop = () => {
+    clearTimeout(wait); wait = null;
+    if (!held) return;
+    const row = held;
+    held = null;
+    row.classList.remove('dragging');
+    rows.forEach(r => { r.classList.remove('shifting'); r.style.transform = ''; });
+    // the lift was not a tap: swallow the click that follows
+    const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
+    window.addEventListener('click', stop, { capture: true, once: true });
+    setTimeout(() => window.removeEventListener('click', stop, { capture: true }), 400);
+    moveBlockTo(from, to);
+  };
 
   rows.forEach((row, i) => {
+    // fingers: hold still for a moment to pick it up, then drag. moving first is a scroll
+    row.addEventListener('touchstart', e => {
+      if (e.target.closest('input') || e.touches.length > 1) return;
+      downY = e.touches[0].clientY;
+      clearTimeout(wait);
+      wait = setTimeout(() => { wait = null; lift(row, i, downY); }, 300);
+    }, { passive: true });
+    row.addEventListener('touchmove', e => {
+      const y = e.touches[0].clientY;
+      if (wait && Math.abs(y - downY) > 8) { clearTimeout(wait); wait = null; return; }
+      if (held !== row) return;
+      e.preventDefault();             // keep the page still while you drag
+      move(y);
+    }, { passive: false });
+    row.addEventListener('touchend', drop);
+    row.addEventListener('touchcancel', drop);
+    row.addEventListener('contextmenu', e => e.preventDefault());
+
+    // a mouse: press and drag
     row.addEventListener('pointerdown', e => {
-      if (e.target.closest('input')) return;
+      if (e.pointerType !== 'mouse' || e.target.closest('input')) return;
       downY = e.clientY;
       const pid = e.pointerId;
       clearTimeout(wait);
-      // hold for a moment to pick it up; moving first means you are scrolling
-      wait = setTimeout(() => {
-        wait = null;
-        held = row;
-        from = to = i;
-        startY = downY;
-        rowH = row.getBoundingClientRect().height;
-        try { row.setPointerCapture(pid); } catch {}
-        try { navigator.vibrate && navigator.vibrate(12); } catch {}
-        row.classList.add('dragging');
-        rows.forEach(r => { if (r !== row) r.classList.add('shifting'); });
-      }, 280);
+      wait = setTimeout(() => { wait = null; lift(row, i, downY); try { row.setPointerCapture(pid); } catch {} }, 200);
     });
-
     row.addEventListener('pointermove', e => {
-      if (wait && Math.abs(e.clientY - downY) > 8) { clearTimeout(wait); wait = null; }
-      if (held !== row) return;
-      const dy = e.clientY - startY;
-      row.style.transform = 'translateY(' + dy + 'px)';
-
-      let next = from + Math.round(dy / rowH);
-      next = Math.max(0, Math.min(rows.length - 1, next));
-      if (next === to) return;
-      to = next;
-
-      rows.forEach((r, j) => {
-        if (r === row) return;
-        let shift = 0;
-        if (from < to && j > from && j <= to) shift = -rowH;
-        if (from > to && j >= to && j < from) shift = rowH;
-        r.style.transform = shift ? 'translateY(' + shift + 'px)' : '';
-      });
+      if (e.pointerType !== 'mouse') return;
+      if (wait && Math.abs(e.clientY - downY) > 6) { clearTimeout(wait); wait = null; }
+      if (held === row) move(e.clientY);
     });
-
-    const drop = () => {
-      clearTimeout(wait); wait = null;
-      if (held !== row) return;
-      held = null;
-      row.classList.remove('dragging');
-      rows.forEach(r => { r.classList.remove('shifting'); r.style.transform = ''; });
-      // the lift was not a tap: swallow the click that follows
-      const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
-      window.addEventListener('click', stop, { capture: true, once: true });
-      setTimeout(() => window.removeEventListener('click', stop, { capture: true }), 400);
-      moveBlockTo(from, to);
-    };
-
-    row.addEventListener('pointerup', drop);
-    row.addEventListener('pointercancel', drop);
+    row.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') drop(); });
   });
 }
 
@@ -6259,7 +6278,8 @@ function renderDay() {
           if (h && !h.marks.includes(viewDay)) h.marks.push(viewDay);
           justTicked = i;
           save(); renderDay(); renderHabits();
-          if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);
+          if (askMealAfter(b)) {}
+          else if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);
           else setTimeout(() => askMoodAfter(b), 500);
         }, 650);
       });
@@ -6303,6 +6323,7 @@ function renderDay() {
 
       save(); renderDay(); renderHabits();
       if (!b.done) return;
+      if (askMealAfter(b)) return;   // a meal block asks about the meal first
       if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);   // that was the last one
       else setTimeout(() => askMoodAfter(b), 500);
     });
@@ -6649,6 +6670,53 @@ const MOODS = [
   { k: 'anxious',     e: '\u{1F32A}', c: '#e3a27a' },
   { k: 'low',         e: '\u{1F327}', c: '#a99bd4' }
 ];
+
+/* ---- a meal block, ticked ----
+   asks if you had what your meals timetable says. yes logs it to Fuel.
+   something else logs that, and can update the timetable too. */
+const mealSlotOf = b => b.meal || ({ breakfast: 'b', lunch: 'l', dinner: 'd' })[String(b.label || '').trim().toLowerCase()] || null;
+function askMealAfter(b) {
+  const slot = mealSlotOf(b);
+  if (!slot) return false;
+  const day = fromKey(viewDay).getDay(), plan = mealsFor(day)[slot];
+  const name = MEAL_SLOTS.find(x => x[0] === slot)[1];
+  const mealKey = { b: 'breakfast', l: 'lunch', d: 'dinner' }[slot];
+  let el = document.getElementById('mood-after'); if (el) el.remove();
+  el = document.createElement('div');
+  el.id = 'mood-after'; el.className = 'ma';
+  const draw = other => {
+    el.innerHTML = '<div class="ma-top"><b>' + (plan && !other ? 'Did you have ' + esc(plan) + '?' : 'What did you have for ' + name.toLowerCase() + '?') + '</b><button type="button" class="ma-x" aria-label="not now">✕</button></div>' +
+      (plan && !other
+        ? '<small>from your meals for ' + cap(FULL[day]) + '</small><div class="mf-btns"><button type="button" class="lf-btn main" data-a="yes">Yes, log it</button><button type="button" class="lf-btn" data-a="other">Something else</button></div>'
+        : '<input type="text" class="mf-in" maxlength="120" placeholder="e.g. jollof rice and chicken">' +
+          '<div class="mf-btns"><button type="button" class="lf-btn main" data-a="log">Log it</button><button type="button" class="lf-btn" data-a="logset">Log and update my meals</button></div>');
+    el.querySelector('.ma-x').addEventListener('click', close);
+    const yes = el.querySelector('[data-a=yes]'); if (yes) yes.addEventListener('click', () => log(plan, false));
+    const oth = el.querySelector('[data-a=other]'); if (oth) oth.addEventListener('click', () => draw(true));
+    const inp = el.querySelector('.mf-in');
+    if (inp) {
+      setTimeout(() => inp.focus(), 50);
+      el.querySelector('[data-a=log]').addEventListener('click', () => { if (inp.value.trim()) log(inp.value.trim(), false); });
+      el.querySelector('[data-a=logset]').addEventListener('click', () => { if (inp.value.trim()) log(inp.value.trim(), true); });
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter' && inp.value.trim()) log(inp.value.trim(), false); });
+    }
+  };
+  const close = () => { el.classList.remove('in'); setTimeout(() => el.remove(), 300); };
+  const log = (what, update) => {
+    const at = new Date(); const fd = fromKey(viewDay);
+    at.setFullYear(fd.getFullYear(), fd.getMonth(), fd.getDate());
+    state.food.unshift({ id: Date.now() + '', at: at.getTime(), what, meal: mealKey });
+    state.food.sort((x, y) => y.at - x.at);
+    if (update) mealsFor(day)[slot] = tidyMeal(what);
+    save();
+    el.innerHTML = '<p class="ma-ok">\u2713 Logged' + (update ? ', and your meals are updated' : '') + '</p>';
+    setTimeout(close, 1100);
+  };
+  draw(false);
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('in'));
+  return true;
+}
 
 /* ---- how do you feel, after a block ----
    when you tick a block on today's plan, a row of faces pops up. one tap
