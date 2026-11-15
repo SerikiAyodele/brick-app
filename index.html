@@ -5122,6 +5122,9 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day #block-add { margin-bottom: 4px !important; }
 #view-day .total { margin-top: 8px !important; padding-top: 14px !important; }
 #view-day .totop { margin-top: 14px !important; }
+
+.pl-rm { flex: none; width: 40px; height: 40px; margin-left: 4px; font-size: 22px; line-height: 1; color: var(--muted); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
+.ns-remove { display: block; width: 100%; min-height: 50px; margin-top: 14px; font: 600 16px var(--display); color: #c2416a; background: color-mix(in srgb, #c2416a 8%, var(--card)); border: 1px solid color-mix(in srgb, #c2416a 25%, var(--hair)); border-radius: 25px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -5383,7 +5386,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:32</footer>
+  <footer>Mr.O:21:34</footer>
 </div>
 
 <script>
@@ -6344,6 +6347,14 @@ function usualLabels(n) {
 // workouts to pick from: your gym plan first, then common kinds
 const NS_GYM = () => { let W = []; try { W = routine().workouts.map(w => ['\u{1F3CB}\uFE0F', w.title, 60, w.id]); } catch {}
   return W.concat([['\u{1F3C3}', 'Cardio', 45], ['\u{1F9D8}', 'Yoga', 45], ['\u{1F3CA}', 'Swim', 45], ['\u{1F6B6}', 'Walk', 30], ['\u{1F6B4}', 'Cycling', 45], ['\u{1F3BE}', 'Tennis', 60], ['\u{1F483}', 'Dance', 45], ['\u{1F938}', 'Stretch', 15]]); };
+// take a block out of the day, with an undo
+function removeBlock(day, i) {
+  const gone = day.blocks[i], where = viewDay;
+  if (!gone) return;
+  day.blocks.splice(i, 1);
+  save(); renderDay(); renderHabits();
+  offerUndo('"' + (gone.label || 'a block') + '"', () => { dayFor(where).blocks.splice(i, 0, gone); save(); renderDay(); renderHabits(); });
+}
 function openNameSheet(b) {
   const old = document.getElementById('namesheet'); if (old) old.remove();
   const el = document.createElement('div');
@@ -6382,10 +6393,12 @@ function openNameSheet(b) {
           (mine.length ? '<p class="ns-sub">Your usual</p>' + mine.map(x => row('↻', x.t, minsLabel(Number(x.mins) || 60))).join('') : '') +
         '</div>';
     }
-    el.innerHTML = html + '<button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
+    el.innerHTML = html + (step || wasEmpty ? '' : '<button type="button" class="ns-remove">Remove this block</button>') + '<button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
     el.querySelector('.w3-back').addEventListener('click', close);
     el.querySelector('.ns-x').addEventListener('click', close);
     el.querySelector('.ns-cancel').addEventListener('click', close);
+    const rmb = el.querySelector('.ns-remove');
+    if (rmb) rmb.addEventListener('click', () => { const d = dayFor(viewDay), i = d.blocks.indexOf(b); el.remove(); if (i >= 0) removeBlock(d, i); else renderDay(); });
     const back = el.querySelector('.ns-back'); if (back) back.addEventListener('click', () => draw(null));
     const inp = el.querySelector('.ns-in');
     if (step === 'meet') {
@@ -7667,7 +7680,12 @@ function renderDay() {
       lenB.setAttribute('aria-label', 'how long, ' + dur(len) + ', tap to change');
       lenB.addEventListener('click', () => { customFor = customFor === i ? null : i; renderDay(); });
 
-      row.append(when, num, name, lenB);
+      // remove, in planning too (with undo)
+      const rm = document.createElement('button');
+      rm.type = 'button'; rm.className = 'pl-rm'; rm.textContent = '\u00d7';
+      rm.setAttribute('aria-label', 'remove ' + ((b.label || '').trim() || 'this block'));
+      rm.addEventListener('click', e => { e.stopPropagation(); removeBlock(day, i); });
+      row.append(when, num, name, lenB, rm);
       sheet.appendChild(row);
       if (focusNew === i) { focusNew = null; setTimeout(() => openNameSheet(b), 60); }
       if (customFor === i) sheet.appendChild(lengthPicker(b, from, len));
