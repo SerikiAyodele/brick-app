@@ -3662,6 +3662,51 @@ body.focusing .nowpill { display: none; }
 .mn-lines { padding-bottom: 6px; }
 .mn-lines .mn-small { flex-basis: 100%; margin: 0; }
 
+/* money, minimal: you enter income and budget, the rest is worked out */
+.mn-mon { display: inline-flex; align-items: center; gap: 4px; }
+.mn-mon button { width: 30px; height: 30px; padding: 0; font-size: 18px; color: var(--muted); background: none; border: none; cursor: pointer; }
+.mn-mon button:disabled { opacity: .3; }
+.mn-mon .mn-gear { margin-left: 6px; font-size: 17px; color: var(--ink); background: var(--hair); border-radius: 50%; }
+.mn-gearbox { margin-bottom: 12px; }
+.mn-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.mn-big span, .mn-bal span { display: block; font-size: 13px; font-weight: 600; color: var(--muted); }
+.mn-big b { display: block; font-size: 40px; font-weight: 600; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.mn-big b.neg { color: #c4553f; }
+.mn-big small { font-size: 13px; color: var(--muted); }
+.mn-bal { text-align: right; }
+.mn-bal b { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+.mn-sum div { padding: 10px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 14px; }
+.mn-sum span { display: block; font-size: 12px; color: var(--muted); }
+.mn-sum b { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-check { margin: 10px 2px 0; font-size: 14px; font-weight: 500; }
+.mn-check.ok { color: #5f9468; } .mn-check.give { color: #b8860b; } .mn-check.over { color: #c4553f; }
+.mn-tabs { margin: 18px 0 6px; }
+.mn-lines2 { list-style: none; margin: 0; padding: 0; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; overflow: hidden; }
+.mn-lines2 li { padding: 12px 14px; cursor: pointer; }
+.mn-lines2 li + li { border-top: 1px solid var(--hair); }
+.mn-lines2 li > div { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; }
+.mn-lines2 li b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mn-lines2 li i { display: block; height: 5px; margin: 6px 0 3px; background: var(--hair); border-radius: 3px; overflow: hidden; }
+.mn-lines2 li u { display: block; height: 100%; background: #7daf86; border-radius: 3px; }
+.mn-lines2 li.near u { background: #c9965a; } .mn-lines2 li.over u { background: #d97a6c; } .mn-lines2 li.over b { color: #c4553f; }
+.mn-lines2 li small { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mn-lines2 li.ed { cursor: default; background: color-mix(in srgb, var(--pink) 6%, var(--card)); }
+.mn-ed2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mn-ed2 input, .mn-ed2 select { width: 100%; min-width: 0; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
+.mn-ed2 input[name=name] { grid-column: 1 / -1; }
+.mn-edb { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; }
+.mn-edb .lf-btn { flex: none; min-height: 40px; padding: 0 18px; }
+.mn-add { display: block; width: 100%; margin-top: 10px; min-height: 44px; font: 500 14px "Poppins", sans-serif; color: var(--muted); background: none; border: 1px dashed var(--dash); border-radius: 14px; cursor: pointer; }
+.mn-note { margin: 10px 2px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.mn-txb .mn-d small em { font-style: normal; font-size: inherit; font-weight: 500; }
+.mn-txb .nol { color: #b8860b; }
+.mn-txb em.amt { flex: none; font-style: normal; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-pick { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px; }
+.mn-pick button { min-height: 32px; padding: 0 12px; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: var(--hair); border: none; border-radius: 16px; cursor: pointer; }
+.mn-pick button.on { color: #fff; background: var(--pink); }
+.mn-pick .mn-del { color: #c4553f; background: none; }
+
 /* stats cards */
 #stats-body { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .st-card { padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
@@ -7272,82 +7317,174 @@ function moneyPlanCards(box, inMonth) {
 }
 
 let moneyMonth = null;   // "YYYY-MM" being looked at
-let moneyOpen = null;    // transaction id open for editing
+let moneyOpen = null;    // transaction id open for picking its line
+let moneyTab = 'budget'; // budget, spending, income
+let moneyGear = false;   // the small settings panel
+let moneyEdit = null;    // budget line id, 'new', 'inc:<i>' or 'inc:new' being edited
 
+/* you type in two things: income and budget. everything else is worked
+   out: spent and left per line from your bank alerts, and whether income
+   and budget balance (every naira given a job, like in Notion). */
 function renderMoney() {
   const box = document.getElementById('money-body');
   if (!state.money) state.money = [];
+  const P = moneyPlan();
   const now = new Date();
   const ym = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
   if (!moneyMonth) moneyMonth = ym(now);
   const [Y, M] = moneyMonth.split('-').map(Number);
-  const inMonth = state.money.filter(x => ym(new Date(x.at)) === moneyMonth);
-  const out = inMonth.filter(x => x.dir === 'DR').reduce((a, x) => a + x.amt, 0);
-  const inn = inMonth.filter(x => x.dir === 'CR').reduce((a, x) => a + x.amt, 0);
-  const latest = state.money.find(x => x.bal !== null && x.bal !== undefined);
-  // spending by kind, biggest first
-  const byKind = {};
-  for (const x of inMonth) if (x.dir === 'DR') byKind[moneyKind(x)] = (byKind[moneyKind(x)] || 0) + x.amt;
-  const kinds = Object.entries(byKind).sort((a, b) => b[1] - a[1]);
-  // pace: what this month is heading for, from the days so far
   const isNow = moneyMonth === ym(now);
-  const daysIn = new Date(Y, M, 0).getDate();
-  const dayN = isNow ? now.getDate() : daysIn;
-  const pace = isNow && dayN > 3 ? out / dayN * daysIn : null;
-  const last = state.money.filter(x => { const d = new Date(x.at); return ym(d) === ym(new Date(Y, M - 2, 1)); }).filter(x => x.dir === 'DR').reduce((a, x) => a + x.amt, 0);
+  const inMonth = state.money.filter(x => ym(new Date(x.at)) === moneyMonth);
+  const latest = state.money.find(x => x.bal !== null && x.bal !== undefined);
 
-  let html = '<header class="pghead"><h1>Money</h1><span>' + cap(MONTHS[M - 1]) + ' ' + Y + '</span></header>' +
-    '<div class="mn-hero"><span>Balance</span><b>' + (latest ? mnNaira(latest.bal) : '–') + '</b>' +
-    '<small>' + (latest ? 'from your alert on ' + cap(FULL[new Date(latest.at).getDay()].slice(0, 3)) + ' ' + new Date(latest.at).getDate() + ' ' + cap(MONTHS[new Date(latest.at).getMonth()].slice(0, 3)) + (latest.acct ? ' · ****' + latest.acct : '') : 'paste a bank alert to start') + '</small></div>' +
-    '<div class="mn-two"><div><span>Out</span><b>' + mnNaira(out) + '</b></div><div><span>In</span><b>' + mnNaira(inn) + '</b></div></div>' +
-    (pace ? '<p class="mn-pace">At this pace, about <b>' + mnNaira(pace) + '</b> out this month' + (last ? ' (' + (pace > last ? 'more' : 'less') + ' than last month’s ' + mnNaira(last) + ')' : '') + '.</p>' : '') +
-    '<div class="mn-nav"><button type="button" data-m="-1" aria-label="previous month">←</button><button type="button" data-m="1" aria-label="next month"' + (isNow ? ' disabled' : '') + '>→</button></div>';
+  // the sums
+  const income = P.income.reduce((a, x) => a + x.amount, 0);
+  const budget = P.budget.reduce((a, b) => a + b.amount, 0);
+  const spentBy = {}; let loose = 0;
+  for (const x of inMonth) if (x.dir === 'DR') { const L = txLine(x); if (L) spentBy[L.id] = (spentBy[L.id] || 0) + x.amt; else loose += x.amt; }
+  const spent = inMonth.filter(x => x.dir === 'DR').reduce((a, x) => a + x.amt, 0);
+  const left = budget - spent;
+  const daysLeft = isNow ? new Date(Y, M, 0).getDate() - now.getDate() + 1 : 0;
+  const gap = income - budget;
+  const bal = gap === 0 ? ['ok', 'Balanced. Every naira has a job.'] : gap > 0 ? ['give', mnNaira(gap) + ' of income has no job yet'] : ['over', 'Budget is ' + mnNaira(-gap) + ' more than income'];
 
-  if (kinds.length) {
-    const top = kinds[0][1];
-    html += '<div class="mn-card"><b class="mn-h">Where it went</b><ul class="mn-kinds">' +
-      kinds.map(([k, v]) => '<li style="--c:' + kindColor(k) + '"><div><span>' + k + '</span><b>' + mnNaira(v) + '</b></div><i><u style="width:' + Math.round(v / top * 100) + '%"></u></i></li>').join('') + '</ul></div>';
+  let html = '<header class="pghead"><h1>Money</h1><span class="mn-mon"><button type="button" data-m="-1" aria-label="previous month">‹</button>' +
+    cap(MONTHS[M - 1].slice(0, 3)) + ' ' + Y + '<button type="button" data-m="1" aria-label="next month"' + (isNow ? ' disabled' : '') + '>›</button>' +
+    '<button type="button" class="mn-gear" aria-label="settings">⚙</button></span></header>';
+
+  if (moneyGear) html += '<div class="mn-gearbox"></div>';
+
+  html += '<div class="mn-top">' +
+    '<div class="mn-big"><span>Left to spend</span><b class="' + (left < 0 ? 'neg' : '') + '">' + mnNaira(left) + '</b>' +
+      (isNow && daysLeft > 0 && left > 0 ? '<small>about ' + mnNaira(left / daysLeft) + ' a day for ' + daysLeft + ' days</small>' : '<small>of ' + mnNaira(budget) + ' budgeted</small>') + '</div>' +
+    '<div class="mn-bal"><span>Balance</span><b>' + (latest ? mnNaira(latest.bal) : '–') + '</b></div></div>' +
+    '<div class="mn-sum"><div><span>Income</span><b>' + mnNaira(income) + '</b></div><div><span>Budget</span><b>' + mnNaira(budget) + '</b></div><div><span>Spent</span><b>' + mnNaira(spent) + '</b></div></div>' +
+    '<p class="mn-check ' + bal[0] + '">' + (bal[0] === 'ok' ? '✓ ' : '') + bal[1] + '</p>';
+
+  html += '<div class="md-seg mn-tabs">' + [['budget', 'Budget'], ['spend', 'Spending'], ['income', 'Income']].map(([k, t]) =>
+    '<button type="button" class="md-seg-b' + (moneyTab === k ? ' on' : '') + '" data-t="' + k + '">' + t + '</button>').join('') + '</div>';
+
+  if (moneyTab === 'budget') {
+    const areas = ['Health', 'Wealth', 'Love', 'Self', ''];
+    html += areas.map(ar => {
+      const L = P.budget.filter(b => (b.area || '') === ar);
+      if (!L.length) return '';
+      return '<div class="mn-area">' + (ar || 'Other') + '</div><ul class="mn-lines2">' + L.map(b => {
+        const sp = spentBy[b.id] || 0, lf = b.amount - sp, pc = b.amount ? Math.min(1, sp / b.amount) : (sp ? 1 : 0);
+        if (moneyEdit === b.id) return '<li class="ed" data-b="' + b.id + '">' + lineEditor(b) + '</li>';
+        return '<li data-b="' + b.id + '" class="' + (lf < 0 ? 'over' : pc > .8 ? 'near' : '') + '"><div><span class="nm"></span><b>' + mnNaira(lf) + '</b></div>' +
+               '<i><u style="width:' + Math.round(pc * 100) + '%"></u></i><small>' + mnNaira(sp) + ' of ' + mnNaira(b.amount) + '</small></li>';
+      }).join('') + '</ul>';
+    }).join('') +
+    (moneyEdit === 'new' ? '<ul class="mn-lines2"><li class="ed">' + lineEditor(null) + '</li></ul>' : '<button type="button" class="mn-add" data-a="newline">+ Add a budget line</button>') +
+    (loose ? '<p class="mn-note">' + mnNaira(loose) + ' spent outside your lines. Open Spending to give it a line.</p>' : '');
   }
 
-  html += '<div class="mn-card"><b class="mn-h">Add from an alert</b><textarea class="mn-paste" rows="3" placeholder="paste your bank alert here"></textarea>' +
-    '<div class="mn-row"><button type="button" class="lf-btn main" data-a="paste">Add</button><span class="mn-msg"></span></div></div>';
+  if (moneyTab === 'spend') {
+    html += '<div class="mn-list">' + (inMonth.length ? inMonth.map(x => {
+      const d = new Date(x.at), L = txLine(x), open = moneyOpen === x.id;
+      return '<div class="mn-tx' + (x.dir === 'CR' ? ' in' : '') + '" data-id="' + x.id + '"><button type="button" class="mn-txb">' +
+        '<span class="mn-d"><b></b><small>' + (x.dir === 'CR' ? 'Money in' : L ? '' : '<em class="nol">no line</em>') + (L ? '<em class="ln"></em>' : '') + ' · ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</small></span>' +
+        '<em class="amt">' + (x.dir === 'CR' ? '+' : '−') + mnNaira(x.amt) + '</em></button>' +
+        (open && x.dir === 'DR' ? '<div class="mn-pick">' + P.budget.map(b => '<button type="button" data-l="' + b.id + '" class="' + (L && L.id === b.id ? 'on' : '') + '"></button>').join('') +
+          '<button type="button" class="mn-del">Remove</button></div>' : '') +
+        (open && x.dir === 'CR' ? '<div class="mn-pick"><button type="button" class="mn-del">Remove</button></div>' : '') + '</div>';
+    }).join('') : '<p class="mn-empty">No alerts this month yet.</p>') + '</div>';
+  }
 
-  html += '<div class="mn-list">' + (inMonth.length ? inMonth.map(x => {
-    const d = new Date(x.at), k = moneyKind(x), open = moneyOpen === x.id;
-    return '<div class="mn-tx' + (x.dir === 'CR' ? ' in' : '') + '" data-id="' + x.id + '"><button type="button" class="mn-txb">' +
-      '<i style="background:' + (x.dir === 'CR' ? '#7daf86' : kindColor(k)) + '"></i><span class="mn-d"><b></b><small>' + k + ' · ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + ' ' + clock(d.getHours() * 60 + d.getMinutes()) + '</small></span>' +
-      '<em>' + (x.dir === 'CR' ? '+' : '−') + mnNaira(x.amt) + '</em></button>' +
-      (open && x.dir === 'DR' && moneyPlan().budget.length ? '<div class="mn-ed mn-lines"><span class="mn-small">Budget line</span>' + moneyPlan().budget.map(b => '<button type="button" data-l="' + b.id + '" class="' + ((txLine(x) || {}).id === b.id ? 'on' : '') + '"></button>').join('') + '</div>' : '') +
-      (open ? '<div class="mn-ed">' + ['Money in'].concat(MONEY_KINDS.map(m => m[0]), ['Other']).filter(n => x.dir === 'CR' ? n === 'Money in' : n !== 'Money in')
-        .map(n => '<button type="button" data-k="' + n + '" class="' + (k === n ? 'on' : '') + '">' + n + '</button>').join('') +
-        '<button type="button" class="mn-del">Remove</button></div>' : '') + '</div>';
-  }).join('') : '<p class="mn-empty">Nothing this month yet.</p>') + '</div>';
+  if (moneyTab === 'income') {
+    const got = inMonth.filter(x => x.dir === 'CR').reduce((a, x) => a + x.amt, 0);
+    html += '<p class="mn-note">' + mnNaira(got) + ' received this month, of ' + mnNaira(income) + ' expected.</p><ul class="mn-lines2">' +
+      P.income.map((x, i) => moneyEdit === 'inc:' + i ? '<li class="ed">' + incEditor(x, i) + '</li>'
+        : '<li data-i="' + i + '"><div><span class="nm"></span><b>' + mnNaira(x.amount) + '</b></div></li>').join('') +
+      (moneyEdit === 'inc:new' ? '<li class="ed">' + incEditor(null, 'new') + '</li>' : '') + '</ul>' +
+      (moneyEdit === 'inc:new' ? '' : '<button type="button" class="mn-add" data-a="newinc">+ Add income</button>');
+  }
 
   box.innerHTML = html;
-  inboxSetup(box.querySelector('.mn-list').parentNode === box ? box : box);
-  box.insertBefore(box.lastChild, box.querySelector('.mn-list'));   // the inbox card sits above the list
-  moneyPlanCards(box, inMonth);
-  box.querySelectorAll('.mn-tx').forEach(el => { const x = state.money.find(t => t.id === el.dataset.id); el.querySelector('.mn-d b').textContent = (x.desc || (x.dir === 'CR' ? 'Money in' : 'Spent')).toLowerCase(); });
-  box.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { const d = new Date(Y, M - 1 + Number(b.dataset.m), 1); moneyMonth = ym(d); renderMoney(); }));
-  box.querySelector('[data-a=paste]').addEventListener('click', () => {
-    const ta = box.querySelector('.mn-paste');
-    // more than one alert pasted at once: split on each new "Acct" or "Amt" line block
-    const parts = ta.value.split(/\n\s*\n|(?=Acct\s*:)/i).map(p => p.trim()).filter(Boolean);
-    let n = 0; for (const p of parts) if (addAlert(p, 'paste')) n++;
-    const msg = box.querySelector('.mn-msg');
-    if (!n) { msg.textContent = 'I could not find an amount in that.'; return; }
-    ta.value = ''; renderMoney();
-    const m2 = document.querySelector('#money-body .mn-msg'); if (m2) { m2.textContent = 'Added ' + n; setTimeout(() => { m2.textContent = ''; }, 2000); }
+
+  // names in as text
+  box.querySelectorAll('.mn-lines2 li[data-b]:not(.ed) .nm').forEach(el => { el.textContent = P.budget.find(b => b.id === el.closest('li').dataset.b).name; });
+  box.querySelectorAll('.mn-lines2 li[data-i] .nm').forEach(el => { el.textContent = P.income[Number(el.closest('li').dataset.i)].name; });
+  box.querySelectorAll('.mn-tx').forEach(el => {
+    const x = state.money.find(t => t.id === el.dataset.id), L = txLine(x);
+    el.querySelector('.mn-d b').textContent = (x.desc || (x.dir === 'CR' ? 'Money in' : 'Spent')).toLowerCase();
+    const ln = el.querySelector('.ln'); if (ln) ln.textContent = L.name;
+    el.querySelectorAll('[data-l]').forEach(b => { b.textContent = P.budget.find(z => z.id === b.dataset.l).name; });
   });
-  box.querySelectorAll('.mn-txb').forEach(b => b.addEventListener('click', () => { const id = b.parentElement.dataset.id; moneyOpen = moneyOpen === id ? null : id; renderMoney(); }));
-  box.querySelectorAll('[data-l]').forEach(b => { b.textContent = moneyPlan().budget.find(x => x.id === b.dataset.l).name;
-    b.addEventListener('click', () => { const x = state.money.find(t => t.id === b.closest('.mn-tx').dataset.id); x.line = b.dataset.l; moneyOpen = null; save(); renderMoney(); }); });
-  box.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { const x = state.money.find(t => t.id === b.closest('.mn-tx').dataset.id); x.kind = b.dataset.k === 'Money in' ? null : b.dataset.k; moneyOpen = null; save(); renderMoney(); }));
-  box.querySelectorAll('.mn-del').forEach(b => b.addEventListener('click', () => {
-    const i = state.money.findIndex(t => t.id === b.closest('.mn-tx').dataset.id), gone = state.money[i];
+
+  const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', e => fn(el, e)));
+  on('[data-m]', el => { const d = new Date(Y, M - 1 + Number(el.dataset.m), 1); moneyMonth = ym(d); renderMoney(); });
+  on('[data-t]', el => { moneyTab = el.dataset.t; moneyEdit = null; moneyOpen = null; renderMoney(); });
+  on('.mn-gear', () => { moneyGear = !moneyGear; renderMoney(); });
+  on('[data-a=newline]', () => { moneyEdit = 'new'; renderMoney(); focusEd(); });
+  on('[data-a=newinc]', () => { moneyEdit = 'inc:new'; renderMoney(); focusEd(); });
+  on('.mn-lines2 li[data-b]:not(.ed)', el => { moneyEdit = el.dataset.b; renderMoney(); focusEd(); });
+  on('.mn-lines2 li[data-i]', el => { moneyEdit = 'inc:' + el.dataset.i; renderMoney(); focusEd(); });
+  on('.mn-txb', el => { const id = el.parentElement.dataset.id; moneyOpen = moneyOpen === id ? null : id; renderMoney(); });
+  on('[data-l]', el => { const x = state.money.find(t => t.id === el.closest('.mn-tx').dataset.id); x.line = el.dataset.l; moneyOpen = null; save(); renderMoney(); });
+  on('.mn-del', el => {
+    const i = state.money.findIndex(t => t.id === el.closest('.mn-tx').dataset.id), gone = state.money[i];
     state.money.splice(i, 1); moneyOpen = null; save(); renderMoney();
     offerUndo('transaction', () => { state.money.splice(i, 0, gone); save(); renderMoney(); });
-  }));
+  });
+  // editors
+  const ed = box.querySelector('li.ed');
+  if (ed) {
+    const g = n => ed.querySelector('[name=' + n + ']');
+    on('li.ed [data-a=cancel]', () => { moneyEdit = null; renderMoney(); });
+    on('li.ed [data-a=save]', () => {
+      const name = g('name').value.trim(), amount = Number(String(g('amt').value).replace(/[^\d.]/g, '')) || 0;
+      if (!name) { g('name').focus(); return; }
+      if (String(moneyEdit).startsWith('inc:')) {
+        const k = moneyEdit.slice(4);
+        if (k === 'new') P.income.push({ name, amount }); else Object.assign(P.income[Number(k)], { name, amount });
+      } else if (moneyEdit === 'new') {
+        P.budget.push({ id: 'b' + Date.now(), name, amount, next: 0, area: g('area').value, note: '' });
+      } else {
+        Object.assign(P.budget.find(b => b.id === moneyEdit), { name, amount, area: g('area').value });
+      }
+      moneyEdit = null; save(); renderMoney();
+    });
+    on('li.ed [data-a=remove]', () => {
+      if (String(moneyEdit).startsWith('inc:')) P.income.splice(Number(moneyEdit.slice(4)), 1);
+      else { P.budget = P.budget.filter(b => b.id !== moneyEdit); state.money.forEach(x => { if (x.line === moneyEdit) delete x.line; }); }
+      moneyEdit = null; save(); renderMoney();
+    });
+    ed.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') ed.querySelector('[data-a=save]').click(); }));
+  }
+  // settings: paste an alert, bank texts
+  const gb = box.querySelector('.mn-gearbox');
+  if (gb) {
+    gb.innerHTML = '<div class="mn-card"><b class="mn-h">Add from an alert</b><textarea class="mn-paste" rows="3" placeholder="paste your bank alert here"></textarea>' +
+      '<div class="mn-row"><button type="button" class="lf-btn main" data-a="paste">Add</button><span class="mn-msg"></span></div></div>';
+    inboxSetup(gb);
+    gb.querySelector('[data-a=paste]').addEventListener('click', () => {
+      const ta = gb.querySelector('.mn-paste');
+      const parts = ta.value.split(/\n\s*\n|(?=Acct\s*:)/i).map(p => p.trim()).filter(Boolean);
+      let n = 0; for (const p of parts) if (addAlert(p, 'paste')) n++;
+      const msg = gb.querySelector('.mn-msg');
+      if (!n) { msg.textContent = 'No amount found in that.'; return; }
+      ta.value = ''; moneyTab = 'spend'; renderMoney();
+    });
+  }
+}
+
+const focusEd = () => setTimeout(() => { const i = document.querySelector('#money-body li.ed input'); if (i) i.focus(); }, 30);
+
+function lineEditor(b) {
+  const areas = ['Health', 'Wealth', 'Love', 'Self', ''];
+  return '<div class="mn-ed2"><input name="name" type="text" maxlength="40" placeholder="line, e.g. Grocery" value="' + esc(b ? b.name : '') + '">' +
+    '<input name="amt" type="text" inputmode="numeric" placeholder="amount" value="' + (b ? b.amount : '') + '">' +
+    '<select name="area" aria-label="area of life">' + areas.map(a => '<option value="' + a + '"' + ((b ? b.area || '' : '') === a ? ' selected' : '') + '>' + (a || 'Other') + '</option>').join('') + '</select>' +
+    '<div class="mn-edb"><button type="button" class="lf-btn main" data-a="save">Save</button><button type="button" class="gm-link" data-a="cancel">Cancel</button>' +
+    (b ? '<button type="button" class="gm-link danger" data-a="remove">Remove</button>' : '') + '</div></div>';
+}
+function incEditor(x, i) {
+  return '<div class="mn-ed2"><input name="name" type="text" maxlength="40" placeholder="source, e.g. Salary" value="' + esc(x ? x.name : '') + '">' +
+    '<input name="amt" type="text" inputmode="numeric" placeholder="amount a month" value="' + (x ? x.amount : '') + '">' +
+    '<div class="mn-edb"><button type="button" class="lf-btn main" data-a="save">Save</button><button type="button" class="gm-link" data-a="cancel">Cancel</button>' +
+    (x ? '<button type="button" class="gm-link danger" data-a="remove">Remove</button>' : '') + '</div></div>';
 }
 
 /* =========== food =========== */
