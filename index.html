@@ -4114,7 +4114,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:40</footer>
+  <footer>everything saves on this device · build 12:44</footer>
 </div>
 
 <script>
@@ -11236,7 +11236,7 @@ function moodSheet(body, close, el, force) {
 }
 
 function renderHome() {
-  healthGoals = false;
+  areaGoalsOpen = false;
   renderQuote();
   renderHomeNow();
   renderHomeQuick(document.getElementById("home-now"));
@@ -11909,34 +11909,37 @@ function goalEditRow(g, n) {
          '<button type="button" class="lf-g-del" data-del="' + n + '">Remove goal</button></div>';
 }
 
-let healthGoals = false;   // on the Health page: false shows the four portals, true shows Goals
+let areaGoalsOpen = false;   // on an area page: false shows its cards, true shows Goals
 
-// Health is four cards, each a door: Fuel, Move, Health log, Goals
-function healthPortals(box, a) {
-  const gs = areaGoals('health'), j = activeJourney();
-  const doors = AREA_PAGES.health.map(tab => { const t = tileFor(tab); return { tab, name: PAGE_NAME[tab], big: t.big + (t.unit ? '<i>' + esc(t.unit) + '</i>' : ''), cap: t.cap }; });
-  doors.push({ tab: 'goals', name: 'Goals', big: gs.length ? areaScore('health', perKeys(0)) + '<i>%</i>' : '+',
+// each area is a short list of cards, each a door: its pages, then Goals
+function areaPortals(box, a) {
+  const gs = areaGoals(a.k), j = a.k === 'health' ? activeJourney() : null;
+  const tabs = a.k === 'love' ? ['love'] : (AREA_PAGES[a.k] || []);
+  const doors = tabs.map(tab => {
+    const t = tileFor(tab), m = MENU.find(x => x.tab === tab);
+    return { tab, name: tab === 'love' ? 'Time together' : PAGE_NAME[tab], big: t.big + (t.unit ? '<i>' + esc(t.unit) + '</i>' : ''), cap: t.cap,
+             c: tab === 'love' ? LOVE_TILE.c : m ? m.c : a.c, go: tab === 'love' ? 'goals' : tab };
+  });
+  doors.push({ tab: 'goals', go: 'goals', name: 'Goals', c: a.c, big: gs.length ? areaScore(a.k, perKeys(0)) + '<i>%</i>' : '+',
                cap: j ? 'Day ' + journeyDay(j, Date.now()) + ' \u00b7 ' + j.name : gs.length ? gs.length + ' goal' + (gs.length > 1 ? 's' : '') : 'set a goal' });
-  const C = { food: '#e3a27a', gym: '#86b9d9', mood: '#a99bd4', goals: '#7daf86' };
-  box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">Health</h1><div class="hp-grid">' +
-    doors.map(d => '<button type="button" class="hp-door" data-door="' + d.tab + '" style="--c:' + C[d.tab] + '"><b>' + d.name + '</b><em>' + d.big + '</em><small>' + esc(d.cap) + '</small></button>').join('') + '</div>';
+  box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">' + a.name + '</h1><div class="hp-grid">' +
+    doors.map(d => '<button type="button" class="hp-door" data-door="' + d.go + '" style="--c:' + d.c + '"><b>' + d.name + '</b><em>' + d.big + '</em><small>' + esc(d.cap) + '</small></button>').join('') + '</div>';
   box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; show('home'); window.scrollTo(0, 0); });
   box.querySelectorAll('[data-door]').forEach(b => b.addEventListener('click', () => {
-    if (b.dataset.door === 'goals') { healthGoals = true; renderLife(); }
-    else show(b.dataset.door);
-    window.scrollTo(0, 0);
+    if (b.dataset.door !== 'goals') { show(b.dataset.door); window.scrollTo(0, 0); return; }
+    areaGoalsOpen = true; renderLife(); window.scrollTo(0, 0);
   }));
 }
 
 function lifeDetail(box, a) {
-  if (a.k === 'health' && !healthGoals) return healthPortals(box, a);
+  if (!areaGoalsOpen) return areaPortals(box, a);
   const gs = areaGoals(a.k);
   const ks = perKeys(0);
   const now = areaScore(a.k, ks);
 
-  let html = '<button type="button" class="lf-back">' + (a.k === 'health' ? '\u2190 Health' : '\u2190 Home') + '</button>' +
-    '<div class="lf-dhead" style="--c:' + a.c + '"><h1>' + (a.k === 'health' ? 'Goals' : a.name) + '</h1>' + (gs.length ? '<b>' + now + '<i>%</i></b>' : '') + '</div>' +
-    (a.k === 'health' ? '' : areaPagesHtml(a)) + (gs.length ? '' : '<p class="hub-empty">No ' + a.name.toLowerCase() + ' goals yet.</p>') + bigLine(a) + (a.k === 'health' ? journeyHtml() : '') + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
+  let html = '<button type="button" class="lf-back">\u2190 ' + a.name + '</button>' +
+    '<div class="lf-dhead" style="--c:' + a.c + '"><h1>Goals</h1>' + (gs.length ? '<b>' + now + '<i>%</i></b>' : '') + '</div>' +
+    (gs.length ? '' : '<p class="hub-empty">No ' + a.name.toLowerCase() + ' goals yet.</p>') + bigLine(a) + (a.k === 'health' ? journeyHtml() : '') + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
   gs.forEach((g, n) => {
     const sc = goalScore(g, ks), [st, stText] = goalStatus(sc.pct);
     const priv = g.private || a.k === 'love';
@@ -11984,8 +11987,7 @@ function lifeDetail(box, a) {
 
   box.querySelector('.lf-back').addEventListener('click', () => {
     lifeExpanded = null;
-    if (a.k === 'health') { healthGoals = false; renderLife(); window.scrollTo(0, 0); return; }
-    lifeOpen = null; show('home'); window.scrollTo(0, 0);
+    areaGoalsOpen = false; renderLife(); window.scrollTo(0, 0);
   });
   box.querySelectorAll('[data-page]').forEach(b => b.addEventListener('click', () => { show(b.dataset.page); window.scrollTo(0, 0); }));
   if (a.k === 'health') wireJourney(box, renderLife);
