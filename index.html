@@ -3968,7 +3968,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 11:43</footer>
+  <footer>everything saves on this device · build 11:45</footer>
 </div>
 
 <script>
@@ -3979,7 +3979,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [] };
 
 function load() {
   try {
@@ -4019,7 +4019,8 @@ function load() {
         journeys:  Array.isArray(d.journeys) ? d.journeys : [],
         meals:     (d.meals && typeof d.meals === 'object') ? d.meals : {},
         grocBudget: (d.grocBudget && typeof d.grocBudget === 'object') ? d.grocBudget : {},
-        prices:    (d.prices && typeof d.prices === 'object') ? d.prices : {}
+        prices:    (d.prices && typeof d.prices === 'object') ? d.prices : {},
+        imported:  Array.isArray(d.imported) ? d.imported : []
       };
     }
     const old = localStorage.getItem(OLD);
@@ -7090,6 +7091,7 @@ async function syncInbox(quiet) {
     for (const it of issues.filter(x => !x.pull_request)) {
       let added = null;
       if ((it.title || '').trim() === 'brick-import') { try { added = importMoney(JSON.parse(it.body || '{}')) ? {} : null; } catch { added = null; } }
+      else if ((it.title || '').trim() === 'brick-health') { try { added = importHealth(JSON.parse(it.body || '{}')) ? {} : null; } catch { added = null; } }
       else added = addAlert(it.body || it.title || '', 'sms');
       // done with it either way: an unreadable one stays closed so it is not read again
       await fetch('https://api.github.com/repos/' + INBOX_REPO + '/issues/' + it.number, {
@@ -7166,6 +7168,40 @@ function moneyPlan() {
   return state.moneyPlan;
 }
 const AREA_OF_LIFE = { health: 'Health', wealth: 'Wealth', relationships: 'Love', love: 'Love', self: 'Self', assets: 'Wealth' };
+
+// Health from Notion: the meal week, past grocery spending (by week) and the current shopping list.
+// each import has an id, so the same one is never added twice
+function importHealth(data) {
+  if (!data || data.kind !== 'brick-health' || !data.id) return false;
+  if (!state.imported) state.imported = [];
+  if (state.imported.includes(data.id)) return true;
+  if (data.meals && typeof data.meals === 'object') {
+    if (!state.meals) state.meals = {};
+    for (const d of Object.keys(data.meals)) {
+      const m = data.meals[d] || {};
+      state.meals[d] = { b: tidyMeal(m.b), l: tidyMeal(m.l), d: tidyMeal(m.d) };
+    }
+  }
+  if (Array.isArray(data.log)) {
+    if (!state.groceryLog) state.groceryLog = [];
+    for (const x of data.log) if (x && x.text && x.at) state.groceryLog.push({ text: String(x.text), at: Number(x.at), price: Number(x.price) || 0, from: 'notion' });
+  }
+  if (data.prices && typeof data.prices === 'object') {
+    if (!state.prices) state.prices = {};
+    for (const [k, v] of Object.entries(data.prices)) if (!state.prices[priceKey(k)] && v > 0) state.prices[priceKey(k)] = { per: Number(v), unit: '', at: Date.now() };
+  }
+  if (Array.isArray(data.list)) {
+    for (const x of data.list) {
+      if (!x || !x.text) continue;
+      addGrocery(cap(String(x.text)));
+      const it = (state.grocery || []).find(g => !g.done && g.text.toLowerCase() === cap(String(x.text)).toLowerCase());
+      if (it && x.price > 0) it.price = Number(x.price);
+    }
+  }
+  state.imported.push(data.id);
+  save();
+  return true;
+}
 
 function importMoney(data) {
   if (!data || data.kind !== 'brick-import') return false;
