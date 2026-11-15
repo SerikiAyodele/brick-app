@@ -2165,13 +2165,25 @@ body[data-view="day"] { background-image: none; }
 .gr-prow input { flex: 1; font-size: 16px; min-width: 0; }
 .gr-pin, .gm-bin, .jr-form input[type="date"] { color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 10px 12px; font: 500 16px "Poppins", sans-serif; }
 .gr-pin:focus, .gm-bin:focus, .jr-form input[type="date"]:focus { outline: none; border-color: var(--pink); }
-.ml-days { display: flex; flex-direction: column; margin-top: 12px; border-top: 1px solid var(--hair); }
-.ml-day { display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--hair); }
-.ml-day.today .ml-dname { color: var(--pink); }
-.ml-dname { font-size: 14px; font-weight: 600; padding-top: 10px; }
-.ml-meal { display: block; width: 100%; min-height: 40px; padding: 8px 0; text-align: left; background: none; border: none; color: var(--ink); font: 400 15px "Poppins", sans-serif; cursor: pointer; }
-.ml-meal.ghost { color: var(--muted); }
-.ml-in { width: 100%; margin: 2px 0; font-size: 16px; padding: 8px 10px; border-radius: 12px; }
+.mt { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.mt-row { display: grid; grid-template-columns: 38px repeat(3, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+.mt-head { position: sticky; top: 0; z-index: 2; padding: 6px 0; background: var(--paper); }
+.mt-h { display: flex; flex-direction: column; align-items: center; font-size: 18px; line-height: 1.1; }
+.mt-h i { font-style: normal; font-size: 11px; font-weight: 600; color: var(--muted); margin-top: 2px; }
+.mt-day { align-self: center; font-size: 13px; font-weight: 600; color: var(--muted); text-align: center; }
+.mt-row.today .mt-day { color: var(--paper); background: var(--pink); border-radius: 10px; padding: 6px 0; }
+.mt-cell { --c: var(--pink); min-height: 64px; padding: 8px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--c) 30%, var(--hair));
+  background: color-mix(in srgb, var(--c) 16%, var(--card)); color: var(--ink); font: 500 12.5px/1.35 "Poppins", sans-serif;
+  text-align: left; overflow-wrap: anywhere; cursor: pointer; }
+.mt-cell.l { --c: var(--brown); }
+.mt-cell.d { --c: var(--blue); }
+.mt-cell.empty { background: transparent; border-style: dashed; color: var(--muted); text-align: center; font-size: 18px; }
+.mt-cell.on { border-color: var(--c); box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 45%, transparent); }
+.mt-row.today .mt-cell { border-color: color-mix(in srgb, var(--c) 60%, var(--hair)); }
+.mt-cell:active { transform: scale(.97); }
+.mt-edit { padding: 12px; margin: 2px 0 6px; border: 1px solid var(--hair); border-radius: 16px; background: var(--card); }
+.mt-edit label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+.ml-in { width: 100%; font-size: 16px; padding: 10px 12px; border-radius: 12px; }
 .jr-note { font-size: 12px; color: var(--muted); margin: 14px 0 0; }
 .jr-acts { display: flex; gap: 10px; margin-top: 12px; }
 .jr-form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
@@ -3508,6 +3520,27 @@ body.showmode #view-day .qp { display: none; }
 .nowpill b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; }
 .nowpill span { flex: none; color: var(--muted); }
 body.focusing .nowpill { display: none; }
+/* plan, calmer: no dot grid, and the blocks hang on one quiet timeline */
+html body[data-view="day"] {
+  background-image:
+    radial-gradient(60rem 26rem at 0% -8rem, color-mix(in srgb, var(--pink) 16%, transparent), transparent 70%),
+    radial-gradient(50rem 24rem at 100% -6rem, color-mix(in srgb, var(--blue) 18%, transparent), transparent 70%) !important;
+  background-size: auto !important; background-repeat: no-repeat !important;
+}
+#view-day .sheet { border-top: none; }
+#view-day .sheet .line { position: relative; border-bottom: none; padding: 12px 0; }
+#view-day .sheet .line::before { content: ""; position: absolute; left: 77px; top: 0; bottom: 0; width: 2px; background: var(--hair); }
+#view-day .sheet .line:first-child::before { top: 24px; }
+#view-day .sheet .line:last-child::before { bottom: calc(100% - 24px); }
+#view-day .sheet .line.ticked::before { background: color-mix(in srgb, var(--pink) 45%, var(--hair)); }
+#view-day .sheet .line .tick { position: relative; z-index: 1; background: var(--paper); }
+#view-day .sheet .line .tick.on { background: var(--pink); }
+#view-day .sheet .line.ticked .what, #view-day .sheet .line.ticked .at { opacity: .55; }
+#view-day .sheet .line.cur { margin: 2px -10px; padding: 12px 10px; background: var(--card); border-radius: 18px; box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+#view-day .sheet .line.cur::before { left: 87px; }
+#view-day .sheet .line.cur .tick { background: var(--card); border-color: var(--pink); }
+#view-day .sheet .line.cur .what { color: var(--ink); font-weight: 600; }
+#view-day .line .at small.endat::before { display: none; }
 /* grocery details and sharing */
 .gr-share { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; }
 .gr-share button { min-height: 36px; padding: 0 14px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 18px; cursor: pointer; }
@@ -3703,6 +3736,31 @@ body.focusing .nowpill { display: none; }
 .mn-txb .mn-d small em { font-style: normal; font-size: inherit; font-weight: 500; }
 .mn-txb .nol { color: #b8860b; }
 .mn-txb em.amt { flex: none; font-style: normal; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-split { display: flex; gap: 3px; height: 14px; margin: 14px 0 8px; }
+.mn-split u { display: block; background: var(--c); border-radius: 7px; }
+.mn-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 2px 12px; font-size: 12px; color: var(--muted); }
+.mn-legend i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--c); }
+.mn-bl li:not(.ed) { display: flex; align-items: center; gap: 12px; padding: 14px; }
+.mn-bl .dot { flex: none; width: 34px; height: 34px; border-radius: 11px; background: radial-gradient(circle, var(--c) 0 6px, color-mix(in srgb, var(--c) 22%, var(--card)) 7px); }
+.mn-bl li .mid { display: block; flex: 1; min-width: 0; font-size: 15px; font-weight: 500; }
+.mn-bl li .mid .nm { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-bl li .mid i { height: 8px; margin: 7px 0 0; border-radius: 4px; }
+.mn-bl li .mid u { background: var(--c); border-radius: 4px; }
+.mn-bl li.over .mid u { background: #d97a6c; }
+.mn-bl li .rt { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
+.mn-bl li .rt b { font-size: 16px; }
+.mn-ed3 { display: flex; flex-direction: column; gap: 12px; }
+.mn-ed3 label, .mn-lab { display: flex; flex-direction: column; gap: 5px; }
+.mn-ed3 label > span, .mn-lab span { font-size: 13px; font-weight: 600; color: var(--muted); }
+.mn-lab { flex-direction: row; align-items: center; gap: 8px; margin-bottom: -6px; }
+.mn-lab .sug { padding: 2px 8px; font-size: 11px; color: var(--muted); background: var(--hair); border-radius: 8px; }
+.mn-ed3 input[type=text] { width: 100%; min-width: 0; font: 400 16px "Poppins", sans-serif; padding: 11px 12px; border-radius: 12px; }
+.mn-amt { position: relative; }
+.mn-amt em { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-style: normal; color: var(--muted); }
+.mn-ed3 .mn-amt input { padding-left: 28px; font-variant-numeric: tabular-nums; }
+.mn-areas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.mn-areas button { min-height: 42px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 14%, var(--card)); border: 1.5px solid transparent; border-radius: 12px; cursor: pointer; }
+.mn-areas button.on { color: #fff; background: var(--c); }
 .mn-pick { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px; }
 .mn-pick button { min-height: 32px; padding: 0 12px; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: var(--hair); border: none; border-radius: 16px; cursor: pointer; }
 .mn-pick button.on { color: #fff; background: var(--pink); }
@@ -3994,7 +4052,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 11:57</footer>
+  <footer>everything saves on this device · build 12:09</footer>
 </div>
 
 <script>
@@ -5966,6 +6024,7 @@ function renderDay() {
     if (!sortingDay) {
       if (i === justTicked) row.classList.add('justdone');
       if (i === firstOpen && !early) row.classList.add('next');
+      if (i === firstOpen && viewDay === tk && nowMin >= from && nowMin < from + len) row.classList.add('cur');
       if (justTicked !== null && i === justTicked + 1) row.classList.add('arrive');
     }
 
@@ -7367,18 +7426,21 @@ function renderMoney() {
     '<button type="button" class="md-seg-b' + (moneyTab === k ? ' on' : '') + '" data-t="' + k + '">' + t + '</button>').join('') + '</div>';
 
   if (moneyTab === 'budget') {
-    const areas = ['Health', 'Wealth', 'Love', 'Self', ''];
-    html += areas.map(ar => {
-      const L = P.budget.filter(b => (b.area || '') === ar);
-      if (!L.length) return '';
-      return '<div class="mn-area">' + (ar || 'Other') + '</div><ul class="mn-lines2">' + L.map(b => {
-        const sp = spentBy[b.id] || 0, lf = b.amount - sp, pc = b.amount ? Math.min(1, sp / b.amount) : (sp ? 1 : 0);
-        if (moneyEdit === b.id) return '<li class="ed" data-b="' + b.id + '">' + lineEditor(b) + '</li>';
-        return '<li data-b="' + b.id + '" class="' + (lf < 0 ? 'over' : pc > .8 ? 'near' : '') + '"><div><span class="nm"></span><b>' + mnNaira(lf) + '</b></div>' +
-               '<i><u style="width:' + Math.round(pc * 100) + '%"></u></i><small>' + mnNaira(sp) + ' of ' + mnNaira(b.amount) + '</small></li>';
-      }).join('') + '</ul>';
-    }).join('') +
-    (moneyEdit === 'new' ? '<ul class="mn-lines2"><li class="ed">' + lineEditor(null) + '</li></ul>' : '<button type="button" class="mn-add" data-a="newline">+ Add a budget line</button>') +
+    const lines = P.budget.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    // where the budget goes, by area of life, as one coloured bar
+    const byArea = {};
+    for (const b of lines) { const a = b.area || guessArea(b.name); byArea[a] = (byArea[a] || 0) + b.amount; }
+    const areas = MN_AREAS.filter(a => byArea[a] > 0);
+    if (budget > 0 && areas.length) html += '<div class="mn-split">' + areas.map(a => '<u style="flex:' + byArea[a] + ';--c:' + MN_AREA_C[a] + '"></u>').join('') + '</div>' +
+      '<div class="mn-legend">' + areas.map(a => '<span style="--c:' + MN_AREA_C[a] + '"><i></i>' + a + ' ' + Math.round(byArea[a] / budget * 100) + '%</span>').join('') + '</div>';
+    html += '<ul class="mn-lines2 mn-bl">' + lines.map(b => {
+      const sp = spentBy[b.id] || 0, lf = b.amount - sp, pc = b.amount ? Math.min(1, sp / b.amount) : (sp ? 1 : 0);
+      if (moneyEdit === b.id) return '<li class="ed" data-b="' + b.id + '">' + lineEditor(b) + '</li>';
+      return '<li data-b="' + b.id + '" class="' + (lf < 0 ? 'over' : '') + '" style="--c:' + MN_AREA_C[b.area || guessArea(b.name)] + '">' +
+        '<span class="dot"></span><div class="mid"><span class="nm"></span><i><u style="width:' + Math.round(pc * 100) + '%"></u></i></div>' +
+        '<div class="rt"><b>' + mnNaira(Math.abs(lf)) + '</b><small>' + (lf < 0 ? 'over' : 'left of ' + mnNaira(b.amount)) + '</small></div></li>';
+    }).join('') + (moneyEdit === 'new' ? '<li class="ed">' + lineEditor(null) + '</li>' : '') + '</ul>' +
+    (moneyEdit === 'new' ? '' : '<button type="button" class="mn-add" data-a="newline">+ Add a budget line</button>') +
     (loose ? '<p class="mn-note">' + mnNaira(loose) + ' spent outside your lines. Open Spending to give it a line.</p>' : '');
   }
 
@@ -7454,6 +7516,11 @@ function renderMoney() {
       moneyEdit = null; save(); renderMoney();
     });
     ed.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') ed.querySelector('[data-a=save]').click(); }));
+    // area: tap to choose; until you do, it follows a guess from the name
+    let picked = !ed.querySelector('.sug');
+    const setArea = a => { g('area').value = a; ed.querySelectorAll('[data-ar]').forEach(c => c.classList.toggle('on', c.dataset.ar === a)); };
+    ed.querySelectorAll('[data-ar]').forEach(c => c.addEventListener('click', () => { picked = true; setArea(c.dataset.ar); const sg = ed.querySelector('.sug'); if (sg) sg.remove(); }));
+    if (g('area')) g('name').addEventListener('input', () => { if (!picked) setArea(guessArea(g('name').value)); });
   }
   // settings: paste an alert, bank texts
   const gb = box.querySelector('.mn-gearbox');
@@ -7474,17 +7541,29 @@ function renderMoney() {
 
 const focusEd = () => setTimeout(() => { const i = document.querySelector('#money-body li.ed input'); if (i) i.focus(); }, 30);
 
+// areas of life for budget lines, with a guess from the name
+const MN_AREAS = ['Health', 'Wealth', 'Love', 'Self'];
+const MN_AREA_C = { Health: '#7daf86', Wealth: '#c9965a', Love: '#d9718e', Self: '#86b9d9' };
+function guessArea(name) {
+  const n = String(name || '').toLowerCase();
+  if (/gym|health|food|grocer|meal|pharm|drug|hospital|doctor|clinic|dental|vitamin|fruit|water/.test(n)) return 'Health';
+  if (/save|saving|invest|rent|bill|light|electric|debt|loan|emergency|insurance|tax|pension|stock|house/.test(n)) return 'Wealth';
+  if (/gift|family|mum|mom|dad|sis|bro|date|partner|friend|church|tithe|offering|giving|charity|wedding|baby/.test(n)) return 'Love';
+  return 'Self';
+}
 function lineEditor(b) {
-  const areas = ['Health', 'Wealth', 'Love', 'Self', ''];
-  return '<div class="mn-ed2"><input name="name" type="text" maxlength="40" placeholder="line, e.g. Grocery" value="' + esc(b ? b.name : '') + '">' +
-    '<input name="amt" type="text" inputmode="numeric" placeholder="amount" value="' + (b ? b.amount : '') + '">' +
-    '<select name="area" aria-label="area of life">' + areas.map(a => '<option value="' + a + '"' + ((b ? b.area || '' : '') === a ? ' selected' : '') + '>' + (a || 'Other') + '</option>').join('') + '</select>' +
+  const set = b && b.area, area = set || guessArea(b ? b.name : '');
+  return '<div class="mn-ed3"><label><span>What is it</span><input name="name" type="text" maxlength="40" placeholder="e.g. Groceries" value="' + esc(b ? b.name : '') + '"></label>' +
+    '<label><span>How much a month</span><div class="mn-amt"><em>₦</em><input name="amt" type="text" inputmode="numeric" placeholder="0" value="' + (b && b.amount ? b.amount : '') + '"></div></label>' +
+    '<div class="mn-lab"><span>Area of life</span>' + (set ? '' : '<small class="sug">suggested</small>') + '</div>' +
+    '<div class="mn-areas">' + MN_AREAS.map(a => '<button type="button" data-ar="' + a + '" style="--c:' + MN_AREA_C[a] + '" class="' + (a === area ? 'on' : '') + '">' + a + '</button>').join('') + '</div>' +
+    '<input type="hidden" name="area" value="' + area + '">' +
     '<div class="mn-edb"><button type="button" class="lf-btn main" data-a="save">Save</button><button type="button" class="gm-link" data-a="cancel">Cancel</button>' +
     (b ? '<button type="button" class="gm-link danger" data-a="remove">Remove</button>' : '') + '</div></div>';
 }
 function incEditor(x, i) {
-  return '<div class="mn-ed2"><input name="name" type="text" maxlength="40" placeholder="source, e.g. Salary" value="' + esc(x ? x.name : '') + '">' +
-    '<input name="amt" type="text" inputmode="numeric" placeholder="amount a month" value="' + (x ? x.amount : '') + '">' +
+  return '<div class="mn-ed3"><label><span>Where from</span><input name="name" type="text" maxlength="40" placeholder="e.g. Salary" value="' + esc(x ? x.name : '') + '"></label>' +
+    '<label><span>How much a month</span><div class="mn-amt"><em>₦</em><input name="amt" type="text" inputmode="numeric" placeholder="0" value="' + (x && x.amount ? x.amount : '') + '"></div></label>' +
     '<div class="mn-edb"><button type="button" class="lf-btn main" data-a="save">Save</button><button type="button" class="gm-link" data-a="cancel">Cancel</button>' +
     (x ? '<button type="button" class="gm-link danger" data-a="remove">Remove</button>' : '') + '</div></div>';
 }
@@ -9200,28 +9279,32 @@ const tidyMeal = t => String(t || '').replace(/\s+/g, ' ').replace(/\s*\+\s*/g, 
 function renderMeals() {
   const box = document.getElementById('food-meals');
   const today = new Date().getDay();
-  let html = '<div class="ml-days">';
+  // a timetable: days down the side, breakfast, lunch and dinner across
+  let html = '<div class="mt"><div class="mt-row mt-head"><span></span>' +
+    MEAL_SLOTS.map(([k, name, e]) => '<span class="mt-h ' + k + '">' + e + '<i>' + name + '</i></span>').join('') + '</div>';
   for (const d of MEAL_DAYS) {
     const m = mealsFor(d);
-    html += '<div class="ml-day' + (d === today ? ' today' : '') + '"><b class="ml-dname">' + (d === today ? 'Today' : cap(FULL[d]).slice(0, 3)) + '</b><div>';
-    for (const [k, name, e] of MEAL_SLOTS) {
-      const id = d + ':' + k;
-      html += mealEdit === id
-        ? '<input type="text" class="ml-in" maxlength="80" aria-label="' + name + ' on ' + FULL[d] + '" placeholder="' + name + '">'
-        : '<button type="button" class="ml-meal' + (m[k] ? '' : ' ghost') + '" data-meal="' + id + '" aria-label="' + name + '">' + e + ' ' + (m[k] ? esc(m[k]) : name) + '</button>';
+    html += '<div class="mt-row' + (d === today ? ' today' : '') + '"><b class="mt-day">' + cap(FULL[d]).slice(0, 3) + '</b>' +
+      MEAL_SLOTS.map(([k, name]) => '<button type="button" class="mt-cell ' + k + (mealEdit === d + ':' + k ? ' on' : '') + (m[k] ? '' : ' empty') + '" data-meal="' + d + ':' + k + '" aria-label="' + name + ' on ' + FULL[d] + ': ' + esc(m[k] || 'empty') + '">' +
+        (m[k] ? esc(m[k]) : '+') + '</button>').join('') + '</div>';
+    if (mealEdit && mealEdit.split(':')[0] === String(d)) {
+      const k = mealEdit.split(':')[1], slot = MEAL_SLOTS.find(x => x[0] === k);
+      html += '<div class="mt-edit"><label for="mt-in">' + cap(FULL[d]) + ' \u00b7 ' + slot[1] + '</label>' +
+        '<input id="mt-in" type="text" class="ml-in" maxlength="80" placeholder="e.g. Oats + banana">' +
+        '<div class="jr-acts"><button type="button" class="lf-btn main" data-mt="save">Save</button><button type="button" class="lf-btn" data-mt="cancel">Cancel</button></div></div>';
     }
-    html += '</div></div>';
   }
   box.innerHTML = html + '</div>';
 
-  box.querySelectorAll('[data-meal]').forEach(b => b.addEventListener('click', () => { mealEdit = b.dataset.meal; renderMeals(); }));
-  const inp = box.querySelector('.ml-in');
+  box.querySelectorAll('[data-meal]').forEach(b => b.addEventListener('click', () => { mealEdit = mealEdit === b.dataset.meal ? null : b.dataset.meal; renderMeals(); }));
+  const inp = box.querySelector('#mt-in');
   if (inp) {
     const [d, k] = mealEdit.split(':');
     inp.value = mealsFor(d)[k] || '';
-    const done = () => { if (mealEdit === null) return; mealsFor(d)[k] = tidyMeal(inp.value); mealEdit = null; save(); renderMeals(); };
+    const done = () => { mealsFor(d)[k] = tidyMeal(inp.value); mealEdit = null; save(); renderMeals(); };
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') done(); if (e.key === 'Escape') { mealEdit = null; renderMeals(); } });
-    inp.addEventListener('blur', done);
+    box.querySelector('[data-mt=save]').addEventListener('click', done);
+    box.querySelector('[data-mt=cancel]').addEventListener('click', () => { mealEdit = null; renderMeals(); });
     setTimeout(() => inp.focus(), 20);
   }
 }
