@@ -4151,11 +4151,11 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 .wk-day i { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
 .wk-day.has i { background: var(--pink); }
 .wk-day.today { background: color-mix(in srgb, var(--pink) 22%, var(--card)); border-color: color-mix(in srgb, var(--pink) 40%, var(--hair)); }
-.wk-scroll { overflow-x: auto; border-radius: 20px; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; scrollbar-width: none; }
+.wk-scroll { overflow-x: auto; border-radius: 20px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; scrollbar-width: none; }
 .wk-scroll::-webkit-scrollbar { display: none; }
-.wk-cal { position: relative; display: grid; grid-template-columns: 44px repeat(7, 112px); gap: 0 6px; width: max-content; padding: 10px 12px 12px 0; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.wk-cal { position: relative; display: grid; grid-template-columns: 44px repeat(7, var(--dw, 112px)); gap: 0 6px; width: max-content; padding: 10px 12px 12px 0; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
 .wk-hcol { position: sticky; left: 0; z-index: 3; background: var(--card); border-radius: 20px 0 0 20px; }
-.wk-dcol { scroll-snap-align: start; scroll-margin-left: 50px; }
+.wk-dcol { scroll-snap-align: start; scroll-margin-left: 44px; }
 .wk-ch { display: flex; align-items: baseline; justify-content: center; gap: 4px; width: 100%; height: 40px; margin: 0 0 6px; padding: 0; font: 500 13px var(--display); color: var(--muted); background: none; border: none; border-radius: 12px; cursor: pointer; }
 .wk-ch b { font-size: 16px; font-weight: 600; color: var(--ink); }
 .wk-dcol.today .wk-ch { color: var(--pink-d); background: color-mix(in srgb, var(--pink) 18%, transparent); }
@@ -4245,6 +4245,8 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
   :root:not([data-theme="light"]) #view-home :is(.hm-now .hm-lbl, .hm-now .hm-sub, .hm-now .hm-prog, .hm-area small) { color: rgba(251, 241, 231, .78) !important; }
   :root:not([data-theme="light"]) #view-home .hm-now.empty .hm-sub, :root:not([data-theme="light"]) #view-home .hm-now.live .hm-lbl { color: #ffc2d4 !important; }
 }
+
+#bugtoast { position: fixed; z-index: 100; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); padding: 12px 14px; font: 500 14px/1.4 var(--display); color: #fff; background: #b9566f; border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
@@ -4503,10 +4505,24 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 16:51</footer>
+  <footer>everything saves on this device · build 16:58</footer>
 </div>
 
 <script>
+/* =========== something broke =========== */
+/* if anything crashes, a small note says what, so a screenshot shows the cause */
+function bugToast(e) {
+  try {
+    const msg = (e && (e.message || e.reason && e.reason.message || e.reason)) || String(e);
+    const where = e && e.lineno ? ' (line ' + e.lineno + ')' : (e && e.stack ? ' (' + String(e.stack).split('\n').slice(0, 2).join(' ').replace(/\s+/g, ' ').slice(0, 120) + ')' : '');
+    let t = document.getElementById('bugtoast');
+    if (!t) { t = document.createElement('div'); t.id = 'bugtoast'; t.addEventListener('click', () => t.remove()); document.body.appendChild(t); }
+    t.textContent = 'Something broke: ' + msg + where + ' · build ' + ((document.querySelector('footer') || {}).textContent || '').split('build ').pop() + '. Tap to close.';
+  } catch {}
+}
+window.addEventListener('error', e => bugToast(e));
+window.addEventListener('unhandledrejection', e => bugToast(e));
+
 /* =========== storage =========== */
 
 const KEY = 'paper.by.mia.v2';
@@ -11867,7 +11883,11 @@ function renderHome() {
   }).join('') + '</div>';
   slot.innerHTML = html;
   slot.querySelector('[data-goals]').addEventListener('click', () => { show('goals'); window.scrollTo(0, 0); });
-  slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => { lifeTab = 'week'; lifeSetup = null; areaGoalsOpen = false; lifeOpen = b.dataset.open; show('life'); window.scrollTo(0, 0); }));
+  slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => {
+    lifeTab = 'week'; lifeSetup = null; areaGoalsOpen = false; lifeOpen = b.dataset.open;
+    try { show('life'); } catch (e) { bugToast(e); }
+    window.scrollTo(0, 0);
+  }));
 }
 
 // short money: 464000 -> 464k
@@ -12221,6 +12241,7 @@ const perWords = t => lifePeriod === 'week' ? t : String(t).replace(/in the last
 
 function measureScore(id, ks) {
   const m = MEASURES[id];
+  if (!m) return { v: null, pct: null, target: 5 };   // a measure that no longer exists
   const v = m.calc(ks);
   const target = scaleTarget(m.target, m.unit, m.pct, ks.length);
   if (v === null || v === undefined) return { v: null, pct: null, target };
@@ -12621,7 +12642,8 @@ function lifeDetail(box, a) {
     const sc = goalScore(g, ks), [st, stText] = goalStatus(sc.pct);
     const priv = g.private || a.k === 'love';
     const P = priv ? ' priv' : '';
-    const custom = g.m === 'custom', M = custom ? null : g.m === 'dyn' ? dynMeasure(g.dyn) : MEASURES[g.m];
+    const M0 = g.m === 'custom' ? null : g.m === 'dyn' ? (g.dyn ? dynMeasure(g.dyn) : null) : MEASURES[g.m];
+    const custom = g.m === 'custom' || !M0, M = M0;
     const T = sc.target, one = lifePeriod === 'day' && /\bdays?\b/.test(custom ? 'days' : M.unit);
     const num = one ? (sc.v ? 'done today' : 'not yet today')
               : custom ? sc.v + ' of ' + T + ' days'
@@ -13751,8 +13773,10 @@ function renderWeek() {
   box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) weekAddSheet(c.dataset.addto, days); }));
   // open on today, or the first planned day
   const sc = box.querySelector('.wk-scroll'), cols = box.querySelectorAll('.wk-dcol');
+  // each day takes 85% of the space, so the edge of the next day shows you can swipe
+  if (sc) box.querySelector('.wk-cal').style.setProperty('--dw', Math.max(110, Math.round((sc.clientWidth - box.querySelector('.wk-hcol').offsetWidth) * 0.85)) + 'px');
   const at = days.indexOf(today) >= 0 ? days.indexOf(today) : Math.max(0, all.findIndex(x => x.length));
-  if (sc && cols[at]) sc.scrollLeft = cols[at].offsetLeft - box.querySelector('.wk-hcol').offsetWidth - 8;
+  if (sc && cols[at]) sc.scrollLeft = cols[at].offsetLeft - box.querySelector('.wk-hcol').offsetWidth;
   document.getElementById('wk-go').addEventListener('click', () => {
     const f = document.getElementById('wk-from').value, t = document.getElementById('wk-to').value;
     const msg = document.getElementById('wk-msg'), src = state.days[f];
