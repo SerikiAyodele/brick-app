@@ -5046,6 +5046,11 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
 .ns-x { position: absolute; top: 14px; right: 14px; z-index: 2; width: 44px; height: 44px; font-size: 26px; line-height: 1; color: var(--ink); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
 .ns-sheet .ns-h, .ns-sheet .ns-head { padding-right: 56px; }
 .ns-cancel { display: block; width: 100%; min-height: 50px; margin-top: 14px; font: 600 16px var(--display); color: var(--ink); background: var(--slot); border: none; border-radius: 25px; cursor: pointer; }
+
+#lensheet .ls-df { margin: 6px 0 4px; }
+#lensheet .ls-save { margin: 6px 0 16px; }
+
+#lensheet .ls-list, #lensheet .ls-add + .ab-sub { display: none !important; }
 </style>
 </head>
 <body>
@@ -5307,7 +5312,7 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:16</footer>
+  <footer>Mr.O:21:19</footer>
 </div>
 
 <script>
@@ -6265,6 +6270,9 @@ function usualLabels(n) {
   return Object.keys(tally).filter(k => tally[k] >= 2).sort((a, b) => tally[b] - tally[a]).slice(0, n).map(k => keep[k]);
 }
 
+// workouts to pick from: your gym plan first, then common kinds
+const NS_GYM = () => { let W = []; try { W = routine().workouts.map(w => ['\u{1F3CB}\uFE0F', w.title, 60, w.id]); } catch {}
+  return W.concat([['\u{1F3C3}', 'Cardio', 45], ['\u{1F9D8}', 'Yoga', 45], ['\u{1F3CA}', 'Swim', 45], ['\u{1F6B6}', 'Walk', 30], ['\u{1F6B4}', 'Cycling', 45], ['\u{1F3BE}', 'Tennis', 60], ['\u{1F483}', 'Dance', 45], ['\u{1F938}', 'Stretch', 15]]); };
 function openNameSheet(b) {
   const old = document.getElementById('namesheet'); if (old) old.remove();
   const el = document.createElement('div');
@@ -6284,6 +6292,9 @@ function openNameSheet(b) {
     if (step === 'rest') {
       html += '<div class="ns-head"><button type="button" class="ns-back">←</button><h2>What kind of rest?</h2></div><div class="ns-list">' +
         REST_KINDS.map(([t, m]) => row({ 'Break': '☕', 'Walk': '\u{1F6B6}', 'Nap': '\u{1F634}', 'Shower': '\u{1F6BF}', 'Movie time': '\u{1F3AC}', 'Music': '\u{1F3A7}', 'Pray': '\u{1F64F}', 'Do nothing': '\u{1F343}' }[t] || '•', t, minsLabel(m))).join('') + '</div>';
+    } else if (step === 'gym') {
+      html += '<div class="ns-head"><button type="button" class="ns-back">←</button><h2>What are you training?</h2></div><div class="ns-list">' +
+        NS_GYM().map(g => row(g[0], g[1], g[3] ? 'from your gym plan' : minsLabel(g[2]))).join('') + '</div>';
     } else if (step === 'meet') {
       html += '<div class="ns-head"><button type="button" class="ns-back">←</button><h2>What\u2019s the topic?</h2></div>' +
         '<div class="ns-type"><input type="text" class="ns-in" placeholder="e.g. Q4 roadmap, or leave empty" maxlength="80"><button type="button" class="ns-ok">Done</button></div>';
@@ -6295,7 +6306,7 @@ function openNameSheet(b) {
           (() => { const S = goalSteps(); return S.length ? '<p class="ns-sub ns-first">Your goals this week</p>' + S.map(x =>
             '<div class="ns-grow">' + row(x.e, x.t, x.goal) + '<button type="button" class="ns-gedit" data-ge="' + x.a + ':' + x.gi + '" aria-label="edit goal ' + esc(x.t) + '">Edit</button></div>').join('') + '<p class="ns-sub">Everything else</p>' : ''; })() +
           row('\u{1F4BC}', 'Work', 'needs an outcome') + row('\u{1F9D8}', 'Rest', 'break, walk, nap…', null, true) +
-          row('\u{1F465}', 'Meeting', 'topic and agenda', null, true) + row('\u{1F3CB}️', 'Workout', '') +
+          row('\u{1F465}', 'Meeting', 'topic and agenda', null, true) + row('\u{1F3CB}️', 'Workout', 'gym, cardio, yoga…', null, true) +
           MEAL_SLOTS.map(([k, name, e]) => { const plan = mealsFor(fromKey(viewDay).getDay())[k]; return row(e, name, plan ? 'planned: ' + plan : 'no meal planned'); }).join('') +
           (mine.length ? '<p class="ns-sub">Your usual</p>' + mine.map(x => row('↻', x.t, minsLabel(Number(x.mins) || 60))).join('') : '') +
         '</div>';
@@ -6313,7 +6324,7 @@ function openNameSheet(b) {
       setTimeout(() => inp.focus(), 50);
       return;
     }
-    if (step !== 'rest') {
+    if (step !== 'rest' && step !== 'gym') {
       inp.value = b.label || '';
       const go = () => { const v = inp.value.trim(); if (v) set(v); else close(); };
       el.querySelector('.ns-ok').addEventListener('click', go);
@@ -6336,7 +6347,8 @@ function openNameSheet(b) {
       if (k === 'Rest') return draw('rest');
       if (k === 'Meeting') return draw('meet');
       if (k === 'Work') return set('Work', 60);
-      if (k === 'Workout') return set('Workout', 60);
+      if (step === 'gym') { const g = NS_GYM().find(x => x[1] === k); if (g && g[3]) b.workout = g[3]; set(k, g && g[2]); return; }
+      if (k === 'Workout') return draw('gym');
       const ms = MEAL_SLOTS.find(x => x[1] === k);
       if (ms) { b.meal = ms[0]; return set(k, ms[0] === 'b' ? 30 : 45); }
       const gst = goalSteps().find(x => x.t === k);
@@ -7112,7 +7124,8 @@ function lengthPicker(b, from, len) {
   let other = len;
   const draw = more => {
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
-      '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2><p class="ls-from">Now ' + minsLabel(len) + ' \u00b7 ' + clock(from) + ' to ' + clock(from + len) + '</p>' +
+      '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2>' +
+      (more ? '' : '<div class="ls-df"></div><p class="ls-from ls-end">' + clock(from) + ' to ' + clock(from + len) + '</p><button type="button" class="wka-go ls-save">Save</button>') +
       (more ? '' : '<p class="ab-sub">Add time</p><div class="ls-add">' + [5, 10, 15, 30, 60].map(d => '<button type="button" data-add="' + d + '">+' + (d === 60 ? '1h' : d) + '</button>').join('') + '</div><p class="ab-sub">Or set it</p>') +
       (more
         ? '<div class="ls-step"><button type="button" data-o="-15" aria-label="15 minutes less">\u2212</button><div><b>' + minsLabel(other) + '</b><small>ends ' + clock(from + other) + '</small></div><button type="button" data-o="15" aria-label="15 minutes more">+</button></div>' +
@@ -7126,6 +7139,11 @@ function lengthPicker(b, from, len) {
     el.querySelector('.ls-cancel').addEventListener('click', close);
     el.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
     el.querySelectorAll('[data-add]').forEach(x => x.addEventListener('click', () => keep(len + Number(x.dataset.add))));   // add time to the task
+    // the length itself, typed
+    const dfBox = el.querySelector('.ls-df');
+    if (dfBox) { let typed = len; const endP = el.querySelector('.ls-end');
+      durField(dfBox, len, m => { typed = m; endP.textContent = clock(from) + ' to ' + clock(from + m); });
+      el.querySelector('.ls-save').addEventListener('click', () => keep(typed)); }
     const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
     el.querySelectorAll('[data-o]').forEach(x => x.addEventListener('click', () => { other = Math.max(15, Math.min(720, other + Number(x.dataset.o))); draw(true); }));
     const st = el.querySelector('.ls-set'); if (st) st.addEventListener('click', () => keep(other));
@@ -14924,7 +14942,10 @@ const goalId = g => { if (!g.setAt) g.setAt = Date.now() + Math.floor(Math.rando
 function goalSteps() {
   const out = [];
   try {
+    const ks = perKeys(0), tk = planKey();
     for (const a of AREAS) areaGoals(a.k).forEach((g, gi) => {
+      // done today (ticked, or one of its blocks done) or met for the week: not a pick any more
+      if ((g.days || []).includes(tk) || stepDoneOn(g, tk) || (goalScore(g, ks).pct || 0) >= 100) return;
       out.push({ t: g.text, e: a.e, a: a.k, gi, id: goalId(g), goal: a.name });
       for (const st of (g.actions || [])) out.push({ t: st, e: a.e, a: a.k, gi, id: goalId(g), goal: g.text });   // its steps
     });
