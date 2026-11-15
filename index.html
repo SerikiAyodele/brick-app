@@ -4649,6 +4649,8 @@ html { background: var(--paper) !important; }
 .gs-sug:disabled { opacity: .6; }
 .gs-sugs .wka-row { margin-top: 4px; }
 .gs-sugs .wka-row button { text-align: left; }
+
+.wk-copylink { display: block; margin: 16px auto 0; min-height: 44px; padding: 0 14px; font: 500 14px var(--display); color: var(--muted); background: none; border: none; text-decoration: underline; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -4909,7 +4911,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:45</footer>
+  <footer>Mr.O:18:48</footer>
 </div>
 
 <script>
@@ -14468,7 +14470,8 @@ function renderWeek() {
   const opt = sel => days.map(k => '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + cap(FULL[fromKey(k).getDay()]) + '</option>').join('');
   const from0 = days[all.findIndex(x => x.length)] || days[0];
   const to0 = days.find((k, n) => !all[n].length && k > from0) || days.find((k, n) => !all[n].length) || days[1];
-  html += '<div class="wk-copy"><b>Copy a day</b><select id="wk-from" aria-label="copy from">' + opt(from0) + '</select> to ' +
+  if (!renderWeek.copyOpen) html += '<button type="button" class="wk-copylink" id="wk-copyopen">Copy a day</button>';
+  else html += '<div class="wk-copy"><b>Copy a day</b><select id="wk-from" aria-label="copy from">' + opt(from0) + '</select> to ' +
     '<select id="wk-to" aria-label="copy to">' + opt(to0) + '</select><button type="button" id="wk-go">Copy</button><small id="wk-msg">Works on an empty day, so no plan gets replaced.</small></div>';
   box.innerHTML = html;
 
@@ -14491,7 +14494,8 @@ function renderWeek() {
   if (sc && weekLook === 'cal') box.querySelector('.wk-cal').style.setProperty('--dw', Math.max(110, Math.round((sc.clientWidth - box.querySelector('.wk-hcol').offsetWidth) * 0.85)) + 'px');
   const at = days.indexOf(today) >= 0 ? days.indexOf(today) : Math.max(0, all.findIndex(x => x.length));
   if (sc && cols[at] && weekLook === 'cal') sc.scrollLeft = cols[at].offsetLeft - box.querySelector('.wk-hcol').offsetWidth;
-  document.getElementById('wk-go').addEventListener('click', () => {
+  const co = document.getElementById('wk-copyopen'); if (co) co.addEventListener('click', () => { renderWeek.copyOpen = true; renderWeek(); });
+  if (document.getElementById('wk-go')) document.getElementById('wk-go').addEventListener('click', () => {
     const f = document.getElementById('wk-from').value, t = document.getElementById('wk-to').value;
     const msg = document.getElementById('wk-msg'), src = state.days[f];
     const name = k => cap(FULL[fromKey(k).getDay()]);
