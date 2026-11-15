@@ -3944,7 +3944,7 @@ body, body[data-view] {
     <button class="brick flat" id="tab-life"   role="tab" aria-selected="false" aria-controls="view-life" hidden>life</button>
     <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas" hidden>tweets</button>
     <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits" hidden>habits</button>
-    <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money" hidden>money</button>
+    <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money" hidden>wallet</button>
     <button class="brick flat" id="tab-stats"  role="tab" aria-selected="false" aria-controls="view-stats">stats</button>
     <button class="brick flat" id="show-toggle" type="button">Show mode</button>
     <div class="mp-theme">
@@ -4091,7 +4091,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:27</footer>
+  <footer>everything saves on this device · build 12:29</footer>
 </div>
 
 <script>
@@ -7527,7 +7527,7 @@ function renderMoney() {
   const gap = income - budget;
   const bal = gap === 0 ? ['ok', 'Balanced. Every naira has a job.'] : gap > 0 ? ['give', mnNaira(gap) + ' of income has no job yet'] : ['over', 'Budget is ' + mnNaira(-gap) + ' more than income'];
 
-  let html = '<header class="pghead"><h1>Money</h1><span class="mn-mon"><button type="button" data-m="-1" aria-label="previous month">‹</button>' +
+  let html = '<header class="pghead"><h1>Wallet</h1><span class="mn-mon"><button type="button" data-m="-1" aria-label="previous month">‹</button>' +
     cap(MONTHS[M - 1].slice(0, 3)) + ' ' + Y + '<button type="button" data-m="1" aria-label="next month"' + (isNow ? ' disabled' : '') + '>›</button>' +
     '<button type="button" class="mn-gear" aria-label="settings">⚙</button></span></header>';
 
@@ -11280,7 +11280,7 @@ function openArea(sec, area, sc) {
 
 // the pages that live under each area, opened from its page on Home
 const AREA_PAGES = { health: ['food', 'gym', 'mood'], wealth: ['money'], love: [], self: ['habits', 'ideas'] };
-const PAGE_NAME = { food: 'Fuel', gym: 'Move', mood: 'Health log', money: 'Money', habits: 'Habits', ideas: 'Tweets' };
+const PAGE_NAME = { food: 'Fuel', gym: 'Move', mood: 'Health log', money: 'Wallet', habits: 'Habits', ideas: 'Tweets' };
 function areaOfPage(tab) { const k = Object.keys(AREA_PAGES).find(a => AREA_PAGES[a].includes(tab)); return k ? AREAS.find(a => a.k === k) : null; }
 function areaPagesHtml(a) {
   const tabs = AREA_PAGES[a.k] || [];
