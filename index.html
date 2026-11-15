@@ -4345,6 +4345,11 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
   :root:not([data-theme="light"]) #view-goals .gl-chk { background: rgba(255,255,255,.12); border-color: rgba(251,241,231,.45); }
   :root:not([data-theme="light"]) #view-goals .gl-chk.on { color: #3b2d25; background: #fbf1e7; border-color: #fbf1e7; }
 }
+
+.ns-grow { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--hair); }
+.ns-grow .ns-row { flex: 1; min-width: 0; border-bottom: 0 !important; }
+.ns-gedit { flex: none; min-width: 56px; min-height: 40px; padding: 0 12px; font: 500 14px var(--display); color: var(--muted); background: var(--paper); border: 1px solid var(--hair); border-radius: 20px; cursor: pointer; }
+.ns-gtype { width: 100%; padding: 8px 0; }
 </style>
 </head>
 <body>
@@ -4603,7 +4608,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:18</footer>
+  <footer>Mr.O:17:21</footer>
 </div>
 
 <script>
@@ -5550,7 +5555,8 @@ function openNameSheet(b) {
       html += '<h2 class="ns-h">What’s this block?</h2>' +
         '<div class="ns-type"><input type="text" class="ns-in" placeholder="Type a name" maxlength="200"><button type="button" class="ns-ok">Save</button></div>' +
         '<div class="ns-list">' +
-          (() => { const S = goalSteps(); return S.length ? '<p class="ns-sub ns-first">Your goals</p>' + S.map(x => row(x.e, x.t, x.goal)).join('') + '<p class="ns-sub">Everything else</p>' : ''; })() +
+          (() => { const S = goalSteps(); return S.length ? '<p class="ns-sub ns-first">Your goals this week</p>' + S.map(x =>
+            '<div class="ns-grow">' + row(x.e, x.t, x.goal) + '<button type="button" class="ns-gedit" data-ge="' + x.a + ':' + x.gi + '" aria-label="edit goal ' + esc(x.t) + '">Edit</button></div>').join('') + '<p class="ns-sub">Everything else</p>' : ''; })() +
           row('\u{1F4BC}', 'Work', 'needs an outcome') + row('\u{1F9D8}', 'Rest', 'break, walk, nap…', null, true) +
           row('\u{1F465}', 'Meeting', 'topic and agenda', null, true) + row('\u{1F3CB}️', 'Workout', '') +
           MEAL_SLOTS.map(([k, name, e]) => { const plan = mealsFor(fromKey(viewDay).getDay())[k]; return row(e, name, plan ? 'planned: ' + plan : 'no meal planned'); }).join('') +
@@ -5574,6 +5580,17 @@ function openNameSheet(b) {
       el.querySelector('.ns-ok').addEventListener('click', go);
       inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
     }
+    // edit a goal right here: its words change everywhere
+    el.querySelectorAll('[data-ge]').forEach(x => x.addEventListener('click', () => {
+      const [ak, gi] = x.dataset.ge.split(':'), g = areaGoals(ak)[Number(gi)];
+      if (!g) return;
+      const wrap = x.parentElement;
+      wrap.innerHTML = '<div class="ns-type ns-gtype"><input type="text" class="ns-gin" maxlength="100" aria-label="goal"><button type="button" class="ns-ok">Save</button></div>';
+      const gin = wrap.querySelector('.ns-gin'); gin.value = g.text; gin.focus();
+      const ok = () => { const t = gin.value.trim(); if (t) { g.text = t; g.own = true; save(); } draw(null); };
+      wrap.querySelector('.ns-ok').addEventListener('click', ok);
+      gin.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
+    }));
     el.querySelectorAll('.ns-row').forEach(r => r.addEventListener('click', () => {
       const k = r.dataset.k;
       if (step === 'rest') { const m = REST_KINDS.find(x => x[0] === k); set(k, m && m[1]); return; }
@@ -12031,8 +12048,7 @@ function renderGoals() {
     let body = '';
     if (goalsTab === 'week') {
       const gs = areaGoals(a.k);
-      body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button>' +
-        '<button type="button" class="gl-steps' + ((g.actions || []).length ? '' : ' none') + (g.private || a.k === 'love' ? ' priv' : '') + '" data-steps="' + a.k + ':' + gi + '">' + ((g.actions || []).length ? esc(g.actions.join(' \u00b7 ')) : '+ steps to get there') + '</button>'; }).join('') +
+      body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button>'; }).join('') +
         (gs.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
     } else if (goalsTab === 'month') {
       const g = MG[a.k];
@@ -12055,7 +12071,6 @@ function renderGoals() {
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
   on('[data-wk]', el => { lifeOpen = el.dataset.wk; areaGoalsOpen = true; lifeSetup = null; show('life'); window.scrollTo(0, 0); });
-  on('[data-steps]', el => { const [ak, gi] = el.dataset.steps.split(':'); stepsSheet(ak, Number(gi)); });
   on('[data-wkadd]', el => { goalsReturn = true; lifeOpen = null; lifeSetup = { i: AREAS.findIndex(x => x.k === el.dataset.wkadd), text: '', one: true }; show('life'); window.scrollTo(0, 0); });
   on('[data-bignew]', el => { goalsReturn = true; lifeOpen = null; if (!state.life[el.dataset.bignew]) state.life[el.dataset.bignew] = { goals: [], ids: [] }; bigEdit = { a: el.dataset.bignew, i: -1, text: '', months: Number(goalsTab) }; show('life'); window.scrollTo(0, 0); });
   on('[data-bigopen]', () => { lifeOpen = null; lifeTab = 'big'; show('life'); window.scrollTo(0, 0); });
@@ -13328,24 +13343,11 @@ function lifeWizard(box) {
     }
     goals.push(g);
     areaGoals(a.k); save();
-    lifeSetup = { ...st, text: '', pick: null, said: null, steps: goals.length - 1 };   // next: the steps to get there
+    lifeSetup = { ...st, text: '', pick: null, said: null, saved: true };
     renderLife();
   };
   const used = goals.filter((g, j) => j !== st.replace).map(g => g.m).filter(m => m !== 'custom');
   const options = Object.keys(MEASURES).filter(id => MEASURES[id].area === a.k && !used.includes(id));
-
-  // the steps that get you there: they become picks when you plan a day
-  if (st.steps !== undefined && goals[st.steps]) {
-    const g = goals[st.steps];
-    box.innerHTML = '<div class="lf-wiz" style="--c:' + a.c + '">' + step + '<h1>Steps</h1>' +
-      '<p class="lf-yours">“' + esc(g.text) + '”</p>' +
-      '<p class="lf-ask">What steps will get you there this week?</p>' +
-      '<div class="gs-ed"></div>' +
-      '<div class="lf-btns col"><button type="button" class="lf-btn main" data-a="next">Next</button></div></div>';
-    stepsEditor(box.querySelector('.gs-ed'), g, a);
-    box.querySelector('[data-a=next]').addEventListener('click', () => { lifeSetup = { ...st, steps: undefined, saved: true }; renderLife(); });
-    return;
-  }
 
   // after saving: show the goals so far, add another or move on
   if (st.saved) {
@@ -13802,57 +13804,21 @@ async function chatSend(text) {
 
 
 /* =========== goal steps ===========
-   each weekly goal can have a few steps that get you there (Gym, 10k walk).
-   they show up as picks when you plan a day. a block made from a step
-   remembers it (b.step = the goal's id), and ticking it counts for that goal. */
-const MAX_STEPS = 6;
+   your weekly goals are the picks when you plan a day (the goal is the step).
+   a block made from a goal remembers it (b.step = the goal's id), and
+   ticking it counts for that goal. */
 const goalId = g => { if (!g.setAt) g.setAt = Date.now() + Math.floor(Math.random() * 1000); return g.setAt; };
 function goalSteps() {
   const out = [];
   try {
-    for (const a of AREAS) for (const g of areaGoals(a.k)) for (const t of (g.actions || [])) out.push({ t, e: a.e, a: a.k, id: goalId(g), goal: g.text });
+    for (const a of AREAS) areaGoals(a.k).forEach((g, gi) => out.push({ t: g.text, e: a.e, a: a.k, gi, id: goalId(g), goal: a.name }));
   } catch {}
   return out;
 }
 function stepDoneOn(g, k) {
-  if (!g.actions || !g.actions.length) return false;
-  const id = g.setAt, names = g.actions.map(x => x.toLowerCase());
+  const id = g.setAt, names = [String(g.text || '').trim().toLowerCase()];
   return ((state.days[k] || {}).blocks || []).some(b => b.done && (b.step === id || names.includes((b.label || '').trim().toLowerCase())));
 }
-// the list of steps with a box to add more, used in setup and in the sheet
-function stepsEditor(root, g, a) {
-  const draw = () => {
-    const S = g.actions || [];
-    root.innerHTML = '<ul class="gs-list">' + S.map((t, i) => '<li><span>' + esc(t) + '</span><button type="button" data-rm="' + i + '" aria-label="remove ' + esc(t) + '">\u00d7</button></li>').join('') + '</ul>' +
-      (S.length < MAX_STEPS ? '<div class="gs-add"><input type="text" maxlength="40" placeholder="' + (S.length ? 'another step' : 'e.g. ' + ({ health: 'Gym', wealth: 'Apply to 2 jobs', love: 'Call mum', self: 'Read 20 pages' })[a.k]) + '" aria-label="add a step"><button type="button">Add</button></div>' : '<p class="gs-max">' + MAX_STEPS + ' steps at most.</p>');
-    root.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { g.actions.splice(Number(b.dataset.rm), 1); save(); draw(); }));
-    const inp = root.querySelector('.gs-add input');
-    if (!inp) return;
-    const add = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; }
-      g.actions = g.actions || [];
-      if (!g.actions.some(x => x.toLowerCase() === t.toLowerCase())) g.actions.push(t);
-      goalId(g); save(); draw(); const n = root.querySelector('.gs-add input'); if (n) n.focus(); };
-    root.querySelector('.gs-add button').addEventListener('click', add);
-    inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
-  };
-  draw();
-}
-function stepsSheet(ak, gi) {
-  const a = AREAS.find(x => x.k === ak), g = areaGoals(ak)[gi];
-  if (!a || !g) return;
-  const old = document.getElementById('gssheet'); if (old) old.remove();
-  const el = document.createElement('div');
-  el.id = 'gssheet'; el.className = 'w3';
-  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet" role="dialog" aria-modal="true" aria-label="Steps"><span class="w3-grab"></span>' +
-    '<h2 class="gs-h">' + a.e + ' Steps</h2><p class="gs-goal">' + esc(g.text) + '</p><p class="gs-ask">What steps will get you there this week? They show up when you plan a day.</p>' +
-    '<div class="gs-ed"></div><button type="button" class="wka-go gs-done">Done</button></div>';
-  document.body.appendChild(el);
-  stepsEditor(el.querySelector('.gs-ed'), g, a);
-  const close = () => { el.remove(); if (document.body.dataset.view === 'goals') renderGoals(); };
-  el.querySelector('.w3-back').addEventListener('click', close);
-  el.querySelector('.gs-done').addEventListener('click', close);
-}
-
 /* =========== plan: week =========== */
 /* a strip of 7 days (tap one to plan it), a calendar of the whole week,
    and "copy a day" to reuse a plan. blocks run one after another from the
