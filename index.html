@@ -3828,6 +3828,41 @@ html body[data-view="day"] {
 .lf-t-in { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
 .hubback { margin-bottom: 4px; }
 
+/* goals */
+.hm-goals { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 22px; padding: 16px 18px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 22px; cursor: pointer; }
+.hm-goals > span:first-child { flex: 1; display: flex; flex-direction: column; }
+.hm-goals b { font-size: 17px; font-weight: 600; }
+.hm-goals small { font-size: 13px; color: var(--muted); }
+.hm-gdots { display: flex; gap: 5px; }
+.hm-gdots i { width: 10px; height: 10px; border-radius: 50%; background: color-mix(in srgb, var(--c) 25%, var(--card)); }
+.hm-gdots i.on { background: var(--c); }
+.hm-goals s { text-decoration: none; font-size: 20px; color: var(--muted); }
+.hm-areas { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.hm-area { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 104px; padding: 14px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 13%, var(--card)); border: none; border-radius: 22px; cursor: pointer; }
+.hm-area i { font-style: normal; font-size: 22px; margin-bottom: 6px; }
+.hm-area b { font-size: 16px; font-weight: 600; }
+.hm-area small { font-size: 11px; color: var(--muted); line-height: 1.35; }
+.gl-tabs { margin: 4px 0 14px; }
+.gl-tabs .md-seg-b { font-size: 13px; }
+.gl-list { display: flex; flex-direction: column; gap: 10px; }
+.gl-area { padding: 14px; background: var(--card); border: 1px solid var(--hair); border-left: 4px solid var(--c); border-radius: 18px; }
+.gl-ah { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.gl-ah i { font-style: normal; font-size: 16px; }
+.gl-ah b { font-size: 14px; font-weight: 600; }
+.gl-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 4px 0; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: none; border: none; cursor: pointer; }
+.gl-row small { flex: none; font-size: 12px; color: var(--muted); }
+.gl-t { flex: 1; min-width: 0; font: 400 15px "Poppins", sans-serif; color: var(--ink); text-align: left; background: none; border: none; padding: 0; cursor: pointer; }
+.gl-t.done { color: var(--muted); text-decoration: line-through; }
+.gl-tick { flex: none; width: 34px; height: 34px; font-size: 15px; color: transparent; background: none; border: 2px solid var(--c); border-radius: 50%; cursor: pointer; }
+.gl-tick.on { color: #fff; background: var(--c); }
+.gl-add { width: 100%; min-height: 40px; padding: 0; text-align: left; font: 500 14px "Poppins", sans-serif; color: var(--muted); background: none; border: none; cursor: pointer; }
+.gl-in { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
+.gl-big { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; width: 100%; padding: 0; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: none; border: none; cursor: pointer; }
+.gl-big small { width: 100%; font-size: 12px; color: var(--muted); }
+.gl-bar { display: block; width: 100%; height: 6px; background: var(--hair); border-radius: 3px; overflow: hidden; }
+.gl-bar u { display: block; height: 100%; background: var(--c); border-radius: 3px; }
+.gl-why { margin: 14px 4px 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
+
 /* people */
 .pp-hero { display: flex; flex-direction: column; gap: 2px; padding: 18px; background: color-mix(in srgb, #e38fa8 18%, var(--card)); border: 1px solid var(--hair); border-radius: 22px; }
 .pp-hero span { font-size: 13px; font-weight: 600; color: var(--muted); }
@@ -4001,6 +4036,7 @@ body, body[data-view] {
     <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas" hidden>tweets</button>
     <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits" hidden>habits</button>
     <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money" hidden>wallet</button>
+    <button class="brick flat" id="tab-goals"  role="tab" aria-selected="false" aria-controls="view-goals" hidden>goals</button>
     <button class="brick flat" id="tab-people" role="tab" aria-selected="false" aria-controls="view-people" hidden>people</button>
     <button class="brick flat" id="tab-stats"  role="tab" aria-selected="false" aria-controls="view-stats">stats</button>
     <button class="brick flat" id="show-toggle" type="button">Show mode</button>
@@ -4065,6 +4101,11 @@ body, body[data-view] {
   </section>
 
   <!-- ============ IDEAS ============ -->
+  <!-- ============ GOALS ============ -->
+  <section id="view-goals" role="tabpanel" aria-labelledby="tab-goals" hidden>
+    <div id="goals-body"></div>
+  </section>
+
   <!-- ============ PEOPLE ============ -->
   <section id="view-people" role="tabpanel" aria-labelledby="tab-people" hidden>
     <div id="people-body"></div>
@@ -4153,7 +4194,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:49</footer>
+  <footer>everything saves on this device · build 12:58</footer>
 </div>
 
 <script>
@@ -4164,7 +4205,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {} };
 
 function load() {
   try {
@@ -4207,7 +4248,8 @@ function load() {
         prices:    (d.prices && typeof d.prices === 'object') ? d.prices : {},
         imported:  Array.isArray(d.imported) ? d.imported : [],
         grocLists: Array.isArray(d.grocLists) ? d.grocLists : [],
-        people:    Array.isArray(d.people) ? d.people : []
+        people:    Array.isArray(d.people) ? d.people : [],
+        monthGoals: d.monthGoals && typeof d.monthGoals === 'object' ? d.monthGoals : {}
       };
     }
     const old = localStorage.getItem(OLD);
@@ -7486,6 +7528,19 @@ function importMoney(data) {
       if (!/^\d{4}-\d{2}$/.test(ym) || P.months[ym] || !Array.isArray(rows)) continue;
       P.months[ym] = { lines: rows.filter(r => r && r.name).map((r, i) => ({ id: 'h' + ym.replace('-', '') + i, name: String(r.name).trim(), amount: Number(r.amount) || 0, area: AREA_OF_LIFE[String(r.area || '').toLowerCase()] || '' })) };
     }
+  }
+  // what was already spent on each line before the bank alerts started (Notion's Debit column)
+  if (Array.isArray(data.spent) && !(state.imported || []).includes(data.id)) {
+    if (!state.money) state.money = [];
+    for (const x of data.spent) {
+      if (!x || !(Number(x.amount) > 0) || !/^\d{4}-\d{2}$/.test(x.ym)) continue;
+      const L = linesFor(x.ym).find(b => lineKey(b.name) === lineKey(x.name));
+      const [y, m] = x.ym.split('-').map(Number);
+      state.money.push({ id: 'n' + x.ym + lineKey(x.name).replace(/ /g, ''), amt: Number(x.amount), dir: 'DR', desc: x.name + ', from Notion', bal: null, acct: '',
+                         at: new Date(y, m - 1, 1, 9, 0).getTime(), src: 'notion', ...(L ? { line: L.id } : {}) });
+    }
+    state.money.sort((a, b) => b.at - a.at);
+    if (data.id) { if (!state.imported) state.imported = []; state.imported.push(data.id); }
   }
   P.importedAt = Date.now();
   save();
@@ -11388,40 +11443,82 @@ function renderHome() {
 
   const slot = document.getElementById('menu');
   slot.innerHTML = '';
-  const ks = perKeys(0), prev = perKeys(1);
-  const overall = lifeScores();
-  // the Life page look: a big total, then a tile per area
-  let html = '<div class="hm-life-head"><b>Your life</b><button type="button" class="hm-big" data-big="1">Big goals \u203a</button></div>' +
-    '<div class="lf-total"><b>' + (overall === null ? '–' : overall) + '</b><i>%</i><span>' +
-      (overall === null ? 'set a goal to start' : 'of the way to your goals ' + perName().toLowerCase()) + '</span></div><div class="lf-grid">';
+  const ks = perKeys(0);
+  // one Goals card: this week across all areas
+  const all = AREAS.flatMap(x => areaGoals(x.k).map(g => goalStatus(goalScore(g, ks).pct)[0]));
+  const onT = all.filter(x => x === 'on').length;
+  let html = '<button type="button" class="hm-goals" data-goals="1"><span><b>Goals</b><small>' +
+    (all.length ? onT + ' of ' + all.length + ' on track this week' : 'set this week\u2019s goals') + '</small></span>' +
+    '<span class="hm-gdots">' + AREAS.map(x => '<i style="--c:' + x.c + '" class="' + (areaGoals(x.k).length ? 'on' : '') + '"></i>').join('') + '</span><s>\u203a</s></button>';
+  // the areas: what runs each one
   const jr = activeJourney();
-  const jrLine = jr ? '<span class="lf-t-trend">\u{1F331} Day ' + journeyDay(jr, Date.now()) + ' \u00b7 ' + esc(jr.name) + '</span>' : '';
-  for (const a of AREAS) {
-    const gs = areaGoals(a.k);
-    if (!gs.length && a.k === 'health') {     // Health always opens its page: journey first, then goals
-      html += '<button type="button" class="lf-tile' + (jr ? '' : ' empty') + '" data-open="health" style="--c:' + a.c + '"><span class="lf-t-name">' + a.name + '</span>' + (jr ? jrLine : '<span class="lf-t-add">+ Set a goal</span>') + '<span class="lf-t-in">Fuel \u00b7 Move \u00b7 Health log</span></button>';
-      continue;
+  html += '<div class="hm-areas">' + AREAS.map(x => {
+    const pages = (AREA_PAGES[x.k] || []).concat(x.k === 'love' ? [] : []);
+    const line = x.k === 'health' && jr ? 'Day ' + journeyDay(jr, Date.now()) + ' \u00b7 ' + jr.name
+      : pages.map(t => PAGE_NAME[t]).join(' \u00b7 ');
+    return '<button type="button" class="hm-area" data-open="' + x.k + '" style="--c:' + x.c + '"><i>' + x.e + '</i><b>' + x.name + '</b><small></small></button>';
+  }).join('') + '</div>';
+  slot.innerHTML = html;
+  slot.querySelectorAll('.hm-area').forEach(el => {
+    const x = AREAS.find(z => z.k === el.dataset.open);
+    el.querySelector('small').textContent = x.k === 'health' && jr ? 'Day ' + journeyDay(jr, Date.now()) + ' \u00b7 ' + jr.name : (AREA_PAGES[x.k] || []).map(t => PAGE_NAME[t]).join(' \u00b7 ');
+  });
+  slot.querySelector('[data-goals]').addEventListener('click', () => { show('goals'); window.scrollTo(0, 0); });
+  slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => { lifeTab = 'week'; lifeSetup = null; areaGoalsOpen = false; lifeOpen = b.dataset.open; show('life'); window.scrollTo(0, 0); }));
+}
+
+/* =========== goals ===========
+   one page for every goal, by how far ahead: this week, this month,
+   6 months and 1 year. few on purpose: one per area for each length,
+   and 2 a week per area (5 in all). the area pages hold the systems
+   that move them: Fuel, Move, Wallet, People and the rest. */
+let goalsTab = 'week';
+let monthEdit = null;   // area key being typed
+function renderGoals() {
+  const box = document.getElementById('goals-body');
+  const ks = perKeys(0), ym = ymOf(Date.now());
+  if (!state.monthGoals) state.monthGoals = {};
+  const MG = state.monthGoals[ym] || (state.monthGoals[ym] = {});
+  const tabs = [['week', 'Week'], ['month', 'Month'], ['6', '6 months'], ['12', '1 year']];
+  let html = '<header class="pghead"><h1>Goals</h1><span>' + ({ week: weekGoalCount() + ' of ' + MAX_WEEK_ALL + ' this week', month: cap(MONTHS[new Date().getMonth()]), 6: 'one per area', 12: 'one per area' })[goalsTab] + '</span></header>' +
+    '<div class="md-seg gl-tabs">' + tabs.map(([k, t]) => '<button type="button" class="md-seg-b' + (goalsTab === k ? ' on' : '') + '" data-gt="' + k + '">' + t + '</button>').join('') + '</div>';
+  html += '<div class="gl-list">' + AREAS.map(a => {
+    let body = '';
+    if (goalsTab === 'week') {
+      const gs = areaGoals(a.k);
+      body = gs.map(g => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '"><i class="lf-dot ' + st[0] + '"></i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span><small>' + st[1] + '</small></button>'; }).join('') +
+        (gs.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
+    } else if (goalsTab === 'month') {
+      const g = MG[a.k];
+      body = monthEdit === a.k || !g
+        ? '<input type="text" class="gl-in" data-mo="' + a.k + '" maxlength="100" placeholder="one thing for ' + a.name.toLowerCase() + ' this month">'
+        : '<div class="gl-row"><button type="button" class="gl-tick' + (g.done ? ' on' : '') + '" data-motick="' + a.k + '" aria-label="done">\u2713</button><button type="button" class="gl-t gl-mt" data-moed="' + a.k + '"></button></div>';
+    } else {
+      const m = Number(goalsTab), b = bigsOf(a.k).find(x => x.months === m);
+      if (b) { const { st, left } = bigState(b), A = weekAction(b);
+        body = '<button type="button" class="gl-big" data-bigopen="1"><span class="gl-t">' + esc(b.text) + '</span><span class="lf-pill ' + st[0] + '">' + st[1] + '</span>' +
+          '<i class="gl-bar"><u style="width:' + b.pct + '%"></u></i><small>' + (b.done ? 'Done' : left + ' days left') + (A ? ' \u00b7 this week: ' + esc(A.text) : '') + '</small></button>'; }
+      else body = '<button type="button" class="gl-add" data-bignew="' + a.k + '">+ ' + (m === 6 ? 'where you want to be in 6 months' : 'where you want to be in a year') + '</button>';
     }
-    const inside = (AREA_PAGES[a.k] || []).map(t => PAGE_NAME[t]).join(' \u00b7 ');
-    const insideHtml = inside ? '<span class="lf-t-in">' + inside + '</span>' : '';
-    if (!gs.length) {
-      html += '<button type="button" class="lf-tile empty" data-open="' + a.k + '" style="--c:' + a.c + '">' +
-              '<span class="lf-t-name">' + a.name + '</span><span class="lf-t-add">+ Set a goal</span>' + insideHtml + '</button>';
-      continue;
-    }
-    const now = areaScore(a.k, ks), was = areaScore(a.k, prev), d = now - (was || 0);
-    const onT = gs.filter(g => goalStatus(goalScore(g, ks).pct)[0] === 'on').length;
-    html += '<button type="button" class="lf-tile" data-open="' + a.k + '" style="--c:' + a.c + '">' +
-      '<span class="lf-t-name">' + a.name + '</span><span class="lf-t-num">' + now + '<i>%</i></span>' +
-      '<span class="lf-t-bar"><u style="width:' + now + '%"></u></span>' +
-      '<span class="lf-t-trend">' + onT + ' of ' + gs.length + ' on track</span>' + (a.k === 'health' ? jrLine : '') + insideHtml + '</button>';
-  }
-  slot.innerHTML = html + '</div>';
-  slot.querySelector('[data-big]').addEventListener('click', () => { lifeTab = 'big'; lifeOpen = null; lifeSetup = null; show('life'); window.scrollTo(0, 0); });
-  slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => { lifeTab = 'week'; lifeSetup = null; lifeOpen = b.dataset.open; show('life'); window.scrollTo(0, 0); }));
-  slot.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => {
-    lifeTab = 'week'; lifeOpen = null; lifeSetup = { i: AREAS.findIndex(x => x.k === b.dataset.add), text: '', one: true }; show('life');
-  }));
+    return '<section class="gl-area" style="--c:' + a.c + '"><div class="gl-ah"><i>' + a.e + '</i><b>' + a.name + '</b></div>' + body + '</section>';
+  }).join('') + '</div>';
+  if (goalsTab === 'week') html += '<p class="gl-why">Few on purpose. Your brain can only push a few goals at once, so fewer get done more.</p>';
+  box.innerHTML = html;
+
+  box.querySelectorAll('.gl-mt').forEach(el => { el.textContent = MG[el.dataset.moed].text; if (MG[el.dataset.moed].done) el.classList.add('done'); });
+  const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
+  on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
+  on('[data-wk]', el => { lifeOpen = el.dataset.wk; areaGoalsOpen = true; lifeSetup = null; show('life'); window.scrollTo(0, 0); });
+  on('[data-wkadd]', el => { goalsReturn = true; lifeOpen = null; lifeSetup = { i: AREAS.findIndex(x => x.k === el.dataset.wkadd), text: '', one: true }; show('life'); window.scrollTo(0, 0); });
+  on('[data-bignew]', el => { goalsReturn = true; lifeOpen = null; if (!state.life[el.dataset.bignew]) state.life[el.dataset.bignew] = { goals: [], ids: [] }; bigEdit = { a: el.dataset.bignew, i: -1, text: '', months: Number(goalsTab) }; show('life'); window.scrollTo(0, 0); });
+  on('[data-bigopen]', () => { lifeOpen = null; lifeTab = 'big'; show('life'); window.scrollTo(0, 0); });
+  on('[data-motick]', el => { const g = MG[el.dataset.motick]; g.done = !g.done; save(); renderGoals(); });
+  on('[data-moed]', el => { monthEdit = el.dataset.moed; renderGoals(); const i = box.querySelector('[data-mo="' + monthEdit + '"]'); if (i) { i.value = MG[monthEdit].text; i.focus(); } });
+  box.querySelectorAll('[data-mo]').forEach(i => {
+    const commit = () => { const t = i.value.trim(), k = i.dataset.mo; if (t) MG[k] = { text: t, done: MG[k] ? MG[k].done : false }; else if (monthEdit === k) delete MG[k]; monthEdit = null; save(); renderGoals(); };
+    i.addEventListener('keydown', e => { if (e.key === 'Enter') commit(); });
+    i.addEventListener('blur', () => { if (i.value.trim() || monthEdit === i.dataset.mo) commit(); });
+  });
 }
 
 // tap an area: a sheet with its pages, each one tap away
@@ -11731,7 +11828,9 @@ function lifeScores() {
 /* ---- goals, one at a time ----
    each area holds up to 3 goals. each goal is one sentence in your words,
    tied to one thing the app can measure. */
-const MAX_LIFE_GOALS = 3;
+const MAX_LIFE_GOALS = 2;     // a week, per area
+const MAX_WEEK_ALL = 5;       // a week, across all areas
+const weekGoalCount = () => AREAS.reduce((n, a) => n + areaGoals(a.k).length, 0);
 
 // older saves kept one sentence and a list of measures; turn that into goals
 function areaGoals(a) {
@@ -11833,7 +11932,7 @@ let bigAct = null;      // "area:index" while typing its weekly action
 let bigConfirm = null;  // "area:index" waiting for "remove?"
 
 const DAY_MS = 86400000;
-const MAX_BIG = 3;
+const MAX_BIG = 2;   // one 6 month goal and one 1 year goal
 const ACTION_WAIT = 8 * 3600000;   // the second change opens 8 hours after the first
 
 function bigState(b) {
@@ -11975,13 +12074,15 @@ function bigEditor(box) {
     const end = new Date(start); end.setMonth(end.getMonth() + st.months);
     const g = { text: t, months: st.months, start, end: st.months === 6 ? start + 180 * DAY_MS : end.getTime(),
                 pct: old ? old.pct : 0, done: old ? old.done : false, action: old ? old.action : null };
-    if (old) list[st.i] = g; else if (list.length < MAX_BIG) list.push(g);
+    if (old) list[st.i] = g; else if (!list.some(x => x.months === st.months && !x.done)) list.push(g);
     bigEdit = null; lifeTab = 'big'; save(); renderLife();
   });
 }
 
+let goalsReturn = false;   // a goal is being set from the Goals page: go back there after
 function renderLife() {
   const box = document.getElementById('life-body');
+  if (goalsReturn && !lifeSetup && !bigEdit) { goalsReturn = false; lifeOpen = null; setTimeout(() => show('goals'), 0); return; }
   if (!state.life) state.life = {};
   AREAS.forEach(a => areaGoals(a.k));
   const setUp = AREAS.filter(a => areaGoals(a.k).length);
@@ -11993,7 +12094,7 @@ function renderLife() {
                '<button type="button" class="md-seg-b' + (lifeTab === 'big' ? ' on' : '') + '" data-tab="big">Big goals</button></div>';
   const wireTabs = () => box.querySelectorAll('[data-tab]').forEach(b => b.addEventListener('click', () => { lifeTab = b.dataset.tab; renderLife(); }));
   if (lifeTab === 'big') { renderBig(box, tabs); wireTabs(); return; }
-  setTimeout(() => show('home'), 0); return;     // the overview is on Home now
+  setTimeout(() => show('goals'), 0); return;    // the overview is the Goals page now
 
   const ks = perKeys(0), prev = perKeys(1);
   const overall = lifeScores();
@@ -12063,14 +12164,15 @@ function areaPortals(box, a) {
   const doors = tabs.map(tab => {
     const t = tileFor(tab), m = MENU.find(x => x.tab === tab);
     return { tab, name: tab === 'love' ? 'Time together' : PAGE_NAME[tab], big: t.big + (t.unit ? '<i>' + esc(t.unit) + '</i>' : ''), cap: t.cap,
-             c: tab === 'love' ? LOVE_TILE.c : m ? m.c : a.c, go: tab === 'love' ? 'goals' : tab };
+             c: tab === 'love' ? LOVE_TILE.c : m ? m.c : a.c, go: tab === 'love' ? 'love' : tab };
   });
-  doors.push({ tab: 'goals', go: 'goals', name: 'Goals', c: a.c, big: gs.length ? areaScore(a.k, perKeys(0)) + '<i>%</i>' : '+',
-               cap: j ? 'Day ' + journeyDay(j, Date.now()) + ' \u00b7 ' + j.name : gs.length ? gs.length + ' goal' + (gs.length > 1 ? 's' : '') : 'set a goal' });
+  if (a.k === 'health') doors.push({ tab: 'goals', go: 'goals', name: 'Journey', c: a.c, big: j ? journeyDay(j, Date.now()) : '+',
+               cap: j ? 'days \u00b7 ' + j.name : 'quitting or starting something' });
   box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">' + a.name + '</h1><div class="hp-grid">' +
     doors.map(d => '<button type="button" class="hp-door" data-door="' + d.go + '" style="--c:' + d.c + '"><b>' + d.name + '</b><em>' + d.big + '</em><small>' + esc(d.cap) + '</small></button>').join('') + '</div>';
   box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; show('home'); window.scrollTo(0, 0); });
   box.querySelectorAll('[data-door]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.door === 'love') { lifeOpen = null; goalsTab = 'week'; show('goals'); return; }
     if (b.dataset.door !== 'goals') { show(b.dataset.door); window.scrollTo(0, 0); return; }
     areaGoalsOpen = true; renderLife(); window.scrollTo(0, 0);
   }));
@@ -12082,8 +12184,8 @@ function lifeDetail(box, a) {
   const ks = perKeys(0);
   const now = areaScore(a.k, ks);
 
-  let html = '<button type="button" class="lf-back">\u2190 ' + a.name + '</button>' +
-    '<div class="lf-dhead" style="--c:' + a.c + '"><h1>Goals</h1>' + (gs.length ? '<b>' + now + '<i>%</i></b>' : '') + '</div>' +
+  let html = '<button type="button" class="lf-back">\u2190 Goals</button>' +
+    '<div class="lf-dhead" style="--c:' + a.c + '"><h1>' + a.name + '</h1>' + (gs.length ? '<b>' + now + '<i>%</i></b>' : '') + '</div>' +
     (gs.length ? '' : '<p class="hub-empty">No ' + a.name.toLowerCase() + ' goals yet.</p>') + bigLine(a) + (a.k === 'health' ? journeyHtml() : '') + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
   gs.forEach((g, n) => {
     const sc = goalScore(g, ks), [st, stText] = goalStatus(sc.pct);
@@ -12126,13 +12228,13 @@ function lifeDetail(box, a) {
       '</li>';
   });
   html += '</ol>';
-  if (gs.length < MAX_LIFE_GOALS) html += '<button type="button" class="lf-addlink lf-addgoal">+ Add goal ' + (gs.length + 1) + '</button>';
-  html += '<button type="button" class="w3-link">Why only 3 goals?</button>';
+  if (gs.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL) html += '<button type="button" class="lf-addlink lf-addgoal">+ Add goal ' + (gs.length + 1) + '</button>';
+  html += '<button type="button" class="w3-link">Why so few goals?</button>';
   box.innerHTML = html;
 
   box.querySelector('.lf-back').addEventListener('click', () => {
-    lifeExpanded = null;
-    areaGoalsOpen = false; renderLife(); window.scrollTo(0, 0);
+    lifeExpanded = null; lifeOpen = null;
+    areaGoalsOpen = false; show('goals'); window.scrollTo(0, 0);
   });
   box.querySelectorAll('[data-page]').forEach(b => b.addEventListener('click', () => { show(b.dataset.page); window.scrollTo(0, 0); }));
   if (a.k === 'health') wireJourney(box, renderLife);
@@ -12687,11 +12789,11 @@ function lifeWizard(box) {
     box.innerHTML = '<div class="lf-wiz" style="--c:' + a.c + '">' + step + '<h1>' + a.name + '</h1>' +
       '<ol class="lf-sofar">' + goals.map((g, i) => '<li><span>Goal ' + (i + 1) + '</span>' + esc(g.text) + '</li>').join('') + '</ol>' +
       '<div class="lf-btns col">' +
-        (goals.length < MAX_LIFE_GOALS ? '<button type="button" class="lf-btn" data-a="more">Add goal ' + n + '</button>' : '') +
+        (goals.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL ? '<button type="button" class="lf-btn" data-a="more">Add goal ' + n + '</button>' : '') +
         '<button type="button" class="lf-btn main" data-a="done">' + (st.one || st.i === AREAS.length - 1 ? 'Done' : 'Next: ' + AREAS[st.i + 1].name) + '</button>' +
       '</div>' +
       '<p class="lf-limit">' + goals.length + ' of ' + MAX_LIFE_GOALS + ' goals</p>' +
-      '<button type="button" class="w3-link">Why only 3 goals?</button></div>';
+      '<button type="button" class="w3-link">Why so few goals?</button></div>';
     box.querySelector('.w3-link').addEventListener('click', () => openWhy3(a.c));
     const more = box.querySelector('[data-a=more]');
     if (more) more.addEventListener('click', () => { lifeSetup = { ...st, saved: false }; renderLife(); });
@@ -12925,7 +13027,8 @@ const TABS = {
   stats:  [document.getElementById('tab-stats'),  document.getElementById('view-stats')],
   money:  [document.getElementById('tab-money'),  document.getElementById('view-money')],
   life:   [document.getElementById('tab-life'),   document.getElementById('view-life')],
-  people: [document.getElementById('tab-people'), document.getElementById('view-people')]
+  people: [document.getElementById('tab-people'), document.getElementById('view-people')],
+  goals:  [document.getElementById('tab-goals'),  document.getElementById('view-goals')]
 };
 
 /* ---- now pill ----
@@ -12970,7 +13073,7 @@ function show(which) {
   document.body.dataset.view = which;
   document.getElementById('tab-more').classList.toggle('flat', !IN_MORE.includes(which));
   const area = areaOfPage(which);
-  if (area || which === 'life') TABS.home[0].classList.remove('flat');
+  if (area || which === 'life' || which === 'goals') TABS.home[0].classList.remove('flat');
   const view = TABS[which][1];
   let back = view.querySelector(':scope > .hubback');
   if (area) {
@@ -12994,6 +13097,7 @@ function show(which) {
   if (which === 'life')  renderLife();
   if (which === 'money') renderMoney();
   if (which === 'people') renderPeople();
+  if (which === 'goals') renderGoals();
   updateNowPill();
   try { localStorage.setItem(KEY + '.tab', which); } catch {}
 }
