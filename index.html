@@ -2152,17 +2152,11 @@ body[data-view="day"] { background-image: none; }
 .jr-fit { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
 .jr-fit button, .jr-fitask { background: none; border: none; padding: 10px 0; min-height: 40px; font: 600 13px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
 .jr-you { color: var(--c) !important; font-weight: 600; }
-.gm { margin: 12px 0 14px; padding: 16px; border: 1px solid var(--hair); border-radius: 20px; background: var(--card); }
-.gm-top span { display: block; font-size: 13px; color: var(--muted); }
-.gm-top b { display: block; font-size: 32px; font-weight: 600; line-height: 1.15; }
-.gm-top small { font-size: 13px; color: var(--muted); }
-.gm-rows { margin-top: 10px; display: flex; flex-direction: column; }
-.gm-rows div { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid var(--hair); font-size: 15px; }
-.gm-rows div b { font-weight: 600; }
-.gm-rows .over b { color: #d9534f; }
-.gm-rows .ok b { color: #7daf86; }
-.gm-rows .wk { font-size: 13px; color: var(--muted); }
-.gm-set { background: none; border: none; min-height: 40px; padding: 8px 0 0; font: 600 14px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
+.gm { margin: 10px 0 12px; }
+.gm b { display: block; font-size: 30px; font-weight: 600; line-height: 1.15; }
+.gm span { font-size: 13px; color: var(--muted); }
+.gm-set { display: block; background: none; border: none; min-height: 40px; padding: 4px 0 0; font: 600 14px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
+.gm-set.over { color: #d9534f; }
 .gm-bud { margin-top: 10px; align-items: center; }
 .gm-bud input { flex: 1; font-size: 16px; padding: 10px 12px; border-radius: 12px; min-width: 0; }
 .gr-price { font-style: normal; font-size: 14px; font-weight: 600; white-space: nowrap; align-self: center; padding: 0 4px; }
@@ -2170,27 +2164,13 @@ body[data-view="day"] { background-image: none; }
 .gr-prow input { flex: 1; font-size: 16px; min-width: 0; }
 .gr-pin, .gm-bin, .jr-form input[type="date"] { color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 10px 12px; font: 500 16px "Poppins", sans-serif; }
 .gr-pin:focus, .gm-bin:focus, .jr-form input[type="date"]:focus { outline: none; border-color: var(--pink); }
-.gr-phint { font-size: 12px; color: var(--muted); margin: 4px 0 8px; }
-.ml-top { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 8px; }
-.ml-top b { font-size: 17px; font-weight: 600; }
-.ml-paste-b { background: none; border: none; min-height: 40px; font: 600 14px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
-.ml-paste { padding: 14px; margin-bottom: 12px; border: 1px solid var(--hair); border-radius: 18px; background: var(--card); }
-.ml-paste label { display: block; font-size: 14px; margin-bottom: 8px; }
-.ml-paste textarea { width: 100%; font-size: 16px; padding: 12px; border-radius: 14px; }
-.ml-msg { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
-.ml-msg:empty { display: none; }
-.ml-days { display: flex; flex-direction: column; gap: 10px; }
-.ml-day { padding: 12px 14px; border: 1px solid var(--hair); border-radius: 18px; background: var(--card); }
-.ml-day.today { border-color: color-mix(in srgb, var(--pink) 55%, var(--hair)); }
-.ml-dname { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-.ml-dname i { font-style: normal; font-size: 12px; color: var(--pink); margin-left: 6px; }
-.ml-meal { display: grid; grid-template-columns: 26px 1fr; grid-template-rows: auto auto; column-gap: 8px; width: 100%; min-height: 44px; padding: 6px 0; text-align: left; background: none; border: none; color: var(--ink); font-family: inherit; cursor: pointer; }
-.ml-meal span { grid-row: 1 / 3; align-self: center; font-size: 18px; }
-.ml-meal small { font-size: 11px; color: var(--muted); }
-.ml-meal b { font-size: 15px; font-weight: 500; }
-.ml-meal b.ghost { color: var(--muted); font-weight: 400; }
-.ml-meal.edit { display: flex; align-items: center; gap: 8px; }
-.ml-meal.edit input { flex: 1; font-size: 16px; padding: 10px 12px; border-radius: 12px; }
+.ml-days { display: flex; flex-direction: column; margin-top: 12px; border-top: 1px solid var(--hair); }
+.ml-day { display: grid; grid-template-columns: 52px 1fr; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--hair); }
+.ml-day.today .ml-dname { color: var(--pink); }
+.ml-dname { font-size: 14px; font-weight: 600; padding-top: 10px; }
+.ml-meal { display: block; width: 100%; min-height: 40px; padding: 8px 0; text-align: left; background: none; border: none; color: var(--ink); font: 400 15px "Poppins", sans-serif; cursor: pointer; }
+.ml-meal.ghost { color: var(--muted); }
+.ml-in { width: 100%; margin: 2px 0; font-size: 16px; padding: 8px 10px; border-radius: 12px; }
 .jr-note { font-size: 12px; color: var(--muted); margin: 14px 0 0; }
 .jr-acts { display: flex; gap: 10px; margin-top: 12px; }
 .jr-form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
@@ -3968,7 +3948,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 11:45</footer>
+  <footer>everything saves on this device · build 11:55</footer>
 </div>
 
 <script>
@@ -8783,16 +8763,11 @@ function grocMonthHtml() {
   const spent = log.reduce((n, x) => n + x.price, 0);
   const toBuy = (state.grocery || []).filter(x => !x.done).reduce((n, x) => n + itemPrice(x), 0);
   const total = spent + toBuy, budget = (state.grocBudget || {})[mk] || 0;
-  const weeks = {};
-  for (const x of log) { const w = Math.min(5, Math.ceil(new Date(x.at).getDate() / 7)); weeks[w] = (weeks[w] || 0) + x.price; }
   const left = budget - total;
-  return '<div class="gm"><div class="gm-top"><span>' + cap(MONTHS[d.getMonth()]) + '</span><b>' + naira0(total) + '</b><small>planned this month</small></div>' +
-    '<div class="gm-rows"><div><span>To buy</span><b>' + naira0(toBuy) + '</b></div><div><span>Spent</span><b>' + naira0(spent) + '</b></div>' +
-    (budget ? '<div><span>Budget</span><b>' + naira0(budget) + '</b></div><div class="' + (left < 0 ? 'over' : 'ok') + '"><span>' + (left < 0 ? 'Over by' : 'Left') + '</span><b>' + naira0(Math.abs(left)) + '</b></div>' : '') +
-    Object.keys(weeks).sort().map(w => '<div class="wk"><span>Week ' + w + '</span><b>' + naira0(weeks[w]) + '</b></div>').join('') + '</div>' +
+  return '<div class="gm"><b>' + naira0(total) + '</b><span>' + cap(MONTHS[d.getMonth()]) + (spent ? ' \u00b7 ' + naira0(spent) + ' spent' : '') + '</span>' +
     (grBudgetEdit
-      ? '<div class="gr-qrow gm-bud"><span class="gr-and">\u20a6</span><input type="number" inputmode="numeric" min="0" class="gm-bin" aria-label="budget for this month" placeholder="budget for ' + cap(MONTHS[d.getMonth()]) + '"><button type="button" class="lf-btn main" data-gm="save">Save</button></div>'
-      : '<button type="button" class="gm-set" data-gm="edit">' + (budget ? 'Change budget' : 'Set a budget') + '</button>') +
+      ? '<div class="gr-qrow gm-bud"><span class="gr-and">\u20a6</span><input type="number" inputmode="numeric" min="0" class="gm-bin" aria-label="budget for this month" placeholder="budget"><button type="button" class="lf-btn main" data-gm="save">Save</button></div>'
+      : '<button type="button" class="gm-set' + (budget && left < 0 ? ' over' : '') + '" data-gm="edit">' + (budget ? (left < 0 ? naira0(-left) + ' over ' : naira0(left) + ' left of ') + naira0(budget) : 'Set a budget') + '</button>') +
     '</div>';
 }
 
@@ -8825,7 +8800,6 @@ function renderGroceries() {
       '<div class="gr-ed">' +
         '<input type="text" class="gr-tin" maxlength="60" aria-label="name" placeholder="what to buy">' +
         '<div class="gr-qrow gr-prow"><span class="gr-and">\u20a6</span><input type="number" inputmode="numeric" min="0" max="9999999" class="gr-pin" aria-label="price" placeholder="' + (sp ? sp.p : 'price') + '"></div>' +
-        '<p class="gr-phint">' + (it.price > 0 ? 'Your price.' + (sp ? ' Suggested ' + naira0(sp.p) + '.' : '') : sp ? (sp.src === 'you' ? 'From what you paid last time.' : 'Lagos estimate, Oct 2026.') + ' Type your own to change it.' : 'No price yet. Type what it costs.') + '</p>' +
         '<div class="gr-qrow"><button type="button" data-a="minus" aria-label="less">−</button>' +
         '<input type="number" inputmode="numeric" min="0" max="9999999" class="gr-qin" aria-label="how many" placeholder="how many">' +
         '<button type="button" data-a="plus" aria-label="more">+</button>' +
@@ -9065,54 +9039,28 @@ function addGrocery(text) {
 }
 
 /* =========== meals: your week of breakfast, lunch and dinner ===========
-   a timetable like the one in Notion. tap a meal to change it. paste a
-   table copied from Notion to fill it in one go. it stays on this device. */
+   tap a meal to change it. it stays on this device. */
 const MEAL_DAYS = [1, 2, 3, 4, 5, 6, 0];   // Monday first
-const MEAL_SLOTS = [['b', 'Breakfast', '\u{1F305}'], ['l', 'Lunch', '☀️'], ['d', 'Dinner', '\u{1F319}']];
+const MEAL_SLOTS = [['b', 'Breakfast', '\u{1F305}'], ['l', 'Lunch', '\u2600\uFE0F'], ['d', 'Dinner', '\u{1F319}']];
 let mealEdit = null;     // "day:slot" being typed in
-let mealPaste = false;   // the paste box is open
 
 function mealsFor(day) { if (!state.meals) state.meals = {}; return state.meals[day] || (state.meals[day] = { b: '', l: '', d: '' }); }
 const tidyMeal = t => String(t || '').replace(/\s+/g, ' ').replace(/\s*\+\s*/g, ' + ').trim();
 
-// a table copied from Notion: one row per day, with Breakfast, Lunch and Dinner columns
-function parseMealTable(text) {
-  const rows = String(text).split(/\r?\n/).map(r => r.split(/\t|\s*\|\s*/).map(c => c.trim())).filter(r => r.some(Boolean));
-  const head = rows.find(r => r.some(c => /breakfast/i.test(c)));
-  const col = k => head ? head.findIndex(c => new RegExp(k, 'i').test(c)) : -1;
-  const cB = head ? col('breakfast') : 1, cL = head ? col('lunch') : 2, cD = head ? col('dinner') : 3;
-  const out = {};
-  for (const r of rows) {
-    const di = FULL.findIndex(d => r.some(c => c.toLowerCase() === d || c.toLowerCase() === d.slice(0, 3)));
-    if (di < 0) continue;
-    const pick = c => { const v = c >= 0 ? tidyMeal(r[c]) : ''; return /^item \d+$/i.test(v) ? '' : v; };   // Notion's empty "Item 7"
-    out[di] = { b: pick(cB), l: pick(cL), d: pick(cD) };
-  }
-  return out;
-}
-
 function renderMeals() {
   const box = document.getElementById('food-meals');
   const today = new Date().getDay();
-  const filled = MEAL_DAYS.some(d => MEAL_SLOTS.some(([k]) => mealsFor(d)[k]));
-  let html = '<div class="ml-top"><b>Your week</b><button type="button" class="ml-paste-b" data-ml="paste">Paste from Notion</button></div>';
-  if (mealPaste || !filled) {
-    html += '<div class="ml-paste"><label for="ml-pin">' + (filled ? 'Paste your table' : 'Copy your meal table in Notion, then paste it here') + '</label>' +
-      '<textarea id="ml-pin" rows="4" placeholder="Day, Breakfast, Lunch, Dinner"></textarea>' +
-      '<div class="jr-acts"><button type="button" class="lf-btn main" data-ml="import">Fill my week</button>' +
-      (filled ? '<button type="button" class="lf-btn" data-ml="close">Cancel</button>' : '') + '</div><p class="ml-msg"></p></div>';
-  }
-  html += '<div class="ml-days">';
+  let html = '<div class="ml-days">';
   for (const d of MEAL_DAYS) {
     const m = mealsFor(d);
-    html += '<div class="ml-day' + (d === today ? ' today' : '') + '"><div class="ml-dname">' + cap(FULL[d]) + (d === today ? ' <i>Today</i>' : '') + '</div>';
+    html += '<div class="ml-day' + (d === today ? ' today' : '') + '"><b class="ml-dname">' + (d === today ? 'Today' : cap(FULL[d]).slice(0, 3)) + '</b><div>';
     for (const [k, name, e] of MEAL_SLOTS) {
       const id = d + ':' + k;
       html += mealEdit === id
-        ? '<div class="ml-meal edit"><span>' + e + '</span><input type="text" class="ml-in" maxlength="80" aria-label="' + name + ' on ' + FULL[d] + '" placeholder="' + name + '"></div>'
-        : '<button type="button" class="ml-meal" data-meal="' + id + '"><span>' + e + '</span><small>' + name + '</small><b' + (m[k] ? '' : ' class="ghost"') + '>' + (m[k] ? esc(m[k]) : 'add') + '</b></button>';
+        ? '<input type="text" class="ml-in" maxlength="80" aria-label="' + name + ' on ' + FULL[d] + '" placeholder="' + name + '">'
+        : '<button type="button" class="ml-meal' + (m[k] ? '' : ' ghost') + '" data-meal="' + id + '" aria-label="' + name + '">' + e + ' ' + (m[k] ? esc(m[k]) : name) + '</button>';
     }
-    html += '</div>';
+    html += '</div></div>';
   }
   box.innerHTML = html + '</div>';
 
@@ -9126,18 +9074,6 @@ function renderMeals() {
     inp.addEventListener('blur', done);
     setTimeout(() => inp.focus(), 20);
   }
-  box.querySelectorAll('[data-ml]').forEach(b => b.addEventListener('click', () => {
-    const a = b.dataset.ml;
-    if (a === 'paste') { mealPaste = !mealPaste; renderMeals(); return; }
-    if (a === 'close') { mealPaste = false; renderMeals(); return; }
-    if (a === 'import') {
-      const got = parseMealTable(document.getElementById('ml-pin').value);
-      const n = Object.keys(got).length;
-      if (!n) { box.querySelector('.ml-msg').textContent = 'I could not find any days in that. Copy the whole table, with the day names.'; return; }
-      for (const d of Object.keys(got)) state.meals[d] = got[d];
-      mealPaste = false; save(); renderMeals();
-    }
-  }));
 }
 
 function setFoodView(v) {
