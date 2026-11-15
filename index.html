@@ -4151,13 +4151,21 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 .wk-day i { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
 .wk-day.has i { background: var(--pink); }
 .wk-day.today { background: color-mix(in srgb, var(--pink) 22%, var(--card)); border-color: color-mix(in srgb, var(--pink) 40%, var(--hair)); }
-.wk-cal { position: relative; display: grid; grid-template-columns: 34px repeat(7, 1fr); gap: 0 3px; padding: 10px 8px 10px 4px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; overflow: hidden; }
+.wk-scroll { overflow-x: auto; border-radius: 20px; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; scrollbar-width: none; }
+.wk-scroll::-webkit-scrollbar { display: none; }
+.wk-cal { position: relative; display: grid; grid-template-columns: 44px repeat(7, 112px); gap: 0 6px; width: max-content; padding: 10px 12px 12px 0; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.wk-hcol { position: sticky; left: 0; z-index: 3; background: var(--card); border-radius: 20px 0 0 20px; }
+.wk-dcol { scroll-snap-align: start; scroll-margin-left: 50px; }
+.wk-ch { display: flex; align-items: baseline; justify-content: center; gap: 4px; width: 100%; height: 40px; margin: 0 0 6px; padding: 0; font: 500 13px var(--display); color: var(--muted); background: none; border: none; border-radius: 12px; cursor: pointer; }
+.wk-ch b { font-size: 16px; font-weight: 600; color: var(--ink); }
+.wk-dcol.today .wk-ch { color: var(--pink-d); background: color-mix(in srgb, var(--pink) 18%, transparent); }
 .wk-hours, .wk-col { position: relative; }
-.wk-hours span { position: absolute; right: 4px; transform: translateY(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; }
+.wk-hours span { position: absolute; right: 8px; transform: translateY(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; }
 .wk-col { background-image: linear-gradient(var(--hair) 1px, transparent 1px); background-size: 100% var(--hr); border-radius: 6px; }
 .wk-col.today { background-color: color-mix(in srgb, var(--pink) 8%, transparent); }
-.wk-blk { position: absolute; left: 1px; right: 1px; overflow: hidden; padding: 3px 3px 3px 4px; font: 500 10.5px/1.25 var(--display); color: var(--ink); text-align: left; background: color-mix(in srgb, var(--q) 60%, var(--card)); border: none; border-left: 3px solid var(--q); border-radius: 6px; cursor: pointer; overflow-wrap: normal; word-break: normal; hyphens: none; }
+.wk-blk { position: absolute; left: 1px; right: 1px; overflow: hidden; padding: 3px 3px 3px 4px; font: 500 13px/1.25 var(--display); padding: 5px 6px 4px 8px; color: var(--ink); text-align: left; background: color-mix(in srgb, var(--q) 60%, var(--card)); border: none; border-left: 3px solid var(--q); border-radius: 6px; cursor: pointer; overflow-wrap: normal; word-break: normal; hyphens: none; }
 .wk-blk.done { opacity: .55; }
+.wk-blk small { display: block; margin-top: 2px; font-size: 11px; color: var(--muted); }
 .wk-now { position: absolute; left: 0; right: 0; height: 2px; background: var(--pink-d); border-radius: 1px; z-index: 2; }
 .wk-empty { margin: 4px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
 .wk-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; padding: 14px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; font-size: 15px; }
@@ -4166,6 +4174,22 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 .wk-copy select { flex: 1; min-width: 0; }
 .wk-copy button { width: 100%; min-height: 44px; padding: 0 16px; font: 600 15px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 20px; cursor: pointer; }
 .wk-copy small { width: 100%; font-size: 13px; color: var(--muted); }
+
+.wk-add { display: flex; align-items: center; gap: 10px; min-height: 44px; margin: 0 0 12px; padding: 0 4px; font: 500 16px var(--display); color: var(--pink-d); background: none; border: none; cursor: pointer; }
+.wk-col { cursor: copy; }
+.wka h2 { margin: 0 0 14px; font-size: 22px; font-weight: 600; }
+.wka input { width: 100%; min-height: 48px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 14px; }
+.wka-h { display: block; margin: 18px 0 8px; font-size: 15px; font-weight: 600; }
+.wka-row, .wka-days, .wka-quick { display: flex; flex-wrap: wrap; gap: 6px; }
+.wka-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+.wka-row button, .wka-days button, .wka-quick button { min-height: 42px; padding: 0 12px; font: 500 14px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 21px; cursor: pointer; }
+.wka-days button { padding: 0; }
+.wka-row button.on, .wka-days button.on { color: var(--ink); font-weight: 600; background: color-mix(in srgb, var(--pink) 30%, var(--card)); border-color: color-mix(in srgb, var(--pink) 55%, var(--hair)); }
+.wka-quick { margin-top: 8px; }
+.wka-quick button { min-height: 36px; font-size: 13px; color: var(--muted); }
+.wka-note { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
+.wka-go { width: 100%; min-height: 48px; margin-top: 14px; font: 600 16px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 24px; cursor: pointer; }
+.wka-go:disabled { opacity: .45; cursor: default; }
 </style>
 </head>
 <body>
@@ -4424,7 +4448,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 16:40</footer>
+  <footer>everything saves on this device · build 16:46</footer>
 </div>
 
 <script>
@@ -13633,21 +13657,24 @@ function renderWeek() {
     return '<button type="button" class="wk-day' + (k === today ? ' today' : '') + (all[n].length ? ' has' : '') + '" data-day="' + k + '" aria-label="plan ' + FULL[d.getDay()] + '">' +
       cap(FULL[d.getDay()].slice(0, 3)) + '<b>' + d.getDate() + '</b><i></i></button>'; }).join('') + '</div>';
 
+  html += '<button type="button" class="wk-add" id="wk-add"><span class="plusbox">+</span> Add a block</button>';
+
   // the hours on show: 7am to 10pm, wider if a plan goes outside that
   let lo = 7 * 60, hi = 22 * 60;
   for (const bs of all) for (const b of bs) { lo = Math.min(lo, b.from); hi = Math.max(hi, b.to); }
   lo = Math.floor(lo / 60) * 60; hi = Math.min(Math.ceil(hi / 60) * 60, 30 * 60);
-  const PX = 0.8, HR = 60 * PX, H = (hi - lo) * PX;
+  const PX = 1, HR = 60 * PX, H = (hi - lo) * PX;
   let hours = '';
   for (let m = lo; m <= hi; m += 120) hours += '<span style="top:' + ((m - lo) * PX) + 'px">' + clock(m).replace(':00', '') + '</span>';
   const nowM = new Date().getHours() * 60 + new Date().getMinutes();
-  html += '<div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div>' +
-    days.map((k, n) => '<div class="wk-col' + (k === today ? ' today' : '') + '" style="height:' + H + 'px">' +
+  // wide days that scroll sideways; the hours stay put on the left
+  html += '<div class="wk-scroll"><div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hcol"><div class="wk-ch"></div><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div></div>' +
+    days.map((k, n) => '<div class="wk-dcol' + (k === today ? ' today' : '') + '"><button type="button" class="wk-ch" data-day="' + k + '">' + cap(FULL[fromKey(k).getDay()]) + ' <b>' + fromKey(k).getDate() + '</b></button><div class="wk-col' + (k === today ? ' today' : '') + '" data-addto="' + k + '" style="height:' + H + 'px">' +
       all[n].map(b => { const c = WK_COLS[[...b.label.toLowerCase()].reduce((x, ch) => x + ch.charCodeAt(0), 0) % WK_COLS.length];
-        return '<button type="button" class="wk-blk' + (b.done ? ' done' : '') + '" data-day="' + k + '" style="--q:' + c + ';top:' + ((b.from - lo) * PX) + 'px;height:' + Math.max(14, (b.to - b.from) * PX - 2) + 'px" title="' + esc(b.label + ', ' + clock(b.from) + ' to ' + clock(b.to)) + '">' + esc(b.label) + '</button>'; }).join('') +
+        return '<button type="button" class="wk-blk' + (b.done ? ' done' : '') + '" data-day="' + k + '" style="--q:' + c + ';top:' + ((b.from - lo) * PX) + 'px;height:' + Math.max(14, (b.to - b.from) * PX - 2) + 'px" title="' + esc(b.label + ', ' + clock(b.from) + ' to ' + clock(b.to)) + '">' + esc(b.label) + ((b.to - b.from) * PX >= 40 ? '<small>' + clock(b.from) + '</small>' : '') + '</button>'; }).join('') +
       (k === key(new Date()) && nowM >= lo && nowM <= hi ? '<i class="wk-now" style="top:' + ((nowM - lo) * PX) + 'px"></i>' : '') +
-    '</div>').join('') + '</div>';
-  if (!planned) html += '<p class="wk-empty">Nothing planned this week yet. Tap a day to start.</p>';
+    '</div></div>').join('') + '</div></div>';
+  if (!planned) html += '<p class="wk-empty">Nothing planned this week yet. Tap a day to add a block.</p>';
 
   // copy a day: only into an empty day, so nothing gets lost
   const opt = sel => days.map(k => '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + cap(FULL[fromKey(k).getDay()]) + '</option>').join('');
@@ -13665,6 +13692,12 @@ function renderWeek() {
   box.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
     viewDay = b.dataset.day; setPlanMode('day'); renderDay(); window.scrollTo(0, 0);
   }));
+  document.getElementById('wk-add').addEventListener('click', () => weekAddSheet(days.includes(today) ? today : days[0], days));
+  box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) weekAddSheet(c.dataset.addto, days); }));
+  // open on today, or the first planned day
+  const sc = box.querySelector('.wk-scroll'), cols = box.querySelectorAll('.wk-dcol');
+  const at = days.indexOf(today) >= 0 ? days.indexOf(today) : Math.max(0, all.findIndex(x => x.length));
+  if (sc && cols[at]) sc.scrollLeft = cols[at].offsetLeft - box.querySelector('.wk-hcol').offsetWidth - 8;
   document.getElementById('wk-go').addEventListener('click', () => {
     const f = document.getElementById('wk-from').value, t = document.getElementById('wk-to').value;
     const msg = document.getElementById('wk-msg'), src = state.days[f];
@@ -13678,6 +13711,56 @@ function renderWeek() {
   });
 }
 
+
+// add a block from the week: name, how long, and which days it repeats on.
+// it goes at the end of each day's plan (blocks run one after another).
+function weekAddSheet(day0, days) {
+  const old = document.getElementById('wksheet'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'wksheet'; el.className = 'w3';
+  const pick = new Set([day0]);
+  let mins = 60;
+  const LENS = [[30, '30 min'], [60, '1 hour'], [90, '1.5 hours'], [120, '2 hours']];
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet wka" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>' +
+    '<h2>Add a block</h2>' +
+    '<input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="what is it? e.g. Gym" aria-label="block name">' +
+    '<b class="wka-h">How long</b><div class="wka-row" id="wka-lens">' + LENS.map(([m, t]) => '<button type="button" data-m="' + m + '"' + (m === mins ? ' class="on"' : '') + '>' + t + '</button>').join('') + '</div>' +
+    '<b class="wka-h">Which days?</b><div class="wka-days" id="wka-days">' + days.map(k => '<button type="button" data-k="' + k + '"' + (pick.has(k) ? ' class="on"' : '') + '>' + cap(FULL[fromKey(k).getDay()].slice(0, 3)) + '</button>').join('') + '</div>' +
+    '<div class="wka-quick"><button type="button" data-q="wd">Weekdays</button><button type="button" data-q="all">Every day</button><button type="button" data-q="one">Just ' + cap(FULL[fromKey(day0).getDay()]) + '</button></div>' +
+    '<p class="wka-note">It goes at the end of each day\u2019s plan.</p>' +
+    '<button type="button" class="wka-go" id="wka-go" disabled>Add</button></div>';
+  document.body.appendChild(el);
+  const name = el.querySelector('#wka-name'), go = el.querySelector('#wka-go');
+  const sync = () => {
+    el.querySelectorAll('#wka-days button').forEach(b => b.classList.toggle('on', pick.has(b.dataset.k)));
+    el.querySelectorAll('#wka-lens button').forEach(b => b.classList.toggle('on', Number(b.dataset.m) === mins));
+    go.disabled = !name.value.trim() || !pick.size;
+    go.textContent = pick.size > 1 ? 'Add to ' + pick.size + ' days' : 'Add';
+  };
+  const close = () => el.remove();
+  el.querySelector('.w3-back').addEventListener('click', close);
+  name.addEventListener('input', sync);
+  el.querySelectorAll('#wka-lens button').forEach(b => b.addEventListener('click', () => { mins = Number(b.dataset.m); sync(); }));
+  el.querySelectorAll('#wka-days button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; pick.has(k) ? pick.delete(k) : pick.add(k); sync(); }));
+  el.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
+    pick.clear();
+    if (b.dataset.q === 'one') pick.add(day0);
+    else days.forEach((k, n) => { if (b.dataset.q === 'all' || n < 5) pick.add(k); });
+    sync();
+  }));
+  go.addEventListener('click', () => {
+    const label = name.value.trim();
+    if (!label || !pick.size) return;
+    for (const k of pick) {
+      if (!state.days[k]) state.days[k] = { start: k === planKey() ? nowHHMM() : '08:00', blocks: [] };
+      state.days[k].touched = true;
+      state.days[k].blocks.push({ label, mins });
+    }
+    save(); close(); renderWeek();
+  });
+  sync();
+  setTimeout(() => name.focus(), 50);
+}
 document.querySelectorAll('#plan-seg [data-pm]').forEach(b => b.addEventListener('click', () => {
   if (b.dataset.pm === 'week') weekOf = mondayOf(viewDay || planKey());
   setPlanMode(b.dataset.pm);
