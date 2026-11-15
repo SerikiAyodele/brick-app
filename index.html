@@ -3758,6 +3758,15 @@ html body[data-view="day"] {
 .mn-amt { position: relative; }
 .mn-amt em { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-style: normal; color: var(--muted); }
 .mn-ed3 .mn-amt input { padding-left: 28px; font-variant-numeric: tabular-nums; }
+.mn-past { display: flex; flex-direction: column; gap: 5px; margin-top: -4px; }
+.mn-past:empty { display: none; }
+.mn-past > span { font-size: 12px; color: var(--muted); }
+.mn-past div { display: flex; flex-wrap: wrap; gap: 6px; }
+.mn-past button { min-height: 36px; padding: 0 12px; font: 400 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 18px; cursor: pointer; }
+.mn-past button b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-unh { display: flex; align-items: baseline; gap: 8px; margin: 22px 2px 8px; }
+.mn-unh b { font-size: 15px; font-weight: 600; }
+.mn-unh small { font-size: 12px; color: var(--muted); }
 .mn-areas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .mn-areas button { min-height: 42px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 14%, var(--card)); border: 1.5px solid transparent; border-radius: 12px; cursor: pointer; }
 .mn-areas button.on { color: #fff; background: var(--c); }
@@ -4052,7 +4061,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:09</footer>
+  <footer>everything saves on this device · build 12:17</footer>
 </div>
 
 <script>
@@ -7255,6 +7264,35 @@ function moneyPlan() {
 }
 const AREA_OF_LIFE = { health: 'Health', wealth: 'Wealth', relationships: 'Love', love: 'Love', self: 'Self', assets: 'Wealth' };
 
+// each month has its own budget. a new month starts as a copy of the month
+// before: same lines and amounts, but not the unplanned ones.
+const ymOf = t => { const d = new Date(t); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+function linesFor(ym) {
+  const P = moneyPlan(), cur = ymOf(Date.now());
+  if (!P.months) { P.months = {}; if (P.budget.length) P.months[cur] = { lines: P.budget.map(b => ({ ...b })) }; }
+  if (P.months[ym]) return P.months[ym].lines;
+  if (ym !== cur) return [];   // a past month with no plan
+  const prev = Object.keys(P.months).filter(k => k < ym).sort().pop();
+  P.months[ym] = { lines: prev ? P.months[prev].lines.filter(b => !b.unplanned).map(b => ({ ...b })) : [] };
+  save();
+  return P.months[ym].lines;
+}
+// the same item across months: "00 Grocery", "groceries" and "food" are one thing
+const LINE_SYN = { food: 'grocery', grocerie: 'grocery', 'mobile data': 'data', electricity: 'light', subscriptions: 'subscription', 'gym sub': 'gym', 'house money': 'house' };
+function lineKey(n) {
+  let k = String(n || '').toLowerCase().replace(/[’']s\b/g, '').replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^my /, '');
+  k = LINE_SYN[k] || k.replace(/s$/, '');
+  return LINE_SYN[k] || k;
+}
+// what you gave this item in earlier months, newest first
+function pastAmounts(name, before) {
+  const P = moneyPlan(), k = lineKey(name);
+  if (!k || !P.months) return [];
+  return Object.keys(P.months).filter(m => m < before).sort().reverse()
+    .map(m => { const b = P.months[m].lines.find(x => lineKey(x.name) === k && x.amount > 0); return b ? [m, b.amount] : null; })
+    .filter(Boolean).slice(0, 4);
+}
+
 // Health from Notion: the meal week, past grocery spending (by week) and the current shopping list.
 // each import has an id, so the same one is never added twice
 function importHealth(data) {
@@ -7297,6 +7335,15 @@ function importMoney(data) {
   if (Array.isArray(data.income)) P.income = data.income.map(x => ({ name: String(x.name).trim(), amount: Number(x.amount) || 0 })).filter(x => x.name);
   if (Array.isArray(data.subs)) P.subs = data.subs.map(x => ({ name: String(x.name).trim(), cost: Number(x.cost) || 0, day: x.day || '' })).filter(x => x.name);
   if (Array.isArray(data.invest)) P.invest = data.invest.slice();
+  if (Array.isArray(data.budget)) { linesFor(ymOf(Date.now())); P.months[ymOf(Date.now())] = { lines: P.budget.map(b => ({ ...b })) }; }
+  // earlier months' plans: added, never over a month you already have
+  if (data.history && typeof data.history === 'object') {
+    linesFor(ymOf(Date.now()));
+    for (const [ym, rows] of Object.entries(data.history)) {
+      if (!/^\d{4}-\d{2}$/.test(ym) || P.months[ym] || !Array.isArray(rows)) continue;
+      P.months[ym] = { lines: rows.filter(r => r && r.name).map((r, i) => ({ id: 'h' + ym.replace('-', '') + i, name: String(r.name).trim(), amount: Number(r.amount) || 0, area: AREA_OF_LIFE[String(r.area || '').toLowerCase()] || '' })) };
+    }
+  }
   P.importedAt = Date.now();
   save();
   return true;
@@ -7305,14 +7352,14 @@ function importMoney(data) {
 // which budget line a transaction belongs to: your pick, else words that match a line, else its kind
 const KIND_LINE = { Food: /grocer|food/i, Transport: /fuel|transport/i, Subscriptions: /subscri/i, Bills: /light|data|bill/i, Health: /gym|health/i };
 function txLine(tx) {
-  const P = moneyPlan();
-  if (tx.line) return P.budget.find(b => b.id === tx.line) || null;
-  if (tx.dir !== 'DR' || !P.budget.length) return null;
+  const B = linesFor(ymOf(tx.at));
+  if (tx.line) return B.find(b => b.id === tx.line) || null;
+  if (tx.dir !== 'DR' || !B.length) return null;
   const d = (tx.desc || '').toLowerCase();
-  const byName = P.budget.find(b => b.name.length > 2 && new RegExp('\\b' + b.name.toLowerCase().replace(/[^a-z ]/g, '').trim().split(' ')[0] + 's?\\b').test(d));
+  const byName = B.find(b => b.name.length > 2 && new RegExp('\\b' + b.name.toLowerCase().replace(/[^a-z ]/g, '').trim().split(' ')[0] + 's?\\b').test(d));
   if (byName) return byName;
   const re = KIND_LINE[moneyKind(tx)];
-  return re ? P.budget.find(b => re.test(b.name)) || null : null;
+  return re ? B.find(b => re.test(b.name)) || null : null;
 }
 
 function moneyPlanCards(box, inMonth) {
@@ -7400,7 +7447,8 @@ function renderMoney() {
 
   // the sums
   const income = P.income.reduce((a, x) => a + x.amount, 0);
-  const budget = P.budget.reduce((a, b) => a + b.amount, 0);
+  const B = linesFor(moneyMonth);
+  const budget = B.reduce((a, b) => a + b.amount, 0);
   const spentBy = {}; let loose = 0;
   for (const x of inMonth) if (x.dir === 'DR') { const L = txLine(x); if (L) spentBy[L.id] = (spentBy[L.id] || 0) + x.amt; else loose += x.amt; }
   const spent = inMonth.filter(x => x.dir === 'DR').reduce((a, x) => a + x.amt, 0);
@@ -7426,22 +7474,29 @@ function renderMoney() {
     '<button type="button" class="md-seg-b' + (moneyTab === k ? ' on' : '') + '" data-t="' + k + '">' + t + '</button>').join('') + '</div>';
 
   if (moneyTab === 'budget') {
-    const lines = P.budget.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    const az = L => L.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    const lines = az(B.filter(b => !b.unplanned)), unp = az(B.filter(b => b.unplanned));
+    const planOnly = !isNow && !inMonth.some(x => x.dir === 'DR');   // an old month from Notion: just the plan
     // where the budget goes, by area of life, as one coloured bar
     const byArea = {};
-    for (const b of lines) { const a = b.area || guessArea(b.name); byArea[a] = (byArea[a] || 0) + b.amount; }
+    for (const b of B) { const a = b.area || guessArea(b.name); byArea[a] = (byArea[a] || 0) + b.amount; }
     const areas = MN_AREAS.filter(a => byArea[a] > 0);
     if (budget > 0 && areas.length) html += '<div class="mn-split">' + areas.map(a => '<u style="flex:' + byArea[a] + ';--c:' + MN_AREA_C[a] + '"></u>').join('') + '</div>' +
       '<div class="mn-legend">' + areas.map(a => '<span style="--c:' + MN_AREA_C[a] + '"><i></i>' + a + ' ' + Math.round(byArea[a] / budget * 100) + '%</span>').join('') + '</div>';
-    html += '<ul class="mn-lines2 mn-bl">' + lines.map(b => {
+    const row = b => {
       const sp = spentBy[b.id] || 0, lf = b.amount - sp, pc = b.amount ? Math.min(1, sp / b.amount) : (sp ? 1 : 0);
       if (moneyEdit === b.id) return '<li class="ed" data-b="' + b.id + '">' + lineEditor(b) + '</li>';
       return '<li data-b="' + b.id + '" class="' + (lf < 0 ? 'over' : '') + '" style="--c:' + MN_AREA_C[b.area || guessArea(b.name)] + '">' +
-        '<span class="dot"></span><div class="mid"><span class="nm"></span><i><u style="width:' + Math.round(pc * 100) + '%"></u></i></div>' +
-        '<div class="rt"><b>' + mnNaira(Math.abs(lf)) + '</b><small>' + (lf < 0 ? 'over' : 'left of ' + mnNaira(b.amount)) + '</small></div></li>';
-    }).join('') + (moneyEdit === 'new' ? '<li class="ed">' + lineEditor(null) + '</li>' : '') + '</ul>' +
-    (moneyEdit === 'new' ? '' : '<button type="button" class="mn-add" data-a="newline">+ Add a budget line</button>') +
-    (loose ? '<p class="mn-note">' + mnNaira(loose) + ' spent outside your lines. Open Spending to give it a line.</p>' : '');
+        '<span class="dot"></span><div class="mid"><span class="nm"></span>' + (planOnly ? '' : '<i><u style="width:' + Math.round(pc * 100) + '%"></u></i>') + '</div>' +
+        '<div class="rt"><b>' + mnNaira(planOnly ? b.amount : Math.abs(lf)) + '</b><small>' + (planOnly ? 'planned' : lf < 0 ? 'over' : 'left of ' + mnNaira(b.amount)) + '</small></div></li>';
+    };
+    if (!B.length && !moneyEdit) html += '<p class="mn-note">No budget for this month.</p>';
+    if (lines.length || moneyEdit === 'new') html += '<ul class="mn-lines2 mn-bl">' + lines.map(row).join('') + (moneyEdit === 'new' ? '<li class="ed">' + lineEditor(null) + '</li>' : '') + '</ul>';
+    if (moneyEdit !== 'new') html += '<button type="button" class="mn-add" data-a="newline">+ Add a budget line</button>';
+    html += '<div class="mn-unh"><b>Unplanned</b><small>this month only, not carried to next month</small></div>';
+    if (unp.length || moneyEdit === 'newu') html += '<ul class="mn-lines2 mn-bl">' + unp.map(row).join('') + (moneyEdit === 'newu' ? '<li class="ed">' + lineEditor(null) + '</li>' : '') + '</ul>';
+    if (moneyEdit !== 'newu') html += '<button type="button" class="mn-add" data-a="newunp">+ Add unplanned</button>';
+    if (loose) html += '<p class="mn-note">' + mnNaira(loose) + ' spent outside your lines. Open Spending to give it a line.</p>';
   }
 
   if (moneyTab === 'spend') {
@@ -7450,7 +7505,7 @@ function renderMoney() {
       return '<div class="mn-tx' + (x.dir === 'CR' ? ' in' : '') + '" data-id="' + x.id + '"><button type="button" class="mn-txb">' +
         '<span class="mn-d"><b></b><small>' + (x.dir === 'CR' ? 'Money in' : L ? '' : '<em class="nol">no line</em>') + (L ? '<em class="ln"></em>' : '') + ' · ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</small></span>' +
         '<em class="amt">' + (x.dir === 'CR' ? '+' : '−') + mnNaira(x.amt) + '</em></button>' +
-        (open && x.dir === 'DR' ? '<div class="mn-pick">' + P.budget.map(b => '<button type="button" data-l="' + b.id + '" class="' + (L && L.id === b.id ? 'on' : '') + '"></button>').join('') +
+        (open && x.dir === 'DR' ? '<div class="mn-pick">' + linesFor(ymOf(x.at)).map(b => '<button type="button" data-l="' + b.id + '" class="' + (L && L.id === b.id ? 'on' : '') + '"></button>').join('') +
           '<button type="button" class="mn-del">Remove</button></div>' : '') +
         (open && x.dir === 'CR' ? '<div class="mn-pick"><button type="button" class="mn-del">Remove</button></div>' : '') + '</div>';
     }).join('') : '<p class="mn-empty">No alerts this month yet.</p>') + '</div>';
@@ -7468,13 +7523,13 @@ function renderMoney() {
   box.innerHTML = html;
 
   // names in as text
-  box.querySelectorAll('.mn-lines2 li[data-b]:not(.ed) .nm').forEach(el => { el.textContent = P.budget.find(b => b.id === el.closest('li').dataset.b).name; });
+  box.querySelectorAll('.mn-lines2 li[data-b]:not(.ed) .nm').forEach(el => { el.textContent = B.find(b => b.id === el.closest('li').dataset.b).name; });
   box.querySelectorAll('.mn-lines2 li[data-i] .nm').forEach(el => { el.textContent = P.income[Number(el.closest('li').dataset.i)].name; });
   box.querySelectorAll('.mn-tx').forEach(el => {
     const x = state.money.find(t => t.id === el.dataset.id), L = txLine(x);
     el.querySelector('.mn-d b').textContent = (x.desc || (x.dir === 'CR' ? 'Money in' : 'Spent')).toLowerCase();
     const ln = el.querySelector('.ln'); if (ln) ln.textContent = L.name;
-    el.querySelectorAll('[data-l]').forEach(b => { b.textContent = P.budget.find(z => z.id === b.dataset.l).name; });
+    el.querySelectorAll('[data-l]').forEach(b => { b.textContent = linesFor(ymOf(x.at)).find(z => z.id === b.dataset.l).name; });
   });
 
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', e => fn(el, e)));
@@ -7482,6 +7537,7 @@ function renderMoney() {
   on('[data-t]', el => { moneyTab = el.dataset.t; moneyEdit = null; moneyOpen = null; renderMoney(); });
   on('.mn-gear', () => { moneyGear = !moneyGear; renderMoney(); });
   on('[data-a=newline]', () => { moneyEdit = 'new'; renderMoney(); focusEd(); });
+  on('[data-a=newunp]', () => { moneyEdit = 'newu'; renderMoney(); focusEd(); });
   on('[data-a=newinc]', () => { moneyEdit = 'inc:new'; renderMoney(); focusEd(); });
   on('.mn-lines2 li[data-b]:not(.ed)', el => { moneyEdit = el.dataset.b; renderMoney(); focusEd(); });
   on('.mn-lines2 li[data-i]', el => { moneyEdit = 'inc:' + el.dataset.i; renderMoney(); focusEd(); });
@@ -7503,16 +7559,16 @@ function renderMoney() {
       if (String(moneyEdit).startsWith('inc:')) {
         const k = moneyEdit.slice(4);
         if (k === 'new') P.income.push({ name, amount }); else Object.assign(P.income[Number(k)], { name, amount });
-      } else if (moneyEdit === 'new') {
-        P.budget.push({ id: 'b' + Date.now(), name, amount, next: 0, area: g('area').value, note: '' });
+      } else if (moneyEdit === 'new' || moneyEdit === 'newu') {
+        B.push({ id: 'b' + Date.now(), name, amount, area: g('area').value, ...(moneyEdit === 'newu' ? { unplanned: true } : {}) });
       } else {
-        Object.assign(P.budget.find(b => b.id === moneyEdit), { name, amount, area: g('area').value });
+        Object.assign(B.find(b => b.id === moneyEdit), { name, amount, area: g('area').value });
       }
       moneyEdit = null; save(); renderMoney();
     });
     on('li.ed [data-a=remove]', () => {
       if (String(moneyEdit).startsWith('inc:')) P.income.splice(Number(moneyEdit.slice(4)), 1);
-      else { P.budget = P.budget.filter(b => b.id !== moneyEdit); state.money.forEach(x => { if (x.line === moneyEdit) delete x.line; }); }
+      else { B.splice(B.findIndex(b => b.id === moneyEdit), 1); state.money.forEach(x => { if (x.line === moneyEdit && ymOf(x.at) === moneyMonth) delete x.line; }); }
       moneyEdit = null; save(); renderMoney();
     });
     ed.querySelectorAll('input').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') ed.querySelector('[data-a=save]').click(); }));
@@ -7521,6 +7577,15 @@ function renderMoney() {
     const setArea = a => { g('area').value = a; ed.querySelectorAll('[data-ar]').forEach(c => c.classList.toggle('on', c.dataset.ar === a)); };
     ed.querySelectorAll('[data-ar]').forEach(c => c.addEventListener('click', () => { picked = true; setArea(c.dataset.ar); const sg = ed.querySelector('.sug'); if (sg) sg.remove(); }));
     if (g('area')) g('name').addEventListener('input', () => { if (!picked) setArea(guessArea(g('name').value)); });
+    // what this item had in earlier months; tap one to use it
+    const pastBox = ed.querySelector('.mn-past');
+    const fillPast = () => {
+      const ps = pastAmounts(g('name').value, moneyMonth), yr = String(new Date().getFullYear());
+      pastBox.innerHTML = ps.length ? '<span>Past months</span><div>' + ps.map(([m, a]) => '<button type="button" data-v="' + a + '">' +
+        cap(MONTHS[Number(m.slice(5)) - 1].slice(0, 3)) + (m.slice(0, 4) !== yr ? ' ’' + m.slice(2, 4) : '') + ' <b>' + mnNaira(a) + '</b></button>').join('') + '</div>' : '';
+      pastBox.querySelectorAll('[data-v]').forEach(c => c.addEventListener('click', () => { g('amt').value = c.dataset.v; }));
+    };
+    if (pastBox) { fillPast(); g('name').addEventListener('input', fillPast); }
   }
   // settings: paste an alert, bank texts
   const gb = box.querySelector('.mn-gearbox');
@@ -7547,14 +7612,15 @@ const MN_AREA_C = { Health: '#7daf86', Wealth: '#c9965a', Love: '#d9718e', Self:
 function guessArea(name) {
   const n = String(name || '').toLowerCase();
   if (/gym|health|food|grocer|meal|pharm|drug|hospital|doctor|clinic|dental|vitamin|fruit|water/.test(n)) return 'Health';
-  if (/save|saving|invest|rent|bill|light|electric|debt|loan|emergency|insurance|tax|pension|stock|house/.test(n)) return 'Wealth';
-  if (/gift|family|mum|mom|dad|sis|bro|date|partner|friend|church|tithe|offering|giving|charity|wedding|baby/.test(n)) return 'Love';
+  if (/save|saving|invest|rent|bill|light|electric|debt|loan|emergency|insurance|tax|pension|stock|house|data|fuel|subscri|estate|clean|laundry/.test(n)) return 'Wealth';
+  if (/gift|family|mum|mom|dad|sis|bro|date|partner|friend|church|tithe|offering|giving|charity|wedding|baby|dog|ife\b/.test(n)) return 'Love';
   return 'Self';
 }
 function lineEditor(b) {
   const set = b && b.area, area = set || guessArea(b ? b.name : '');
   return '<div class="mn-ed3"><label><span>What is it</span><input name="name" type="text" maxlength="40" placeholder="e.g. Groceries" value="' + esc(b ? b.name : '') + '"></label>' +
     '<label><span>How much a month</span><div class="mn-amt"><em>₦</em><input name="amt" type="text" inputmode="numeric" placeholder="0" value="' + (b && b.amount ? b.amount : '') + '"></div></label>' +
+    '<div class="mn-past"></div>' +
     '<div class="mn-lab"><span>Area of life</span>' + (set ? '' : '<small class="sug">suggested</small>') + '</div>' +
     '<div class="mn-areas">' + MN_AREAS.map(a => '<button type="button" data-ar="' + a + '" style="--c:' + MN_AREA_C[a] + '" class="' + (a === area ? 'on' : '') + '">' + a + '</button>').join('') + '</div>' +
     '<input type="hidden" name="area" value="' + area + '">' +
