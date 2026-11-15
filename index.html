@@ -3828,6 +3828,66 @@ html body[data-view="day"] {
 .lf-t-in { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
 .hubback { margin-bottom: 4px; }
 
+/* habits as streaks */
+.hb-add input { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 13px 14px; border-radius: 16px; }
+.hb-full, .hb-empty { margin: 0 4px; font-size: 13px; color: var(--muted); line-height: 1.5; }
+.hb-empty { margin-top: 12px; }
+.hb-card { margin-top: 12px; padding: 16px; background: var(--card); border-radius: 24px; box-shadow: 0 1px 0 var(--hair), 0 10px 24px -18px rgba(59, 45, 37, .4); }
+.hb-card.done { background: linear-gradient(160deg, color-mix(in srgb, var(--c) 18%, var(--card)), var(--card)); }
+.hb-top { display: flex; align-items: center; gap: 12px; }
+.hb-fire { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 18px; background: color-mix(in srgb, var(--c) 16%, var(--card)); }
+.hb-fire b { font-size: 22px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.hb-fire span { font-size: 13px; line-height: 1.2; }
+.hb-name { flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 0; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: none; border: none; cursor: pointer; }
+.hb-name b { font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-name small { font-size: 12px; color: var(--muted); }
+.hb-tick { flex: none; width: 52px; height: 52px; font-size: 22px; color: var(--c); background: none; border: 2.5px solid color-mix(in srgb, var(--c) 55%, transparent); border-radius: 50%; cursor: pointer; transition: transform .15s; }
+.hb-card.done .hb-tick { color: #fff; background: var(--c); border-color: var(--c); }
+.hb-tick:active { transform: scale(.9); }
+.hb-card.pop .hb-tick { animation: hbpop .45s ease; }
+.hb-card.pop .hb-fire { animation: hbpop .45s ease .1s; }
+@keyframes hbpop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.hb-bar { display: block; height: 5px; margin: 14px 0 0; background: var(--hair); border-radius: 3px; overflow: hidden; }
+.hb-bar u { display: block; height: 100%; background: var(--c); border-radius: 3px; }
+.hb-week { display: flex; justify-content: space-between; margin-top: 12px; }
+.hb-d { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); text-transform: uppercase; }
+.hb-d i { width: 26px; height: 26px; border-radius: 9px; background: var(--hair); }
+.hb-d.on i { background: var(--c); }
+.hb-d.now { color: var(--ink); font-weight: 600; }
+.hb-d.now:not(.on) i { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent); background: none; }
+
+/* home, the good version */
+#view-home .pghead { flex-direction: column-reverse; align-items: flex-start; gap: 0; margin-bottom: 18px; }
+#view-home .pghead h1 { font-size: 32px; letter-spacing: -.5px; }
+#view-home .pghead span { font-size: 13px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; color: var(--muted); }
+#view-home .hm-now { position: relative; overflow: hidden; gap: 6px; padding: 22px; color: #fbf1e7; background: linear-gradient(150deg, #4a372c 0%, #2f241e 100%) !important;
+  border: none; border-radius: 28px; box-shadow: 0 20px 40px -22px rgba(47, 36, 30, .7); }
+#view-home .hm-now::after { content: ""; position: absolute; right: -40px; top: -40px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(238, 163, 182, .35), transparent 70%); pointer-events: none; }
+#view-home .hm-now b { font-size: 26px; letter-spacing: -.3px; }
+#view-home .hm-now .hm-lbl, #view-home .hm-now .hm-sub, #view-home .hm-now .hm-prog { color: rgba(251, 241, 231, .72); }
+#view-home .hm-now.live .hm-lbl, #view-home .hm-now.empty .hm-sub { color: #f4b4c5; }
+#view-home .hm-now .hm-bar { background: rgba(251, 241, 231, .16); }
+#view-home .hm-now .hm-bar u { background: #f4b4c5; }
+#view-home .hm-quick { margin: 0 0 10px; }
+#view-home .hq { min-height: 46px; border: none; background: var(--card); box-shadow: 0 1px 0 var(--hair), 0 6px 16px -12px rgba(59, 45, 37, .35); }
+#view-home .hq.due { background: color-mix(in srgb, var(--pink) 14%, var(--card)); }
+#view-home .hm-nudge { border: none; box-shadow: 0 1px 0 var(--hair), 0 6px 16px -12px rgba(59, 45, 37, .35); }
+.hm-sec { margin: 24px 4px 10px; font-size: 13px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase; color: var(--muted); }
+#view-home .hm-goals { margin-top: 10px; padding: 18px 20px; border: none; border-radius: 24px; background: var(--card); box-shadow: 0 1px 0 var(--hair), 0 10px 24px -16px rgba(59, 45, 37, .35); }
+.hm-gt { flex: 1; display: flex; flex-direction: column; }
+.hm-gbars { display: flex; align-items: flex-end; gap: 5px; height: 34px; }
+.hm-gbars i { position: relative; width: 8px; height: 100%; border-radius: 4px; background: color-mix(in srgb, var(--c) 22%, var(--card)); overflow: hidden; }
+.hm-gbars u { position: absolute; left: 0; right: 0; bottom: 0; background: var(--c); border-radius: 4px; }
+#view-home .hm-areas { gap: 12px; margin-top: 0; }
+#view-home .hm-area { position: relative; overflow: hidden; gap: 0; min-height: 150px; padding: 16px; border-radius: 26px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--c) 26%, var(--card)), color-mix(in srgb, var(--c) 8%, var(--card))); transition: transform .15s; }
+#view-home .hm-area:active { transform: scale(.97); }
+.hm-ae { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: auto; font-size: 20px; background: color-mix(in srgb, #fff 70%, transparent); border-radius: 14px; }
+.hm-an { margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--muted); }
+#view-home .hm-area em { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-style: normal; font-size: 24px; font-weight: 600; letter-spacing: -.4px; line-height: 1.2; color: var(--ink); }
+#view-home .hm-area em i { font-style: normal; font-size: 14px; font-weight: 500; color: var(--muted); }
+#view-home .hm-area small { font-size: 12px; color: var(--muted); }
+
 /* goals */
 .hm-goals { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 22px; padding: 16px 18px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 22px; cursor: pointer; }
 .hm-goals > span:first-child { flex: 1; display: flex; flex-direction: column; }
@@ -4194,7 +4254,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:58</footer>
+  <footer>everything saves on this device · build 13:09</footer>
 </div>
 
 <script>
@@ -4368,80 +4428,54 @@ function lastSevenDays() {
   return out;
 }
 
+/* habits as streaks. a habit takes about 66 days of doing it to become
+   automatic (UCL study, Lally 2009). so: build 1 or 2 at once, 3 at most,
+   and a habit that reaches 66 days moves to "locked in" and frees a slot. */
+const HABIT_DAYS = 66, HABIT_MAX = 3;
+function bestStreak(marks) {
+  const ks = [...new Set(marks)].sort();
+  let best = 0, run = 0, prev = null;
+  for (const k of ks) { run = prev && shiftKey(prev, 1) === k ? run + 1 : 1; best = Math.max(best, run); prev = k; }
+  return best;
+}
 function renderHabits() {
   renderSuggestion();
-  habitList.innerHTML = '';
-
-  if (!state.habits.length) {
-    const e = document.createElement('div');
-    e.className = 'empty';
-    e.textContent = 'nothing here yet';
-    habitList.appendChild(e);
-    return;
-  }
-
   const today = todayKey();
-
-  state.habits.forEach((h, idx) => {
-    const accent = h.color || colorFor(idx);
-    const marks = new Set(h.marks);
-
-    const box = document.createElement('div');
-    box.className = 'box studs';
-    box.style.setProperty('--accent', accent);
-
-    const top = document.createElement('div');
-    top.className = 'habit-top';
-
-    const name = document.createElement('button');
-    name.className = 'habit-name';
-    name.type = 'button';
-    name.textContent = h.name;
-    name.addEventListener('click', () => {
-      openHabit = (openHabit === h.id) ? null : h.id;
-      monthOffset = 0;
-      renderHabits();
+  const building = state.habits.filter(h => h.marks.length < HABIT_DAYS), locked = state.habits.filter(h => h.marks.length >= HABIT_DAYS);
+  const card = h => {
+    const marks = new Set(h.marks), n = streakOf(h.marks), done = marks.has(today), lockedIn = h.marks.length >= HABIT_DAYS;
+    const week = lastSevenDays().map(d => { const k = key(d); return '<span class="hb-d' + (marks.has(k) ? ' on' : '') + (k === today ? ' now' : '') + '"><i></i>' + DAYS[d.getDay()][0] + '</span>'; }).join('');
+    return '<div class="hb-card' + (done ? ' done' : '') + '" data-h="' + h.id + '" style="--c:' + (h.color || '#d9718e') + '">' +
+      '<div class="hb-top"><div class="hb-fire"><b>' + n + '</b><span>' + (n ? '\u{1F525}' : '\u{1F331}') + '</span></div>' +
+        '<button type="button" class="hb-name"><b></b><small>' + (lockedIn ? 'locked in \u00b7 best ' + bestStreak(h.marks) : Math.min(h.marks.length, HABIT_DAYS) + ' of ' + HABIT_DAYS + ' days to automatic' + (bestStreak(h.marks) > n ? ' \u00b7 best ' + bestStreak(h.marks) : '')) + '</small></button>' +
+        '<button type="button" class="hb-tick" aria-label="' + (done ? 'undo today' : 'done today') + '">\u2713</button></div>' +
+      (lockedIn ? '' : '<i class="hb-bar"><u style="width:' + Math.round(Math.min(1, h.marks.length / HABIT_DAYS) * 100) + '%"></u></i>') +
+      '<div class="hb-week">' + week + '</div></div>';
+  };
+  let html = '';
+  if (building.length < HABIT_MAX) html += '<div class="hb-add"><input type="text" maxlength="40" placeholder="+ a habit you want to build" aria-label="new habit"></div>';
+  else html += '<p class="hb-full">You\u2019re building ' + HABIT_MAX + '. That\u2019s the most that works: one more spreads you too thin. Each one frees up at ' + HABIT_DAYS + ' days.</p>';
+  html += building.map(card).join('');
+  if (!state.habits.length) html += '<p class="hb-empty">Start with one small thing you can do every day, even on a bad day. Small and daily beats big and sometimes.</p>';
+  if (locked.length) html += '<div class="hm-sec">Locked in</div>' + locked.map(card).join('');
+  habitList.innerHTML = html;
+  habitList.querySelectorAll('.hb-card').forEach(el => {
+    const h = state.habits.find(x => x.id === el.dataset.h);
+    el.querySelector('.hb-name b').textContent = h.name;
+    el.querySelector('.hb-tick').addEventListener('click', () => {
+      const was = h.marks.includes(today);
+      toggle(h, today);
+      if (!was) { const c = habitList.querySelector('[data-h="' + h.id + '"]'); if (c) c.classList.add('pop'); }
     });
-
-    const n = streakOf(h.marks);
-    const streak = document.createElement('span');
-    streak.className = 'streak';
-    streak.textContent = n ? n + 'd' : '';
-
-    const plus = document.createElement('button');
-    plus.className = 'mark' + (marks.has(today) ? ' done' : '');
-    plus.type = 'button';
-    plus.textContent = marks.has(today) ? '✓' : '+';
-    plus.setAttribute('aria-label', (marks.has(today) ? 'unmark ' : 'mark ') + h.name + ' today');
-    plus.addEventListener('click', () => toggle(h, today));
-
-    top.append(name, streak, plus);
-    box.appendChild(top);
-
-    const week = document.createElement('div');
-    week.className = 'week';
-
-    for (const d of lastSevenDays()) {
-      const k = key(d);
-      const col = document.createElement('div');
-      col.className = 'day';
-
-      const dot = document.createElement('div');
-      dot.className = 'dot' + (marks.has(k) ? ' on' : '') + (k === today ? ' today' : '');
-
-      const lbl = document.createElement('div');
-      lbl.className = 'lbl';
-      lbl.textContent = DAYS[d.getDay()];
-
-      col.append(dot, lbl);
-      week.appendChild(col);
-    }
-
-    box.appendChild(week);
-    if (openHabit === h.id) box.appendChild(monthPanel(h));
-
-    habitList.appendChild(box);
+    el.querySelector('.hb-name').addEventListener('click', () => { openHabit = openHabit === h.id ? null : h.id; monthOffset = 0; renderHabits(); });
+    if (openHabit === h.id) el.appendChild(monthPanel(h));
   });
+  const add = habitList.querySelector('.hb-add input');
+  if (add) add.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || !add.value.trim()) return;
+    addHabit(cap(add.value.trim()));
+  });
+  const sub = document.getElementById('habits-sub'); if (sub) sub.textContent = building.length + ' of ' + HABIT_MAX + ' building';
 }
 
 function toggle(h, k) {
@@ -4578,7 +4612,9 @@ function renderSuggestion() {
   const slot = document.getElementById('suggest-slot');
   slot.innerHTML = '';
 
-  for (const s of findSuggestions()) {
+  // one at a time, and only while there is room for another habit
+  if (state.habits.filter(h => h.marks.length < HABIT_DAYS).length >= HABIT_MAX) return;
+  for (const s of findSuggestions().slice(0, 1)) {
     const pretty = s.label.charAt(0).toUpperCase() + s.label.slice(1);
 
     const box = document.createElement('div');
@@ -7458,9 +7494,18 @@ function linesFor(ym) {
   if (P.months[ym]) return P.months[ym].lines;
   if (ym !== cur) return [];   // a past month with no plan
   const prev = Object.keys(P.months).filter(k => k < ym).sort().pop();
-  P.months[ym] = { lines: prev ? P.months[prev].lines.filter(b => !b.unplanned).map(b => ({ ...b })) : [] };
+  P.months[ym] = { lines: prev ? P.months[prev].lines.filter(b => !b.unplanned).map(b => ({ ...b })) : [],
+                   income: (prev && P.months[prev].income ? P.months[prev].income : P.income).map(x => ({ ...x })) };
   save();
   return P.months[ym].lines;
+}
+// a month's income. this month starts from what you had; an old month without any shows none
+function incomeFor(ym, make) {
+  const P = moneyPlan(); linesFor(ym);
+  const M = P.months[ym] || (make ? (P.months[ym] = { lines: [] }) : null);
+  if (!M) return make ? [] : null;
+  if (!M.income) { if (ym === ymOf(Date.now())) M.income = P.income.map(x => ({ ...x })); else if (make) M.income = []; else return null; }
+  return M.income;
 }
 // the same item across months: "00 Grocery", "groceries" and "food" are one thing
 const LINE_SYN = { food: 'grocery', grocerie: 'grocery', 'mobile data': 'data', electricity: 'light', subscriptions: 'subscription', 'gym sub': 'gym', 'house money': 'house' };
@@ -7520,7 +7565,7 @@ function importMoney(data) {
   if (Array.isArray(data.income)) P.income = data.income.map(x => ({ name: String(x.name).trim(), amount: Number(x.amount) || 0 })).filter(x => x.name);
   if (Array.isArray(data.subs)) P.subs = data.subs.map(x => ({ name: String(x.name).trim(), cost: Number(x.cost) || 0, day: x.day || '' })).filter(x => x.name);
   if (Array.isArray(data.invest)) P.invest = data.invest.slice();
-  if (Array.isArray(data.budget)) { linesFor(ymOf(Date.now())); P.months[ymOf(Date.now())] = { lines: P.budget.map(b => ({ ...b })) }; }
+  if (Array.isArray(data.budget)) { linesFor(ymOf(Date.now())); P.months[ymOf(Date.now())] = { lines: P.budget.map(b => ({ ...b })), income: P.income.map(x => ({ ...x })) }; }
   // earlier months' plans: added, never over a month you already have
   if (data.history && typeof data.history === 'object') {
     linesFor(ymOf(Date.now()));
@@ -7644,7 +7689,8 @@ function renderMoney() {
   const latest = state.money.find(x => x.bal !== null && x.bal !== undefined);
 
   // the sums
-  const income = P.income.reduce((a, x) => a + x.amount, 0);
+  const INC = incomeFor(moneyMonth) || [];
+  const income = INC.reduce((a, x) => a + x.amount, 0);
   const B = linesFor(moneyMonth);
   const budget = B.reduce((a, b) => a + b.amount, 0);
   const spentBy = {}; let loose = 0;
@@ -7653,7 +7699,7 @@ function renderMoney() {
   const left = budget - spent;
   const daysLeft = isNow ? new Date(Y, M, 0).getDate() - now.getDate() + 1 : 0;
   const gap = income - budget;
-  const bal = gap === 0 ? ['ok', 'Balanced. Every naira has a job.'] : gap > 0 ? ['give', mnNaira(gap) + ' of income has no job yet'] : ['over', 'Budget is ' + mnNaira(-gap) + ' more than income'];
+  const bal = !INC.length && !isNow ? null : gap === 0 ? ['ok', 'Balanced. Every naira has a job.'] : gap > 0 ? ['give', mnNaira(gap) + ' of income has no job yet'] : ['over', 'Budget is ' + mnNaira(-gap) + ' more than income'];
 
   let html = '<header class="pghead"><h1>Wallet</h1><span class="mn-mon"><button type="button" data-m="-1" aria-label="previous month">‹</button>' +
     cap(MONTHS[M - 1].slice(0, 3)) + ' ' + Y + '<button type="button" data-m="1" aria-label="next month"' + (isNow ? ' disabled' : '') + '>›</button>' +
@@ -7666,7 +7712,7 @@ function renderMoney() {
       (isNow && daysLeft > 0 && left > 0 ? '<small>about ' + mnNaira(left / daysLeft) + ' a day for ' + daysLeft + ' days</small>' : '<small>of ' + mnNaira(budget) + ' budgeted</small>') + '</div>' +
     '<div class="mn-bal"><span>Balance</span><b>' + (latest ? mnNaira(latest.bal) : '–') + '</b></div></div>' +
     '<div class="mn-sum"><div><span>Income</span><b>' + mnNaira(income) + '</b></div><div><span>Budget</span><b>' + mnNaira(budget) + '</b></div><div><span>Spent</span><b>' + mnNaira(spent) + '</b></div></div>' +
-    '<p class="mn-check ' + bal[0] + '">' + (bal[0] === 'ok' ? '✓ ' : '') + bal[1] + '</p>';
+    (bal ? '<p class="mn-check ' + bal[0] + '">' + (bal[0] === 'ok' ? '✓ ' : '') + bal[1] + '</p>' : '');
 
   html += '<div class="md-seg mn-tabs">' + [['budget', 'Budget'], ['spend', 'Spending'], ['income', 'Income']].map(([k, t]) =>
     '<button type="button" class="md-seg-b' + (moneyTab === k ? ' on' : '') + '" data-t="' + k + '">' + t + '</button>').join('') + '</div>';
@@ -7712,7 +7758,7 @@ function renderMoney() {
   if (moneyTab === 'income') {
     const got = inMonth.filter(x => x.dir === 'CR').reduce((a, x) => a + x.amt, 0);
     html += '<p class="mn-note">' + mnNaira(got) + ' received this month, of ' + mnNaira(income) + ' expected.</p><ul class="mn-lines2">' +
-      P.income.map((x, i) => moneyEdit === 'inc:' + i ? '<li class="ed">' + incEditor(x, i) + '</li>'
+      INC.map((x, i) => moneyEdit === 'inc:' + i ? '<li class="ed">' + incEditor(x, i) + '</li>'
         : '<li data-i="' + i + '"><div><span class="nm"></span><b>' + mnNaira(x.amount) + '</b></div></li>').join('') +
       (moneyEdit === 'inc:new' ? '<li class="ed">' + incEditor(null, 'new') + '</li>' : '') + '</ul>' +
       (moneyEdit === 'inc:new' ? '' : '<button type="button" class="mn-add" data-a="newinc">+ Add income</button>');
@@ -7722,7 +7768,7 @@ function renderMoney() {
 
   // names in as text
   box.querySelectorAll('.mn-lines2 li[data-b]:not(.ed) .nm').forEach(el => { el.textContent = B.find(b => b.id === el.closest('li').dataset.b).name; });
-  box.querySelectorAll('.mn-lines2 li[data-i] .nm').forEach(el => { el.textContent = P.income[Number(el.closest('li').dataset.i)].name; });
+  box.querySelectorAll('.mn-lines2 li[data-i] .nm').forEach(el => { el.textContent = INC[Number(el.closest('li').dataset.i)].name; });
   box.querySelectorAll('.mn-tx').forEach(el => {
     const x = state.money.find(t => t.id === el.dataset.id), L = txLine(x);
     el.querySelector('.mn-d b').textContent = (x.desc || (x.dir === 'CR' ? 'Money in' : 'Spent')).toLowerCase();
@@ -7756,7 +7802,8 @@ function renderMoney() {
       if (!name) { g('name').focus(); return; }
       if (String(moneyEdit).startsWith('inc:')) {
         const k = moneyEdit.slice(4);
-        if (k === 'new') P.income.push({ name, amount }); else Object.assign(P.income[Number(k)], { name, amount });
+        const I = incomeFor(moneyMonth, true);
+        if (k === 'new') I.push({ name, amount }); else Object.assign(I[Number(k)], { name, amount });
       } else if (moneyEdit === 'new' || moneyEdit === 'newu') {
         B.push({ id: 'b' + Date.now(), name, amount, area: g('area').value, ...(moneyEdit === 'newu' ? { unplanned: true } : {}) });
       } else {
@@ -7765,7 +7812,7 @@ function renderMoney() {
       moneyEdit = null; save(); renderMoney();
     });
     on('li.ed [data-a=remove]', () => {
-      if (String(moneyEdit).startsWith('inc:')) P.income.splice(Number(moneyEdit.slice(4)), 1);
+      if (String(moneyEdit).startsWith('inc:')) incomeFor(moneyMonth, true).splice(Number(moneyEdit.slice(4)), 1);
       else { B.splice(B.findIndex(b => b.id === moneyEdit), 1); state.money.forEach(x => { if (x.line === moneyEdit && ymOf(x.at) === moneyMonth) delete x.line; }); }
       moneyEdit = null; save(); renderMoney();
     });
@@ -11447,24 +11494,46 @@ function renderHome() {
   // one Goals card: this week across all areas
   const all = AREAS.flatMap(x => areaGoals(x.k).map(g => goalStatus(goalScore(g, ks).pct)[0]));
   const onT = all.filter(x => x === 'on').length;
-  let html = '<button type="button" class="hm-goals" data-goals="1"><span><b>Goals</b><small>' +
+  let html = '<button type="button" class="hm-goals" data-goals="1"><span class="hm-gt"><b>Goals</b><small>' +
     (all.length ? onT + ' of ' + all.length + ' on track this week' : 'set this week\u2019s goals') + '</small></span>' +
-    '<span class="hm-gdots">' + AREAS.map(x => '<i style="--c:' + x.c + '" class="' + (areaGoals(x.k).length ? 'on' : '') + '"></i>').join('') + '</span><s>\u203a</s></button>';
-  // the areas: what runs each one
-  const jr = activeJourney();
-  html += '<div class="hm-areas">' + AREAS.map(x => {
-    const pages = (AREA_PAGES[x.k] || []).concat(x.k === 'love' ? [] : []);
-    const line = x.k === 'health' && jr ? 'Day ' + journeyDay(jr, Date.now()) + ' \u00b7 ' + jr.name
-      : pages.map(t => PAGE_NAME[t]).join(' \u00b7 ');
-    return '<button type="button" class="hm-area" data-open="' + x.k + '" style="--c:' + x.c + '"><i>' + x.e + '</i><b>' + x.name + '</b><small></small></button>';
+    '<span class="hm-gbars">' + AREAS.map(x => { const gs = areaGoals(x.k), sc = gs.length ? areaScore(x.k, ks) : 0;
+      return '<i style="--c:' + x.c + '"><u style="height:' + Math.max(gs.length ? 12 : 0, sc) + '%"></u></i>'; }).join('') + '</span></button>';
+  // the areas, each with one live number from the systems that run it
+  html += '<div class="hm-sec">Today</div><div class="hm-areas">' + AREAS.map(x => {
+    const L = areaLive(x.k);
+    return '<button type="button" class="hm-area" data-open="' + x.k + '" style="--c:' + x.c + '"><span class="hm-ae">' + x.e + '</span>' +
+      '<b class="hm-an">' + x.name + '</b><em>' + L.big + '</em><small>' + esc(L.cap) + '</small></button>';
   }).join('') + '</div>';
   slot.innerHTML = html;
-  slot.querySelectorAll('.hm-area').forEach(el => {
-    const x = AREAS.find(z => z.k === el.dataset.open);
-    el.querySelector('small').textContent = x.k === 'health' && jr ? 'Day ' + journeyDay(jr, Date.now()) + ' \u00b7 ' + jr.name : (AREA_PAGES[x.k] || []).map(t => PAGE_NAME[t]).join(' \u00b7 ');
-  });
   slot.querySelector('[data-goals]').addEventListener('click', () => { show('goals'); window.scrollTo(0, 0); });
   slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => { lifeTab = 'week'; lifeSetup = null; areaGoalsOpen = false; lifeOpen = b.dataset.open; show('life'); window.scrollTo(0, 0); }));
+}
+
+// short money: 464000 -> 464k
+const shortNaira = n => { const a = Math.abs(n), sg = n < 0 ? '-' : ''; return '\u20a6' + sg + (a >= 1e6 ? (a / 1e6).toFixed(a >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'm' : a >= 1e3 ? Math.round(a / 1e3) + 'k' : Math.round(a)); };
+// one live number per area, from the systems under it
+function areaLive(k) {
+  const t = todayKey();
+  if (k === 'health') {
+    const j = activeJourney(), n = state.food.filter(f => key(new Date(f.at)) === t).length, g = tileFor('gym');
+    if (j) return { big: 'Day ' + journeyDay(j, Date.now()), cap: j.name };
+    return g.big === 'Rest' ? { big: n + '<i> logged</i>', cap: 'food today \u00b7 rest day' } : { big: g.big + '<i>' + (g.unit || '') + '</i>', cap: 'exercises \u00b7 ' + n + ' food logged' };
+  }
+  if (k === 'wealth') {
+    const cur = ymOf(Date.now()), B = linesFor(cur), bud = B.reduce((a, b) => a + b.amount, 0);
+    if (!bud) return { big: '\u2013', cap: 'set a budget' };
+    const sp = (state.money || []).filter(x => x.dir === 'DR' && ymOf(x.at) === cur).reduce((a, x) => a + x.amt, 0);
+    return { big: shortNaira(bud - sp), cap: 'left this month' };
+  }
+  if (k === 'love') {
+    const P = state.people || [], due = P.filter(x => personDue(x) >= 0).sort((a, b) => personDue(b) - personDue(a));
+    if (!P.length) return { big: '+', cap: 'add your people' };
+    return due.length ? { big: esc(due[0].name), cap: 'is due a hello' } : { big: '\u2713', cap: 'all caught up' };
+  }
+  const H = state.habits || [];
+  if (!H.length) return { big: '+', cap: 'start a habit' };
+  const best = Math.max(...H.map(h => streakOf(h.marks)));
+  return { big: H.filter(h => h.marks.includes(t)).length + '<i>/' + H.length + '</i>', cap: best ? 'habits \u00b7 ' + best + ' day streak' : 'habits today' };
 }
 
 /* =========== goals ===========
@@ -13112,7 +13181,7 @@ function fillHeads() {
   set('home-date', FULL[d.getDay()].replace(/^./, c => c.toUpperCase()) + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()].replace(/^./, c => c.toUpperCase()));
   set('food-sub', state.food.filter(f => key(new Date(f.at)) === t).length + ' today');
   set('ideas-sub', 'only you');
-  set('habits-sub', state.habits.length + ' tracked');
+  set('habits-sub', state.habits.filter(h => h.marks.length < 66).length + ' of 3 building');
   const sess = todaysSession();
   set('gym-sub', sess ? 'Session day' : 'Rest day');
 }
