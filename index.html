@@ -4794,6 +4794,15 @@ html { background: var(--paper) !important; }
 
 .wl-day li.done span, .wl-day li.done time { text-decoration: none !important; color: var(--muted) !important; opacity: .7; }
 
+/* goals: no leftover step line; focus room: even more room */
+#view-goals .gl-sl { display: none !important; }
+.focus .fx-label { display: none !important; }
+.focus .fx-stage { width: min(68vw, 250px) !important; margin-top: 36px !important; }
+.focus .fx-quote { display: none !important; }
+.focus .fx-growing { margin-top: 28px !important; }
+.focus .fx-time { margin-top: 36px !important; }
+body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: none !important; }
+
 /* home on one screen, with more luxury: one list card for Goals and the areas, fine rose gold lines, serif numbers */
 #view-home#view-home .pghead { position: relative; margin-bottom: 16px !important; padding-bottom: 14px; }
 #view-home#view-home .pghead::after { content: ""; position: absolute; left: 0; bottom: 0; width: 64px; height: 2px; border-radius: 1px; background: var(--gold); }
@@ -4815,15 +4824,6 @@ html { background: var(--paper) !important; }
 #view-home#view-home .hm-area small { font-size: 12.5px !important; }
 #view-home#view-home .hm-area em { font-family: var(--serif, inherit) !important; font-size: 22px !important; font-weight: 600 !important; }
 
-/* goals: no leftover step line; focus room: even more room */
-#view-goals .gl-sl { display: none !important; }
-.focus .fx-label { display: none !important; }
-.focus .fx-stage { width: min(68vw, 250px) !important; margin-top: 36px !important; }
-.focus .fx-quote { display: none !important; }
-.focus .fx-growing { margin-top: 28px !important; }
-.focus .fx-time { margin-top: 36px !important; }
-body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: none !important; }
-
 /* add a block: big picture tiles, then how long */
 .ab h2 { margin: 0 0 12px; font-size: 24px; font-weight: 600; }
 .ab-sub { margin: 4px 2px 8px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
@@ -4837,7 +4837,6 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 
 .ab-grid.one { grid-template-columns: 1fr; }
 .ab-grid.one .ab-t b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
 /* home: back to separate cards, compact so it reads at a glance, each with a fine rose gold edge */
 #view-home#view-home#view-home#view-home .hm-areas { display: flex !important; flex-direction: column !important; gap: 10px !important; margin: 10px 0 0 !important; border: none !important; border-radius: 0 !important; overflow: visible !important; background: none !important; }
 #view-home#view-home#view-home#view-home .hm-goals.hm-goals, #view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area {
@@ -4851,7 +4850,6 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 #view-home#view-home .hm-area .hm-an::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
 :root[data-theme="dark"] #view-home#view-home#view-home#view-home :is(.hm-goals.hm-goals, .hm-areas .hm-area.hm-area) { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .8) !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #view-home#view-home#view-home#view-home :is(.hm-goals.hm-goals, .hm-areas .hm-area.hm-area) { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .8) !important; } }
-
 /* home: a quiet divider between Goals and the four areas */
 #view-home#view-home#view-home .hm-sec { display: flex !important; align-items: center; gap: 12px; margin: 18px 2px 8px !important; font-size: 11px !important; font-weight: 600 !important;
   letter-spacing: 2.5px !important; text-transform: uppercase !important; color: transparent !important; background: none !important; }
@@ -4869,7 +4867,6 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 #view-goals .gl-ebtns button { min-height: 44px; padding: 0 16px; font: 600 15px var(--display); color: var(--ink); background: var(--hair); border: none; border-radius: 22px; cursor: pointer; }
 #view-goals .gl-ebtns button:first-child { color: #fff; background: var(--pink); }
 #view-goals .gl-ebtns button.rm { margin-left: auto; color: #c2415d; background: none; border: 1px solid color-mix(in srgb, #c2415d 35%, var(--hair)); }
-
 /* add a block (week): two calm steps with room to breathe */
 .wka2 { max-height: 90vh; overflow-y: auto; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important; }
 .wka2 h2 { margin: 2px 0 16px !important; font-size: 26px !important; }
@@ -4898,14 +4895,12 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 .wka2 .wka-quick { margin-top: 10px; }
 .wka2 .wka-note { margin-top: 16px; }
 .wka2 .wka-go { min-height: 54px; margin-top: 14px; font-size: 17px; }
-
 /* home: more room to breathe (still ends above the tab bar on her phone) */
 #view-home#view-home#view-home .pghead { margin-top: 10px !important; margin-bottom: 30px !important; padding-bottom: 22px !important; }
 #view-home#view-home#view-home .pghead span { margin-bottom: 6px; }
 #view-home#view-home#view-home .hm-quick { margin-top: 18px !important; margin-bottom: 26px !important; }
 #view-home#view-home#view-home .hm-sec { margin: 28px 2px 14px !important; }
 #view-home#view-home#view-home#view-home .hm-areas { gap: 12px !important; }
-
 .wk2-hrs { display: flex; align-items: center; gap: 12px; padding: 10px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
 .wk2-hrs button { flex: none; width: 56px; height: 56px; font: 600 28px var(--display); color: var(--ink); background: var(--pink-s); border: none; border-radius: 50%; cursor: pointer; }
 .wk2-hrs div { flex: 1; text-align: center; }
@@ -4914,14 +4909,12 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 .wka2 .wk2-lens { grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
 .wka2 .wk2-lens button { min-height: 46px; padding: 0 6px; align-items: center; justify-content: center; }
 .wka2 .wk2-lens b { font-size: 15px; }
-
 .wk2-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; }
 .wk2-top .wk2-step { flex: 1; }
 .wk2-x { flex: none; width: 44px; height: 44px; font-size: 26px; line-height: 1; color: var(--ink); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
 .wk2-back { flex: none; min-height: 44px; padding: 0 14px; font: 600 15px var(--display); color: var(--ink); background: var(--slot); border: none; border-radius: 22px; cursor: pointer; }
 .wk2-hrs b { font-family: var(--display) !important; }
 .wk2-sel { min-height: 54px !important; margin-top: 0 !important; font-size: 17px !important; border-radius: 16px !important; }
-
 /* home: the four areas as 2 by 2 squares again, with the rose gold edges */
 #view-home#view-home#view-home#view-home#view-home .hm-areas { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
 #view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: space-between !important;
@@ -4958,6 +4951,38 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 .wg-col i:not(.done) { opacity: .45; }
 .wg-col i.done { filter: saturate(1.6) brightness(.92); }
 .wg-col u { background: var(--gold-1, #d68fa3) !important; height: 2px !important; }
+
+.ab-note { margin: -6px 0 12px; font-size: 14px; color: var(--muted); }
+.ab-goal { display: block; width: 100%; min-height: 50px; margin: 0 0 10px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 14px; }
+
+/* week add: an elegant goals picker that opens a list */
+.wk2-gbtn { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 56px; margin-top: 22px; padding: 0 18px; font: 600 16px var(--display); color: var(--ink); cursor: pointer;
+  border: 1px solid transparent; border-radius: 18px; background: linear-gradient(color-mix(in srgb, var(--pink) 8%, var(--card)), color-mix(in srgb, var(--pink) 8%, var(--card))) padding-box, var(--gold, linear-gradient(135deg, #f7d3dc, #b97488)) border-box; }
+.wk2-gbtn span { display: flex; align-items: center; gap: 10px; }
+.wk2-gbtn i { font-style: normal; font-size: 20px; }
+.wk2-gbtn s { text-decoration: none; font-size: 14px; font-weight: 500; color: var(--pink-d); }
+.wk2-gbtn s b { display: inline-block; transition: transform .2s; }
+.wk2-gbtn.open s b { transform: rotate(180deg); }
+.wk2-glist { margin-top: 8px; padding: 6px 0; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; }
+.wk2-gg + .wk2-gg { border-top: 1px solid var(--hair); }
+.wk2-gg small { display: block; padding: 10px 18px 4px; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: color-mix(in srgb, var(--c) 70%, var(--ink)); }
+.wk2-gg button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 50px; padding: 0 18px; text-align: left; font: 500 16px var(--display); color: var(--ink); background: none; border: none; cursor: pointer; }
+.wk2-gg button:active { background: var(--pink-s); }
+.wk2-gg button i { font-style: normal; font-size: 18px; }
+.wk2-gg button span { flex: 1; }
+.wk2-gg button s { text-decoration: none; font-size: 20px; color: var(--muted); }
+/* plan day: the start time is always there, as a calm row */
+#view-day.calm .start-row { display: flex !important; }
+#view-day .start-row { align-items: center; padding: 6px 6px 6px 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; }
+#view-day .start-row input { min-height: 44px; }
+
+/* home fits one screen on the phone, even with the next step card and the phone's top bar */
+#view-home#view-home#view-home .pghead { margin-top: 0 !important; margin-bottom: 18px !important; padding-bottom: 14px !important; }
+#view-home#view-home#view-home .hm-quick { margin-top: 14px !important; margin-bottom: 16px !important; }
+#view-home#view-home#view-home .hm-sec { margin: 18px 2px 10px !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { min-height: 100px !important; padding: 14px 16px !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-area em { padding-top: 6px; font-size: 24px !important; }
+#view-home#view-home#view-home .hm-nudge { margin-bottom: 12px !important; }
 </style>
 </head>
 <body>
@@ -5218,7 +5243,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:58</footer>
+  <footer>Mr.O:20:05</footer>
 </div>
 
 <script>
@@ -6374,7 +6399,13 @@ function nowCard(day) {
     // if the block you are actually on, the first one not ticked, is a focus block, use that
     const open = wins.find(x => !x.b.done);
     if (open && isFocusBlock(open.b.label) && (!w || w.b.done || !isFocusBlock(w.b.label) && !isAgendaBlock(w.b.label))) w = open;
-    if (w && !w.b.done) {
+    if (w && !w.b.done && w.b.workout && workoutById(w.b.workout)) {
+      const acts = document.createElement('div'); acts.className = 'nc-acts';
+      const gb = document.createElement('button'); gb.type = 'button'; gb.className = 'nc-act grow'; gb.textContent = 'Open ' + workoutById(w.b.workout).title;
+      gb.addEventListener('click', () => openWorkout(w.b.workout));
+      acts.appendChild(gb); card.appendChild(acts);
+    }
+    if (w && !w.b.done && !w.b.workout) {
       const f = w.b.meeting ? 'agenda' : outcomeField(w.b.label);
       if (f) {
         const acts = document.createElement('div');
@@ -7778,14 +7809,24 @@ function addBlockSheet() {
   const h = new Date().getHours(), meal = h < 11 ? MEAL_SLOTS[0] : h < 16 ? MEAL_SLOTS[1] : MEAL_SLOTS[2];
   const seen = new Set();
   const goals = (typeof goalSteps === 'function' ? goalSteps() : []).filter(g => { const k = g.t.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 5);
-  const common = [['\u{1F4BC}', 'Work', 60], ['\u2615', 'Break', 15], ['\u{1F6B6}', 'Walk', 30], ['\u{1F3CB}\uFE0F', 'Gym', 60],
-                  [meal[2], meal[1], meal[0] === 'b' ? 30 : 45], ['\u{1F465}', 'Meeting', 30], ['\u{1F4D6}', 'Read', 30], ['\u{1F64F}', 'Pray', 15]];
+  void meal;
+  const common = [['\u{1F4BC}', 'Work', 60, 'work'], ['\u{1F9D8}', 'Rest', 30, 'rest'], ['\u{1F3CB}\uFE0F', 'Workout', 60, 'gym'], ['\u{1F465}', 'Meeting', 30],
+                  ['\u{1F305}', 'Breakfast', 30], ['\u2600\uFE0F', 'Lunch', 45], ['\u{1F319}', 'Dinner', 45], ['\u{1F4DA}', 'Learn', 60]];
+  // rest that genuinely restores you: body, mind, people and joy
+  const REST = [['Body', [['\u{1F634}', 'Sleep', 480], ['\u{1F4A4}', 'Nap', 20], ['\u{1F6B6}', 'Walk', 30], ['\u{1F938}', 'Stretch', 15], ['\u{1F6BF}', 'Shower', 15], ['\u{1F6C1}', 'Bath', 30]]],
+                ['Mind', [['\u{1F9D8}', 'Meditate', 10], ['\u{1F64F}', 'Pray', 15], ['\u{1F4D3}', 'Journal', 15], ['\u{1F4D6}', 'Read for fun', 30], ['\u{1F3A7}', 'Music', 30], ['\u{1F333}', 'Sit outside', 15], ['\u{1F343}', 'Do nothing', 15]]],
+                ['People and joy', [['\u{1F4DE}', 'Call a friend', 30], ['\u{1F46A}', 'Family time', 60], ['\u{1F496}', 'Date night', 120], ['\u{1F373}', 'Cook a nice meal', 45], ['\u{1F3AC}', 'Movie time', 120], ['\u{1F3A8}', 'Hobby time', 45], ['\u2615', 'Tea break', 15]]]];
+  const gymTypes = () => { const W = routine().workouts.map(w => ['\u{1F3CB}\uFE0F', w.title, 60, w.id]);
+    return W.concat([['\u{1F3C3}', 'Cardio', 45], ['\u{1F9D8}', 'Yoga', 45], ['\u{1F3CA}', 'Swim', 45], ['\u{1F3BE}', 'Tennis', 60], ['\u{1F6B4}', 'Cycling', 45], ['\u{1F483}', 'Dance', 45]]); };
+  let step = null;   // null, 'rest', 'gym' or 'work'
   const mine = usualLabels(2).filter(x => !common.some(c => c[1].toLowerCase() === x.t.toLowerCase()) && !goals.some(g => g.t.toLowerCase() === x.t.toLowerCase()));
   let pick = null;
   const close = () => el.remove();
   const add = mins => {
     const b = { label: pick.label, mins, done: false };
     if (pick.step) b.step = pick.step;
+    if (pick.workout) b.workout = pick.workout;
+    if (pick.goals && pick.goals.length) b.goals = pick.goals.map(t => ({ text: t, done: false }));
     const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
     day.touched = true; day.blocks.push(b);
     save(); close(); renderDay(); renderHabits();
@@ -7793,7 +7834,17 @@ function addBlockSheet() {
   const tile = (e, t, data) => '<button type="button" class="ab-t" ' + data + '><span>' + e + '</span><b>' + esc(t) + '</b></button>';
   const draw = () => {
     let html = '<div class="w3-back"></div><div class="w3-sheet ab" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>';
-    if (!pick) {
+    if (!pick && step === 'rest') {
+      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>Rest</b></div><h2>What kind of rest?</h2>' +
+        REST.map(([h, L], gi) => '<p class="ab-sub">' + h + '</p><div class="ab-grid">' + L.map((r, i) => tile(r[0], r[1], 'data-r="' + gi + ':' + i + '"')).join('') + '</div>').join('');
+    } else if (!pick && step === 'gym') {
+      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>Workout</b></div><h2>What are you training?</h2>' +
+        '<div class="ab-grid">' + gymTypes().map((g, i) => tile(g[0], g[1], 'data-w="' + i + '"')).join('') + '</div>';
+    } else if (!pick && step === 'work') {
+      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>Work</b></div><h2>What will you get done?</h2><p class="ab-note">Up to 3 goals for this block.</p>' +
+        [0, 1, 2].map(i => '<input type="text" class="ab-goal" maxlength="80" placeholder="' + ['Goal 1', 'Goal 2 (optional)', 'Goal 3 (optional)'][i] + '" aria-label="work goal ' + (i + 1) + '">').join('') +
+        '<button type="button" class="wka-go ab-next">Next</button>';
+    } else if (!pick) {
       html += '<h2>What is it?</h2>' +
         (goals.length ? '<p class="ab-sub">Your goals</p><div class="ab-grid one">' + goals.map((g, i) => tile(g.e, g.t, 'data-g="' + i + '"')).join('') + '</div><p class="ab-sub">Everyday</p>' : '') +
         '<div class="ab-grid">' + common.map((c, i) => tile(c[0], c[1], 'data-c="' + i + '"')).join('') + mine.map((m, i) => tile('\u21BB', m.t, 'data-u="' + i + '"')).join('') + '</div>' +
@@ -7811,10 +7862,16 @@ function addBlockSheet() {
     el.querySelector('.w3-back').addEventListener('click', close);
     el.querySelector('.ls-cancel').addEventListener('click', close);
     el.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => { const g = goals[Number(b.dataset.g)]; pick = { label: g.t, step: g.id }; draw(); }));
-    el.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => { const c = common[Number(b.dataset.c)]; pick = { label: c[1], mins: c[2] }; draw(); }));
+    el.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => { const c = common[Number(b.dataset.c)];
+      if (c[3]) { step = c[3]; draw(); return; }
+      pick = { label: c[1], mins: c[2] }; draw(); }));
+    el.querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => { const [gi, i] = b.dataset.r.split(':').map(Number), r = REST[gi][1][i]; pick = { label: r[1], mins: r[2] }; draw(); }));
+    el.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', () => { const g = gymTypes()[Number(b.dataset.w)]; pick = { label: g[1], mins: g[2], workout: g[3] || null }; draw(); }));
+    const nx = el.querySelector('.ab-next');
+    if (nx) nx.addEventListener('click', () => { const gl = [...el.querySelectorAll('.ab-goal')].map(i => i.value.trim()).filter(Boolean).slice(0, 3); pick = { label: 'Work', mins: 60, goals: gl }; draw(); });
     el.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { pick = { label: mine[Number(b.dataset.u)].t }; draw(); }));
     el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
-    const bk = el.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => { pick = null; draw(); });
+    const bk = el.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => { if (pick) pick = null; else step = null; draw(); });
     const inp = el.querySelector('.ab-type input');
     if (inp) { const go = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; } pick = { label: t }; draw(); };
       el.querySelector('.ab-type button').addEventListener('click', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); }
@@ -11233,6 +11290,15 @@ const GYM = {
 };
 
 let gymDay = null;   // set on first draw, from your routine
+// open a workout in Move (from a planned workout block)
+function openWorkout(id) { gymDay = id; show('gym'); window.scrollTo(0, 0); }
+// the workout planned for right now, if any
+function nowWorkout() {
+  const k = planKey(), d = state.days[k]; if (!d || !d.blocks) return null;
+  let at = toMins(d.start); const nm = planMin(k);
+  for (const b of d.blocks) { const len = Number(b.mins) || 60; if (!b.done && nm >= at && nm < at + len) return b.workout && workoutById(b.workout) ? b.workout : null; at += len; }
+  return null;
+}
 
 function gymValue(id, field, fallback) {
   const e = state.gymEdits && state.gymEdits[id];
@@ -12470,7 +12536,7 @@ function renderHomeNow() {
     }
   }
   box.innerHTML = html;
-  box.firstChild.addEventListener('click', () => show('day'));
+  box.firstChild.addEventListener('click', () => { const nb = nowWorkout(); if (nb) openWorkout(nb); else show('day'); });
 }
 
 /* =========== people ===========
@@ -15093,8 +15159,9 @@ function weekAddSheet(day0, days, preset, after) {
       const S = goalSteps();
       h += '<div class="wk2-top"><p class="wk2-step">Step 1 of 2</p><button type="button" class="wk2-x" aria-label="close">\u00d7</button></div><h2>What is it?</h2>' +
         '<div class="wk2-type"><input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="Type a name" aria-label="block name"><button type="button" id="wka-next">Next</button></div>' +
-        (S.length ? '<p class="wk2-h">From your goals</p><select id="wka-goal" class="wka-sel wk2-sel" aria-label="from your goals"><option value="">Pick a goal or step\u2026</option>' +
-          AREAS.map(a => { const xs = S.filter(x => x.a === a.k); return xs.length ? '<optgroup label="' + a.name + '">' + xs.map(x => '<option value="' + esc(x.t) + '">' + esc(x.t) + '</option>').join('') + '</optgroup>' : ''; }).join('') + '</select>' : '') +
+        (S.length ? '<button type="button" class="wk2-gbtn" aria-expanded="false"><span><i>\u{1F3AF}</i>From your goals</span><s>' + S.length + ' <b>\u25BE</b></s></button>' +
+          '<div class="wk2-glist" hidden>' + AREAS.map(a => { const xs = S.filter(x => x.a === a.k); return xs.length ? '<div class="wk2-gg" style="--c:' + a.c + '"><small>' + a.name + '</small>' +
+            xs.map(x => '<button type="button" data-g="' + esc(x.t) + '"><i>' + a.e + '</i><span>' + esc(x.t) + '</span><s>\u203a</s></button>').join('') + '</div>' : ''; }).join('') + '</div>' : '') +
         '<p class="wk2-h">Everyday</p><div class="wk2-tiles">' + COMMON.map(([e, t, m]) => '<button type="button" data-t="' + t + '" data-mm="' + m + '"><i>' + e + '</i><span>' + t + '</span></button>').join('') + '</div>';
     } else {
       const LENS = [30, 60, 90, 120]; if (!LENS.includes(mins)) { LENS.push(mins); LENS.sort((a, b) => a - b); }
@@ -15120,8 +15187,9 @@ function weekAddSheet(day0, days, preset, after) {
       el.querySelector('#wka-next').addEventListener('click', next);
       name.addEventListener('keydown', e => { if (e.key === 'Enter') next(); });
       el.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { label = b.dataset.t; const u = usualLength(label); mins = u || Number(b.dataset.mm) || mins; draw(2); }));
-      const gsel = el.querySelector('#wka-goal');
-      if (gsel) gsel.addEventListener('change', () => { if (gsel.value) { label = gsel.value; const u = usualLength(label); if (u) mins = u; draw(2); } });
+      const gb = el.querySelector('.wk2-gbtn'), gl = el.querySelector('.wk2-glist');
+      if (gb) gb.addEventListener('click', () => { const open = gl.hidden; gl.hidden = !open; gb.setAttribute('aria-expanded', open); gb.classList.toggle('open', open); });
+      el.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => { label = b.dataset.g; const u = usualLength(label); if (u) mins = u; draw(2); }));
       setTimeout(() => name.focus(), 50);
       return;
     }
