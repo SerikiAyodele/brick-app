@@ -27,7 +27,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap">
 
 <style>
 /* Blocks that snap together. Graph paper underneath, studs on top,
@@ -4032,6 +4032,54 @@ body, body[data-view] {
 .fh { background: linear-gradient(160deg, color-mix(in srgb, #8b6cf6 24%, var(--card)), color-mix(in srgb, var(--pink) 10%, var(--card)) 80%) !important; }
 .tabs .brick:not(.flat) { background: color-mix(in srgb, var(--pink) 28%, var(--card)); }
 
+/* home: drawn on paper. light pink ruled paper, pencil outlines, a pink
+   marker shade, handwriting for titles and big numbers (body text stays
+   Poppins so it is easy to read). */
+body[data-view="home"] { --sk-paper: #fdeef2; --sk-line: rgba(134, 185, 217, .32); --sk-margin: rgba(217, 113, 142, .45);
+  --sk-ink: #4a3a40; --sk-shade: #f6c6d3; --sk-fill: #fff8fa; --sk-hand: "Caveat", "Bradley Hand", cursive; }
+:root[data-theme="dark"] body[data-view="home"] { --sk-paper: #2a2024; --sk-line: rgba(134, 185, 217, .14); --sk-margin: rgba(217, 113, 142, .35);
+  --sk-ink: #f3dde4; --sk-shade: #6e4553; --sk-fill: #33272c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body[data-view="home"] { --sk-paper: #2a2024; --sk-line: rgba(134, 185, 217, .14);
+  --sk-margin: rgba(217, 113, 142, .35); --sk-ink: #f3dde4; --sk-shade: #6e4553; --sk-fill: #33272c; } }
+html body[data-view="home"], :root:not([data-theme="light"]) body[data-view="home"] {
+  background-color: var(--sk-paper) !important;
+  background-image: linear-gradient(90deg, transparent 8px, var(--sk-margin) 8px, var(--sk-margin) 10px, transparent 10px),
+                    linear-gradient(var(--sk-line) 1px, transparent 1px) !important;
+  background-size: 100% 100%, 100% 34px !important; background-attachment: local; }
+body[data-view="home"] #view-home .pghead h1 { font: 700 46px/1 var(--sk-hand); letter-spacing: 0; color: var(--sk-ink); }
+body[data-view="home"] #view-home .pghead span { font: 500 20px var(--sk-hand); letter-spacing: 0; text-transform: none; color: var(--pink-d); }
+body[data-view="home"] #view-home .hm-sec { font: 700 26px var(--sk-hand); letter-spacing: 0; text-transform: none; color: var(--sk-ink); margin: 26px 4px 8px; }
+/* every card: a wobbly pencil outline with a pink marker shadow */
+body[data-view="home"] #view-home :is(.hm-now, .hm-goals, .hm-area, .hm-nudge, .hm-mood, .hm-room, .hq) {
+  background: var(--sk-fill) !important; color: var(--sk-ink); border: 2px solid var(--sk-ink) !important;
+  border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px !important; box-shadow: 4px 5px 0 var(--sk-shade) !important; }
+body[data-view="home"] #view-home :is(.hm-now, .hm-area, .hm-goals)::before, body[data-view="home"] #view-home :is(.hm-now, .hm-area, .hm-goals)::after { display: none !important; }
+body[data-view="home"] #view-home :is(.hm-now, .hm-area) { background-image: none !important; }
+body[data-view="home"] #view-home .hm-now { transform: rotate(-.6deg); padding: 20px 22px; }
+body[data-view="home"] #view-home .hm-now b { font: 700 34px/1.1 var(--sk-hand); letter-spacing: 0; color: var(--sk-ink); }
+body[data-view="home"] #view-home .hm-now :is(.hm-lbl, .hm-sub, .hm-prog) { color: color-mix(in srgb, var(--sk-ink) 65%, transparent); }
+body[data-view="home"] #view-home .hm-now.live .hm-lbl, body[data-view="home"] #view-home .hm-now.empty .hm-sub { color: var(--pink-d); }
+body[data-view="home"] #view-home .hm-bar { height: 8px; background: transparent !important; border: 1.5px solid var(--sk-ink); border-radius: 6px 3px 7px 3px; }
+body[data-view="home"] #view-home .hm-bar u { background: repeating-linear-gradient(-45deg, var(--pink) 0 3px, transparent 3px 6px) !important; }
+body[data-view="home"] #view-home .hq { border-radius: 30px 8px 26px 10px / 10px 26px 8px 30px !important; box-shadow: 2px 3px 0 var(--sk-shade) !important; }
+body[data-view="home"] #view-home .hq:nth-child(even) { transform: rotate(.8deg); }
+body[data-view="home"] #view-home .hq:nth-child(odd) { transform: rotate(-.6deg); }
+body[data-view="home"] #view-home .hm-goals { transform: rotate(.4deg); }
+body[data-view="home"] #view-home .hm-gt b { font: 700 28px var(--sk-hand); }
+body[data-view="home"] #view-home .hm-gbars i { background: transparent; border: 1.5px solid var(--sk-ink); border-radius: 3px 5px 2px 4px; }
+body[data-view="home"] #view-home .hm-gbars u { background: repeating-linear-gradient(-45deg, var(--c) 0 3px, transparent 3px 5px); border-radius: 0; }
+body[data-view="home"] #view-home .hm-area:nth-child(1) { transform: rotate(-1deg); }
+body[data-view="home"] #view-home .hm-area:nth-child(2) { transform: rotate(.9deg); }
+body[data-view="home"] #view-home .hm-area:nth-child(3) { transform: rotate(.7deg); }
+body[data-view="home"] #view-home .hm-area:nth-child(4) { transform: rotate(-.8deg); }
+body[data-view="home"] #view-home .hm-area:active, body[data-view="home"] #view-home .hm-now:active { transform: scale(.97); }
+body[data-view="home"] #view-home .hm-ae { background: none !important; border: 1.5px dashed var(--sk-ink); border-radius: 50% 45% 55% 48%; }
+/* the area name, underlined with a highlighter in its colour */
+body[data-view="home"] #view-home .hm-an { font: 700 24px var(--sk-hand); color: var(--sk-ink) !important;
+  background: linear-gradient(transparent 55%, color-mix(in srgb, var(--c) 55%, transparent) 55%, color-mix(in srgb, var(--c) 55%, transparent) 90%, transparent 90%); padding: 0 2px; align-self: flex-start; }
+body[data-view="home"] #view-home .hm-area em { font: 700 32px/1.1 var(--sk-hand); letter-spacing: 0; color: var(--sk-ink); }
+body[data-view="home"] #view-home .hm-area em i, body[data-view="home"] #view-home .hm-area small { color: color-mix(in srgb, var(--sk-ink) 62%, transparent); }
+
 /* wallet: one Notion style table, in pink */
 .nt { margin: 14px 0 8px; }
 .nt-title { display: flex; align-items: baseline; gap: 8px; font: 600 20px var(--display); margin: 0 2px 8px; }
@@ -4135,6 +4183,37 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
   :root:not([data-theme="light"]) #view-home .hm-an { color: var(--c); }
   :root:not([data-theme="light"]) #view-home .hm-quick .hq { background: color-mix(in srgb, var(--q) 22%, var(--card)); }
 }
+
+/* plan: day or week */
+.pl-seg { margin: 6px 0 14px; }
+#view-day.wk > :not(.pl-seg):not(#week-body):not(.hubback) { display: none !important; }
+.wk-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 0 12px; }
+.wk-head b { font-size: 20px; font-weight: 600; }
+.wk-head small { display: block; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.wk-head > div:first-child { min-width: 0; }
+.wk-nav { display: flex; gap: 6px; }
+.wk-nav button { min-width: 40px; min-height: 40px; padding: 0 10px; font: 500 14px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 20px; cursor: pointer; }
+.wk-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin: 0 0 14px; }
+.wk-day { display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 64px; padding: 8px 0; font: 500 12px var(--display); color: var(--muted); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; }
+.wk-day b { font-size: 17px; font-weight: 600; color: var(--ink); }
+.wk-day i { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+.wk-day.has i { background: var(--pink); }
+.wk-day.today { background: color-mix(in srgb, var(--pink) 22%, var(--card)); border-color: color-mix(in srgb, var(--pink) 40%, var(--hair)); }
+.wk-cal { position: relative; display: grid; grid-template-columns: 34px repeat(7, 1fr); gap: 0 3px; padding: 10px 8px 10px 4px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; overflow: hidden; }
+.wk-hours, .wk-col { position: relative; }
+.wk-hours span { position: absolute; right: 4px; transform: translateY(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; }
+.wk-col { background-image: linear-gradient(var(--hair) 1px, transparent 1px); background-size: 100% var(--hr); border-radius: 6px; }
+.wk-col.today { background-color: color-mix(in srgb, var(--pink) 8%, transparent); }
+.wk-blk { position: absolute; left: 1px; right: 1px; overflow: hidden; padding: 3px 3px 3px 4px; font: 500 10.5px/1.25 var(--display); color: var(--ink); text-align: left; background: color-mix(in srgb, var(--q) 60%, var(--card)); border: none; border-left: 3px solid var(--q); border-radius: 6px; cursor: pointer; overflow-wrap: normal; word-break: normal; hyphens: none; }
+.wk-blk.done { opacity: .55; }
+.wk-now { position: absolute; left: 0; right: 0; height: 2px; background: var(--pink-d); border-radius: 1px; z-index: 2; }
+.wk-empty { margin: 4px 0 0; font-size: 14px; color: var(--muted); text-align: center; }
+.wk-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 14px 0 0; padding: 14px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; font-size: 15px; }
+.wk-copy b { width: 100%; font-size: 15px; font-weight: 600; }
+.wk-copy select { min-height: 40px; padding: 0 10px; font: 16px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 12px; }
+.wk-copy select { flex: 1; min-width: 0; }
+.wk-copy button { width: 100%; min-height: 44px; padding: 0 16px; font: 600 15px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 20px; cursor: pointer; }
+.wk-copy small { width: 100%; font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -4252,6 +4331,12 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 
   <!-- ============ DAY ============ -->
   <section id="view-day" role="tabpanel" aria-labelledby="tab-day" hidden>
+
+    <div class="md-seg pl-seg" id="plan-seg">
+      <button type="button" class="md-seg-b" data-pm="day">Day</button>
+      <button type="button" class="md-seg-b" data-pm="week">Week</button>
+    </div>
+    <div id="week-body" hidden></div>
 
     <div class="datebar">
       <div class="big" id="day-title"></div>
@@ -4387,7 +4472,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 17:05</footer>
+  <footer>everything saves on this device · build 17:30</footer>
 </div>
 
 <script>
@@ -13407,7 +13492,7 @@ function show(which) {
   if (which === 'habits') renderHabits();
   if (which === 'stats')  renderStats();
   if (which === 'mood')  renderMood();
-  if (which === 'day')   { renderDay(); showUpNext(); }
+  if (which === 'day')   { renderDay(); showUpNext(); setPlanMode(planMode); }
   if (which === 'ideas') renderIdeas();
   if (which === 'life')  renderLife();
   if (which === 'money') renderMoney();
@@ -13550,6 +13635,101 @@ async function chatSend(text) {
     chatMsgs = []; chatErr = ''; chatSave(); renderChat();
   });
 }
+
+/* =========== plan: week =========== */
+/* a strip of 7 days (tap one to plan it), a calendar of the whole week,
+   and "copy a day" to reuse a plan. blocks run one after another from the
+   day's start time, so the calendar works out each block's time the same way. */
+let planMode = 'day';
+try { planMode = localStorage.getItem(KEY + '.planmode') === 'week' ? 'week' : 'day'; } catch {}
+let weekOf = null;   // the Monday of the week on show
+const WK_COLS = ['#f0b0c2', '#9cc6e4', '#e3cfa6', '#c8c2c0'];
+const mondayOf = k => { const d = fromKey(k); return shiftKey(k, -((d.getDay() + 6) % 7)); };
+
+function setPlanMode(m) {
+  planMode = m;
+  try { localStorage.setItem(KEY + '.planmode', m); } catch {}
+  const view = document.getElementById('view-day');
+  view.classList.toggle('wk', m === 'week');
+  document.getElementById('week-body').hidden = m !== 'week';
+  document.querySelectorAll('#plan-seg [data-pm]').forEach(b => b.classList.toggle('on', b.dataset.pm === m));
+  if (m === 'week') renderWeek();
+  else { const np = document.getElementById('nowpill'); if (np) np.classList.remove('on'); }
+}
+
+function blocksOf(k) {
+  const d = state.days[k];
+  if (!d || !d.blocks || !d.blocks.length) return [];
+  let at = toMins(d.start);
+  return d.blocks.map((b, i) => { const len = Number(b.mins) || 60, from = at; at += len; return { i, label: b.label || 'Block', from, to: at, done: !!b.done }; });
+}
+
+function renderWeek() {
+  const box = document.getElementById('week-body');
+  if (!weekOf) weekOf = mondayOf(viewDay || planKey());
+  const days = [0, 1, 2, 3, 4, 5, 6].map(n => shiftKey(weekOf, n));
+  const today = planKey();
+  const a = fromKey(days[0]), z = fromKey(days[6]);
+  const range = a.getDate() + ' ' + cap(MONTHS[a.getMonth()].slice(0, 3)) + ' to ' + z.getDate() + ' ' + cap(MONTHS[z.getMonth()].slice(0, 3));
+  const all = days.map(blocksOf);
+  const planned = all.filter(x => x.length).length;
+
+  let html = '<div class="wk-head"><div><b>' + (days.includes(today) ? 'This week' : weekOf > today ? 'Coming week' : 'Past week') + '</b><small>' + range + '</small></div>' +
+    '<div class="wk-nav"><button type="button" data-wk="-1" aria-label="previous week">\u2190</button><button type="button" data-wk="0">now</button><button type="button" data-wk="1" aria-label="next week">\u2192</button></div></div>';
+
+  html += '<div class="wk-strip">' + days.map((k, n) => { const d = fromKey(k);
+    return '<button type="button" class="wk-day' + (k === today ? ' today' : '') + (all[n].length ? ' has' : '') + '" data-day="' + k + '" aria-label="plan ' + FULL[d.getDay()] + '">' +
+      cap(FULL[d.getDay()].slice(0, 3)) + '<b>' + d.getDate() + '</b><i></i></button>'; }).join('') + '</div>';
+
+  // the hours on show: 7am to 10pm, wider if a plan goes outside that
+  let lo = 7 * 60, hi = 22 * 60;
+  for (const bs of all) for (const b of bs) { lo = Math.min(lo, b.from); hi = Math.max(hi, b.to); }
+  lo = Math.floor(lo / 60) * 60; hi = Math.min(Math.ceil(hi / 60) * 60, 30 * 60);
+  const PX = 0.8, HR = 60 * PX, H = (hi - lo) * PX;
+  let hours = '';
+  for (let m = lo; m <= hi; m += 120) hours += '<span style="top:' + ((m - lo) * PX) + 'px">' + clock(m).replace(':00', '') + '</span>';
+  const nowM = new Date().getHours() * 60 + new Date().getMinutes();
+  html += '<div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div>' +
+    days.map((k, n) => '<div class="wk-col' + (k === today ? ' today' : '') + '" style="height:' + H + 'px">' +
+      all[n].map(b => { const c = WK_COLS[[...b.label.toLowerCase()].reduce((x, ch) => x + ch.charCodeAt(0), 0) % WK_COLS.length];
+        return '<button type="button" class="wk-blk' + (b.done ? ' done' : '') + '" data-day="' + k + '" style="--q:' + c + ';top:' + ((b.from - lo) * PX) + 'px;height:' + Math.max(14, (b.to - b.from) * PX - 2) + 'px" title="' + esc(b.label + ', ' + clock(b.from) + ' to ' + clock(b.to)) + '">' + esc(b.label) + '</button>'; }).join('') +
+      (k === key(new Date()) && nowM >= lo && nowM <= hi ? '<i class="wk-now" style="top:' + ((nowM - lo) * PX) + 'px"></i>' : '') +
+    '</div>').join('') + '</div>';
+  if (!planned) html += '<p class="wk-empty">Nothing planned this week yet. Tap a day to start.</p>';
+
+  // copy a day: only into an empty day, so nothing gets lost
+  const opt = sel => days.map(k => '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + cap(FULL[fromKey(k).getDay()]) + '</option>').join('');
+  const from0 = days[all.findIndex(x => x.length)] || days[0];
+  const to0 = days.find((k, n) => !all[n].length && k > from0) || days.find((k, n) => !all[n].length) || days[1];
+  html += '<div class="wk-copy"><b>Copy a day</b><select id="wk-from" aria-label="copy from">' + opt(from0) + '</select> to ' +
+    '<select id="wk-to" aria-label="copy to">' + opt(to0) + '</select><button type="button" id="wk-go">Copy</button><small id="wk-msg">Works on an empty day, so no plan gets replaced.</small></div>';
+  box.innerHTML = html;
+
+  box.querySelectorAll('[data-wk]').forEach(b => b.addEventListener('click', () => {
+    const n = Number(b.dataset.wk);
+    weekOf = n ? shiftKey(weekOf, 7 * n) : mondayOf(planKey());
+    renderWeek();
+  }));
+  box.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
+    viewDay = b.dataset.day; setPlanMode('day'); renderDay(); window.scrollTo(0, 0);
+  }));
+  document.getElementById('wk-go').addEventListener('click', () => {
+    const f = document.getElementById('wk-from').value, t = document.getElementById('wk-to').value;
+    const msg = document.getElementById('wk-msg'), src = state.days[f];
+    const name = k => cap(FULL[fromKey(k).getDay()]);
+    if (f === t) { msg.textContent = 'Pick two different days.'; return; }
+    if (!src || !src.blocks || !src.blocks.length) { msg.textContent = name(f) + ' has nothing planned to copy.'; return; }
+    if (state.days[t] && state.days[t].blocks && state.days[t].blocks.length) { msg.textContent = name(t) + ' already has a plan. Clear it first.'; return; }
+    state.days[t] = { start: src.start, touched: true, blocks: src.blocks.map(b => { const c = { label: b.label || '', mins: Number(b.mins) || 60 }; if (b.meeting) c.meeting = true; if (b.topic) c.topic = b.topic; return c; }) };
+    save(); renderWeek();
+    const m2 = document.getElementById('wk-msg'); if (m2) m2.textContent = 'Copied ' + name(f) + ' to ' + name(t) + '.';
+  });
+}
+
+document.querySelectorAll('#plan-seg [data-pm]').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.pm === 'week') weekOf = mondayOf(viewDay || planKey());
+  setPlanMode(b.dataset.pm);
+}));
 
 /* =========== go =========== */
 
