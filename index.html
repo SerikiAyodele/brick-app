@@ -5098,6 +5098,23 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
 /* Finish plan stays in view while you reorder */
 #view-day .pl-finish { position: sticky; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 6; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .5); }
 #view-day .viewtools .arrange:first-child { color: var(--pink-d); font-weight: 600; }
+
+.gl-hab { margin: 4px 0 14px !important; }
+.gl-quit { margin-top: 10px; padding: 14px; background: color-mix(in srgb, #7daf86 8%, var(--card)); border: 1px solid color-mix(in srgb, #7daf86 30%, var(--hair)); border-radius: 18px; }
+.gl-qh { display: flex; align-items: center; gap: 10px; }
+.gl-qh i { font-style: normal; font-size: 20px; }
+.gl-qh b { flex: 1; font-size: 17px; font-weight: 600; }
+.gl-qh small { font-size: 14px; color: var(--muted); }
+.gl-qtip { margin: 12px 2px 0; font-size: 15px; line-height: 1.45; color: var(--ink); }
+.gl-qtip b { font-weight: 600; }
+.gl-qend { display: block; min-height: 40px; margin: 6px 0 0; padding: 0 2px; font: 500 14px var(--display); color: var(--muted); background: none; border: none; text-decoration: underline; cursor: pointer; }
+.gl-qf { display: block; margin-bottom: 8px; font-size: 16px; font-weight: 600; }
+.gl-quit input { width: 100%; min-height: 48px; margin-bottom: 8px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; }
+.gl-quit label { display: block; margin: 4px 2px 6px; font-size: 14px; color: var(--muted); }
+
+.ls-add.minus { grid-template-columns: repeat(4, 1fr); }
+.ls-add.minus button { background: var(--paper); border-color: var(--hair); }
+.ls-add button:disabled { opacity: .35; }
 </style>
 </head>
 <body>
@@ -5359,7 +5376,7 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:27</footer>
+  <footer>Mr.O:21:30</footer>
 </div>
 
 <script>
@@ -7172,7 +7189,8 @@ function lengthPicker(b, from, len) {
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
       '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2>' +
       (more ? '' : '<div class="ls-df"></div><p class="ls-from ls-end">' + clock(from) + ' to ' + clock(from + len) + '</p><button type="button" class="wka-go ls-save">Save</button>') +
-      (more ? '' : '<p class="ab-sub">Add time</p><div class="ls-add">' + [5, 10, 15, 30, 60].map(d => '<button type="button" data-add="' + d + '">+' + (d === 60 ? '1h' : d) + '</button>').join('') + '</div><p class="ab-sub">Or set it</p>') +
+      (more ? '' : '<p class="ab-sub">Add time</p><div class="ls-add">' + [5, 10, 15, 30, 60].map(d => '<button type="button" data-add="' + d + '">+' + (d === 60 ? '1h' : d) + '</button>').join('') + '</div>' +
+        '<p class="ab-sub">Take time off</p><div class="ls-add minus">' + [5, 10, 15, 30].map(d => '<button type="button" data-add="-' + d + '"' + (len - d < 5 ? ' disabled' : '') + '>\u2212' + d + '</button>').join('') + '</div><p class="ab-sub">Or set it</p>') +
       (more
         ? '<div class="ls-step"><button type="button" data-o="-15" aria-label="15 minutes less">\u2212</button><div><b>' + minsLabel(other) + '</b><small>ends ' + clock(from + other) + '</small></div><button type="button" data-o="15" aria-label="15 minutes more">+</button></div>' +
           '<button type="button" class="wka-go ls-set">Set ' + minsLabel(other) + '</button><button type="button" class="ls-back">Back</button>'
@@ -7342,7 +7360,9 @@ function attachDrag(sheet) {
     const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
     window.addEventListener('click', stop, { capture: true, once: true });
     setTimeout(() => window.removeEventListener('click', stop, { capture: true }), 400);
-    moveBlockTo(from, to);
+    // rows can skip folded done blocks, so move by each row's real place in the day
+    const idx = k => (rows[k].dataset.i != null ? Number(rows[k].dataset.i) : k);
+    moveBlockTo(idx(from), idx(to));
   };
 
   rows.forEach((row, i) => {
@@ -7745,7 +7765,6 @@ function renderDay() {
     row.append(how, bin);
     if (extra.childNodes.length) row.appendChild(extra);
     sheet.appendChild(row);
-    holdToAdd(row, day, i, firstOpen);
     if (customFor === i) sheet.appendChild(lengthPicker(b, from, len));
 
   });
@@ -7783,7 +7802,7 @@ function renderDay() {
   // sizes change once the font arrives, so measure again then
   if (document.fonts) document.fonts.ready.then(() => { for (const el of growing) if (el.isConnected) grow(el); });
 
-  if (sortingDay) attachDrag(sheet);
+  attachDrag(sheet);   // hold a block and move it, any time
 
   if (!sortingDay && day.blocks.length && day.blocks.every(b => b.done)) {
     const card = document.createElement('div');
@@ -13263,6 +13282,47 @@ function goalEditUsed() {
   try { localStorage.setItem(GOAL_EDIT_KEY, JSON.stringify(ts)); } catch {}
 }
 let monthEdit = null;   // area key being typed
+// habits, together with the goals: up to 3 with streaks, plus a quit journey with its days clean and help
+let quitForm = false;
+function habitsHtml() {
+  const H = (state.habits || []).slice(0, 3), tk = todayKey(), jj = activeJourney(), q = jj && isQuit(jj) ? jj : null, jc = q ? cleanDays(q) : null;
+  let h = '<section class="gl-hab"><div class="gl-hh"><b>Habits</b><small>' + H.length + ' of 3</small></div>' +
+    H.map((x, i) => { const on = (x.marks || []).includes(tk), st = streakOf(x.marks || []);
+      return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(x.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span>' + esc(x.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
+    (H.length < 3 ? '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>' : '');
+  if (q) {
+    const day = journeyDay(q, Date.now()), stg = journeyStage(q, day), tip = stg.tips[(day - stg.from) % stg.tips.length];
+    h += '<div class="gl-quit"><div class="gl-qh"><i>\u{1F33F}</i><b>' + esc(q.name) + '</b><small>Day ' + day + '</small></div>' +
+      '<div class="jr-clean"><span><b>' + jc.now + '</b><small>days clean</small></span><span><b>' + jc.best + '</b><small>best run</small></span><span><b>' + (q.cravings || []).filter(c => c.rode).length + '</b><small>cravings ridden out</small></span></div>' +
+      '<div class="jr-sos"><button type="button" class="jr-crave" data-q="crave">Craving now</button><button type="button" class="jr-slip" data-q="slip">I slipped</button></div>' +
+      '<p class="gl-qtip"><b>' + stg.name + ':</b> ' + tip + '</p>' +
+      '<button type="button" class="gl-qend" data-q="end">End this</button></div>';
+  } else if (quitForm) {
+    h += '<div class="gl-quit"><b class="gl-qf">Quit something</b><input type="text" id="qf-name" maxlength="60" placeholder="e.g. Quit edibles"><label for="qf-start">Day 1 was</label><input type="date" id="qf-start" value="' + tk + '" max="' + tk + '">' +
+      '<div class="jr-sos"><button type="button" class="jr-crave" data-q="start">Start</button><button type="button" class="jr-slip" data-q="cancel">Cancel</button></div></div>';
+  } else h += '<button type="button" class="gl-add" data-q="new">+ Quit something</button>';
+  return h + '</section>';
+}
+function wireHabits(box, redraw) {
+  box.querySelectorAll('[data-htick]').forEach(b => b.addEventListener('click', () => { const x = state.habits[Number(b.dataset.htick)], tk = todayKey();
+    x.marks = x.marks || []; const i = x.marks.indexOf(tk); i < 0 ? x.marks.push(tk) : x.marks.splice(i, 1); save(); redraw(); }));
+  box.querySelectorAll('[data-hadd]').forEach(b => b.addEventListener('click', () => { show('habits'); window.scrollTo(0, 0); }));
+  box.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
+    const a = b.dataset.q, q = activeJourney();
+    if (a === 'crave') return cravingSheet(q, redraw);
+    if (a === 'slip') return slipSheet(q, redraw);
+    if (a === 'new') { quitForm = true; redraw(); setTimeout(() => { const i = document.getElementById('qf-name'); if (i) i.focus(); }, 30); return; }
+    if (a === 'cancel') { quitForm = false; redraw(); return; }
+    if (a === 'start') {
+      const name = (document.getElementById('qf-name').value || '').trim(), st = document.getElementById('qf-start').value || todayKey();
+      if (!name) { document.getElementById('qf-name').focus(); return; }
+      state.journeys = state.journeys || [];
+      state.journeys.push({ id: Date.now(), name: QUIT_RE.test(name) ? name : 'Quit ' + name.replace(/^quit\s+/i, ''), start: st > todayKey() ? todayKey() : st, kind: JOURNEY_PLANS.cannabis.match.test(name) ? 'cannabis' : 'habit', end: null });
+      quitForm = false; save(); redraw(); return;
+    }
+    if (a === 'end' && q) { q.end = Date.now(); save(); redraw(); offerUndo(q.name, () => { q.end = null; save(); redraw(); }); }
+  }));
+}
 function renderGoals() {
   const box = document.getElementById('goals-body');
   const ks = perKeys(0), ym = ymOf(Date.now());
@@ -13271,6 +13331,7 @@ function renderGoals() {
   const tabs = [['week', 'Week'], ['month', 'Month'], ['6', '6 months'], ['12', '1 year']];
   let html = '<header class="pghead"><h1>Goals</h1><span>' + ({ week: weekGoalCount() + ' of ' + MAX_WEEK_ALL + ' this week', month: cap(MONTHS[new Date().getMonth()]), 6: 'one per area', 12: 'one per area' })[goalsTab] + '</span></header>' +
     '<div class="md-seg gl-tabs">' + tabs.map(([k, t]) => '<button type="button" class="md-seg-b' + (goalsTab === k ? ' on' : '') + '" data-gt="' + k + '">' + t + '</button>').join('') + '</div>';
+  if (goalsTab === 'week') html += habitsHtml();
   html += '<div class="gl-list">' + AREAS.map(a => {
     let body = '';
     if (goalsTab === 'week') {
@@ -13295,24 +13356,12 @@ function renderGoals() {
     }
     return '<section class="gl-area" data-a="' + a.k + '" style="--c:' + a.c + '"><div class="gl-ah"><i>' + a.e + '</i><b>' + a.name + '</b></div>' + body + '</section>';
   }).join('') + '</div>';
-  if (goalsTab === 'week') {
-    // habits sit with the goals: up to 3, each with its streak and a tick for today; a quit journey shows its days clean
-    const H = (state.habits || []).slice(0, 3), tk = todayKey(), jj = activeJourney(), jc = jj && isQuit(jj) ? cleanDays(jj) : null;
-    html += '<section class="gl-hab"><div class="gl-hh"><b>Habits</b><small>' + H.length + ' of 3</small></div>' +
-      H.map((h, i) => { const on = (h.marks || []).includes(tk), st = streakOf(h.marks || []);
-        return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(h.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span>' + esc(h.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
-      (jc ? '<button type="button" class="gl-hrow gl-hj" data-hj="1"><i>\u{1F33F}</i><span>' + esc(jj.name) + '</span><em>' + jc.now + '<small>clean</small></em></button>' : '') +
-      (H.length < 3 ? '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>' : '') + '</section>';
-  }
   if (goalsTab === 'week') html += '<button type="button" class="ai-sug" id="sug-goals">\u2728 Suggest goals</button>';
   if (goalsTab === 'week') html += '<p class="gl-why">Few on purpose. Your brain can only push a few goals at once, so fewer get done more.</p>';
   box.innerHTML = html;
 
   const sg = box.querySelector('#sug-goals'); if (sg) sg.addEventListener('click', () => suggestSheet('goals'));
-  box.querySelectorAll('[data-htick]').forEach(b => b.addEventListener('click', () => { const h = state.habits[Number(b.dataset.htick)], tk = todayKey();
-    h.marks = h.marks || []; const i = h.marks.indexOf(tk); i < 0 ? h.marks.push(tk) : h.marks.splice(i, 1); save(); renderGoals(); }));
-  box.querySelectorAll('[data-hadd]').forEach(b => b.addEventListener('click', () => { show('habits'); window.scrollTo(0, 0); }));
-  box.querySelectorAll('[data-hj]').forEach(b => b.addEventListener('click', () => { lifeOpen = 'health'; areaGoalsOpen = true; journeyOpen = true; lifeSetup = null; show('life'); window.scrollTo(0, 0); }));
+  wireHabits(box, renderGoals);
   box.querySelectorAll('.gl-mt').forEach(el => { el.textContent = MG[el.dataset.moed].text; if (MG[el.dataset.moed].done) el.classList.add('done'); });
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
@@ -13997,8 +14046,7 @@ function areaPortals(box, a) {
     return { tab, name: tab === 'love' ? 'Time together' : PAGE_NAME[tab], big: t.big + (t.unit ? '<i>' + esc(t.unit) + '</i>' : ''), cap: t.cap,
              c: tab === 'love' ? LOVE_TILE.c : m ? m.c : a.c, go: tab === 'love' ? 'love' : tab };
   });
-  if (a.k === 'health') doors.push({ tab: 'goals', go: 'goals', name: 'Journey', c: a.c, big: j ? journeyDay(j, Date.now()) : '+',
-               cap: j ? 'days \u00b7 ' + j.name : 'quitting or starting something' });
+  // quitting now lives with the habits on the Goals page
   const ICON = { food: '\u{1F37D}\uFE0F', gym: '\u{1F3C3}\u200D\u2640\uFE0F', mood: '\u{1FA7A}', money: '\u{1F4B3}', habits: '\u2705', ideas: '\u{1F4AC}', people: '\u{1F48C}', love: '\u{1F49E}', goals: '\u{1F331}' };
   // health: a short summary of today on top
   let sum = '';
@@ -14029,7 +14077,7 @@ function lifeDetail(box, a) {
 
   let html = '<button type="button" class="lf-back">\u2190 Goals</button>' +
     '<div class="lf-dhead" style="--c:' + a.c + '"><h1>' + a.name + '</h1>' + (gs.length ? '<b>' + now + '<i>%</i></b>' : '') + '</div>' +
-    (gs.length ? '' : '<p class="hub-empty">No ' + a.name.toLowerCase() + ' goals yet.</p>') + bigLine(a) + (a.k === 'health' ? journeyHtml() : '') + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
+    (gs.length ? '' : '<p class="hub-empty">No ' + a.name.toLowerCase() + ' goals yet.</p>') + bigLine(a) + '' + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
   gs.forEach((g, n) => {
     const sc = goalScore(g, ks), [st, stText] = goalStatus(sc.pct);
     const priv = g.private || a.k === 'love';
