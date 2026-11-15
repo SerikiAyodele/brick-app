@@ -3571,6 +3571,57 @@ body.focusing .nowpill { display: none; }
 .dg-ideas button { min-height: 34px; padding: 0 12px; text-align: left; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 17px; cursor: pointer; }
 .dg-skip { align-self: flex-start; padding: 4px 0; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: none; border: none; cursor: pointer; }
 
+/* money */
+.mn-hero { display: flex; flex-direction: column; gap: 2px; padding: 18px; background: color-mix(in srgb, var(--brown) 16%, var(--card)); border: 1px solid var(--hair); border-radius: 22px; }
+.mn-hero span { font-size: 13px; font-weight: 600; color: var(--muted); }
+.mn-hero b { font-size: 38px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.mn-hero small { font-size: 12px; color: var(--muted); }
+.mn-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.mn-two div { padding: 14px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.mn-two span { display: block; font-size: 12px; color: var(--muted); }
+.mn-two b { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-pace { margin: 10px 2px 0; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.mn-pace b { color: var(--ink); }
+.mn-nav { display: flex; justify-content: flex-end; gap: 6px; margin-top: 8px; }
+.mn-nav button { width: 38px; height: 38px; font-size: 16px; color: var(--ink); background: var(--hair); border: none; border-radius: 50%; cursor: pointer; }
+.mn-nav button:disabled { opacity: .35; }
+.mn-card { margin-top: 12px; padding: 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.mn-h { display: block; margin-bottom: 10px; font-size: 15px; font-weight: 600; }
+.mn-kinds { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.mn-kinds div { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 4px; }
+.mn-kinds b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-kinds i { display: block; height: 6px; background: var(--hair); border-radius: 3px; overflow: hidden; }
+.mn-kinds u { display: block; height: 100%; background: var(--c); border-radius: 3px; }
+.mn-paste { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; resize: vertical; }
+.mn-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.mn-row .lf-btn { flex: none; min-height: 42px; padding: 0 20px; }
+.mn-msg { font-size: 13px; color: var(--muted); }
+.mn-list { margin-top: 14px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; overflow: hidden; }
+.mn-tx + .mn-tx { border-top: 1px solid var(--hair); }
+.mn-txb { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 14px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: none; border: none; cursor: pointer; }
+.mn-txb i { flex: none; width: 10px; height: 10px; border-radius: 50%; }
+.mn-d { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.mn-d b { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize; }
+.mn-d small { font-size: 12px; color: var(--muted); }
+.mn-txb em { flex: none; font-style: normal; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.mn-tx.in em { color: #5f9468; }
+.mn-ed { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px 36px; }
+.mn-ed button { min-height: 32px; padding: 0 12px; font: 500 13px "Poppins", sans-serif; color: var(--muted); background: var(--hair); border: none; border-radius: 16px; cursor: pointer; }
+.mn-ed button.on { color: #fff; background: var(--pink); }
+.mn-ed .mn-del { color: #c4553f; background: none; }
+.mn-empty { margin: 0; padding: 16px; font-size: 14px; color: var(--muted); }
+
+/* bank texts inbox */
+.mn-small { margin: 0 0 6px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.mn-key { flex: 1; min-width: 0; font: 400 16px "Poppins", sans-serif; padding: 10px 12px; border-radius: 12px; }
+.mn-inbox .mn-row { flex-wrap: wrap; }
+.ib-help ol { list-style: decimal; padding-left: 20px; margin: 0 0 6px; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 1.45; }
+.w3-sheet.ib-help li { display: list-item; }
+.w3-sheet.ib-help li b { display: inline; font-size: inherit; font-weight: 600; line-height: inherit; overflow-wrap: anywhere; }
+.ib-sec { margin: 12px 0 6px; font-size: 13px; font-weight: 600; color: var(--pink); }
+.ib-note { margin: 10px 0 14px; font-size: 12px; color: var(--muted); }
+.w3-sheet.ib-help { max-height: 88vh; overflow-y: auto; }
+
 /* stats cards */
 #stats-body { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .st-card { padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
@@ -3641,6 +3692,11 @@ body, body[data-view] {
     <div id="life-body"></div>
   </section>
 
+  <!-- ============ MONEY ============ -->
+  <section id="view-money" role="tabpanel" aria-labelledby="tab-money" hidden>
+    <div id="money-body"></div>
+  </section>
+
   <section id="view-stats" role="tabpanel" aria-labelledby="tab-stats" hidden>
     <header class="pghead"><h1>Stats</h1><span>what your numbers mean</span></header>
     <div class="daypick" id="range-pick"></div>
@@ -3705,6 +3761,7 @@ body, body[data-view] {
     <button class="brick flat" id="tab-life"   role="tab" aria-selected="false" aria-controls="view-life" hidden>life</button>
     <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas">tweets</button>
     <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits">habits</button>
+    <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money">money</button>
     <button class="brick flat" id="tab-stats"  role="tab" aria-selected="false" aria-controls="view-stats">stats</button>
     <button class="brick flat" id="show-toggle" type="button">Show mode</button>
     <div class="mp-theme">
@@ -3849,7 +3906,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 15:44</footer>
+  <footer>everything saves on this device · build 11:33</footer>
 </div>
 
 <script>
@@ -3860,7 +3917,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [] };
 
 function load() {
   try {
@@ -3890,6 +3947,7 @@ function load() {
         routine:   (d.routine && typeof d.routine === 'object') ? d.routine : null,
         trainProfile: (d.trainProfile && typeof d.trainProfile === 'object') ? d.trainProfile : null,
         groceryLog: Array.isArray(d.groceryLog) ? d.groceryLog : [],
+        money:     Array.isArray(d.money) ? d.money : [],
         penalties: Array.isArray(d.penalties) ? d.penalties : [],
         penaltyLink: typeof d.penaltyLink === 'string' ? d.penaltyLink : '',
         goalSetAt: Number(d.goalSetAt) || 0,
@@ -6878,6 +6936,232 @@ function renderStats() {
   card('#6fa3c8', 'Tweets', caught.length, caught.length === 1 ? ' tweet' : ' tweets',
     caught.length ? 'Thoughts you posted to yourself. You acted on <b>' + acted + ' of ' + caught.length + '</b>, by tapping "acted on".'
                   : 'No tweets in ' + label + '.');
+}
+
+/* =========== money ===========
+   your money from your bank's alerts, no typing numbers. paste an alert (or,
+   later, the Shortcut sends texts in by itself) and brick reads the amount,
+   whether it went out or came in, what it was for, the date, and your
+   balance. it sorts spending into kinds and does the sums. */
+
+// "Amt:NGN6,200.00 DR  Desc:...  Bal:NGN632,615.55  Date:2026-11-14 5:26PM" and similar
+function parseAlert(text) {
+  const t = String(text || '').replace(/\r/g, '');
+  const num = s => Number(String(s).replace(/[^\d.]/g, ''));
+  const amt = t.match(/(?:amt|amount)\s*[:=]?\s*(?:NGN|N|₦)?\s*([\d,]+(?:\.\d{1,2})?)\s*(DR|CR|debit|credit)?/i)
+           || t.match(/(?:NGN|₦)\s*([\d,]+(?:\.\d{1,2})?)\s*(DR|CR)?/i);
+  if (!amt) return null;
+  let dir = (amt[2] || '').toUpperCase();
+  if (!dir) dir = /\b(credit|cr|received|inflow)\b/i.test(t) ? 'CR' : /\b(debit|dr|spent|withdraw|purchase|pos)\b/i.test(t) ? 'DR' : 'DR';
+  if (dir.startsWith('C')) dir = 'CR'; else dir = 'DR';
+  const desc = (t.match(/(?:desc|description|narration|details?)\s*[:=]\s*([^\n]+)/i) || [])[1] || '';
+  const bal = (t.match(/(?:bal|balance|avail(?:able)?\s*bal)\s*[:=]?\s*(?:NGN|N|₦)?\s*(-?[\d,]+(?:\.\d{1,2})?)/i) || [])[1];
+  const acct = (t.match(/(?:acct|account|a\/c)\s*[:=]?\s*\**\s*(\d{3,4})\b/i) || [])[1] || '';
+  const dm = t.match(/(\d{4}-\d{2}-\d{2})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM)?)?/i) || t.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM)?)?/i);
+  let at = Date.now();
+  if (dm && dm[1] && dm[1].includes('-')) {
+    const [y, mo, d] = dm[1].split('-').map(Number);
+    let h = Number(dm[2] || 12), mi = Number(dm[3] || 0);
+    if (dm[4]) { const pm = /pm/i.test(dm[4]); if (pm && h < 12) h += 12; if (!pm && h === 12) h = 0; }
+    at = new Date(y, mo - 1, d, h, mi).getTime();
+  }
+  return { amt: num(amt[1]), dir, desc: desc.trim(), bal: bal !== undefined ? num(bal) * (String(bal).startsWith('-') ? -1 : 1) : null, acct, at };
+}
+
+// the kind of spending, from what the alert says it was for
+const MONEY_KINDS = [
+  ['Food', /pepper|onion|juice|food|rice|meat|fish|egg|bread|market|grocer|shoprite|spar|restaurant|kitchen|chicken|suya|cafe|coffee|eat|chops|drinks|bukka/i, '#e3a27a'],
+  ['Transport', /uber|bolt|taxi|fuel|petrol|filling|ride|transport|bus|okada|keke|parking|toll/i, '#86b9d9'],
+  ['Bills', /airtime|data|mtn|glo|airtel|9mobile|dstv|gotv|electric|nepa|ikedc|ekedc|phcn|water bill|internet|spectranet|smile|starlink/i, '#a99bd4'],
+  ['Subscriptions', /netflix|spotify|apple|icloud|youtube|prime|showmax|chatgpt|claude|anthropic|notion|google|subscription/i, '#d9718e'],
+  ['Health', /pharm|hospital|clinic|gym|fitness|drug|medic/i, '#7daf86'],
+  ['Shopping', /jumia|konga|mall|store|shop|cloth|fashion|amazon|temu|shein/i, '#c9965a'],
+  ['Transfers', /transfer|trf|to \w+|nip|ussd/i, '#9aa6b8']
+];
+function moneyKind(tx) {
+  if (tx.dir === 'CR') return 'Money in';
+  if (tx.kind) return tx.kind;
+  const k = MONEY_KINDS.find(([, re]) => re.test(tx.desc));
+  return k ? k[0] : 'Other';
+}
+const kindColor = k => (MONEY_KINDS.find(x => x[0] === k) || [0, 0, '#b3a08f'])[2];
+const mnNaira = n => '₦' + Math.round(n).toLocaleString();
+
+function addAlert(text, src) {
+  const tx = parseAlert(text);
+  if (!tx) return null;
+  if (!state.money) state.money = [];
+  // the same alert twice (pasted again, or sent twice) is kept once
+  const dup = state.money.find(x => x.amt === tx.amt && x.dir === tx.dir && Math.abs(x.at - tx.at) < 60000 && x.desc === tx.desc);
+  if (dup) return dup;
+  const it = { id: Date.now() + '' + Math.random().toString(36).slice(2, 5), ...tx, src: src || 'paste' };
+  state.money.push(it);
+  state.money.sort((a, b) => b.at - a.at);
+  save();
+  return it;
+}
+
+/* ---- the inbox: bank texts that log themselves ----
+   an iPhone Shortcut posts each bank text as an issue in a private GitHub
+   repo. brick reads the open ones, adds them, and closes them. the access
+   key lives only on this phone (not in backups, not in the code). */
+const INBOX_REPO = 'SerikiAyodele/brick-inbox';
+const INBOX_KEY = KEY + '.inboxkey';
+let inboxBusy = false, inboxNote = '';
+const inboxToken = () => { try { return localStorage.getItem(INBOX_KEY) || ''; } catch { return ''; } };
+
+async function syncInbox(quiet) {
+  const tok = inboxToken();
+  if (!tok || inboxBusy) return 0;
+  inboxBusy = true;
+  const h = { Authorization: 'Bearer ' + tok, Accept: 'application/vnd.github+json' };
+  let n = 0;
+  try {
+    const r = await fetch('https://api.github.com/repos/' + INBOX_REPO + '/issues?state=open&per_page=50', { headers: h, cache: 'no-store' });
+    if (r.status === 401 || r.status === 403 || r.status === 404) { inboxNote = 'The access key did not work. Check it, then paste it again.'; return 0; }
+    if (!r.ok) { inboxNote = 'Could not reach the inbox. It will try again.'; return 0; }
+    const issues = await r.json();
+    for (const it of issues.filter(x => !x.pull_request)) {
+      const added = addAlert(it.body || it.title || '', 'sms');
+      // done with it either way: an unreadable one stays closed so it is not read again
+      await fetch('https://api.github.com/repos/' + INBOX_REPO + '/issues/' + it.number, {
+        method: 'PATCH', headers: { ...h, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state: 'closed', state_reason: added ? 'completed' : 'not_planned' })
+      });
+      if (added) n++;
+    }
+    inboxNote = n ? n + ' new from your bank texts' : '';
+  } catch { inboxNote = 'No signal. It will try again.'; }
+  finally { inboxBusy = false; }
+  if (n || !quiet) { if (!document.getElementById('view-money').hidden) renderMoney(); }
+  return n;
+}
+// check when the app opens, when it comes back to the front, and every few minutes
+setTimeout(() => syncInbox(true), 1500);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) syncInbox(true); });
+setInterval(() => syncInbox(true), 5 * 60000);
+
+function inboxSetup(box) {
+  const has = !!inboxToken();
+  const el = document.createElement('div');
+  el.className = 'mn-card mn-inbox';
+  el.innerHTML = has
+    ? '<b class="mn-h">Bank texts \\u00b7 connected</b><p class="mn-small">' + (esc(inboxNote) || 'New alerts come in when you open brick.') + '</p>' +
+      '<div class="mn-row"><button type="button" class="lf-btn" data-a="sync">Check now</button><button type="button" class="gm-link" data-a="help">Shortcut steps</button><button type="button" class="gm-link danger" data-a="off">Disconnect</button></div>'
+    : '<b class="mn-h">Make bank texts log themselves</b><p class="mn-small">Paste your inbox access key here once. Then set up the Shortcut.</p>' +
+      '<div class="mn-row"><input type="password" class="mn-key" placeholder="access key" autocomplete="off"><button type="button" class="lf-btn main" data-a="save">Connect</button></div>' +
+      '<button type="button" class="gm-link" data-a="help">How to get the key and the Shortcut</button>';
+  box.appendChild(el);
+  const on = (a, fn) => { const b = el.querySelector('[data-a=' + a + ']'); if (b) b.addEventListener('click', fn); };
+  on('save', async () => {
+    const v = el.querySelector('.mn-key').value.trim(); if (!v) return;
+    try { localStorage.setItem(INBOX_KEY, v); } catch {}
+    inboxNote = 'Connected. Checking\\u2026'; renderMoney(); await syncInbox(false);
+  });
+  on('sync', () => { inboxNote = 'Checking\\u2026'; renderMoney(); syncInbox(false); });
+  on('off', () => { try { localStorage.removeItem(INBOX_KEY); } catch {} inboxNote = ''; renderMoney(); });
+  on('help', () => inboxHelp());
+}
+
+function inboxHelp() {
+  const old = document.getElementById('why3'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'why3'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ib-help" role="dialog" aria-modal="true"><span class="w3-grab"></span><h2>Bank texts, set up once</h2>' +
+    '<p class="ib-sec">1. The access key (on a laptop is easiest)</p><ol>' +
+      '<li>Go to <b>github.com/settings/personal-access-tokens/new</b></li>' +
+      '<li>Name it <b>brick inbox</b>. Expiry: 1 year.</li>' +
+      '<li>Repository access: <b>Only select repositories</b>, pick <b>brick-inbox</b>.</li>' +
+      '<li>Permissions: <b>Issues</b>, <b>Read and write</b>.</li>' +
+      '<li>Generate, copy it, paste it into brick and tap Connect.</li></ol>' +
+    '<p class="ib-sec">2. The Shortcut (on your iPhone)</p><ol>' +
+      '<li>Shortcuts app, <b>Automation</b>, <b>+</b>, <b>Message</b>.</li>' +
+      '<li>Message contains <b>Amt</b>. Choose <b>Run Immediately</b>.</li>' +
+      '<li>Add <b>Get Contents of URL</b>: <b>https://api.github.com/repos/' + INBOX_REPO + '/issues</b></li>' +
+      '<li>Method <b>POST</b>. Header <b>Authorization</b> = <b>Bearer</b> then a space and your key.</li>' +
+      '<li>Request Body <b>JSON</b>: <b>title</b> = <b>alert</b>, <b>body</b> = <b>Shortcut Input</b> (its Content).</li>' +
+      '<li>Done. For email alerts, make a second one with <b>Email</b> instead of Message.</li></ol>' +
+    '<p class="ib-note">The key only opens the brick-inbox repo. It stays on your phone and in the Shortcut.</p>' +
+    '<button type="button" class="lf-btn main w3-ok">Got it</button></div>';
+  document.body.appendChild(el);
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 200); };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('.w3-ok').addEventListener('click', close);
+}
+
+let moneyMonth = null;   // "YYYY-MM" being looked at
+let moneyOpen = null;    // transaction id open for editing
+
+function renderMoney() {
+  const box = document.getElementById('money-body');
+  if (!state.money) state.money = [];
+  const now = new Date();
+  const ym = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  if (!moneyMonth) moneyMonth = ym(now);
+  const [Y, M] = moneyMonth.split('-').map(Number);
+  const inMonth = state.money.filter(x => ym(new Date(x.at)) === moneyMonth);
+  const out = inMonth.filter(x => x.dir === 'DR').reduce((a, x) => a + x.amt, 0);
+  const inn = inMonth.filter(x => x.dir === 'CR').reduce((a, x) => a + x.amt, 0);
+  const latest = state.money.find(x => x.bal !== null && x.bal !== undefined);
+  // spending by kind, biggest first
+  const byKind = {};
+  for (const x of inMonth) if (x.dir === 'DR') byKind[moneyKind(x)] = (byKind[moneyKind(x)] || 0) + x.amt;
+  const kinds = Object.entries(byKind).sort((a, b) => b[1] - a[1]);
+  // pace: what this month is heading for, from the days so far
+  const isNow = moneyMonth === ym(now);
+  const daysIn = new Date(Y, M, 0).getDate();
+  const dayN = isNow ? now.getDate() : daysIn;
+  const pace = isNow && dayN > 3 ? out / dayN * daysIn : null;
+  const last = state.money.filter(x => { const d = new Date(x.at); return ym(d) === ym(new Date(Y, M - 2, 1)); }).filter(x => x.dir === 'DR').reduce((a, x) => a + x.amt, 0);
+
+  let html = '<header class="pghead"><h1>Money</h1><span>' + cap(MONTHS[M - 1]) + ' ' + Y + '</span></header>' +
+    '<div class="mn-hero"><span>Balance</span><b>' + (latest ? mnNaira(latest.bal) : '–') + '</b>' +
+    '<small>' + (latest ? 'from your alert on ' + cap(FULL[new Date(latest.at).getDay()].slice(0, 3)) + ' ' + new Date(latest.at).getDate() + ' ' + cap(MONTHS[new Date(latest.at).getMonth()].slice(0, 3)) + (latest.acct ? ' · ****' + latest.acct : '') : 'paste a bank alert to start') + '</small></div>' +
+    '<div class="mn-two"><div><span>Out</span><b>' + mnNaira(out) + '</b></div><div><span>In</span><b>' + mnNaira(inn) + '</b></div></div>' +
+    (pace ? '<p class="mn-pace">At this pace, about <b>' + mnNaira(pace) + '</b> out this month' + (last ? ' (' + (pace > last ? 'more' : 'less') + ' than last month’s ' + mnNaira(last) + ')' : '') + '.</p>' : '') +
+    '<div class="mn-nav"><button type="button" data-m="-1" aria-label="previous month">←</button><button type="button" data-m="1" aria-label="next month"' + (isNow ? ' disabled' : '') + '>→</button></div>';
+
+  if (kinds.length) {
+    const top = kinds[0][1];
+    html += '<div class="mn-card"><b class="mn-h">Where it went</b><ul class="mn-kinds">' +
+      kinds.map(([k, v]) => '<li style="--c:' + kindColor(k) + '"><div><span>' + k + '</span><b>' + mnNaira(v) + '</b></div><i><u style="width:' + Math.round(v / top * 100) + '%"></u></i></li>').join('') + '</ul></div>';
+  }
+
+  html += '<div class="mn-card"><b class="mn-h">Add from an alert</b><textarea class="mn-paste" rows="3" placeholder="paste your bank alert here"></textarea>' +
+    '<div class="mn-row"><button type="button" class="lf-btn main" data-a="paste">Add</button><span class="mn-msg"></span></div></div>';
+
+  html += '<div class="mn-list">' + (inMonth.length ? inMonth.map(x => {
+    const d = new Date(x.at), k = moneyKind(x), open = moneyOpen === x.id;
+    return '<div class="mn-tx' + (x.dir === 'CR' ? ' in' : '') + '" data-id="' + x.id + '"><button type="button" class="mn-txb">' +
+      '<i style="background:' + (x.dir === 'CR' ? '#7daf86' : kindColor(k)) + '"></i><span class="mn-d"><b></b><small>' + k + ' · ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + ' ' + clock(d.getHours() * 60 + d.getMinutes()) + '</small></span>' +
+      '<em>' + (x.dir === 'CR' ? '+' : '−') + mnNaira(x.amt) + '</em></button>' +
+      (open ? '<div class="mn-ed">' + ['Money in'].concat(MONEY_KINDS.map(m => m[0]), ['Other']).filter(n => x.dir === 'CR' ? n === 'Money in' : n !== 'Money in')
+        .map(n => '<button type="button" data-k="' + n + '" class="' + (k === n ? 'on' : '') + '">' + n + '</button>').join('') +
+        '<button type="button" class="mn-del">Remove</button></div>' : '') + '</div>';
+  }).join('') : '<p class="mn-empty">Nothing this month yet.</p>') + '</div>';
+
+  box.innerHTML = html;
+  inboxSetup(box.querySelector('.mn-list').parentNode === box ? box : box);
+  box.insertBefore(box.lastChild, box.querySelector('.mn-list'));   // the inbox card sits above the list
+  box.querySelectorAll('.mn-tx').forEach(el => { const x = state.money.find(t => t.id === el.dataset.id); el.querySelector('.mn-d b').textContent = (x.desc || (x.dir === 'CR' ? 'Money in' : 'Spent')).toLowerCase(); });
+  box.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { const d = new Date(Y, M - 1 + Number(b.dataset.m), 1); moneyMonth = ym(d); renderMoney(); }));
+  box.querySelector('[data-a=paste]').addEventListener('click', () => {
+    const ta = box.querySelector('.mn-paste');
+    // more than one alert pasted at once: split on each new "Acct" or "Amt" line block
+    const parts = ta.value.split(/\n\s*\n|(?=Acct\s*:)/i).map(p => p.trim()).filter(Boolean);
+    let n = 0; for (const p of parts) if (addAlert(p, 'paste')) n++;
+    const msg = box.querySelector('.mn-msg');
+    if (!n) { msg.textContent = 'I could not find an amount in that.'; return; }
+    ta.value = ''; renderMoney();
+    const m2 = document.querySelector('#money-body .mn-msg'); if (m2) { m2.textContent = 'Added ' + n; setTimeout(() => { m2.textContent = ''; }, 2000); }
+  });
+  box.querySelectorAll('.mn-txb').forEach(b => b.addEventListener('click', () => { const id = b.parentElement.dataset.id; moneyOpen = moneyOpen === id ? null : id; renderMoney(); }));
+  box.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { const x = state.money.find(t => t.id === b.closest('.mn-tx').dataset.id); x.kind = b.dataset.k === 'Money in' ? null : b.dataset.k; moneyOpen = null; save(); renderMoney(); }));
+  box.querySelectorAll('.mn-del').forEach(b => b.addEventListener('click', () => {
+    const i = state.money.findIndex(t => t.id === b.closest('.mn-tx').dataset.id), gone = state.money[i];
+    state.money.splice(i, 1); moneyOpen = null; save(); renderMoney();
+    offerUndo('transaction', () => { state.money.splice(i, 0, gone); save(); renderMoney(); });
+  }));
 }
 
 /* =========== food =========== */
@@ -11673,6 +11957,7 @@ const TABS = {
   ideas:  [document.getElementById('tab-ideas'),  document.getElementById('view-ideas')],
   habits: [document.getElementById('tab-habits'), document.getElementById('view-habits')],
   stats:  [document.getElementById('tab-stats'),  document.getElementById('view-stats')],
+  money:  [document.getElementById('tab-money'),  document.getElementById('view-money')],
   life:   [document.getElementById('tab-life'),   document.getElementById('view-life')]
 };
 
@@ -11728,6 +12013,7 @@ function show(which) {
   if (which === 'day')   { renderDay(); showUpNext(); }
   if (which === 'ideas') renderIdeas();
   if (which === 'life')  renderLife();
+  if (which === 'money') renderMoney();
   updateNowPill();
   try { localStorage.setItem(KEY + '.tab', which); } catch {}
 }
@@ -11748,7 +12034,7 @@ function fillHeads() {
 }
 
 // "more" opens a small panel above the bar
-const IN_MORE = ['life', 'ideas', 'habits', 'stats'];
+const IN_MORE = ['life', 'money', 'ideas', 'habits', 'stats'];
 const moreBtn = document.getElementById('tab-more');
 const morePanel = document.getElementById('more-panel');
 
