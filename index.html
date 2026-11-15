@@ -2152,6 +2152,45 @@ body[data-view="day"] { background-image: none; }
 .jr-fit { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
 .jr-fit button, .jr-fitask { background: none; border: none; padding: 10px 0; min-height: 40px; font: 600 13px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
 .jr-you { color: var(--c) !important; font-weight: 600; }
+.gm { margin: 12px 0 14px; padding: 16px; border: 1px solid var(--hair); border-radius: 20px; background: var(--card); }
+.gm-top span { display: block; font-size: 13px; color: var(--muted); }
+.gm-top b { display: block; font-size: 32px; font-weight: 600; line-height: 1.15; }
+.gm-top small { font-size: 13px; color: var(--muted); }
+.gm-rows { margin-top: 10px; display: flex; flex-direction: column; }
+.gm-rows div { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid var(--hair); font-size: 15px; }
+.gm-rows div b { font-weight: 600; }
+.gm-rows .over b { color: #d9534f; }
+.gm-rows .ok b { color: #7daf86; }
+.gm-rows .wk { font-size: 13px; color: var(--muted); }
+.gm-set { background: none; border: none; min-height: 40px; padding: 8px 0 0; font: 600 14px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
+.gm-bud { margin-top: 10px; align-items: center; }
+.gm-bud input { flex: 1; font-size: 16px; padding: 10px 12px; border-radius: 12px; min-width: 0; }
+.gr-price { font-style: normal; font-size: 14px; font-weight: 600; white-space: nowrap; align-self: center; padding: 0 4px; }
+.gr-price.est { font-weight: 400; color: var(--muted); }
+.gr-prow input { flex: 1; font-size: 16px; min-width: 0; }
+.gr-pin, .gm-bin, .jr-form input[type="date"] { color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 10px 12px; font: 500 16px "Poppins", sans-serif; }
+.gr-pin:focus, .gm-bin:focus, .jr-form input[type="date"]:focus { outline: none; border-color: var(--pink); }
+.gr-phint { font-size: 12px; color: var(--muted); margin: 4px 0 8px; }
+.ml-top { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 8px; }
+.ml-top b { font-size: 17px; font-weight: 600; }
+.ml-paste-b { background: none; border: none; min-height: 40px; font: 600 14px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
+.ml-paste { padding: 14px; margin-bottom: 12px; border: 1px solid var(--hair); border-radius: 18px; background: var(--card); }
+.ml-paste label { display: block; font-size: 14px; margin-bottom: 8px; }
+.ml-paste textarea { width: 100%; font-size: 16px; padding: 12px; border-radius: 14px; }
+.ml-msg { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+.ml-msg:empty { display: none; }
+.ml-days { display: flex; flex-direction: column; gap: 10px; }
+.ml-day { padding: 12px 14px; border: 1px solid var(--hair); border-radius: 18px; background: var(--card); }
+.ml-day.today { border-color: color-mix(in srgb, var(--pink) 55%, var(--hair)); }
+.ml-dname { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+.ml-dname i { font-style: normal; font-size: 12px; color: var(--pink); margin-left: 6px; }
+.ml-meal { display: grid; grid-template-columns: 26px 1fr; grid-template-rows: auto auto; column-gap: 8px; width: 100%; min-height: 44px; padding: 6px 0; text-align: left; background: none; border: none; color: var(--ink); font-family: inherit; cursor: pointer; }
+.ml-meal span { grid-row: 1 / 3; align-self: center; font-size: 18px; }
+.ml-meal small { font-size: 11px; color: var(--muted); }
+.ml-meal b { font-size: 15px; font-weight: 500; }
+.ml-meal b.ghost { color: var(--muted); font-weight: 400; }
+.ml-meal.edit { display: flex; align-items: center; gap: 8px; }
+.ml-meal.edit input { flex: 1; font-size: 16px; padding: 10px 12px; border-radius: 12px; }
 .jr-note { font-size: 12px; color: var(--muted); margin: 14px 0 0; }
 .jr-acts { display: flex; gap: 10px; margin-top: 12px; }
 .jr-form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
@@ -3854,8 +3893,9 @@ body, body[data-view] {
 
     <div class="md-seg fd-seg">
       <button type="button" class="md-seg-b on" data-fv="log">Today</button>
-      <button type="button" class="md-seg-b" data-fv="pat">Patterns</button>
+      <button type="button" class="md-seg-b" data-fv="meals">Meals</button>
       <button type="button" class="md-seg-b" data-fv="groc">Groceries</button>
+      <button type="button" class="md-seg-b" data-fv="pat">Patterns</button>
     </div>
 
     <div id="food-groc" hidden>
@@ -3892,6 +3932,7 @@ body, body[data-view] {
     <div id="food-log"></div>
     </div>
     <div id="food-patview" hidden><div id="food-patterns"></div></div>
+    <div id="food-mealview" hidden><div id="food-meals"></div></div>
   </section>
 
   <!-- ============ MOOD ============ -->
@@ -3906,7 +3947,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 11:33</footer>
+  <footer>everything saves on this device · build 11:41</footer>
 </div>
 
 <script>
@@ -3917,7 +3958,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {} };
 
 function load() {
   try {
@@ -3953,7 +3994,10 @@ function load() {
         goalSetAt: Number(d.goalSetAt) || 0,
         goalUnlockUntil: Number(d.goalUnlockUntil) || 0,
         sleep:     Array.isArray(d.sleep) ? d.sleep : [],
-        journeys:  Array.isArray(d.journeys) ? d.journeys : []
+        journeys:  Array.isArray(d.journeys) ? d.journeys : [],
+        meals:     (d.meals && typeof d.meals === 'object') ? d.meals : {},
+        grocBudget: (d.grocBudget && typeof d.grocBudget === 'object') ? d.grocBudget : {},
+        prices:    (d.prices && typeof d.prices === 'object') ? d.prices : {}
       };
     }
     const old = localStorage.getItem(OLD);
@@ -8516,6 +8560,80 @@ async function grocSaveImage() {
   return 'Saved';
 }
 
+/* =========== grocery prices ===========
+   each item gets a price: what you paid last time if you have bought it before,
+   else a Lagos estimate (Lagos State price tracker and market trackers, Oct 2026).
+   you can always type your own. the month card adds it all up. */
+const LAGOS_PRICES = [
+  [/\beggs?\b/, 5400, 'crate'], [/\byam\b/, 2500, 'each'], [/\brice\b/, 1200, 'kg'], [/\bbread\b|\bloaf\b/, 2000, 'each'],
+  [/\bchicken\b/, 6500, 'kg'], [/\bturkey\b/, 9000, 'kg'], [/\bbeef\b|\bmeat\b|\bgoat\b/, 7000, 'kg'],
+  [/\bsardines?\b/, 1200, 'tin'], [/\bfish\b|\bmackerel\b|\bcroaker\b|\btitus\b|\bpanla\b/, 5000, 'kg'],
+  [/\bmilk\b/, 3500, 'pack'], [/\by[oa]g(h)?urt\b|\byoghurt\b/, 4500, 'pack'], [/\bparfait\b/, 4000, 'each'],
+  [/\bplantains?\b/, 2000, 'bunch'], [/\boats?\b/, 3500, 'pack'], [/\bpasta\b|\bspaghetti\b|\bmacaroni\b/, 1200, 'pack'],
+  [/\bnoodles?\b|\bindomie\b/, 400, 'pack'], [/\btomato(e)? paste\b/, 1200, 'tin'], [/\btomato(e)?s?\b/, 2000, 'each'],
+  [/\bpeppers?\b|\btatashe\b|\bshombo\b|\bata\b/, 1000, 'each'], [/\bonions?\b/, 1000, 'each'], [/\bsugar\b/, 1500, 'pack'],
+  [/\bsalt\b/, 500, 'pack'], [/\boil\b/, 3500, 'L'], [/\bbananas?\b/, 1500, 'bunch'], [/\bapples?\b/, 600, 'each'],
+  [/\btangerines?\b|\boranges?\b/, 300, 'each'], [/\balmonds?\b/, 6000, 'pack'], [/\bcashews?\b/, 5500, 'pack'],
+  [/\bcoconut flakes?\b/, 3000, 'pack'], [/\btea\b/, 1500, 'pack'], [/\bcoffee\b/, 5000, 'pack'], [/\bgarri\b/, 1500, 'kg'],
+  [/\bbeans\b/, 2500, 'kg'], [/\bmaggi\b|\bknorr\b|\bseasoning\b|\bbouillon\b/, 1500, 'pack'], [/\bcurry\b|\bthyme\b|\bspice\b/, 800, 'pack'],
+  [/\blettuce\b|\bcabbage\b|\bvegetables?\b|\bugu\b|\bspinach\b|\bscent lea(f|ve)s?\b|\bgreens\b/, 1000, 'bunch'],
+  [/\bcarrots?\b|\bcucumbers?\b/, 500, 'each'], [/\btissue\b/, 2200, 'pack'], [/\btoothpaste\b/, 2000, 'each'],
+  [/\bsoap\b|\bdetergent\b/, 1500, 'each'], [/\bwater\b/, 300, 'each'], [/\bjuice\b|\bchivita\b|\bvitamilk\b/, 1800, 'pack'],
+  [/\bbutter\b/, 3000, 'each'], [/\bcheese\b/, 4000, 'pack'], [/\bpotato(e)?s?\b/, 3000, 'kg']
+];
+const naira0 = n => '\u20a6' + Math.round(n).toLocaleString('en-NG');
+const priceKey = t => String(t || '').toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim();
+const round50 = n => Math.max(50, Math.round(n / 50) * 50);
+// times the base price by how many, when the amount and the price talk about the same thing
+function scalePrice(p, per, it) {
+  const q = Number(it.qty) || 0, u = it.unit || '';
+  if (!q) return p;
+  if (per === 'crate') return u === 'pcs' ? p / 30 * q : u === '' && q >= 6 ? p / 30 * q : p * q;
+  if (per === 'kg') return u === 'kg' ? p * q : u === 'g' ? p * q / 1000 : p;
+  if (per === 'each') return (u === 'pcs' || u === '') ? p * q : p;
+  return u === per || u === '' ? p * q : p;
+}
+// { p, src: 'you' | 'lagos' } or null
+function suggestPrice(it) {
+  if (it.unit === 'naira' && it.qty) return { p: it.qty, src: 'you' };
+  if (it.unit === 'knaira' && it.qty) return { p: it.qty * 1000, src: 'you' };
+  const mine = (state.prices || {})[priceKey(it.text)];
+  if (mine) return { p: round50(it.qty && mine.unit === (it.unit || '') ? mine.per * it.qty : mine.per * (mine.unit === '' ? (Number(it.qty) || 1) : 1)), src: 'you' };
+  const t = it.text.toLowerCase();
+  const hit = LAGOS_PRICES.find(([re]) => re.test(t));
+  return hit ? { p: round50(scalePrice(hit[1], hit[2], it)), src: 'lagos' } : null;
+}
+const itemPrice = it => it.price > 0 ? it.price : (suggestPrice(it) || {}).p || 0;
+// remember what you paid, per one of whatever the amount counts
+function learnPrice(it, price) {
+  if (!(price > 0)) return;
+  if (!state.prices) state.prices = {};
+  const q = Number(it.qty) || 0, u = it.unit === 'naira' || it.unit === 'knaira' ? '' : (it.unit || '');
+  state.prices[priceKey(it.text)] = { per: q && u ? price / q : (q && !u ? price / q : price), unit: q ? u : '', at: Date.now() };
+}
+const monthOf = at => { const d = new Date(at); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+let grBudgetEdit = false;
+
+// the month card: total planned, what is spent, what is left to buy, and the budget
+function grocMonthHtml() {
+  const mk = monthOf(Date.now()), d = new Date();
+  const log = (state.groceryLog || []).filter(x => monthOf(x.at) === mk && x.price > 0);
+  const spent = log.reduce((n, x) => n + x.price, 0);
+  const toBuy = (state.grocery || []).filter(x => !x.done).reduce((n, x) => n + itemPrice(x), 0);
+  const total = spent + toBuy, budget = (state.grocBudget || {})[mk] || 0;
+  const weeks = {};
+  for (const x of log) { const w = Math.min(5, Math.ceil(new Date(x.at).getDate() / 7)); weeks[w] = (weeks[w] || 0) + x.price; }
+  const left = budget - total;
+  return '<div class="gm"><div class="gm-top"><span>' + cap(MONTHS[d.getMonth()]) + '</span><b>' + naira0(total) + '</b><small>planned this month</small></div>' +
+    '<div class="gm-rows"><div><span>To buy</span><b>' + naira0(toBuy) + '</b></div><div><span>Spent</span><b>' + naira0(spent) + '</b></div>' +
+    (budget ? '<div><span>Budget</span><b>' + naira0(budget) + '</b></div><div class="' + (left < 0 ? 'over' : 'ok') + '"><span>' + (left < 0 ? 'Over by' : 'Left') + '</span><b>' + naira0(Math.abs(left)) + '</b></div>' : '') +
+    Object.keys(weeks).sort().map(w => '<div class="wk"><span>Week ' + w + '</span><b>' + naira0(weeks[w]) + '</b></div>').join('') + '</div>' +
+    (grBudgetEdit
+      ? '<div class="gr-qrow gm-bud"><span class="gr-and">\u20a6</span><input type="number" inputmode="numeric" min="0" class="gm-bin" aria-label="budget for this month" placeholder="budget for ' + cap(MONTHS[d.getMonth()]) + '"><button type="button" class="lf-btn main" data-gm="save">Save</button></div>'
+      : '<button type="button" class="gm-set" data-gm="edit">' + (budget ? 'Change budget' : 'Set a budget') + '</button>') +
+    '</div>';
+}
+
 function renderGroceries() {
   if (!state.grocery) state.grocery = [];
   // big or small used to sit in prep: move it to the amount
@@ -8535,6 +8653,8 @@ function renderGroceries() {
     const sw = !it.done && v && v[0] === 'watch' ? swapFor(it.text) : null;
     const open = grOpen === it.id && !it.done;
     const qty = grocAmt(it) ? '<em class="gr-q">' + esc(grocAmt(it)) + '</em>' : '';
+    const sp = suggestPrice(it), pr = it.done && it.paid ? it.paid : itemPrice(it);
+    const priceTag = pr ? '<em class="gr-price' + (it.price > 0 || it.paid ? '' : ' est') + '">' + naira0(pr) + '</em>' : '';
     const sub = it.done ? '' :
       (it.note ? '<small class="gr-note">' + esc(it.note) + (it.auto ? ' · <i>from what you eat</i>' : '') + '</small>' : '') +
       (v && (v[0] === 'good' || sw) ? '<small class="gr-v ' + v[0] + '">' + (v[0] === 'good' ? '✓ ' : '⚠ ') + esc(v[1]) + '</small>' : '');
@@ -8542,6 +8662,8 @@ function renderGroceries() {
     const editor = !open ? '' :
       '<div class="gr-ed">' +
         '<input type="text" class="gr-tin" maxlength="60" aria-label="name" placeholder="what to buy">' +
+        '<div class="gr-qrow gr-prow"><span class="gr-and">\u20a6</span><input type="number" inputmode="numeric" min="0" max="9999999" class="gr-pin" aria-label="price" placeholder="' + (sp ? sp.p : 'price') + '"></div>' +
+        '<p class="gr-phint">' + (it.price > 0 ? 'Your price.' + (sp ? ' Suggested ' + naira0(sp.p) + '.' : '') : sp ? (sp.src === 'you' ? 'From what you paid last time.' : 'Lagos estimate, Oct 2026.') + ' Type your own to change it.' : 'No price yet. Type what it costs.') + '</p>' +
         '<div class="gr-qrow"><button type="button" data-a="minus" aria-label="less">−</button>' +
         '<input type="number" inputmode="numeric" min="0" max="9999999" class="gr-qin" aria-label="how many" placeholder="how many">' +
         '<button type="button" data-a="plus" aria-label="more">+</button>' +
@@ -8571,7 +8693,7 @@ function renderGroceries() {
         '<button type="button" class="gr-done" data-a="close">Done</button></div>';
     return '<li class="gr-row' + (it.done ? ' done' : '') + (open ? ' open' : '') + '" data-id="' + it.id + '">' +
       '<button type="button" class="gr-tick" data-a="tick" aria-label="' + (it.done ? 'put back on the list' : 'got it') + '"><i>✓</i></button>' +
-      '<button type="button" class="gr-name gr-open" data-a="open"><span class="gr-t">' + esc(it.text) + (it.type ? '<span class="gr-type"> · ' + esc(it.type) + '</span>' : '') + qty + '</span>' + sub + '</button>' +
+      '<button type="button" class="gr-name gr-open" data-a="open"><span class="gr-t">' + esc(it.text) + (it.type ? '<span class="gr-type"> · ' + esc(it.type) + '</span>' : '') + qty + '</span>' + sub + '</button>' + priceTag +
       '<button type="button" class="gr-del" data-a="del" aria-label="remove">×</button>' + swapBtn + editor + '</li>';
   };
 
@@ -8591,7 +8713,16 @@ function renderGroceries() {
             '<ul class="gr-list got">' + got.map(row).join('') + '</ul>';
   }
   if (state.grocery.length > 3) html = '<div class="gr-findrow"><input type="search" class="gr-find" placeholder="Search your list" aria-label="search your list" autocomplete="off"><span class="gr-none" hidden>Nothing on your list matches</span></div>' + html;
+  html = grocMonthHtml() + html;
   list.innerHTML = html;
+  list.querySelectorAll('[data-gm]').forEach(b => b.addEventListener('click', () => {
+    const mk = monthOf(Date.now());
+    if (b.dataset.gm === 'edit') { grBudgetEdit = true; renderGroceries(); const i = list.querySelector('.gm-bin'); if (i) { i.value = (state.grocBudget || {})[mk] || ''; i.focus(); } return; }
+    const v = Number(list.querySelector('.gm-bin').value) || 0;
+    if (!state.grocBudget) state.grocBudget = {};
+    if (v > 0) state.grocBudget[mk] = v; else delete state.grocBudget[mk];
+    grBudgetEdit = false; save(); renderGroceries();
+  }));
   // search: hides what does not match, as you type
   const find = list.querySelector('.gr-find');
   if (find) {
@@ -8627,8 +8758,8 @@ function renderGroceries() {
     li.querySelector('[data-a=tick]').addEventListener('click', () => {
       it.done = !it.done;
       if (!state.groceryLog) state.groceryLog = [];
-      if (it.done) state.groceryLog.push({ text: it.text, at: Date.now() });
-      else { const j = state.groceryLog.map(x => x.text).lastIndexOf(it.text); if (j > -1) state.groceryLog.splice(j, 1); }
+      if (it.done) { const p = itemPrice(it); it.paid = p || 0; state.groceryLog.push({ text: it.text, at: Date.now(), price: p || 0 }); if (it.price > 0) learnPrice(it, it.price); }
+      else { it.paid = 0; const j = state.groceryLog.map(x => x.text).lastIndexOf(it.text); if (j > -1) state.groceryLog.splice(j, 1); }
       if (grOpen === it.id) grOpen = null;
       save(); renderGroceries();
     });
@@ -8665,6 +8796,10 @@ function renderGroceries() {
         li.querySelectorAll('[data-u2]').forEach(b => b.addEventListener('click', () => { it.unit2 = it.unit2 === b.dataset.u2 ? '' : b.dataset.u2; save(); renderGroceries(); }));
         li.querySelector('[data-a=x2]').addEventListener('click', () => { it.qty2 = null; it.unit2 = ''; grSecond = null; save(); renderGroceries(); });
       }
+      const pin = li.querySelector('.gr-pin');
+      pin.value = it.price > 0 ? it.price : '';
+      pin.addEventListener('change', () => { const v = Number(pin.value) || 0; it.price = v > 0 ? v : null; if (v > 0) learnPrice(it, v); save(); renderGroceries(); });
+      pin.addEventListener('keydown', e => { if (e.key === 'Enter') pin.blur(); });
       const tn = li.querySelector('.gr-tin');
       tn.value = it.text;
       const setT = () => { const v = tn.value.trim(); if (v && v !== it.text) { it.text = v; save(); } else tn.value = it.text; };
@@ -8767,12 +8902,90 @@ function addGrocery(text) {
   save(); renderGroceries();
 }
 
+/* =========== meals: your week of breakfast, lunch and dinner ===========
+   a timetable like the one in Notion. tap a meal to change it. paste a
+   table copied from Notion to fill it in one go. it stays on this device. */
+const MEAL_DAYS = [1, 2, 3, 4, 5, 6, 0];   // Monday first
+const MEAL_SLOTS = [['b', 'Breakfast', '\u{1F305}'], ['l', 'Lunch', '☀️'], ['d', 'Dinner', '\u{1F319}']];
+let mealEdit = null;     // "day:slot" being typed in
+let mealPaste = false;   // the paste box is open
+
+function mealsFor(day) { if (!state.meals) state.meals = {}; return state.meals[day] || (state.meals[day] = { b: '', l: '', d: '' }); }
+const tidyMeal = t => String(t || '').replace(/\s+/g, ' ').replace(/\s*\+\s*/g, ' + ').trim();
+
+// a table copied from Notion: one row per day, with Breakfast, Lunch and Dinner columns
+function parseMealTable(text) {
+  const rows = String(text).split(/\r?\n/).map(r => r.split(/\t|\s*\|\s*/).map(c => c.trim())).filter(r => r.some(Boolean));
+  const head = rows.find(r => r.some(c => /breakfast/i.test(c)));
+  const col = k => head ? head.findIndex(c => new RegExp(k, 'i').test(c)) : -1;
+  const cB = head ? col('breakfast') : 1, cL = head ? col('lunch') : 2, cD = head ? col('dinner') : 3;
+  const out = {};
+  for (const r of rows) {
+    const di = FULL.findIndex(d => r.some(c => c.toLowerCase() === d || c.toLowerCase() === d.slice(0, 3)));
+    if (di < 0) continue;
+    const pick = c => { const v = c >= 0 ? tidyMeal(r[c]) : ''; return /^item \d+$/i.test(v) ? '' : v; };   // Notion's empty "Item 7"
+    out[di] = { b: pick(cB), l: pick(cL), d: pick(cD) };
+  }
+  return out;
+}
+
+function renderMeals() {
+  const box = document.getElementById('food-meals');
+  const today = new Date().getDay();
+  const filled = MEAL_DAYS.some(d => MEAL_SLOTS.some(([k]) => mealsFor(d)[k]));
+  let html = '<div class="ml-top"><b>Your week</b><button type="button" class="ml-paste-b" data-ml="paste">Paste from Notion</button></div>';
+  if (mealPaste || !filled) {
+    html += '<div class="ml-paste"><label for="ml-pin">' + (filled ? 'Paste your table' : 'Copy your meal table in Notion, then paste it here') + '</label>' +
+      '<textarea id="ml-pin" rows="4" placeholder="Day, Breakfast, Lunch, Dinner"></textarea>' +
+      '<div class="jr-acts"><button type="button" class="lf-btn main" data-ml="import">Fill my week</button>' +
+      (filled ? '<button type="button" class="lf-btn" data-ml="close">Cancel</button>' : '') + '</div><p class="ml-msg"></p></div>';
+  }
+  html += '<div class="ml-days">';
+  for (const d of MEAL_DAYS) {
+    const m = mealsFor(d);
+    html += '<div class="ml-day' + (d === today ? ' today' : '') + '"><div class="ml-dname">' + cap(FULL[d]) + (d === today ? ' <i>Today</i>' : '') + '</div>';
+    for (const [k, name, e] of MEAL_SLOTS) {
+      const id = d + ':' + k;
+      html += mealEdit === id
+        ? '<div class="ml-meal edit"><span>' + e + '</span><input type="text" class="ml-in" maxlength="80" aria-label="' + name + ' on ' + FULL[d] + '" placeholder="' + name + '"></div>'
+        : '<button type="button" class="ml-meal" data-meal="' + id + '"><span>' + e + '</span><small>' + name + '</small><b' + (m[k] ? '' : ' class="ghost"') + '>' + (m[k] ? esc(m[k]) : 'add') + '</b></button>';
+    }
+    html += '</div>';
+  }
+  box.innerHTML = html + '</div>';
+
+  box.querySelectorAll('[data-meal]').forEach(b => b.addEventListener('click', () => { mealEdit = b.dataset.meal; renderMeals(); }));
+  const inp = box.querySelector('.ml-in');
+  if (inp) {
+    const [d, k] = mealEdit.split(':');
+    inp.value = mealsFor(d)[k] || '';
+    const done = () => { if (mealEdit === null) return; mealsFor(d)[k] = tidyMeal(inp.value); mealEdit = null; save(); renderMeals(); };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') done(); if (e.key === 'Escape') { mealEdit = null; renderMeals(); } });
+    inp.addEventListener('blur', done);
+    setTimeout(() => inp.focus(), 20);
+  }
+  box.querySelectorAll('[data-ml]').forEach(b => b.addEventListener('click', () => {
+    const a = b.dataset.ml;
+    if (a === 'paste') { mealPaste = !mealPaste; renderMeals(); return; }
+    if (a === 'close') { mealPaste = false; renderMeals(); return; }
+    if (a === 'import') {
+      const got = parseMealTable(document.getElementById('ml-pin').value);
+      const n = Object.keys(got).length;
+      if (!n) { box.querySelector('.ml-msg').textContent = 'I could not find any days in that. Copy the whole table, with the day names.'; return; }
+      for (const d of Object.keys(got)) state.meals[d] = got[d];
+      mealPaste = false; save(); renderMeals();
+    }
+  }));
+}
+
 function setFoodView(v) {
   foodView = v;
   document.querySelectorAll('[data-fv]').forEach(b => b.classList.toggle('on', b.dataset.fv === v));
   document.getElementById('food-groc').hidden = v !== 'groc';
   document.getElementById('food-logview').hidden = v !== 'log';
   document.getElementById('food-patview').hidden = v !== 'pat';
+  document.getElementById('food-mealview').hidden = v !== 'meals';
+  if (v === 'meals') renderMeals();
   if (v === 'groc') renderGroceries();
   if (v === 'pat') renderPatterns();
 }
