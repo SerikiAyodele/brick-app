@@ -4350,6 +4350,102 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 .ns-grow .ns-row { flex: 1; min-width: 0; border-bottom: 0 !important; }
 .ns-gedit { flex: none; min-width: 56px; min-height: 40px; padding: 0 12px; font: 500 14px var(--display); color: var(--muted); background: var(--paper); border: 1px solid var(--hair); border-radius: 20px; cursor: pointer; }
 .ns-gtype { width: 100%; padding: 8px 0; }
+
+/* ============ MONO: minimal and professional, black and white ============
+   this block wins over everything above it. no stickers, no pastels, no tilts. */
+:root, :root[data-theme="light"] {
+  --paper: #ffffff; --card: #ffffff; --ink: #111111; --muted: #6e6e6e; --shade: #e9e9e9; --slot: #f4f4f4;
+  --hair: #e6e6e6; --dash: #d4d4d4; --hover: #f5f5f5; --grid: transparent;
+  --pink: #e0789a; --pink-d: #c2557a; --pink-s: #fde8ef;
+}
+:root[data-theme="dark"] {
+  --paper: #000000; --card: #111111; --ink: #f5f5f5; --muted: #9a9a9a; --shade: #222222; --slot: #1a1a1a;
+  --hair: #262626; --dash: #333333; --hover: #1a1a1a;
+  --pink: #f08fab; --pink-d: #f5a3bb; --pink-s: #2a1820;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #000000; --card: #111111; --ink: #f5f5f5; --muted: #9a9a9a; --shade: #222222; --slot: #1a1a1a;
+  --hair: #262626; --dash: #333333; --hover: #1a1a1a;
+  --pink: #f08fab; --pink-d: #f5a3bb; --pink-s: #2a1820;
+} }
+/* plain page, no dots, no glow */
+html body, html body[data-view], html body[data-view="day"] { background: var(--paper) !important; background-image: none !important; }
+/* cards: flat, thin line, no shadow, no tilt */
+#view-home#view-home :is(.hm-now, .hm-goals, .hm-area, .hm-quick .hq, .hm-nudge),
+#view-goals#view-goals .gl-area {
+  background: var(--card) !important; color: var(--ink) !important; border: 1px solid var(--hair) !important; box-shadow: none !important; transform: none !important; }
+#view-home#view-home .hm-now { border-radius: 20px !important; padding: 20px !important; }
+#view-home#view-home .hm-now::before, #view-home#view-home .hm-now::after, #view-home#view-home .hm-area::before, #view-home#view-home .hm-area::after { display: none !important; content: none !important; }
+#view-home#view-home .hm-now b, #view-home#view-home .hm-area em, #view-home#view-home .hm-area .hm-an, #view-home#view-home .hm-gt b { color: var(--ink) !important; }
+#view-home#view-home :is(.hm-now .hm-lbl, .hm-now .hm-sub, .hm-now .hm-prog, .hm-area small, .hm-goals small) { color: var(--muted) !important; }
+#view-home#view-home .hm-now.empty .hm-sub, #view-home#view-home .hm-now.live .hm-lbl { color: var(--ink) !important; font-weight: 600; }
+#view-home#view-home .hm-now .hm-bar { background: var(--hair) !important; }
+#view-home#view-home .hm-now .hm-bar u, #view-home#view-home .hm-gbars u { background: var(--ink) !important; }
+#view-home#view-home .hm-gbars i { background: var(--hair) !important; }
+#view-home#view-home .hm-quick .hq { border-radius: 14px !important; font-weight: 500 !important; }
+#view-home#view-home .hm-quick .hq span { filter: grayscale(1); }
+#view-home#view-home .hq.due::after { background: var(--ink) !important; }
+#view-home#view-home .hm-area { border-radius: 18px !important; padding: 16px !important; min-height: 120px !important; }
+#view-home#view-home .hm-ae, #view-goals#view-goals .gl-ah i { display: none !important; }
+#view-home#view-home .hm-sec { font-size: 13px !important; font-weight: 600 !important; letter-spacing: .4px !important; text-transform: uppercase !important; color: var(--muted) !important; }
+#view-home#view-home .hm-goals { border-radius: 18px !important; }
+/* goals page */
+#view-goals#view-goals .gl-list { gap: 12px !important; margin-top: 14px !important; }
+#view-goals#view-goals .gl-area { padding: 16px 16px 8px !important; border-radius: 18px !important; }
+#view-goals#view-goals .gl-ah b { font-size: 13px !important; font-weight: 600 !important; letter-spacing: .4px; text-transform: uppercase; color: var(--muted) !important; }
+#view-goals#view-goals .gl-t { color: var(--ink) !important; }
+#view-goals#view-goals .gl-chk { background: transparent !important; border: 1.5px solid var(--dash) !important; color: var(--paper) !important; }
+#view-goals#view-goals .gl-chk.on { background: var(--ink) !important; border-color: var(--ink) !important; color: var(--paper) !important; }
+#view-goals#view-goals :is(.gl-steps, .gl-steps.none, .gl-add) { color: var(--muted) !important; }
+/* tabs and buttons */
+.tabs, .morepanel { background: var(--paper) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; border-color: var(--hair) !important; }
+.tabs .brick:not(.flat), .brick:not(.flat) { background: var(--ink) !important; color: var(--paper) !important; }
+.md-seg { background: var(--slot) !important; }
+.md-seg-b.on { background: var(--card) !important; color: var(--ink) !important; box-shadow: 0 0 0 1px var(--hair); }
+:is(.wka-go, .cy-all, .wk-copy button, .ch-form button, .tw-post) { background: var(--ink) !important; color: var(--paper) !important; }
+:is(.wka-row button.on, .wka-days button.on, .ls-row.on, .cy-row.got) { background: var(--ink) !important; color: var(--paper) !important; border-color: var(--ink) !important; }
+.cy-row.got b, .cy-row.got small { color: var(--paper) !important; }
+.cy-row.got .cy-plus { background: var(--paper) !important; color: var(--ink) !important; }
+.cy-plus, .ls-row i { background: var(--slot) !important; color: var(--ink) !important; }
+.ch-msg.me { background: var(--ink) !important; color: var(--paper) !important; }
+#bugtoast { background: #111 !important; }
+/* the week calendar: grey blocks */
+.wk-blk { --q: var(--muted) !important; background: var(--slot) !important; border-left-color: var(--ink) !important; }
+.wk-day.today, .wk-dcol.today .wk-ch { background: var(--ink) !important; color: var(--paper) !important; }
+.wk-day.today b, .wk-dcol.today .wk-ch b { color: var(--paper) !important; }
+.wk-day.has i { background: var(--ink) !important; }
+.wk-day.today.has i { background: var(--paper) !important; }
+.wk-col.today { background-color: transparent !important; }
+.wk-now { background: var(--ink) !important; }
+
+/* pink: the one accent */
+.tabs .brick:not(.flat) { background: var(--pink) !important; color: #fff !important; }
+#view-home#view-home .hm-now.live .hm-lbl, #view-home#view-home .hm-now.empty .hm-sub { color: var(--pink-d) !important; }
+#view-home#view-home .hm-now .hm-lbl::before { background: var(--pink) !important; }
+#view-home#view-home .hm-now .hm-bar u, #view-home#view-home .hm-gbars u { background: var(--pink) !important; }
+#view-home#view-home .hq.due::after { background: var(--pink) !important; }
+#view-goals#view-goals .gl-chk.on { background: var(--pink) !important; border-color: var(--pink) !important; color: #fff !important; }
+#view-goals#view-goals .gl-steps.none { color: var(--pink-d) !important; }
+.md-seg-b.on { color: var(--pink-d) !important; }
+.wk-day.today, .wk-dcol.today .wk-ch { background: var(--pink) !important; color: #fff !important; }
+.wk-day.today b, .wk-dcol.today .wk-ch b { color: #fff !important; }
+.wk-day.has i { background: var(--pink) !important; }
+.wk-day.today.has i { background: #fff !important; }
+.wk-now { background: var(--pink) !important; }
+.wk-blk { border-left-color: var(--pink) !important; }
+.wk-add, .wk-add .plusbox { color: var(--pink-d) !important; }
+:is(.wka-row button.on, .wka-days button.on, .ls-row.on, .cy-row.got) { background: var(--pink-s) !important; color: var(--ink) !important; border-color: var(--pink) !important; }
+.cy-row.got b, .cy-row.got small { color: var(--ink) !important; }
+.cy-row.got .cy-plus { background: var(--pink) !important; color: #fff !important; }
+.cy-plus, .ls-row i { background: var(--pink-s) !important; color: var(--pink-d) !important; }
+.ch-msg.me { background: var(--pink) !important; color: #fff !important; }
+
+/* colour only where it means something: area markers and goal status */
+#view-home#view-home .hm-area .hm-an::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--c); vertical-align: middle; }
+#view-goals#view-goals .gl-ah b::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: var(--c); vertical-align: middle; }
+#view-goals#view-goals .gl-area { border-left: 4px solid var(--c) !important; }
+#view-home#view-home .hm-gbars i { background: color-mix(in srgb, var(--c) 25%, var(--card)) !important; }
+#view-home#view-home .hm-gbars u { background: var(--c) !important; }
 </style>
 </head>
 <body>
@@ -4608,7 +4704,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:21</footer>
+  <footer>Mr.O:17:28</footer>
 </div>
 
 <script>
