@@ -4586,6 +4586,17 @@ html { background: var(--paper) !important; }
 #view-day .nowcard:not(.past) .nc-next { grid-column: 1 / -1; }
 #view-day .nowcard:not(.past) .nc-info .nc-next { position: relative; margin: 0; }
 #view-day .nowcard:not(.past) .nc-acts { grid-column: 1 / -1; margin-top: 16px; }
+
+.ai-sug { display: block; width: 100%; min-height: 50px; margin: 14px 0 6px; font: 600 16px var(--display); color: var(--pink-d); background: color-mix(in srgb, var(--pink) 12%, var(--card)); border: 1px dashed color-mix(in srgb, var(--pink) 50%, var(--hair)); border-radius: 25px; cursor: pointer; }
+#view-day.wk .ai-sug { display: none; }
+.sg-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.sg-list li { display: flex; align-items: center; gap: 12px; padding: 12px 12px 12px 14px; background: var(--paper); border: 1px solid var(--hair); border-left: 4px solid var(--c); border-radius: 16px; }
+.sg-list li div { flex: 1; min-width: 0; }
+.sg-list li b { display: block; font-size: 17px; font-weight: 600; line-height: 1.3; }
+.sg-list li b small { font-size: 14px; font-weight: 500; color: var(--muted); }
+.sg-list li p { margin: 4px 0 0; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.sg-list li button { flex: none; min-width: 64px; min-height: 42px; padding: 0 12px; font: 600 15px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 21px; cursor: pointer; }
+.sg-list li button:disabled { color: var(--muted); background: var(--hair); }
 </style>
 </head>
 <body>
@@ -4732,6 +4743,7 @@ html { background: var(--paper) !important; }
 
     <datalist id="preset-names"></datalist>
 
+    <button class="ai-sug" id="sug-day" type="button">✨ Suggest tasks</button>
     <button class="addblock" id="block-add" type="button">
       <span class="plusbox">+</span> Add a block
     </button>
@@ -4845,7 +4857,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:21</footer>
+  <footer>Mr.O:18:23</footer>
 </div>
 
 <script>
@@ -7335,6 +7347,7 @@ document.getElementById('block-add').addEventListener('click', () => {
   save(); renderDay(); renderHabits();
 });
 
+document.getElementById('sug-day').addEventListener('click', () => suggestSheet('day'));
 document.getElementById('day-top').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 document.getElementById('day-prev').addEventListener('click',  () => { viewDay = shiftKey(viewDay, -1); renderDay(); });
 document.getElementById('day-next').addEventListener('click',  () => { viewDay = shiftKey(viewDay,  1); renderDay(); });
@@ -12405,9 +12418,11 @@ function renderGoals() {
     }
     return '<section class="gl-area" data-a="' + a.k + '" style="--c:' + a.c + '"><div class="gl-ah"><i>' + a.e + '</i><b>' + a.name + '</b></div>' + body + '</section>';
   }).join('') + '</div>';
+  if (goalsTab === 'week') html += '<button type="button" class="ai-sug" id="sug-goals">\u2728 Suggest goals</button>';
   if (goalsTab === 'week') html += '<p class="gl-why">Few on purpose. Your brain can only push a few goals at once, so fewer get done more.</p>';
   box.innerHTML = html;
 
+  const sg = box.querySelector('#sug-goals'); if (sg) sg.addEventListener('click', () => suggestSheet('goals'));
   box.querySelectorAll('.gl-mt').forEach(el => { el.textContent = MG[el.dataset.moed].text; if (MG[el.dataset.moed].done) el.classList.add('done'); });
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
@@ -14198,6 +14213,83 @@ function stepsSheet(ak, gi, after) {
   const close = () => { el.remove(); if (after) after(); };
   el.querySelector('.w3-back').addEventListener('click', close);
   el.querySelector('.gs-done').addEventListener('click', close);
+}
+
+
+/* =========== suggestions =========== */
+/* Claude reads a short picture of your data and suggests weekly goals, or
+   tasks for the day you are planning. tap one to add it. */
+function aiSnapshot(mode) {
+  const L = [], t = todayKey(), d = new Date();
+  L.push('Today: ' + d.toDateString() + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'));
+  try {
+    for (const a of AREAS) {
+      const gs = areaGoals(a.k);
+      L.push(a.name + ' goals this week: ' + (gs.length ? gs.map(g => g.text + ' (' + goalStatus(goalScore(g, perKeys(0)).pct)[1] + ')').join('; ') : 'none'));
+    }
+    const tally = {};
+    for (let i = 1; i <= 14; i++) for (const b of ((state.days[shiftKey(t, -i)] || {}).blocks || [])) {
+      const k = (b.label || '').trim().toLowerCase(); if (!k) continue;
+      tally[k] = tally[k] || [0, 0]; tally[k][0]++; if (b.done) tally[k][1]++;
+    }
+    const top = Object.entries(tally).sort((a, b) => b[1][0] - a[1][0]).slice(0, 25);
+    if (top.length) L.push('Last 14 days, planned (done of planned): ' + top.map(([k, v]) => k + ' ' + v[1] + '/' + v[0]).join(', '));
+    const pk = mode === 'day' ? viewDay : t;
+    const today = ((state.days[pk] || {}).blocks || []).map(b => b.label).filter(Boolean);
+    L.push((mode === 'day' ? 'Already planned for the day being planned (' + pk + '): ' : 'Planned today: ') + (today.join(', ') || 'nothing'));
+    if ((state.habits || []).length) L.push('Habits: ' + state.habits.map(h => h.name + ' (' + streakOf(h.marks) + ' day streak)').join(', '));
+    const moods = (state.moods || []).filter(m => Date.now() - m.at < 14 * 864e5), mc = {};
+    moods.forEach(m => { mc[m.mood] = (mc[m.mood] || 0) + 1; });
+    if (moods.length) L.push('Moods last 14 days: ' + Object.entries(mc).map(([k, v]) => k + ' ' + v).join(', '));
+    const food = (state.food || []).filter(f => Date.now() - f.at < 7 * 864e5);
+    if (food.length) L.push('Food logged last 7 days: ' + food.slice(-20).map(f => f.what).join(', '));
+    const P = (state.people || []).filter(x => personDue(x) >= 0).map(x => x.name);
+    if (P.length) L.push('People due a hello: ' + P.join(', '));
+    const cur = ymOf(Date.now()), bud = linesFor(cur).reduce((a, b) => a + b.amount, 0);
+    if (bud) { const sp = (state.money || []).filter(x => x.dir === 'DR' && ymOf(x.at) === cur).reduce((a, x) => a + x.amt, 0); L.push('Money this month: budget ' + Math.round(bud) + ', spent ' + Math.round(sp)); }
+  } catch {}
+  return L.join('\n').slice(0, 11000);
+}
+
+async function suggestSheet(mode) {
+  const old = document.getElementById('sugsheet'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'sugsheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet sg" role="dialog" aria-modal="true" aria-label="Suggestions"><span class="w3-grab"></span>' +
+    '<h2 class="gs-h">' + (mode === 'day' ? '\u2728 Tasks for ' + (viewDay === planKey() ? 'today' : cap(FULL[fromKey(viewDay).getDay()])) : '\u2728 Goals for this week') + '</h2>' +
+    '<div class="sg-body"><p class="gs-ask">Reading your data\u2026</p></div><button type="button" class="ls-cancel">Close</button></div>';
+  document.body.appendChild(el);
+  const close = () => { el.remove(); if (mode === 'goals' && document.body.dataset.view === 'goals') renderGoals(); };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('.ls-cancel').addEventListener('click', close);
+  const body = el.querySelector('.sg-body');
+  let out = null, why = '';
+  try {
+    const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 90000);
+    const r = await aiFetch('/api/suggest', { mode, snapshot: aiSnapshot(mode) }, ctl.signal);
+    clearTimeout(timer);
+    out = r.ok ? await r.json() : null;
+    if (!r.ok) why = r.status === 401 ? 'Type your AI passcode, then try again.' : r.status === 429 ? 'Too many asks. Try again in a bit.' : [404, 405, 501, 503].includes(r.status) ? 'The AI is not set up here yet.' : 'Claude could not answer. Try again.';
+  } catch { why = 'No connection. Try again.'; }
+  if (!document.body.contains(el)) return;
+  if (!out || !Array.isArray(out.items) || !out.items.length) { body.innerHTML = '<p class="gs-ask">' + esc(why || 'No ideas this time. Try again.') + '</p>'; return; }
+  body.innerHTML = '<ul class="sg-list">' + out.items.map((it, i) => { const a = AREAS.find(x => x.k === it.area) || AREAS[3];
+    return '<li style="--c:' + a.c + '"><div><b>' + a.e + ' ' + esc(it.text) + (mode === 'day' && it.mins ? ' <small>' + minsLabel(it.mins) + '</small>' : '') + '</b><p>' + esc(it.why) + '</p></div><button type="button" data-i="' + i + '">Add</button></li>'; }).join('') + '</ul>';
+  body.querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => {
+    const it = out.items[Number(b.dataset.i)];
+    if (mode === 'day') {
+      const day = dayFor(viewDay); day.touched = true;
+      day.blocks.push({ label: it.text, mins: it.mins || 60 });
+      save(); renderDay(); renderHabits();
+    } else {
+      if (!state.life[it.area]) state.life[it.area] = { goals: [], ids: [] };
+      const gs = areaGoals(it.area);
+      if (gs.length >= MAX_LIFE_GOALS) { b.textContent = 'Area full'; b.disabled = true; return; }
+      gs.push({ text: it.text, m: 'custom', own: true, target: 5, days: [], setAt: Date.now() });
+      areaGoals(it.area); save();
+    }
+    b.textContent = 'Added \u2713'; b.disabled = true;
+  }));
 }
 
 /* =========== plan: week =========== */
