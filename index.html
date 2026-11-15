@@ -4262,7 +4262,40 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 .gs-add button { min-height: 46px; padding: 0 16px; font: 600 15px var(--display); color: var(--ink); background: color-mix(in srgb, var(--pink) 28%, var(--card)); border: none; border-radius: 14px; cursor: pointer; }
 .gs-max { font-size: 13px; color: var(--muted); }
 .lf-wiz .gs-ed { margin: 0 0 18px; text-align: left; }
+.ns-sub.ns-first { margin-top: 4px; }
 .qp-c.goal { background: color-mix(in srgb, var(--pink) 18%, var(--card)); }
+
+.cy .cy-h { margin: 0; font-size: 18px; font-weight: 600; color: var(--ink); }
+.cy .cy-sub { margin: 2px 0 12px; font-size: 15px; color: var(--muted); }
+.cy-list { display: flex; flex-direction: column; gap: 8px; }
+.cy-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 0 16px 0 10px; text-align: left; font: 500 18px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; transition: transform .12s; }
+.cy-row:active { transform: scale(.98); }
+.cy-row b { flex: 1; min-width: 0; font-weight: 500; overflow-wrap: break-word; }
+.cy-row small { flex: none; font-size: 15px; color: var(--muted); }
+.cy-plus { flex: none; display: grid; place-items: center; width: 36px; height: 36px; font-size: 20px; font-weight: 600; color: var(--pink-d); background: color-mix(in srgb, var(--pink) 18%, var(--card)); border-radius: 50%; }
+.cy-row.got { cursor: default; background: color-mix(in srgb, var(--pink) 12%, var(--card)); border-color: color-mix(in srgb, var(--pink) 35%, var(--hair)); }
+.cy-row.got .cy-plus { color: #fff; background: var(--pink); }
+.cy-row.got b { color: var(--muted); }
+.cy-btns { display: flex; gap: 8px; margin-top: 12px; }
+.cy-btns button { flex: 1; min-height: 48px; font: 600 16px var(--display); border: none; border-radius: 24px; cursor: pointer; }
+.cy-all { color: var(--paper); background: var(--ink); }
+.cy-done { color: var(--ink); background: var(--hair); }
+
+.ls h2 { margin: 0; font-size: 22px; font-weight: 600; }
+.ls-from { margin: 2px 0 14px; font-size: 15px; color: var(--muted); }
+.ls-list { display: flex; flex-direction: column; gap: 8px; }
+.ls-row { display: flex; align-items: baseline; gap: 10px; width: 100%; min-height: 60px; padding: 0 18px; text-align: left; font: 500 20px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; align-items: center; }
+.ls-row b { font-weight: 600; }
+.ls-row i { font-style: normal; font-size: 13px; font-weight: 600; color: var(--pink-d); background: color-mix(in srgb, var(--pink) 18%, var(--card)); padding: 3px 8px; border-radius: 10px; }
+.ls-row small { margin-left: auto; font-size: 15px; color: var(--muted); }
+.ls-row.on { background: color-mix(in srgb, var(--pink) 18%, var(--card)); border-color: color-mix(in srgb, var(--pink) 45%, var(--hair)); }
+.ls-other b { font-weight: 500; color: var(--muted); }
+.ls-step { display: flex; align-items: center; gap: 12px; }
+.ls-step button { flex: none; width: 64px; height: 64px; font: 600 30px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 50%; cursor: pointer; }
+.ls-step div { flex: 1; text-align: center; }
+.ls-step b { display: block; font-size: 30px; font-weight: 600; }
+.ls-step small { font-size: 15px; color: var(--muted); }
+.ls-back { display: block; margin: 8px auto 0; min-height: 44px; font: 500 15px var(--display); color: var(--muted); background: none; border: none; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -4521,7 +4554,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:02</footer>
+  <footer>Mr.O:17:06</footer>
 </div>
 
 <script>
@@ -5448,6 +5481,7 @@ function openNameSheet(b) {
   document.body.appendChild(el);
   const wasEmpty = !(b.label || '').trim();
   const set = (label, mins) => {
+    if (!mins && wasEmpty) mins = usualLength(label);          // your usual length for this name
     b.label = label; if (mins && wasEmpty) b.mins = mins;     // a length only for a new block
     save(); el.remove(); renderDay(); renderHabits();
   };
@@ -5467,10 +5501,10 @@ function openNameSheet(b) {
       html += '<h2 class="ns-h">What’s this block?</h2>' +
         '<div class="ns-type"><input type="text" class="ns-in" placeholder="Type a name" maxlength="200"><button type="button" class="ns-ok">Save</button></div>' +
         '<div class="ns-list">' +
+          (() => { const S = goalSteps(); return S.length ? '<p class="ns-sub ns-first">Your goals</p>' + S.map(x => row(x.e, x.t, x.goal)).join('') + '<p class="ns-sub">Everything else</p>' : ''; })() +
           row('\u{1F4BC}', 'Work', 'needs an outcome') + row('\u{1F9D8}', 'Rest', 'break, walk, nap…', null, true) +
           row('\u{1F465}', 'Meeting', 'topic and agenda', null, true) + row('\u{1F3CB}️', 'Workout', '') +
           MEAL_SLOTS.map(([k, name, e]) => { const plan = mealsFor(fromKey(viewDay).getDay())[k]; return row(e, name, plan ? 'planned: ' + plan : 'no meal planned'); }).join('') +
-          (() => { const S = goalSteps(); return S.length ? '<p class="ns-sub">Your goals</p>' + S.map(x => row(x.e, x.t, x.goal)).join('') : ''; })() +
           (mine.length ? '<p class="ns-sub">Your usual</p>' + mine.map(x => row('↻', x.t, minsLabel(Number(x.mins) || 60))).join('') : '') +
         '</div>';
     }
@@ -6186,39 +6220,38 @@ function usualLength(label) {
    when it ends on the time wheel. the wheel only saves when you tap Done
    (iPhone reports every spin as a change, so saving on each one closed it). */
 function lengthPicker(b, from, len) {
-  const keep = m => { b.mins = Math.max(5, Math.min(1440, m)); save(); renderDay(); };
-  const box = document.createElement('div');
-  box.className = 'lenpick lp4';
+  // a big sheet: your usual first, a few common lengths, each with its end time. one tap sets it.
+  const spot = document.createElement('div');
+  if (document.getElementById('lensheet')) return spot;
+  const el = document.createElement('div');
+  el.id = 'lensheet'; el.className = 'w3';
   const usual = usualLength(b.label);
-  const opts = [15, 30, 45, 60, 90, 120];
-  if (usual && !opts.includes(usual)) opts.push(usual);
-  opts.sort((x, y) => x - y);
-
-  box.innerHTML =
-    '<div class="lp4-now"><b>' + minsLabel(len) + '</b><span>' + clock(from) + ' to ' + clock(from + len) + '</span></div>' +
-    '<div class="lp4-row add">' + [[-5, '−5'], [5, '+5'], [10, '+10'], [15, '+15'], [30, '+30']].map(([d, t]) =>
-      '<button type="button" data-d="' + d + '"' + (len + d < 5 ? ' disabled' : '') + '>' + t + '</button>').join('') + '</div>' +
-    '<div class="lp4-row">' + opts.map(m => '<button type="button" data-m="' + m + '" class="' + (m === len ? 'on' : '') + (m === usual ? ' usual' : '') + '">' + minsLabel(m) + '</button>').join('') + '</div>' +
-    '<label class="lp4-end"><span>Ends at</span><input type="time" step="300"></label>' +
-    '<button type="button" class="lp4-done">Done</button>';
-  box.querySelectorAll('[data-d]').forEach(x => x.addEventListener('click', () => keep(len + Number(x.dataset.d))));
-  box.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
-  const t = box.querySelector('input');
-  t.value = hhmm(from + len);
-  let picked = null;
-  const commit = () => {
-    if (!picked || !/^\d{2}:\d{2}/.test(picked)) return;
-    let m = toMins(picked.slice(0, 5)) - (from % 1440);
-    if (m <= 0) m += 1440;                               // ends after midnight
-    picked = null;
-    keep(m);
+  const name = (b.label || '').trim();
+  let opts = [30, 60, 90, 120];
+  if (usual && !opts.includes(usual)) opts = [usual, ...opts.filter(m => m !== 90)];
+  const close = () => { el.remove(); customFor = null; renderDay(); };
+  const keep = m => { b.mins = Math.max(5, Math.min(1440, m)); save(); close(); };
+  let other = len;
+  const draw = more => {
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
+      '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2><p class="ls-from">Starts ' + clock(from) + '</p>' +
+      (more
+        ? '<div class="ls-step"><button type="button" data-o="-15" aria-label="15 minutes less">\u2212</button><div><b>' + minsLabel(other) + '</b><small>ends ' + clock(from + other) + '</small></div><button type="button" data-o="15" aria-label="15 minutes more">+</button></div>' +
+          '<button type="button" class="wka-go ls-set">Set ' + minsLabel(other) + '</button><button type="button" class="ls-back">Back</button>'
+        : '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === len ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' +
+            (m === usual ? '<i>your usual</i>' : '') + '<small>ends ' + clock(from + m) + '</small></button>').join('') +
+          '<button type="button" class="ls-row ls-other" data-other="1"><b>Other</b><small>' + (opts.includes(len) ? '' : 'now ' + minsLabel(len)) + '</small></button></div>') +
+      '</div>';
+    el.querySelector('.w3-back').addEventListener('click', close);
+    el.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
+    const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
+    el.querySelectorAll('[data-o]').forEach(x => x.addEventListener('click', () => { other = Math.max(15, Math.min(720, other + Number(x.dataset.o))); draw(true); }));
+    const st = el.querySelector('.ls-set'); if (st) st.addEventListener('click', () => keep(other));
+    const bk = el.querySelector('.ls-back'); if (bk) bk.addEventListener('click', () => draw(false));
   };
-  t.addEventListener('input', () => { picked = t.value; });
-  t.addEventListener('change', () => { picked = t.value; });
-  t.addEventListener('blur', commit);                    // the wheel's Done
-  t.addEventListener('keydown', e => { if (e.key === 'Enter') t.blur(); });
-  box.querySelector('.lp4-done').addEventListener('click', () => { commit(); customFor = null; renderDay(); });
-  return box;
+  draw(false);
+  document.body.appendChild(el);
+  return spot;
 }
 
 const HB_STOP = new Set(['the', 'a', 'an', 'to', 'my', 'and', 'of', 'for', 'in', 'on', 'at', 'with', 'do', 'go', 'get', 'have', 'take', 'min', 'mins', 'minutes', 'hour', 'hours', 'page', 'pages', 'every', 'day', 'daily', 'morning', 'night', 'evening']);
@@ -6257,69 +6290,45 @@ function renderCarry() {
   slot.innerHTML = '';
 
   const day = dayFor(viewDay);
-  if (day.blocks.length || day.noCarry) return;
+  if (day.noCarry) return;
+  // shows on an empty day, and stays open while you are bringing things over
+  if (day.blocks.length && !day.carryOpen) return;
 
   const prev = lastPlanned(viewDay);
   if (!prev) return;
 
   const items = prev.day.blocks.filter(b => (b.label || '').trim());
-  const when = (prev.k === shiftKey(viewDay, -1))
-    ? 'yesterday'
-    : FULL[fromKey(prev.k).getDay()];
+  if (!items.length) return;
+  const when = (prev.k === shiftKey(viewDay, -1)) ? 'Yesterday' : 'On ' + cap(FULL[fromKey(prev.k).getDay()]);
+  if (!day.carried || day.carried.from !== prev.k) day.carried = { from: prev.k, i: [] };
+  const got = day.carried.i;
+
+  const copy = b => ({ label: b.label, mins: b.mins, ...(b.step ? { step: b.step } : {}),
+    ...(Array.isArray(b.goals) && b.goals.length ? { goals: b.goals.map(g => ({ text: g.text, done: false })) } : {}) });
+  const bring = list => {
+    for (const n of list) if (!got.includes(n)) { day.blocks.push(copy(items[n])); got.push(n); }
+    day.carryOpen = got.length < items.length; if (!day.carryOpen) day.noCarry = true;
+    save(); renderDay(); renderHabits();
+  };
 
   const box = document.createElement('div');
-  box.className = 'suggest studs';
-
-  const p = document.createElement('p');
-  p.innerHTML = 'on <b>' + when + '</b> you planned these. carry any over?';
-  box.appendChild(p);
-
-  const list = document.createElement('div');
-  list.className = 'carry';
-  const boxes = [];
-
-  for (const b of items) {
-    const lab = document.createElement('label');
-
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = true;
-    boxes.push([cb, b]);
-
-    const txt = document.createElement('span');
-    txt.textContent = b.label;
-
-    const dur = document.createElement('span');
-    dur.className = 'dur';
-    const d = DURATIONS.find(x => x.mins === b.mins);
-    dur.textContent = d ? d.label : b.mins + 'm';
-
-    lab.append(cb, txt, dur);
-    list.appendChild(lab);
-  }
-
-  box.appendChild(list);
-
-  const row = document.createElement('div');
-  row.className = 'row';
-
-  const yes = document.createElement('button');
-  yes.className = 'brick'; yes.type = 'button'; yes.textContent = 'carry over';
-  yes.addEventListener('click', () => {
-    const picked = boxes.filter(([cb]) => cb.checked).map(([, b]) => ({ label: b.label, mins: b.mins,
-      ...(Array.isArray(b.goals) && b.goals.length
-          ? { goals: b.goals.map(g => ({ text: g.text, done: false })) } : {}) }));
-    if (!picked.length) { day.noCarry = true; save(); renderDay(); return; }
-    day.blocks.push(...picked);
-    save(); renderDay(); renderHabits();
-  });
-
-  const no = document.createElement('button');
-  no.className = 'brick flat'; no.type = 'button'; no.textContent = 'start fresh';
-  no.addEventListener('click', () => { day.noCarry = true; save(); renderDay(); });
-
-  row.append(yes, no);
-  box.appendChild(row);
+  box.className = 'suggest studs cy';
+  box.innerHTML = '<p class="cy-h">' + when + ' you planned these.</p><p class="cy-sub">Tap one to bring it over, then pick the days.</p>' +
+    '<div class="cy-list">' + items.map((b, n) => { const d = DURATIONS.find(x => x.mins === b.mins);
+      return '<button type="button" class="cy-row' + (got.includes(n) ? ' got' : '') + '" data-n="' + n + '"' + (got.includes(n) ? ' disabled' : '') + '>' +
+        '<span class="cy-plus">' + (got.includes(n) ? '\u2713' : '+') + '</span><b>' + esc(b.label) + '</b><small>' + (got.includes(n) ? 'added' : (d ? d.label : b.mins + 'm')) + '</small></button>'; }).join('') + '</div>' +
+    '<div class="cy-btns">' + (got.length < items.length ? '<button type="button" class="cy-all">Bring all</button>' : '') +
+    '<button type="button" class="cy-done">' + (got.length ? 'Done' : 'Start fresh') + '</button></div>';
+  // tap one: same name and length, and pick which days this week it goes on (today is picked)
+  box.querySelectorAll('.cy-row:not(.got)').forEach(r => r.addEventListener('click', () => {
+    const n = Number(r.dataset.n), b = items[n];
+    weekAddSheet(viewDay, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(viewDay, x)), { label: b.label, mins: b.mins, step: b.step }, picks => {
+      if (picks.includes(viewDay)) { got.push(n); day.carryOpen = got.length < items.length; if (!day.carryOpen) day.noCarry = true; }
+      save(); renderDay(); renderHabits();
+    });
+  }));
+  const all = box.querySelector('.cy-all'); if (all) all.addEventListener('click', () => bring(items.map((_, n) => n)));
+  box.querySelector('.cy-done').addEventListener('click', () => { day.carryOpen = false; day.noCarry = true; save(); renderDay(); });
   slot.appendChild(box);
 }
 
@@ -13882,15 +13891,16 @@ function renderWeek() {
 
 // add a block from the week: name, how long, and which days it repeats on.
 // it goes at the end of each day's plan (blocks run one after another).
-function weekAddSheet(day0, days) {
+function weekAddSheet(day0, days, preset, after) {
   const old = document.getElementById('wksheet'); if (old) old.remove();
   const el = document.createElement('div');
   el.id = 'wksheet'; el.className = 'w3';
   const pick = new Set([day0]);
-  let mins = 60;
-  const LENS = [[30, '30 min'], [60, '1 hour'], [90, '1.5 hours'], [120, '2 hours']];
+  let mins = preset && preset.mins ? Number(preset.mins) : 60;
+  const LENS = [30, 60, 90, 120].map(m => [m, minsLabel(m)]);
+  if (!LENS.some(x => x[0] === mins)) { LENS.push([mins, minsLabel(mins)]); LENS.sort((x, y) => x[0] - y[0]); }
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet wka" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>' +
-    '<h2>Add a block</h2>' +
+    '<h2>' + (preset ? 'Bring it over' : 'Add a block') + '</h2>' +
     '<input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="what is it? e.g. Gym" aria-label="block name">' +
     (() => { const S = goalSteps(); return S.length ? '<b class="wka-h">From your goals</b><div class="wka-row" id="wka-steps">' + S.map(x => '<button type="button" data-st="' + esc(x.t) + '">' + x.e + ' ' + esc(x.t) + '</button>').join('') + '</div>' : ''; })() +
     '<b class="wka-h">How long</b><div class="wka-row" id="wka-lens">' + LENS.map(([m, t]) => '<button type="button" data-m="' + m + '"' + (m === mins ? ' class="on"' : '') + '>' + t + '</button>').join('') + '</div>' +
@@ -13900,6 +13910,7 @@ function weekAddSheet(day0, days) {
     '<button type="button" class="wka-go" id="wka-go" disabled>Add</button></div>';
   document.body.appendChild(el);
   const name = el.querySelector('#wka-name'), go = el.querySelector('#wka-go');
+  if (preset) name.value = preset.label || '';
   const sync = () => {
     el.querySelectorAll('#wka-days button').forEach(b => b.classList.toggle('on', pick.has(b.dataset.k)));
     el.querySelectorAll('#wka-lens button').forEach(b => b.classList.toggle('on', Number(b.dataset.m) === mins));
@@ -13925,12 +13936,14 @@ function weekAddSheet(day0, days) {
       if (!state.days[k]) state.days[k] = { start: k === planKey() ? nowHHMM() : '08:00', blocks: [] };
       state.days[k].touched = true;
       const gst = goalSteps().find(x => x.t.toLowerCase() === label.toLowerCase());
-      state.days[k].blocks.push(gst ? { label, mins, step: gst.id } : { label, mins });
+      const sid = preset && preset.step ? preset.step : gst ? gst.id : null;
+      state.days[k].blocks.push(sid ? { label, mins, step: sid } : { label, mins });
     }
-    save(); close(); renderWeek();
+    save(); close();
+    if (after) after([...pick]); else renderWeek();
   });
   sync();
-  setTimeout(() => name.focus(), 50);
+  if (!preset) setTimeout(() => name.focus(), 50);
 }
 document.querySelectorAll('#plan-seg [data-pm]').forEach(b => b.addEventListener('click', () => {
   if (b.dataset.pm === 'week') weekOf = mondayOf(viewDay || planKey());
