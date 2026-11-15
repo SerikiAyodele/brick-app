@@ -3791,6 +3791,20 @@ html body[data-view="day"] {
 .mn-pick button.on { color: #fff; background: var(--pink); }
 .mn-pick .mn-del { color: #c4553f; background: none; }
 
+/* area pages: the pages under each area */
+.hub-rows { margin: 14px 0 6px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; overflow: hidden; }
+.hub-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 12px 16px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: none; border: none; border-left: 4px solid var(--c); cursor: pointer; }
+.hub-row + .hub-row { border-top: 1px solid var(--hair); }
+.hub-row span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hub-row b { font-size: 16px; font-weight: 600; }
+.hub-row small { font-size: 12px; color: var(--muted); }
+.hub-row em { flex: none; font-style: normal; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.hub-row em i { font-style: normal; font-size: 13px; color: var(--muted); }
+.hub-row s { flex: none; text-decoration: none; font-size: 20px; color: var(--muted); }
+.hub-empty { margin: 4px 2px 0; font-size: 13px; color: var(--muted); }
+.lf-t-in { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
+.hubback { margin-bottom: 4px; }
+
 /* stats cards */
 #stats-body { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .st-card { padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
@@ -3920,17 +3934,17 @@ body, body[data-view] {
   <div class="tabs" role="tablist">
     <button class="brick flat" id="tab-home"   role="tab" aria-selected="true"  aria-controls="view-home">home</button>
     <button class="brick flat" id="tab-day"    role="tab" aria-selected="false" aria-controls="view-day">plan</button>
-    <button class="brick flat" id="tab-food"   role="tab" aria-selected="false" aria-controls="view-food">fuel</button>
-    <button class="brick flat" id="tab-gym"    role="tab" aria-selected="false" aria-controls="view-gym">move</button>
+    <button class="brick flat" id="tab-food"   role="tab" aria-selected="false" aria-controls="view-food" hidden>fuel</button>
+    <button class="brick flat" id="tab-gym"    role="tab" aria-selected="false" aria-controls="view-gym" hidden>move</button>
     <button class="brick flat" id="tab-mood"   role="tab" aria-selected="false" aria-controls="view-mood" hidden>mood</button>
     <button class="brick flat" id="tab-more"   type="button" aria-expanded="false" aria-controls="more-panel">more</button>
   </div>
 
   <div class="morepanel" id="more-panel" hidden>
     <button class="brick flat" id="tab-life"   role="tab" aria-selected="false" aria-controls="view-life" hidden>life</button>
-    <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas">tweets</button>
-    <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits">habits</button>
-    <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money">money</button>
+    <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas" hidden>tweets</button>
+    <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits" hidden>habits</button>
+    <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money" hidden>money</button>
     <button class="brick flat" id="tab-stats"  role="tab" aria-selected="false" aria-controls="view-stats">stats</button>
     <button class="brick flat" id="show-toggle" type="button">Show mode</button>
     <div class="mp-theme">
@@ -4077,7 +4091,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:24</footer>
+  <footer>everything saves on this device · build 12:27</footer>
 </div>
 
 <script>
@@ -10922,6 +10936,12 @@ function tileFor(tab) {
     const n = state.ideas.filter(i => key(new Date(i.at)) === t).length;
     return { big: n, cap: n === 1 ? 'tweet today' : 'tweets today', frac: null };
   }
+  if (tab === 'money') {
+    const B = linesFor(ymOf(Date.now())), cur = ymOf(Date.now());
+    const spent = (state.money || []).filter(x => x.dir === 'DR' && ymOf(x.at) === cur).reduce((a, x) => a + x.amt, 0);
+    const bud = B.reduce((a, b) => a + b.amount, 0);
+    return bud ? { big: mnNaira(bud - spent), cap: 'left to spend this month', frac: null } : { big: '\u2013', cap: 'set a budget', frac: null };
+  }
   if (tab === 'habits') {
     const n = state.habits.length;
     if (!n) return { big: '\u2013', cap: 'none yet', frac: null };
@@ -11200,12 +11220,14 @@ function renderHome() {
   for (const a of AREAS) {
     const gs = areaGoals(a.k);
     if (!gs.length && a.k === 'health') {     // Health always opens its page: journey first, then goals
-      html += '<button type="button" class="lf-tile' + (jr ? '' : ' empty') + '" data-open="health" style="--c:' + a.c + '"><span class="lf-t-name">' + a.name + '</span>' + (jr ? jrLine : '<span class="lf-t-add">+ Set a goal</span>') + '</button>';
+      html += '<button type="button" class="lf-tile' + (jr ? '' : ' empty') + '" data-open="health" style="--c:' + a.c + '"><span class="lf-t-name">' + a.name + '</span>' + (jr ? jrLine : '<span class="lf-t-add">+ Set a goal</span>') + '<span class="lf-t-in">Fuel \u00b7 Move \u00b7 Health log</span></button>';
       continue;
     }
+    const inside = (AREA_PAGES[a.k] || []).map(t => PAGE_NAME[t]).join(' \u00b7 ');
+    const insideHtml = inside ? '<span class="lf-t-in">' + inside + '</span>' : '';
     if (!gs.length) {
-      html += '<button type="button" class="lf-tile empty" data-add="' + a.k + '" style="--c:' + a.c + '">' +
-              '<span class="lf-t-name">' + a.name + '</span><span class="lf-t-add">+ Set a goal</span></button>';
+      html += '<button type="button" class="lf-tile empty" data-open="' + a.k + '" style="--c:' + a.c + '">' +
+              '<span class="lf-t-name">' + a.name + '</span><span class="lf-t-add">+ Set a goal</span>' + insideHtml + '</button>';
       continue;
     }
     const now = areaScore(a.k, ks), was = areaScore(a.k, prev), d = now - (was || 0);
@@ -11213,7 +11235,7 @@ function renderHome() {
     html += '<button type="button" class="lf-tile" data-open="' + a.k + '" style="--c:' + a.c + '">' +
       '<span class="lf-t-name">' + a.name + '</span><span class="lf-t-num">' + now + '<i>%</i></span>' +
       '<span class="lf-t-bar"><u style="width:' + now + '%"></u></span>' +
-      '<span class="lf-t-trend">' + onT + ' of ' + gs.length + ' on track</span>' + (a.k === 'health' ? jrLine : '') + '</button>';
+      '<span class="lf-t-trend">' + onT + ' of ' + gs.length + ' on track</span>' + (a.k === 'health' ? jrLine : '') + insideHtml + '</button>';
   }
   slot.innerHTML = html + '</div>';
   slot.querySelector('[data-big]').addEventListener('click', () => { lifeTab = 'big'; lifeOpen = null; lifeSetup = null; show('life'); window.scrollTo(0, 0); });
@@ -11254,6 +11276,20 @@ function openArea(sec, area, sc) {
     else { lifeOpen = area.k; lifeSetup = null; }
     show('life');
   });
+}
+
+// the pages that live under each area, opened from its page on Home
+const AREA_PAGES = { health: ['food', 'gym', 'mood'], wealth: ['money'], love: [], self: ['habits', 'ideas'] };
+const PAGE_NAME = { food: 'Fuel', gym: 'Move', mood: 'Health log', money: 'Money', habits: 'Habits', ideas: 'Tweets' };
+function areaOfPage(tab) { const k = Object.keys(AREA_PAGES).find(a => AREA_PAGES[a].includes(tab)); return k ? AREAS.find(a => a.k === k) : null; }
+function areaPagesHtml(a) {
+  const tabs = AREA_PAGES[a.k] || [];
+  if (!tabs.length) return '';
+  return '<div class="hub-rows" style="--c:' + a.c + '">' + tabs.map(tab => {
+    const t = tileFor(tab);
+    return '<button type="button" class="hub-row" data-page="' + tab + '"><span><b>' + PAGE_NAME[tab] + '</b><small>' + esc(t.cap) + '</small></span>' +
+      '<em>' + t.big + (t.unit ? '<i>' + esc(t.unit) + '</i>' : '') + '</em><s>\u203a</s></button>';
+  }).join('') + '</div>';
 }
 
 // which pages sit under which part of life
@@ -11846,7 +11882,7 @@ function lifeDetail(box, a) {
 
   let html = '<button type="button" class="lf-back">← Home</button>' +
     '<div class="lf-dhead" style="--c:' + a.c + '"><h1>' + a.name + '</h1>' + (gs.length ? '<b>' + now + '<i>%</i></b>' : '') + '</div>' +
-    bigLine(a) + (a.k === 'health' ? journeyHtml() : '') + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
+    areaPagesHtml(a) + (gs.length ? '' : '<p class="hub-empty">No ' + a.name.toLowerCase() + ' goals yet.</p>') + bigLine(a) + (a.k === 'health' ? journeyHtml() : '') + '<div class="lf-goal per-row"' + (gs.length ? '' : ' hidden') + '><span>' + (lifePeriod === 'week' ? 'This week \u00b7 last 7 days' : 'Today') + '</span>' + periodSwitch() + '</div><ol class="lf-goals" style="--c:' + a.c + '">';
   gs.forEach((g, n) => {
     const sc = goalScore(g, ks), [st, stText] = goalStatus(sc.pct);
     const priv = g.private || a.k === 'love';
@@ -11893,6 +11929,7 @@ function lifeDetail(box, a) {
   box.innerHTML = html;
 
   box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; lifeExpanded = null; show('home'); window.scrollTo(0, 0); });
+  box.querySelectorAll('[data-page]').forEach(b => b.addEventListener('click', () => { show(b.dataset.page); window.scrollTo(0, 0); }));
   if (a.k === 'health') wireJourney(box, renderLife);
   wirePeriod(box, renderLife);
   box.querySelector('.w3-link').addEventListener('click', () => openWhy3(a.c));
@@ -12726,6 +12763,18 @@ function show(which) {
   }
   document.body.dataset.view = which;
   document.getElementById('tab-more').classList.toggle('flat', !IN_MORE.includes(which));
+  const area = areaOfPage(which);
+  if (area || which === 'life') TABS.home[0].classList.remove('flat');
+  const view = TABS[which][1];
+  let back = view.querySelector(':scope > .hubback');
+  if (area) {
+    if (!back) {
+      back = document.createElement('button'); back.type = 'button'; back.className = 'lf-back hubback';
+      back.addEventListener('click', () => { lifeOpen = back.dataset.a; lifeSetup = null; bigEdit = null; show('life'); window.scrollTo(0, 0); });
+      view.prepend(back);
+    }
+    back.dataset.a = area.k; back.textContent = '\u2190 ' + area.name;
+  } else if (back) back.remove();
   setMore(false);
   fillHeads();
   if (which === 'home')   renderHome();
@@ -12758,7 +12807,7 @@ function fillHeads() {
 }
 
 // "more" opens a small panel above the bar
-const IN_MORE = ['life', 'money', 'ideas', 'habits', 'stats'];
+const IN_MORE = ['stats'];
 const moreBtn = document.getElementById('tab-more');
 const morePanel = document.getElementById('more-panel');
 
