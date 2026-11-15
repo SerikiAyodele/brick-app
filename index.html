@@ -3828,6 +3828,39 @@ html body[data-view="day"] {
 .lf-t-in { display: block; margin-top: 6px; font-size: 11px; color: var(--muted); }
 .hubback { margin-bottom: 4px; }
 
+/* people */
+.pp-hero { display: flex; flex-direction: column; gap: 2px; padding: 18px; background: color-mix(in srgb, #e38fa8 18%, var(--card)); border: 1px solid var(--hair); border-radius: 22px; }
+.pp-hero span { font-size: 13px; font-weight: 600; color: var(--muted); }
+.pp-hero b { font-size: 30px; font-weight: 600; line-height: 1.15; }
+.pp-hero small { font-size: 13px; color: var(--muted); line-height: 1.4; }
+.pp-hero.ok { background: color-mix(in srgb, #7daf86 16%, var(--card)); }
+.pp-list { list-style: none; margin: 14px 0 0; padding: 0; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; overflow: hidden; }
+.pp-list:empty { display: none; }
+.pp-list li { display: flex; align-items: center; gap: 10px; padding: 10px 12px 10px 14px; }
+.pp-list li + li { border-top: 1px solid var(--hair); }
+.pp-who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 0; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: none; border: none; cursor: pointer; }
+.pp-who i { flex: none; display: grid; place-items: center; width: 40px; height: 40px; font-style: normal; font-weight: 600; color: #fff; background: #e38fa8; border-radius: 50%; }
+.pp-list li:not(.due) .pp-who i { background: color-mix(in srgb, #e38fa8 40%, var(--card)); }
+.pp-who span { min-width: 0; display: flex; flex-direction: column; }
+.pp-who b { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pp-who small { font-size: 12px; color: var(--muted); }
+.pp-list li.due .pp-who small { color: #c25a7c; }
+.pp-hi { flex: none; min-width: 74px; min-height: 40px; padding: 0 14px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 20px; cursor: pointer; }
+.pp-list li.due .pp-hi { color: #fff; background: #e38fa8; }
+.pp-ed { flex-direction: column; align-items: stretch !important; gap: 10px !important; padding: 14px !important; background: color-mix(in srgb, var(--pink) 6%, var(--card)); }
+.pp-ed input, .pp-add input { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 11px 12px; border-radius: 12px; }
+.pp-every { display: flex; gap: 6px; }
+.pp-every button { flex: 1; min-height: 40px; font: 500 12px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 12px; cursor: pointer; }
+.pp-every button.on { color: #fff; background: #e38fa8; }
+.pp-add { margin-top: 12px; }
+/* home: one next step */
+.hm-nudge { display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 10px; padding: 12px 14px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
+.hm-nudge i { flex: none; display: grid; place-items: center; width: 38px; height: 38px; font-style: normal; font-size: 19px; background: var(--hair); border-radius: 12px; }
+.hm-nudge span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hm-nudge b { font-size: 15px; font-weight: 600; }
+.hm-nudge small { font-size: 12px; color: var(--muted); }
+.hm-nudge s { text-decoration: none; font-size: 20px; color: var(--muted); }
+
 /* stats cards */
 #stats-body { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .st-card { padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
@@ -3968,6 +4001,7 @@ body, body[data-view] {
     <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas" hidden>tweets</button>
     <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits" hidden>habits</button>
     <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money" hidden>wallet</button>
+    <button class="brick flat" id="tab-people" role="tab" aria-selected="false" aria-controls="view-people" hidden>people</button>
     <button class="brick flat" id="tab-stats"  role="tab" aria-selected="false" aria-controls="view-stats">stats</button>
     <button class="brick flat" id="show-toggle" type="button">Show mode</button>
     <div class="mp-theme">
@@ -4031,6 +4065,11 @@ body, body[data-view] {
   </section>
 
   <!-- ============ IDEAS ============ -->
+  <!-- ============ PEOPLE ============ -->
+  <section id="view-people" role="tabpanel" aria-labelledby="tab-people" hidden>
+    <div id="people-body"></div>
+  </section>
+
   <section id="view-ideas" role="tabpanel" aria-labelledby="tab-ideas" hidden>
     <header class="pghead"><h1>Tweets</h1><span id="ideas-sub"></span></header>
 
@@ -4114,7 +4153,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:44</footer>
+  <footer>everything saves on this device · build 12:49</footer>
 </div>
 
 <script>
@@ -4125,7 +4164,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [] };
 
 function load() {
   try {
@@ -4167,7 +4206,8 @@ function load() {
         grocBudget: (d.grocBudget && typeof d.grocBudget === 'object') ? d.grocBudget : {},
         prices:    (d.prices && typeof d.prices === 'object') ? d.prices : {},
         imported:  Array.isArray(d.imported) ? d.imported : [],
-        grocLists: Array.isArray(d.grocLists) ? d.grocLists : []
+        grocLists: Array.isArray(d.grocLists) ? d.grocLists : [],
+        people:    Array.isArray(d.people) ? d.people : []
       };
     }
     const old = localStorage.getItem(OLD);
@@ -10969,6 +11009,12 @@ function tileFor(tab) {
     const n = state.ideas.filter(i => key(new Date(i.at)) === t).length;
     return { big: n, cap: n === 1 ? 'tweet today' : 'tweets today', frac: null };
   }
+  if (tab === 'people') {
+    const P = state.people || [];
+    if (!P.length) return { big: '+', cap: 'who matters most?', frac: null };
+    const due = P.filter(x => personDue(x) >= 0).length;
+    return due ? { big: due, cap: due === 1 ? 'person to say hi to' : 'people to say hi to', frac: null } : { big: '\u2713', cap: 'all caught up', frac: null };
+  }
   if (tab === 'money') {
     const B = linesFor(ymOf(Date.now())), cur = ymOf(Date.now());
     const spent = (state.money || []).filter(x => x.dir === 'DR' && ymOf(x.at) === cur).reduce((a, x) => a + x.amt, 0);
@@ -11029,6 +11075,104 @@ function renderHomeNow() {
   }
   box.innerHTML = html;
   box.firstChild.addEventListener('click', () => show('day'));
+}
+
+/* =========== people ===========
+   the people you want to stay close to, and how often. close relationships
+   are the strongest link to a long, happy life (an 85 year Harvard study),
+   but they fade quietly. this keeps them from fading: who is due a hello. */
+const PEOPLE_EVERY = [[7, 'Every week'], [14, 'Every 2 weeks'], [30, 'Every month']];
+let personEdit = null;   // id being edited
+// days past due (negative: not due yet)
+function personDue(x) { return x.last ? Math.floor((Date.now() - x.last) / 86400000) - x.every : 0; }
+const daysAgo = t => { const n = Math.floor((Date.now() - t) / 86400000); return n === 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'; };
+
+function renderPeople() {
+  const box = document.getElementById('people-body');
+  if (!state.people) state.people = [];
+  const list = state.people.slice().sort((a, b) => personDue(b) - personDue(a));
+  const top = list.find(x => personDue(x) >= 0);
+  let html = '<header class="pghead"><h1>People</h1><span>' + (state.people.length ? state.people.length + ' close' : '') + '</span></header>';
+  html += top ? '<div class="pp-hero"><span>Say hi to</span><b></b><small>' + (top.last ? 'last time ' + daysAgo(top.last) : 'you haven\u2019t ticked them yet') + '</small></div>'
+    : state.people.length ? '<div class="pp-hero ok"><span>All caught up</span><b>\u2713</b><small>everyone has heard from you</small></div>'
+    : '<div class="pp-hero"><span>Who matters most?</span><small>Add the people you want to stay close to. Brick tells you when it\u2019s been too long.</small></div>';
+  html += '<ul class="pp-list">' + list.map(x => {
+    const d = personDue(x), ed = personEdit === x.id;
+    if (ed) return '<li class="pp-ed" data-id="' + x.id + '"><input type="text" maxlength="30" class="pp-name"><div class="pp-every">' +
+      PEOPLE_EVERY.map(([n, t]) => '<button type="button" data-ev="' + n + '" class="' + (x.every === n ? 'on' : '') + '">' + t + '</button>').join('') + '</div>' +
+      '<div class="mn-edb"><button type="button" class="lf-btn main" data-a="ok">Done</button><button type="button" class="gm-link danger" data-a="rm">Remove</button></div></li>';
+    return '<li data-id="' + x.id + '" class="' + (d >= 0 ? 'due' : '') + '"><button type="button" class="pp-who"><i></i><span><b></b><small>' +
+      (x.last ? daysAgo(x.last) : 'not yet') + ' \u00b7 ' + PEOPLE_EVERY.find(e => e[0] === x.every)[1].toLowerCase() + '</small></span></button>' +
+      '<button type="button" class="pp-hi' + (x.last && personDue(x) < -x.every + 1 ? ' done' : '') + '" data-a="hi">' + (x.last && Date.now() - x.last < 86400000 ? '\u2713' : 'Talked') + '</button></li>';
+  }).join('') + '</ul>' +
+  '<div class="pp-add"><input type="text" maxlength="30" placeholder="+ add someone, e.g. Mum" aria-label="add someone"></div>';
+  box.innerHTML = html;
+  // names as text
+  if (top) box.querySelector('.pp-hero b').textContent = top.name;
+  box.querySelectorAll('.pp-list li').forEach(li => {
+    const x = state.people.find(p => p.id === li.dataset.id);
+    const nm = li.querySelector('.pp-who b'); if (nm) { nm.textContent = x.name; li.querySelector('.pp-who i').textContent = x.name.trim()[0].toUpperCase(); }
+    const inp = li.querySelector('.pp-name'); if (inp) { inp.value = x.name; inp.addEventListener('change', () => { if (inp.value.trim()) { x.name = inp.value.trim(); save(); } }); }
+    const on = (sel, fn) => { const el = li.querySelector(sel); if (el) el.addEventListener('click', fn); };
+    on('.pp-who', () => { personEdit = x.id; renderPeople(); });
+    on('[data-a=hi]', () => {
+      const was = x.last; x.last = Date.now(); save(); renderPeople();
+      offerUndo(x.name, () => { x.last = was; save(); renderPeople(); });
+    });
+    li.querySelectorAll('[data-ev]').forEach(b => b.addEventListener('click', () => { x.every = Number(b.dataset.ev); save(); renderPeople(); }));
+    on('[data-a=ok]', () => { if (inp && inp.value.trim()) x.name = inp.value.trim(); personEdit = null; save(); renderPeople(); });
+    on('[data-a=rm]', () => {
+      const i = state.people.indexOf(x); state.people.splice(i, 1); personEdit = null; save(); renderPeople();
+      offerUndo(x.name, () => { state.people.splice(i, 0, x); save(); renderPeople(); });
+    });
+  });
+  const add = box.querySelector('.pp-add input');
+  add.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || !add.value.trim()) return;
+    state.people.push({ id: 'p' + Date.now(), name: add.value.trim(), every: 14, last: 0 });
+    save(); renderPeople();
+    const a2 = document.querySelector('.pp-add input'); if (a2) a2.focus();
+  });
+}
+
+/* ---- one nudge ----
+   home shows a single next step, the most useful one right now, so you
+   never have to decide what to look at. one thing is easier to act on than five. */
+function homeNudge() {
+  const t = todayKey(), h = new Date().getHours();
+  // someone you're close to is overdue
+  const P = (state.people || []).filter(x => x.last && personDue(x) >= 0).sort((a, b) => personDue(b) - personDue(a))[0];
+  if (P && h >= 9 && h < 21) return { e: '\u{1F48C}', t: 'Say hi to ' + P.name, s: Math.floor((Date.now() - P.last) / 86400000) + ' days since you talked', go: 'people' };
+  // a habit missed yesterday: missing once is fine, twice starts a new pattern
+  const y = shiftKey(t, -1);
+  const hb = (state.habits || []).find(x => x.marks.length >= 3 && !x.marks.includes(y) && !x.marks.includes(t) && x.marks.includes(shiftKey(t, -2)));
+  if (hb) return { e: '\u{1F501}', t: 'Don\u2019t miss ' + hb.name + ' twice', s: 'missing once is normal, twice starts a new habit', go: 'habits' };
+  // a meal time with nothing logged
+  const eaten = state.food.filter(f => key(new Date(f.at)) === t);
+  if (h >= 13 && h < 16 && !eaten.some(f => new Date(f.at).getHours() >= 11)) return { e: '\u{1F957}', t: 'Log lunch', s: 'so brick can tell how you\u2019ll feel this afternoon', go: 'food' };
+  // a wallet line gone over
+  if (state.moneyPlan) {
+    const cur = ymOf(Date.now()), B = linesFor(cur), sp = {};
+    for (const x of (state.money || [])) if (x.dir === 'DR' && ymOf(x.at) === cur) { const L = txLine(x); if (L) sp[L.id] = (sp[L.id] || 0) + x.amt; }
+    const over = B.filter(b => b.amount && sp[b.id] > b.amount).sort((a, b) => (sp[b.id] - b.amount) - (sp[a.id] - a.amount))[0];
+    if (over) return { e: '\u{1F45B}', t: over.name + ' is over budget', s: mnNaira(sp[over.id] - over.amount) + ' more than planned', go: 'money' };
+  }
+  // late and tomorrow isn't planned
+  if (h >= 20 && !(state.days[shiftKey(t, 1)] && state.days[shiftKey(t, 1)].blocks.length)) return { e: '\u{1F319}', t: 'Plan tomorrow', s: 'a plan made tonight means an easier morning', go: 'tomorrow' };
+  return null;
+}
+function renderHomeNudge(box) {
+  const n = homeNudge();
+  if (!n) return;
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'hm-nudge';
+  b.innerHTML = '<i>' + n.e + '</i><span><b></b><small></small></span><s>\u203a</s>';
+  b.querySelector('b').textContent = n.t; b.querySelector('small').textContent = n.s;
+  b.addEventListener('click', () => {
+    if (n.go === 'tomorrow') { viewDay = shiftKey(todayKey(), 1); show('day'); return; }
+    show(n.go); window.scrollTo(0, 0);
+  });
+  box.appendChild(b);
 }
 
 /* =========== sleep ===========
@@ -11240,6 +11384,7 @@ function renderHome() {
   renderQuote();
   renderHomeNow();
   renderHomeQuick(document.getElementById("home-now"));
+  renderHomeNudge(document.getElementById("home-now"));
 
   const slot = document.getElementById('menu');
   slot.innerHTML = '';
@@ -11313,8 +11458,8 @@ function openArea(sec, area, sc) {
 }
 
 // the pages that live under each area, opened from its page on Home
-const AREA_PAGES = { health: ['food', 'gym', 'mood'], wealth: ['money'], love: [], self: ['habits', 'ideas'] };
-const PAGE_NAME = { food: 'Fuel', gym: 'Move', mood: 'Health log', money: 'Wallet', habits: 'Habits', ideas: 'Tweets' };
+const AREA_PAGES = { health: ['food', 'gym', 'mood'], wealth: ['money'], love: ['people'], self: ['habits', 'ideas'] };
+const PAGE_NAME = { food: 'Fuel', gym: 'Move', mood: 'Health log', money: 'Wallet', habits: 'Habits', ideas: 'Tweets', people: 'People' };
 function areaOfPage(tab) { const k = Object.keys(AREA_PAGES).find(a => AREA_PAGES[a].includes(tab)); return k ? AREAS.find(a => a.k === k) : null; }
 function areaPagesHtml(a) {
   const tabs = AREA_PAGES[a.k] || [];
@@ -11914,7 +12059,7 @@ let areaGoalsOpen = false;   // on an area page: false shows its cards, true sho
 // each area is a short list of cards, each a door: its pages, then Goals
 function areaPortals(box, a) {
   const gs = areaGoals(a.k), j = a.k === 'health' ? activeJourney() : null;
-  const tabs = a.k === 'love' ? ['love'] : (AREA_PAGES[a.k] || []);
+  const tabs = (AREA_PAGES[a.k] || []).concat(a.k === 'love' ? ['love'] : []);
   const doors = tabs.map(tab => {
     const t = tileFor(tab), m = MENU.find(x => x.tab === tab);
     return { tab, name: tab === 'love' ? 'Time together' : PAGE_NAME[tab], big: t.big + (t.unit ? '<i>' + esc(t.unit) + '</i>' : ''), cap: t.cap,
@@ -12779,7 +12924,8 @@ const TABS = {
   habits: [document.getElementById('tab-habits'), document.getElementById('view-habits')],
   stats:  [document.getElementById('tab-stats'),  document.getElementById('view-stats')],
   money:  [document.getElementById('tab-money'),  document.getElementById('view-money')],
-  life:   [document.getElementById('tab-life'),   document.getElementById('view-life')]
+  life:   [document.getElementById('tab-life'),   document.getElementById('view-life')],
+  people: [document.getElementById('tab-people'), document.getElementById('view-people')]
 };
 
 /* ---- now pill ----
@@ -12847,6 +12993,7 @@ function show(which) {
   if (which === 'ideas') renderIdeas();
   if (which === 'life')  renderLife();
   if (which === 'money') renderMoney();
+  if (which === 'people') renderPeople();
   updateNowPill();
   try { localStorage.setItem(KEY + '.tab', which); } catch {}
 }
