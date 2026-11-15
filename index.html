@@ -2157,6 +2157,7 @@ body[data-view="day"] { background-image: none; }
 .gm span { font-size: 13px; color: var(--muted); }
 .gm-set { display: block; background: none; border: none; min-height: 40px; padding: 4px 0 0; font: 600 14px "Poppins", sans-serif; color: var(--pink); cursor: pointer; }
 .gm-set.over { color: #d9534f; }
+.gm-acts { display: flex; justify-content: space-between; gap: 12px; }
 .gm-bud { margin-top: 10px; align-items: center; }
 .gm-bud input { flex: 1; font-size: 16px; padding: 10px 12px; border-radius: 12px; min-width: 0; }
 .gr-price { font-style: normal; font-size: 14px; font-weight: 600; white-space: nowrap; align-self: center; padding: 0 4px; }
@@ -3993,7 +3994,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 11:55</footer>
+  <footer>everything saves on this device · build 11:57</footer>
 </div>
 
 <script>
@@ -4004,7 +4005,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [] };
 
 function load() {
   try {
@@ -4045,7 +4046,8 @@ function load() {
         meals:     (d.meals && typeof d.meals === 'object') ? d.meals : {},
         grocBudget: (d.grocBudget && typeof d.grocBudget === 'object') ? d.grocBudget : {},
         prices:    (d.prices && typeof d.prices === 'object') ? d.prices : {},
-        imported:  Array.isArray(d.imported) ? d.imported : []
+        imported:  Array.isArray(d.imported) ? d.imported : [],
+        grocLists: Array.isArray(d.grocLists) ? d.grocLists : []
       };
     }
     const old = localStorage.getItem(OLD);
@@ -8904,7 +8906,8 @@ function grocMonthHtml() {
   return '<div class="gm"><b>' + naira0(total) + '</b><span>' + cap(MONTHS[d.getMonth()]) + (spent ? ' \u00b7 ' + naira0(spent) + ' spent' : '') + '</span>' +
     (grBudgetEdit
       ? '<div class="gr-qrow gm-bud"><span class="gr-and">\u20a6</span><input type="number" inputmode="numeric" min="0" class="gm-bin" aria-label="budget for this month" placeholder="budget"><button type="button" class="lf-btn main" data-gm="save">Save</button></div>'
-      : '<button type="button" class="gm-set' + (budget && left < 0 ? ' over' : '') + '" data-gm="edit">' + (budget ? (left < 0 ? naira0(-left) + ' over ' : naira0(left) + ' left of ') + naira0(budget) : 'Set a budget') + '</button>') +
+      : '<div class="gm-acts"><button type="button" class="gm-set' + (budget && left < 0 ? ' over' : '') + '" data-gm="edit">' + (budget ? (left < 0 ? naira0(-left) + ' over ' : naira0(left) + ' left of ') + naira0(budget) : 'Set a budget') + '</button>' +
+        ((state.grocery || []).length ? '<button type="button" class="gm-set" data-gm="new">New list</button>' : '') + '</div>') +
     '</div>';
 }
 
@@ -8990,6 +8993,16 @@ function renderGroceries() {
   list.innerHTML = html;
   list.querySelectorAll('[data-gm]').forEach(b => b.addEventListener('click', () => {
     const mk = monthOf(Date.now());
+    if (b.dataset.gm === 'new') {
+      // start fresh: what you bought is already in your spending; the old list is kept, with undo
+      const before = state.grocery.slice();
+      if (!state.grocLists) state.grocLists = [];
+      state.grocLists.push({ at: Date.now(), items: before });
+      state.grocLists = state.grocLists.slice(-24);
+      state.grocery = []; grOpen = null; save(); renderGroceries();
+      offerUndo('old list', () => { state.grocery = before; state.grocLists.pop(); save(); renderGroceries(); });
+      return;
+    }
     if (b.dataset.gm === 'edit') { grBudgetEdit = true; renderGroceries(); const i = list.querySelector('.gm-bin'); if (i) { i.value = (state.grocBudget || {})[mk] || ''; i.focus(); } return; }
     const v = Number(list.querySelector('.gm-bin').value) || 0;
     if (!state.grocBudget) state.grocBudget = {};
