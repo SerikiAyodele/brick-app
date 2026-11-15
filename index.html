@@ -4642,6 +4642,13 @@ html { background: var(--paper) !important; }
 #view-home#view-home .hm-now .hm-bar u { background: var(--gold) !important; }
 #view-goals#view-goals .gl-chk.on, .cy-row.got .cy-plus { background: var(--gold) !important; border-color: var(--gold-1) !important; color: #3a1f29 !important; }
 #view-home .pghead span { background: var(--gold); -webkit-background-clip: text; background-clip: text; color: transparent !important; font-weight: 600; }
+
+.lf-gm-btns { display: flex; gap: 8px; margin: 10px 0 2px 30px; }
+.lf-gm-btns .lf-gm-steps { flex: 1; margin: 0; min-height: 40px; padding: 0 8px; white-space: nowrap; font-size: 14px; }
+.gs-sug { display: block; width: 100%; min-height: 46px; margin: 14px 0 0; font: 600 15px var(--display); color: var(--pink-d); background: var(--pink-s); border: none; border-radius: 23px; cursor: pointer; }
+.gs-sug:disabled { opacity: .6; }
+.gs-sugs .wka-row { margin-top: 4px; }
+.gs-sugs .wka-row button { text-align: left; }
 </style>
 </head>
 <body>
@@ -4902,7 +4909,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:42</footer>
+  <footer>Mr.O:18:45</footer>
 </div>
 
 <script>
@@ -13167,8 +13174,9 @@ function lifeDetail(box, a) {
     const open = lifeExpanded === a.k + ':' + n;
     const did = custom && (g.days || []).includes(todayKey());
     html += '<li class="lf-gm' + (open ? ' open' : '') + '" data-open-goal="' + n + '">' +
-      '<div class="lf-gm-row"><i class="lf-dot ' + st + '" title="' + stText + '"></i><b class="lf-g-text' + P + '">' + esc(g.text) + '</b><button type="button" class="lf-gm-steps" data-gsteps="' + n + '">Steps</button><button type="button" class="lf-gm-edit" data-edit="' + n + '">Edit</button></div>' +
+      '<div class="lf-gm-row"><i class="lf-dot ' + st + '" title="' + stText + '"></i><b class="lf-g-text' + P + '">' + esc(g.text) + '</b><button type="button" class="lf-gm-edit" data-edit="' + n + '">Edit</button></div>' +
       ((g.actions || []).length ? '<p class="lf-gm-sl' + P + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') +
+      '<div class="lf-gm-btns"><button type="button" class="lf-gm-steps" data-gsteps="' + n + '">' + ((g.actions || []).length ? 'Edit steps' : '+ Add steps') + '</button><button type="button" class="lf-gm-steps sug" data-gsug="' + n + '">\u2728 Suggest steps</button></div>' +
       '<div class="lf-gm-num"><span>' + num + '</span><span class="lf-gm-st ' + st + '">' + stText + '</span></div>' +
       '<i class="lf-g-bar"><u data-w="' + (sc.pct || 0) + '"></u></i>' +
       (() => { const L = goalTodayLinks(g, a.k); return L.length ? '<p class="lf-link' + P + '">Today \u00b7 ' + L.map(x => esc(x.t) + (x.ok ? ' \u2713' : ' \u2717')).join(' \u00b7 ') + '</p>' : ''; })() +
@@ -13213,6 +13221,7 @@ function lifeDetail(box, a) {
     lifeExpanded = lifeExpanded === id ? null : id; renderLife();
   }));
   box.querySelectorAll('[data-gsteps]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); stepsSheet(a.k, Number(b.dataset.gsteps), () => renderLife()); }));
+  box.querySelectorAll('[data-gsug]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); stepsSheet(a.k, Number(b.dataset.gsug), () => renderLife(), true); }));
   box.querySelectorAll('[data-lock]').forEach(b => b.addEventListener('click', () => {
     const g = gs[Number(b.dataset.lock)]; g.private = !g.private; save(); renderLife();
   }));
@@ -14244,7 +14253,7 @@ function stepsEditor(root, g, a) {
   };
   draw();
 }
-function stepsSheet(ak, gi, after) {
+function stepsSheet(ak, gi, after, suggestNow) {
   const a = AREAS.find(x => x.k === ak), g = areaGoals(ak)[gi];
   if (!a || !g) return;
   const old = document.getElementById('gssheet'); if (old) old.remove();
@@ -14252,9 +14261,39 @@ function stepsSheet(ak, gi, after) {
   el.id = 'gssheet'; el.className = 'w3';
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet" role="dialog" aria-modal="true" aria-label="Steps"><span class="w3-grab"></span>' +
     '<h2 class="gs-h">Steps</h2><p class="gs-goal">' + esc(g.text) + '</p><p class="gs-ask">What steps will get you there this week? They show up when you plan a day.</p>' +
-    '<div class="gs-ed"></div><button type="button" class="wka-go gs-done">Save</button></div>';
+    '<div class="gs-ed"></div>' +
+    '<button type="button" class="gs-sug">\u2728 Suggest steps</button><div class="gs-sugs"></div>' +
+    '<button type="button" class="wka-go gs-done">Save</button></div>';
   document.body.appendChild(el);
   stepsEditor(el.querySelector('.gs-ed'), g, a);
+  const sugBox = el.querySelector('.gs-sugs'), sugBtn = el.querySelector('.gs-sug');
+  const suggest = async () => {
+    sugBtn.disabled = true; sugBtn.textContent = 'Thinking\u2026'; sugBox.innerHTML = '';
+    let out = null, why = '';
+    try {
+      const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 90000);
+      const snap = 'Plan steps for ONE weekly goal only. Goal: ' + g.text + '. Area: ' + a.name + '. Steps already set: ' + ((g.actions || []).join(', ') || 'none') +
+        '. Give small, concrete steps that move this goal forward this week.\n\n' + (typeof aiSnapshot === 'function' ? aiSnapshot('day') : '');
+      const r = await aiFetch('/api/suggest', { mode: 'day', snapshot: snap.slice(0, 11000) }, ctl.signal);
+      clearTimeout(timer);
+      out = r.ok ? await r.json() : null;
+      if (!r.ok) why = r.status === 401 ? 'Type your AI passcode first, then try again.' : r.status === 429 ? 'Too many asks. Try again in a bit.' : 'The AI is not set up here.';
+    } catch { why = 'No connection. Try again.'; }
+    if (!document.body.contains(el)) return;
+    sugBtn.disabled = false; sugBtn.textContent = '\u2728 Suggest more';
+    const have = (g.actions || []).map(x => x.toLowerCase());
+    const items = out && Array.isArray(out.items) ? out.items.map(i => String(i.text || '').trim()).filter(t => t && !have.includes(t.toLowerCase())).slice(0, 5) : [];
+    if (!items.length) { sugBox.innerHTML = '<p class="gs-ask">' + esc(why || 'No ideas this time. Try again.') + '</p>'; return; }
+    sugBox.innerHTML = '<p class="gs-ask">Tap one to add it.</p><div class="wka-row">' + items.map(t => '<button type="button" data-sug="' + esc(t) + '">+ ' + esc(t) + '</button>').join('') + '</div>';
+    sugBox.querySelectorAll('[data-sug]').forEach(b => b.addEventListener('click', () => {
+      g.actions = g.actions || [];
+      if (g.actions.length >= MAX_STEPS) { b.textContent = MAX_STEPS + ' steps at most'; return; }
+      if (!g.actions.some(x => x.toLowerCase() === b.dataset.sug.toLowerCase())) g.actions.push(b.dataset.sug);
+      goalId(g); save(); stepsEditor(el.querySelector('.gs-ed'), g, a); b.remove();
+    }));
+  };
+  sugBtn.addEventListener('click', suggest);
+  if (suggestNow) suggest();
   const close = () => { el.remove(); if (after) after(); };
   el.querySelector('.w3-back').addEventListener('click', close);
   el.querySelector('.gs-done').addEventListener('click', close);
