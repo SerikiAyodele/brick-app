@@ -4597,6 +4597,31 @@ html { background: var(--paper) !important; }
 .sg-list li p { margin: 4px 0 0; font-size: 14px; line-height: 1.4; color: var(--muted); }
 .sg-list li button { flex: none; min-width: 64px; min-height: 42px; padding: 0 12px; font: 600 15px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 21px; cursor: pointer; }
 .sg-list li button:disabled { color: var(--muted); background: var(--hair); }
+
+/* focus room: a calm night sky that drifts slowly (indigo, plum, rose, teal). always dark, in light mode too */
+.focus { --ink: #f6f3f8; --muted: rgba(246, 243, 248, .62); --hair: rgba(255, 255, 255, .12); --card: rgba(255, 255, 255, .06); --slot: rgba(255, 255, 255, .08);
+  --pink: #f29ab5; --pink-d: #f6b1c6; --pink-s: rgba(242, 154, 181, .18); color: var(--ink) !important; }
+.focus::before { content: ""; position: fixed; inset: -25%; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(38% 32% at 22% 24%, rgba(124, 96, 230, .55), transparent 70%),
+    radial-gradient(34% 30% at 80% 28%, rgba(232, 120, 160, .46), transparent 70%),
+    radial-gradient(44% 38% at 52% 86%, rgba(56, 150, 176, .40), transparent 70%),
+    radial-gradient(30% 26% at 12% 78%, rgba(240, 168, 120, .28), transparent 70%);
+  filter: blur(24px); animation: fxsky 48s ease-in-out infinite alternate; }
+@keyframes fxsky { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(5%, -4%) rotate(9deg); } 100% { transform: translate(-5%, 4%) rotate(-7deg); } }
+@media (prefers-reduced-motion: reduce) { .focus::before { animation: none; } }
+.focus .fx-name, .focus .fx-left { color: var(--ink) !important; }
+.focus .fx-label { color: var(--pink-d) !important; }
+.focus .fx-label::before { background: var(--pink) !important; }
+.focus .fx-track { stroke: rgba(255, 255, 255, .10) !important; stroke-width: 7 !important; }
+.focus .fx-arc { stroke: var(--pink) !important; stroke-width: 7 !important; filter: drop-shadow(0 0 7px rgba(242, 154, 181, .75)); }
+.focus .fx-close, .focus .fx-mood { color: var(--ink) !important; background: rgba(255, 255, 255, .10) !important; border: 1px solid rgba(255, 255, 255, .14) !important; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.focus .fx-goal { color: var(--ink) !important; background: rgba(255, 255, 255, .07) !important; border: 1px solid rgba(255, 255, 255, .13) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.focus .fx-goal i { border-color: rgba(255, 255, 255, .45) !important; }
+.focus .fx-goal.on i { background: var(--pink) !important; border-color: var(--pink) !important; color: #fff !important; }
+.focus .fx-goal.on span { color: var(--muted) !important; }
+.focus .fx-growing, .focus .fx-ends, .focus .fx-note, .focus .fx-quote, .focus .fx-quote small { color: var(--muted) !important; }
+.focus .fx-done { color: #fff !important; background: var(--pink) !important; border: none !important; }
 </style>
 </head>
 <body>
@@ -4857,7 +4882,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:23</footer>
+  <footer>Mr.O:18:37</footer>
 </div>
 
 <script>
@@ -4879,7 +4904,7 @@ window.addEventListener('unhandledrejection', e => bugToast(e));
 /* on the laptop (serve.py) the AI is same address. anywhere else (the online
    app) it goes to brick's Cloudflare worker, which holds the key. the worker
    needs a passcode, typed once on this device. */
-const AI_URL = '';   // set after the worker is deployed
+const AI_URL = 'https://brick-ai.brick-ai.workers.dev';   // brick's Cloudflare worker (worker/ in this repo)
 const AI_PASS_KEY = 'paper.by.mia.v2.aipass';
 const aiLocal = () => !AI_URL || /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
 async function aiFetch(path, body, signal) {
