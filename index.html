@@ -4797,7 +4797,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:53</footer>
+  <footer>Mr.O:18:09</footer>
 </div>
 
 <script>
@@ -14166,13 +14166,12 @@ function renderWeek() {
     // days down the page, each with its blocks: time, name, length
     const goalOf = id => { for (const a of AREAS) for (const g of areaGoals(a.k)) if (g.setAt === id) return a; return null; };
     const nowM = new Date().getHours() * 60 + new Date().getMinutes();
-    // the next week follows under this one, so the next Monday is always just below
-    const next = days.map(k => shiftKey(k, 7));
-    const nd = fromKey(next[0]), nz = fromKey(next[6]);
+    // next Monday sits at the end, so the next week is one tap away
+    const next = [shiftKey(days[0], 7)];
     html += '<div class="wl">' + days.concat(next).map((k, n) => { const d = fromKey(k), bs = n < 7 ? all[n] : blocksOf(k), isT = k === today, past = k < today;
       const raw = (state.days[k] || {}).blocks || [];
       const fold = past && bs.length && !wlOpen.has(k);
-      return (n === 7 ? '<p class="wl-next">Next week \u00b7 ' + nd.getDate() + ' ' + cap(MONTHS[nd.getMonth()].slice(0, 3)) + ' to ' + nz.getDate() + ' ' + cap(MONTHS[nz.getMonth()].slice(0, 3)) + '</p>' : '') +
+      return (n === 7 ? '<p class="wl-next">Next week</p>' : '') +
         '<section class="wl-day' + (isT ? ' today' : '') + (past ? ' past' : '') + (fold ? ' fold' : '') + '" id="wl-' + k + '">' +
         '<button type="button" class="wl-h" ' + (past && bs.length ? 'data-fold="' + k + '"' : 'data-day="' + k + '"') + '><b>' + (isT ? 'Today' : cap(FULL[d.getDay()])) + '</b><span>' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</span>' +
           '<small>' + (bs.length ? (bs.some(b => b.done) ? bs.filter(b => b.done).length + ' of ' + bs.length + ' done' : bs.length + (bs.length === 1 ? ' block' : ' blocks')) : '') + '</small></button>' +
