@@ -4540,6 +4540,29 @@ html { background: var(--paper) !important; }
 .wl-next { margin: 14px 4px 0; font-size: 14px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); }
 
 .ls-cancel { display: block; width: 100%; min-height: 52px; margin-top: 10px; font: 600 17px var(--display); color: var(--ink); background: var(--hair); border: none; border-radius: 26px; cursor: pointer; }
+
+/* plan: the Now card, calm. name, time left, a thin pink line, what comes next */
+#view-day .nowcard:not(.past) { display: block !important; position: relative; padding: 20px 20px 18px 24px !important; background: var(--card) !important;
+  border: 1px solid var(--hair) !important; border-radius: 20px !important; box-shadow: none !important; overflow: hidden; }
+#view-day .nowcard:not(.past)::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--pink); }
+#view-day .nowcard.waiting::before, #view-day .nowcard.over::before { background: var(--dash); }
+#view-day .nowcard:not(.past) .nc-ring { display: none !important; }
+#view-day .nowcard:not(.past) .nc-info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#view-day .nowcard:not(.past) .nc-tag { align-self: flex-start; padding: 0; font-size: 12px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--pink-d) !important; background: none !important; }
+#view-day .nowcard.waiting .nc-tag, #view-day .nowcard.over .nc-tag { color: var(--muted) !important; }
+#view-day .nowcard:not(.past) .nc-name { margin-top: 2px; font-size: 26px; font-weight: 700; line-height: 1.2; color: var(--ink); overflow-wrap: break-word; }
+#view-day .nowcard:not(.past) .nc-in { font-size: 15px; color: var(--muted); }
+#view-day .nowcard .nc-big { display: flex; align-items: baseline; gap: 6px; margin-top: 14px; }
+#view-day .nowcard .nc-big b { font-size: 22px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+#view-day .nowcard .nc-big span { font-size: 15px; color: var(--muted); }
+#view-day .nowcard .nc-bar { display: block; height: 6px; margin: 8px 0 4px; background: var(--slot); border-radius: 3px; overflow: hidden; }
+#view-day .nowcard .nc-bar u { display: block; height: 100%; width: 0; background: var(--pink); border-radius: 3px; transition: width .6s; }
+#view-day .nowcard.over .nc-bar { display: none; }
+#view-day .nowcard:not(.past) .nc-next { margin-top: 6px; font-size: 15px; color: var(--muted); }
+#view-day .nowcard:not(.past) .nc-next b { color: var(--ink); font-weight: 600; }
+#view-day .nowcard:not(.past) .nc-acts { display: flex; gap: 8px; margin-top: 16px; }
+#view-day .nowcard:not(.past) .nc-act { flex: 1; min-height: 46px; font: 600 15px var(--display); color: var(--ink) !important; background: var(--card) !important; border: 1px solid var(--dash) !important; border-radius: 23px; }
+#view-day .nowcard:not(.past) .nc-act.grow { color: var(--paper) !important; background: var(--ink) !important; border-color: var(--ink) !important; }
 </style>
 </head>
 <body>
@@ -4799,7 +4822,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:11</footer>
+  <footer>Mr.O:18:14</footer>
 </div>
 
 <script>
@@ -5906,6 +5929,8 @@ function nowCard(day) {
       '<span class="nc-tag"><i></i><span class="nc-tagtext"></span></span>' +
       '<b class="nc-name"></b>' +
       '<span class="nc-in"></span>' +
+      '<div class="nc-big"><b class="nc-left2"></b><span class="nc-unit2"></span></div>' +
+      '<i class="nc-bar"><u></u></i>' +
       '<span class="nc-next"></span>' +
     '</div>';
 
@@ -5934,7 +5959,7 @@ function nowCard(day) {
           const go = document.createElement('button');
           go.type = 'button';
           go.className = 'nc-act grow';
-          go.textContent = '\u{1F331} Focus';
+          go.textContent = 'Focus';
           go.addEventListener('click', () => openFocus(w.b, w.from, Number(w.b.mins) || 60));
           acts.appendChild(go);
         }
@@ -5960,9 +5985,9 @@ function nowCard(day) {
       $('.nc-name').textContent = cur.b.label || 'unnamed block';
       $('.nc-left').textContent = fmtLeft(cur.z - now);
       $('.nc-unit').textContent = 'left';
-      $('.nc-in').innerHTML = '<b>' + fmtIn(now - cur.a) + '</b> in · ends ' + clock(cur.from + (Number(cur.b.mins) || 60));
+      $('.nc-in').textContent = clock(cur.from) + ' to ' + clock(cur.from + (Number(cur.b.mins) || 60));
       const nx = wins[cur.i + 1];
-      $('.nc-next').innerHTML = nx ? 'Up next: <b>' + esc(nx.b.label || 'unnamed block') + '</b> at ' + clock(nx.from) : 'Last one today';
+      $('.nc-next').innerHTML = nx ? 'Then <b>' + esc(nx.b.label || 'unnamed block') + '</b> at ' + clock(nx.from) : 'Last one today';
     } else if (now < first.a) {
       key = 'before';
       frac = 0;
@@ -5987,6 +6012,9 @@ function nowCard(day) {
     }
 
     $('.nc-arc').style.strokeDashoffset = C * (1 - Math.min(1, Math.max(0, frac)));
+    $('.nc-left2').textContent = $('.nc-left').textContent;
+    $('.nc-unit2').textContent = $('.nc-unit').textContent;
+    $('.nc-bar u').style.width = Math.round(Math.min(1, Math.max(0, frac)) * 100) + '%';
     if (shown !== null && shown !== key) { renderDay(); return; }   // moved to the next block
     shown = key;
   };
