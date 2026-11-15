@@ -4299,6 +4299,52 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 
 /* room at the bottom so the last cards can scroll clear of the tab bar and the Now pill */
 .wrap { padding-bottom: calc(160px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* goals: the same stickers as Home. pastel cards, white edge, a big tilted emoji, goals as a checklist */
+#view-goals .gl-list { gap: 26px; margin-top: 26px; }
+#view-goals .gl-area { position: relative; padding: 30px 18px 12px; background: var(--a); border: 4px solid #fff; border-left-width: 4px; border-radius: 26px;
+  box-shadow: 0 2px 0 rgba(59,45,37,.06), 0 10px 22px -10px rgba(59,45,37,.28); }
+#view-goals .gl-area[data-a="health"] { --a: #cfe4f4; }
+#view-goals .gl-area[data-a="wealth"] { --a: #f6e6c3; }
+#view-goals .gl-area[data-a="love"]   { --a: #fbd3df; }
+#view-goals .gl-area[data-a="self"]   { --a: #e7e0f6; }
+#view-goals .gl-ah { margin: 0 0 6px; }
+#view-goals .gl-ah i { position: absolute; top: -24px; left: 12px; font-size: 44px; line-height: 1;
+  filter: drop-shadow(0 3px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 6px 8px rgba(0,0,0,.18)); }
+#view-goals .gl-area:nth-child(1) .gl-ah i { transform: rotate(-12deg); }
+#view-goals .gl-area:nth-child(2) .gl-ah i { transform: rotate(10deg); }
+#view-goals .gl-area:nth-child(3) .gl-ah i { transform: rotate(8deg); }
+#view-goals .gl-area:nth-child(4) .gl-ah i { transform: rotate(-10deg); }
+#view-goals .gl-ah b { font-size: 18px; font-weight: 700; color: var(--ink); }
+#view-goals .gl-row { min-height: 48px; gap: 12px; }
+#view-goals .gl-t { font-size: 16px; font-weight: 500; color: var(--ink); }
+#view-goals .gl-chk { flex: none; display: grid; place-items: center; width: 28px; height: 28px; font-style: normal; font-size: 15px; font-weight: 700; color: #fff;
+  background: rgba(255,255,255,.7); border: 2px solid rgba(59,45,37,.25); border-radius: 50%; }
+#view-goals .gl-chk.on { background: var(--ink); border-color: var(--ink); }
+#view-goals .gl-steps { margin: -8px 0 4px; padding-left: 40px; color: color-mix(in srgb, var(--ink) 60%, transparent); }
+#view-goals .gl-steps.none { color: color-mix(in srgb, var(--ink) 55%, transparent); }
+#view-goals .gl-add { color: color-mix(in srgb, var(--ink) 60%, transparent); }
+#view-goals .gl-in { background: rgba(255,255,255,.7); }
+:root[data-theme="dark"] #view-goals .gl-area { border-color: #f3e3e8; }
+:root[data-theme="dark"] #view-goals .gl-area[data-a="health"] { --a: #3f5f7a; }
+:root[data-theme="dark"] #view-goals .gl-area[data-a="wealth"] { --a: #6e5a3a; }
+:root[data-theme="dark"] #view-goals .gl-area[data-a="love"]   { --a: #7a4558; }
+:root[data-theme="dark"] #view-goals .gl-area[data-a="self"]   { --a: #54496f; }
+:root[data-theme="dark"] #view-goals :is(.gl-ah b, .gl-t) { color: #fbf1e7; }
+:root[data-theme="dark"] #view-goals :is(.gl-steps, .gl-steps.none, .gl-add) { color: rgba(251,241,231,.75); }
+:root[data-theme="dark"] #view-goals .gl-chk { background: rgba(255,255,255,.12); border-color: rgba(251,241,231,.45); }
+:root[data-theme="dark"] #view-goals .gl-chk.on { color: #3b2d25; background: #fbf1e7; border-color: #fbf1e7; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #view-goals .gl-area { border-color: #f3e3e8; }
+  :root:not([data-theme="light"]) #view-goals .gl-area[data-a="health"] { --a: #3f5f7a; }
+  :root:not([data-theme="light"]) #view-goals .gl-area[data-a="wealth"] { --a: #6e5a3a; }
+  :root:not([data-theme="light"]) #view-goals .gl-area[data-a="love"]   { --a: #7a4558; }
+  :root:not([data-theme="light"]) #view-goals .gl-area[data-a="self"]   { --a: #54496f; }
+  :root:not([data-theme="light"]) #view-goals :is(.gl-ah b, .gl-t) { color: #fbf1e7; }
+  :root:not([data-theme="light"]) #view-goals :is(.gl-steps, .gl-steps.none, .gl-add) { color: rgba(251,241,231,.75); }
+  :root:not([data-theme="light"]) #view-goals .gl-chk { background: rgba(255,255,255,.12); border-color: rgba(251,241,231,.45); }
+  :root:not([data-theme="light"]) #view-goals .gl-chk.on { color: #3b2d25; background: #fbf1e7; border-color: #fbf1e7; }
+}
 </style>
 </head>
 <body>
@@ -4557,7 +4603,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:11</footer>
+  <footer>Mr.O:17:18</footer>
 </div>
 
 <script>
@@ -11949,6 +11995,23 @@ function areaLive(k) {
   return { big: H.filter(h => h.marks.includes(t)).length + '<i>/' + H.length + '</i>', cap: best ? 'habits \u00b7 ' + best + ' day streak' : 'habits today' };
 }
 
+// a tap that lands inside an area card always opens it, even if something
+// invisible sits on top (Self could not be tapped on the phone). it also says
+// what was on top, so the real cause can be found.
+document.addEventListener('click', e => {
+  if (document.body.dataset.view !== 'home' || document.querySelector('.w3, #focus:not([hidden])')) return;
+  const hit = [...document.querySelectorAll('#view-home .hm-area[data-open]')].find(c => {
+    const r = c.getBoundingClientRect();
+    return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  });
+  if (!hit || hit.contains(e.target)) return;
+  if (e.target.closest('#nowpill, .tabs, .morepanel')) return;     // a real button on top: let it work
+  const t = e.target, who = t.id ? '#' + t.id : (t.className && String(t.className).split(' ')[0]) || t.tagName.toLowerCase();
+  e.preventDefault(); e.stopPropagation();
+  hit.click();
+  try { setTimeout(() => bugToast({ message: 'opened ' + hit.dataset.open + ', it was covered by ' + who }), 300); } catch {}
+}, true);
+
 /* =========== goals ===========
    one page for every goal, by how far ahead: this week, this month,
    6 months and 1 year. few on purpose: one per area for each length,
@@ -11968,7 +12031,7 @@ function renderGoals() {
     let body = '';
     if (goalsTab === 'week') {
       const gs = areaGoals(a.k);
-      body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '"><i class="lf-dot ' + st[0] + '"></i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span><small>' + st[1] + '</small></button>' +
+      body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button>' +
         '<button type="button" class="gl-steps' + ((g.actions || []).length ? '' : ' none') + (g.private || a.k === 'love' ? ' priv' : '') + '" data-steps="' + a.k + ':' + gi + '">' + ((g.actions || []).length ? esc(g.actions.join(' \u00b7 ')) : '+ steps to get there') + '</button>'; }).join('') +
         (gs.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
     } else if (goalsTab === 'month') {
@@ -11983,7 +12046,7 @@ function renderGoals() {
           '<i class="gl-bar"><u style="width:' + b.pct + '%"></u></i><small>' + (b.done ? 'Done' : left + ' days left') + (A ? ' \u00b7 this week: ' + esc(A.text) : '') + '</small></button>'; }
       else body = '<button type="button" class="gl-add" data-bignew="' + a.k + '">+ ' + (m === 6 ? 'where you want to be in 6 months' : 'where you want to be in a year') + '</button>';
     }
-    return '<section class="gl-area" style="--c:' + a.c + '"><div class="gl-ah"><i>' + a.e + '</i><b>' + a.name + '</b></div>' + body + '</section>';
+    return '<section class="gl-area" data-a="' + a.k + '" style="--c:' + a.c + '"><div class="gl-ah"><i>' + a.e + '</i><b>' + a.name + '</b></div>' + body + '</section>';
   }).join('') + '</div>';
   if (goalsTab === 'week') html += '<p class="gl-why">Few on purpose. Your brain can only push a few goals at once, so fewer get done more.</p>';
   box.innerHTML = html;
@@ -13546,7 +13609,7 @@ function updateNowPill() {
   const v = document.body.dataset.view;
   const t = planKey(), d = state.days && state.days[t];
   let cur = null;
-  if (d && d.blocks && d.blocks.length && v !== 'day' && !document.body.classList.contains('focusing')) {
+  if (d && d.blocks && d.blocks.length && v !== 'day' && v !== 'home' && !document.body.classList.contains('focusing')) {   // Home has the Now card already
     const nowM = planMin(t);
     let at = toMins(d.start);
     for (const b of d.blocks) {
