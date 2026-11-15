@@ -3541,6 +3541,22 @@ html body[data-view="day"] {
 #view-day .sheet .line.cur .tick { background: var(--card); border-color: var(--pink); }
 #view-day .sheet .line.cur .what { color: var(--ink); font-weight: 600; }
 #view-day .line .at small.endat::before { display: none; }
+/* planning mode: numbers, names, lengths; hold a row to drag it */
+#view-day .sheet .line.plan-row { flex-wrap: nowrap; align-items: center; padding: 10px 0; touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+#view-day .sheet .line.plan-row::before { display: none; }
+#view-day .sheet .line.plan-row + .line.plan-row { border-top: 1px solid var(--hair); }
+.pl-num { flex: none; width: 32px; height: 32px; padding: 0; font: 600 14px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 50%; cursor: pointer; }
+.pl-numin { flex: none; width: 56px; height: 36px; padding: 4px; text-align: center; font: 600 16px "Poppins", sans-serif; border-radius: 12px; }
+#view-day .line.plan-row .pl-name { flex: 1 1 auto; width: auto; min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-len { flex: none; min-height: 36px; padding: 0 12px; font: 500 14px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 18px; cursor: pointer; }
+#view-day .line.plan-row.dragging { background: var(--card); border-radius: 16px; box-shadow: 0 10px 28px rgba(0,0,0,.22); transform-origin: center; }
+#view-day .line.plan-row.dragging .pl-num { background: var(--pink); color: #fff; }
+.pl-tip { margin: 12px 0 0; font-size: 13px; color: var(--muted); }
+.pl-finish { display: block; width: 100%; min-height: 50px; margin: 14px 0 0; font-size: 16px; }
+.pl-start { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; width: 100%; margin: 0 0 12px; padding: 14px 16px;
+  font-family: "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px dashed color-mix(in srgb, var(--pink) 55%, var(--hair)); border-radius: 18px; cursor: pointer; }
+.pl-start b { font-size: 16px; font-weight: 600; }
+.pl-start span { font-size: 13px; color: var(--muted); }
 /* grocery details and sharing */
 .gr-share { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; }
 .gr-share button { min-height: 36px; padding: 0 14px; font: 500 13px "Poppins", sans-serif; color: var(--ink); background: var(--hair); border: none; border-radius: 18px; cursor: pointer; }
@@ -4061,7 +4077,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:17</footer>
+  <footer>everything saves on this device · build 12:24</footer>
 </div>
 
 <script>
@@ -4205,7 +4221,8 @@ function planMin(k) { return Math.floor((Date.now() - fromKey(k).getTime()) / 60
 
 let viewDay = planKey();
 let noteFor = null;   // the timestamp of the check in being annotated
-let sortingDay = false;
+let sortingDay = false;   // planning mode: number, drag, set lengths, then Finish plan
+let sortingKey = null;
 let compactDay = !!state.compact;
 
 /* =========== colours =========== */
@@ -5840,6 +5857,14 @@ function renderCarry() {
   slot.appendChild(box);
 }
 
+// finish planning: keep a copy of the plan (the first one), so the end of the
+// day can show what changed
+function finishPlan(day) {
+  if (!day.planSnap) day.planSnap = { at: Date.now(), start: day.start, blocks: day.blocks.map(b => ({ label: b.label || '', mins: Number(b.mins) || 60 })) };
+  sortingDay = false; customFor = null;
+  save(); renderDay(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function moveBlockTo(from, to) {
   const blocks = dayFor(viewDay).blocks;
   if (from === to || to < 0 || to >= blocks.length) { renderDay(); return; }
@@ -5850,25 +5875,35 @@ function moveBlockTo(from, to) {
 
 // drag to reorder, pointer events so it works with a finger
 function attachDrag(sheet) {
-  const rows = Array.from(sheet.children);
+  const rows = Array.from(sheet.children).filter(r => r.classList.contains('line'));
   if (rows.length < 2) return;
 
-  let held = null, startY = 0, rowH = 0, from = 0, to = 0;
+  let held = null, startY = 0, rowH = 0, from = 0, to = 0, wait = null, downY = 0;
+  // while a block is held, the page must not scroll under your finger
+  sheet.addEventListener('touchmove', e => { if (held) e.preventDefault(); }, { passive: false });
 
   rows.forEach((row, i) => {
     row.addEventListener('pointerdown', e => {
-      if (!e.target.closest('.grip')) return;      // only the handle starts a drag
-      held = row;
-      from = to = i;
-      startY = e.clientY;
-      rowH = row.getBoundingClientRect().height;
-      row.setPointerCapture(e.pointerId);
-      row.classList.add('dragging');
-      rows.forEach(r => { if (r !== row) r.classList.add('shifting'); });
-      e.preventDefault();
+      if (e.target.closest('input')) return;
+      downY = e.clientY;
+      const pid = e.pointerId;
+      clearTimeout(wait);
+      // hold for a moment to pick it up; moving first means you are scrolling
+      wait = setTimeout(() => {
+        wait = null;
+        held = row;
+        from = to = i;
+        startY = downY;
+        rowH = row.getBoundingClientRect().height;
+        try { row.setPointerCapture(pid); } catch {}
+        try { navigator.vibrate && navigator.vibrate(12); } catch {}
+        row.classList.add('dragging');
+        rows.forEach(r => { if (r !== row) r.classList.add('shifting'); });
+      }, 280);
     });
 
     row.addEventListener('pointermove', e => {
+      if (wait && Math.abs(e.clientY - downY) > 8) { clearTimeout(wait); wait = null; }
       if (held !== row) return;
       const dy = e.clientY - startY;
       row.style.transform = 'translateY(' + dy + 'px)';
@@ -5888,10 +5923,15 @@ function attachDrag(sheet) {
     });
 
     const drop = () => {
+      clearTimeout(wait); wait = null;
       if (held !== row) return;
       held = null;
       row.classList.remove('dragging');
       rows.forEach(r => { r.classList.remove('shifting'); r.style.transform = ''; });
+      // the lift was not a tap: swallow the click that follows
+      const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
+      window.addEventListener('click', stop, { capture: true, once: true });
+      setTimeout(() => window.removeEventListener('click', stop, { capture: true }), 400);
       moveBlockTo(from, to);
     };
 
@@ -5963,6 +6003,7 @@ function renderDay() {
   const day = dayFor(viewDay);
   const d = fromKey(viewDay);
   const isToday = viewDay === planKey();
+  if (sortingDay && sortingKey !== viewDay) sortingDay = false;   // planning is for the day you started it on
 
   document.getElementById('day-title').innerHTML =
     (isToday ? 'today' : FULL[d.getDay()]) +
@@ -5987,7 +6028,8 @@ function renderDay() {
     blockList.appendChild(e);
     document.getElementById('total').textContent = '';
     document.getElementById('block-add').hidden = false;
-    sortingDay = false;
+    sortingDay = !day.planSnap && viewDay >= planKey();   // a new day opens straight into planning
+    sortingKey = viewDay;
     return;
   }
 
@@ -6111,34 +6153,38 @@ function renderDay() {
     });
 
     if (sortingDay) {
-      row.className = 'line sorting';
+      row.className = 'line plan-row';
 
-      const grip = document.createElement('span');
-      grip.className = 'grip';
-      grip.textContent = '\u2261';
+      // the number: tap it and type where this block should go
+      const num = document.createElement('button');
+      num.type = 'button'; num.className = 'pl-num'; num.textContent = i + 1;
+      num.setAttribute('aria-label', 'block ' + (i + 1) + ', tap to move it');
+      num.addEventListener('click', () => {
+        const inp = document.createElement('input');
+        inp.type = 'number'; inp.inputMode = 'numeric'; inp.min = 1; inp.max = day.blocks.length;
+        inp.className = 'pl-numin'; inp.value = i + 1; inp.setAttribute('aria-label', 'move to position');
+        num.replaceWith(inp); inp.focus(); inp.select();
+        let doneIt = false;
+        const go = () => { if (doneIt) return; doneIt = true; const n = Math.round(Number(inp.value)); moveBlockTo(i, Math.max(1, Math.min(day.blocks.length, n || i + 1)) - 1); };
+        inp.addEventListener('change', go); inp.addEventListener('blur', go);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+      });
 
-      const name = document.createElement('div');
-      name.className = 'fixed';
-      name.textContent = b.label || 'unnamed block';
+      const name = document.createElement('button');
+      name.type = 'button';
+      name.className = 'what what-btn pl-name' + ((b.label || '').trim() ? '' : ' empty');
+      name.textContent = (b.label || '').trim() || 'What\u2019s this?';
+      name.addEventListener('click', () => openNameSheet(b));
 
-      const moves = document.createElement('span');
-      moves.className = 'moves';
+      const lenB = document.createElement('button');
+      lenB.type = 'button'; lenB.className = 'pl-len'; lenB.textContent = dur(len);
+      lenB.setAttribute('aria-label', 'how long, ' + dur(len) + ', tap to change');
+      lenB.addEventListener('click', () => { customFor = customFor === i ? null : i; renderDay(); });
 
-      const up = document.createElement('button');
-      up.className = 'move'; up.type = 'button'; up.textContent = '\u2191';
-      up.setAttribute('aria-label', 'move up');
-      up.disabled = i === 0;
-      up.addEventListener('click', () => moveBlock(i, -1));
-
-      const dn = document.createElement('button');
-      dn.className = 'move'; dn.type = 'button'; dn.textContent = '\u2193';
-      dn.setAttribute('aria-label', 'move down');
-      dn.disabled = i === day.blocks.length - 1;
-      dn.addEventListener('click', () => moveBlock(i, 1));
-
-      moves.append(up, dn);
-      row.append(when, grip, name, moves);
+      row.append(when, num, name, lenB);
       sheet.appendChild(row);
+      if (focusNew === i) { focusNew = null; setTimeout(() => openNameSheet(b), 60); }
+      if (customFor === i) sheet.appendChild(lengthPicker(b, from, len));
       return;
     }
 
@@ -6247,6 +6293,13 @@ function renderDay() {
 
   clearInterval(nowTimer);
   focusNudge(day);
+  if (!sortingDay && !day.planSnap && viewDay >= planKey() && day.blocks.some(b => !b.done)) {
+    const go = document.createElement('button');
+    go.type = 'button'; go.className = 'pl-start';
+    go.innerHTML = '<b>Plan my day</b><span>order, lengths, then finish \u203a</span>';
+    go.addEventListener('click', () => { sortingDay = true; sortingKey = viewDay; renderDay(); window.scrollTo(0, 0); });
+    blockList.appendChild(go);
+  }
   if (!sortingDay && viewDay === planKey()) {
     const y = shiftKey(viewDay, -1), yd = state.days[y];
     const yLeft = yd ? yd.blocks.filter(b => !b.done).length : 0;
@@ -6308,15 +6361,18 @@ function renderDay() {
   const arr = document.createElement('button');
   arr.className = 'arrange' + (sortingDay ? ' on' : '');
   arr.type = 'button';
-  arr.textContent = sortingDay ? '\u2713 done' : 'arrange';
+  arr.textContent = sortingDay ? 'Finish plan' : 'plan my day';
   if (sortingDay) {
+    arr.className = 'lf-btn main pl-finish';
     const tip = document.createElement('p');
-    tip.className = 'hint';
-    tip.style.margin = '12px 0 0';
-    tip.textContent = 'drag the \u2261 handle, or use the arrows.';
+    tip.className = 'hint pl-tip';
+    tip.textContent = 'Hold a block and drag it. Or tap its number and type where it goes.';
     blockList.appendChild(tip);
   }
-  arr.addEventListener('click', () => { sortingDay = !sortingDay; renderDay(); });
+  arr.addEventListener('click', () => {
+    if (sortingDay) finishPlan(day);
+    else { sortingDay = true; sortingKey = viewDay; customFor = null; renderDay(); }
+  });
 
   if (sortingDay) {
     blockList.appendChild(arr);
@@ -6350,7 +6406,7 @@ function renderDay() {
     blockList.appendChild(tools);
   }
 
-  document.getElementById('block-add').hidden = sortingDay;
+  document.getElementById('block-add').hidden = false;
 
   const mins = at - toMins(day.start);
   const total = document.getElementById('total');
@@ -12134,6 +12190,60 @@ function dayStats(k) {
   return { total, done, pct: done / total, mins, start: toMins(d.start), d };
 }
 
+// what changed between the plan you finished and the day you had
+function planChanges(d) {
+  const snap = d.planSnap;
+  if (!snap) return null;
+  const was = snap.blocks.map(b => b.label), now = d.blocks.map(b => b.label || '');
+  const count = (a, l) => a.filter(x => x === l).length;
+  const added = [...new Set(now.filter(l => count(now, l) > count(was, l)))];
+  const dropped = [...new Set(was.filter(l => count(was, l) > count(now, l)))];
+  const both = now.filter(l => was.includes(l));
+  const wasOrder = was.filter(l => now.includes(l));
+  const moved = [...new Set(both.filter((l, i) => wasOrder[i] !== l))];
+  const longer = [], shorter = [];
+  for (const b of d.blocks) {
+    const p = snap.blocks.find(x => x.label === (b.label || ''));
+    if (!p) continue;
+    const diff = (Number(b.mins) || 60) - p.mins;
+    if (diff >= 10) longer.push((b.label || 'a block') + ' +' + dur(diff));
+    if (diff <= -10) shorter.push((b.label || 'a block') + ' ' + dur(-diff) + ' shorter');
+  }
+  const lines = [];
+  const list = a => a.slice(0, 3).map(x => x || 'unnamed').join(', ') + (a.length > 3 ? ' and ' + (a.length - 3) + ' more' : '');
+  if (added.length) lines.push('Added: ' + list(added));
+  if (dropped.length) lines.push('Dropped: ' + list(dropped));
+  if (moved.length) lines.push('Moved: ' + list(moved));
+  if (longer.length) lines.push('Ran longer: ' + list(longer));
+  if (shorter.length) lines.push('Cut short: ' + list(shorter));
+  return lines.length ? lines : ['You kept to your plan.'];
+}
+
+// your best and worst moments of the day, and what you were doing then
+const MOOD_SCORE = { good: 5, calm: 5, focused: 5, okay: 3, bored: 2, unfocused: 2, tired: 2, unmotivated: 2, stressed: 1, anxious: 1, low: 0 };
+function blockAtTime(d, ms) {
+  if (!d || !d.blocks) return null;
+  const t = new Date(ms), m = t.getHours() * 60 + t.getMinutes();
+  let at = toMins(d.start);
+  for (const b of d.blocks) {
+    const len = Number(b.mins) || 60;
+    for (const mm of [m, m + 1440]) if (mm >= at && mm < at + len) return b.label || null;
+    at += len;
+  }
+  return null;
+}
+function moodHighLow(k, d) {
+  const ms = moodsIn([k]).filter(m => m.mood in MOOD_SCORE);
+  if (!ms.length) return null;
+  const doing = m => m.after || blockAtTime(d, m.at);
+  const say = m => { const md = MOODS.find(x => x.k === m.mood); const what = doing(m);
+    return (md ? md.e + ' ' : '') + cap(m.mood) + ' at ' + clockOf(m.at) + (what ? ', during ' + what : ''); };
+  const byScore = ms.slice().sort((a, b) => MOOD_SCORE[b.mood] - MOOD_SCORE[a.mood] || a.at - b.at);
+  const hi = byScore[0], lo = byScore[byScore.length - 1];
+  return { hi: say(hi), lo: MOOD_SCORE[lo.mood] < MOOD_SCORE[hi.mood] ? say(lo) : null,
+           hiDoing: doing(hi), loDoing: MOOD_SCORE[lo.mood] < MOOD_SCORE[hi.mood] ? doing(lo) : null };
+}
+
 function daySummary(k) {
   const st = dayStats(k); if (!st) return;
   const food = foodIn([k]), moods = moodsIn([k]);
@@ -12160,6 +12270,7 @@ function daySummary(k) {
     state.habits.length ? ['Habits', habitsDone + ' of ' + state.habits.length] : null
   ].filter(Boolean);
 
+  const hl = moodHighLow(k, st.d), changes = planChanges(st.d);
   // one thing to do better tomorrow: the first that applies
   const sad = moods.find(m => ['tired', 'low', 'stressed', 'anxious', 'unmotivated', 'unfocused'].includes(m.mood));
   const better =
@@ -12169,6 +12280,7 @@ function daySummary(k) {
     sleepOn(k) && sleepMins(sleepOn(k)) < 420 ? 'You slept ' + dur(sleepMins(sleepOn(k))) + '. Aim to be in bed 30 minutes earlier tonight.' :
     meals.length && !protein ? 'Add protein to breakfast tomorrow, eggs or beans, for steadier energy.' :
     sad ? 'You felt ' + sad.mood + ' around ' + clockOf(sad.at) + '. Plan a short break or walk near that time tomorrow.' :
+    hl && hl.hiDoing && hl.loDoing && hl.hiDoing !== hl.loDoing ? 'You were happiest during ' + hl.hiDoing + ' and lowest during ' + hl.loDoing + '. Put a bit of ' + hl.hiDoing + ' near that time tomorrow.' :
     st.start > 10 * 60 && k !== planKey() ? 'Start your first block 30 minutes earlier tomorrow.' :
     st.total > 8 ? 'Plan one less block tomorrow. Fewer blocks, more finished.' :
     !food.length ? 'Log what you eat tomorrow, so brick can spot what gives you energy.' :
@@ -12204,6 +12316,8 @@ function daySummary(k) {
     '<div class="ds-head"><small>' + (k === planKey() ? 'Today' : cap(FULL[fromKey(k).getDay()])) + '</small><h2>' +
       (st.done === st.total ? 'Day done' : st.done + ' of ' + st.total + ' done') + '</h2><b>' + Math.round(st.pct * 100) + '%</b></div>' +
     '<ul class="ds-rows">' + rows.map(([a, b]) => '<li><span>' + a + '</span><b>' + esc(b) + '</b></li>').join('') + '</ul>' +
+    (hl ? '<div class="ds-box"><span>Happiest</span><p>' + esc(hl.hi) + '</p>' + (hl.lo ? '<span>Lowest</span><p>' + esc(hl.lo) + '</p>' : '') + '</div>' : '') +
+    (changes ? '<div class="ds-box"><span>What changed from your plan</span>' + changes.map(c => '<p>' + esc(c) + '</p>').join('') + '</div>' : '') +
     '<div class="ds-box better"><span>One thing for tomorrow</span><p>' + esc(better) + '</p></div>' +
     (pats.length ? '<div class="ds-box"><span>Patterns</span>' + pats.slice(0, 2).map(p => '<p>' + esc(p) + '</p>').join('') + '</div>'
                  : '<div class="ds-box"><span>Patterns</span><p>A few more planned days and patterns show up here.</p></div>') +
