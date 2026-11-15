@@ -5002,6 +5002,24 @@ body[data-view="home"] footer { margin: 0; padding: 2px 0 0; font-size: 11px; }
 #view-home#view-home#view-home#view-home#view-home .hm-areas { gap: 1.3vh 12px !important; }
 #view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { min-height: 11vh !important; }
 #view-home#view-home#view-home #quote { display: none; }
+
+/* home is exactly one screen tall (the phone's clock bar and the tab bar taken out).
+   the four squares stretch or shrink to fill what is left, so the page ends at the bottom on any phone */
+body[data-view="home"] { padding-bottom: 0 !important; }
+body[data-view="home"] .wrap { padding-top: 16px !important; padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important; }
+body[data-view="home"] footer { position: relative; margin: 0 !important; padding: 0 !important; height: 16px; line-height: 16px; font-size: 11px; }
+#view-home:not([hidden]) { display: flex; flex-direction: column;
+  min-height: calc(100svh - env(safe-area-inset-top, 0px) - 16px - 70px - env(safe-area-inset-bottom, 0px) - 16px); }
+#view-home > .pghead, #view-home > #home-now { flex: none; }
+#view-home > #menu { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+#view-home > #menu > :not(.hm-areas) { flex: none; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas { flex: 1; min-height: 0; grid-template-rows: 1fr 1fr; margin-bottom: 4px !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { min-height: 80px !important; height: auto; padding: 12px 16px !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-area em { padding-top: 4px; font-size: 25px !important; }
+
+.ls-add { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 0 0 14px; }
+.ls-add button { min-height: 52px; font: 600 17px var(--display); color: var(--ink); background: color-mix(in srgb, var(--pink) 16%, var(--card)); border: 1px solid color-mix(in srgb, var(--pink) 40%, var(--hair)); border-radius: 16px; cursor: pointer; }
+.ls-add button:active { transform: scale(.96); }
 </style>
 </head>
 <body>
@@ -5262,7 +5280,7 @@ body[data-view="home"] footer { margin: 0; padding: 2px 0 0; font-size: 11px; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:16</footer>
+  <footer>Mr.O:21:00</footer>
 </div>
 
 <script>
@@ -7064,7 +7082,8 @@ function lengthPicker(b, from, len) {
   let other = len;
   const draw = more => {
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
-      '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2><p class="ls-from">Starts ' + clock(from) + '</p>' +
+      '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2><p class="ls-from">Now ' + minsLabel(len) + ' \u00b7 ' + clock(from) + ' to ' + clock(from + len) + '</p>' +
+      (more ? '' : '<p class="ab-sub">Add time</p><div class="ls-add">' + [5, 10, 15, 30, 60].map(d => '<button type="button" data-add="' + d + '">+' + (d === 60 ? '1h' : d) + '</button>').join('') + '</div><p class="ab-sub">Or set it</p>') +
       (more
         ? '<div class="ls-step"><button type="button" data-o="-15" aria-label="15 minutes less">\u2212</button><div><b>' + minsLabel(other) + '</b><small>ends ' + clock(from + other) + '</small></div><button type="button" data-o="15" aria-label="15 minutes more">+</button></div>' +
           '<button type="button" class="wka-go ls-set">Set ' + minsLabel(other) + '</button><button type="button" class="ls-back">Back</button>'
@@ -7076,6 +7095,7 @@ function lengthPicker(b, from, len) {
     el.querySelector('.w3-back').addEventListener('click', close);
     el.querySelector('.ls-cancel').addEventListener('click', close);
     el.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
+    el.querySelectorAll('[data-add]').forEach(x => x.addEventListener('click', () => keep(len + Number(x.dataset.add))));   // add time to the task
     const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
     el.querySelectorAll('[data-o]').forEach(x => x.addEventListener('click', () => { other = Math.max(15, Math.min(720, other + Number(x.dataset.o))); draw(true); }));
     const st = el.querySelector('.ls-set'); if (st) st.addEventListener('click', () => keep(other));
