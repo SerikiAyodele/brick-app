@@ -5094,6 +5094,10 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
 .gl-htick { flex: none; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; font-size: 15px; font-weight: 700; color: #fff; background: transparent; border: 1.5px solid var(--dash); border-radius: 50%; cursor: pointer; }
 .gl-htick.on { background: var(--pink); border-color: var(--pink); }
 .gl-hj i { flex: none; width: 30px; text-align: center; font-style: normal; font-size: 20px; }
+
+/* Finish plan stays in view while you reorder */
+#view-day .pl-finish { position: sticky; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 6; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .5); }
+#view-day .viewtools .arrange:first-child { color: var(--pink-d); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -5355,7 +5359,7 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:24</footer>
+  <footer>Mr.O:21:27</footer>
 </div>
 
 <script>
@@ -7846,8 +7850,8 @@ function renderDay() {
       save(); renderDay();
     });
 
-    const topBar = !day.planSnap && viewDay >= planKey() && day.blocks.some(b => !b.done);   // the Plan my day bar already shows up top
-    if (topBar) tools.append(squash); else tools.append(arr, squash);
+    arr.textContent = 'Reorder';      // always a way in: reorder, then Finish plan
+    tools.append(arr, squash);
     // alarms: a web app can't set iPhone alarms, so hand the times to a Shortcut that can
     const ups = upcomingStarts(day);
     if (viewDay === planKey() && ups.length) {
@@ -7978,6 +7982,13 @@ function addBlockSheet(preset, insertAt) {
   const gymTypes = () => { const W = routine().workouts.map(w => ['\u{1F3CB}\uFE0F', w.title, 60, w.id]);
     return W.concat([['\u{1F3C3}', 'Cardio', 45], ['\u{1F9D8}', 'Yoga', 45], ['\u{1F3CA}', 'Swim', 45], ['\u{1F3BE}', 'Tennis', 60], ['\u{1F6B4}', 'Cycling', 45], ['\u{1F483}', 'Dance', 45]]); };
   let step = null;   // null, 'rest', 'gym' or 'work'
+  // your most used blocks from the last 30 days, first
+  const tally = {}, keepT = {};
+  for (let i = 1; i <= 30; i++) for (const x of ((state.days[shiftKey(planKey(), -i)] || {}).blocks || [])) {
+    const t = (x.label || '').trim(); if (!t) continue; const k = t.toLowerCase(); tally[k] = (tally[k] || 0) + 1; keepT[k] = keepT[k] || t; }
+  const icon = t => { const l = t.toLowerCase(); const M = [[/walk/, '\u{1F6B6}'], [/shower|bath/, '\u{1F6BF}'], [/sleep|nap/, '\u{1F634}'], [/read/, '\u{1F4D6}'], [/pray/, '\u{1F64F}'], [/breakfast/, '\u{1F305}'], [/lunch/, '\u2600\uFE0F'], [/dinner/, '\u{1F319}'], [/gym|workout|glute|upper|leg/, '\u{1F3CB}\uFE0F'], [/plan/, '\u{1F4DD}'], [/movie|film/, '\u{1F3AC}'], [/break|tea|coffee/, '\u2615'], [/meet|call/, '\u{1F465}'], [/work|deep/, '\u{1F4BC}'], [/learn|study|course|go\b/, '\u{1F4DA}']];
+    const f = M.find(([r]) => r.test(l)); return f ? f[1] : '\u21BB'; };
+  const top = Object.keys(tally).filter(k => tally[k] >= 2).sort((a, b) => tally[b] - tally[a]).slice(0, 6).map(k => keepT[k]);
   const mine = usualLabels(2).filter(x => !common.some(c => c[1].toLowerCase() === x.t.toLowerCase()) && !goals.some(g => g.t.toLowerCase() === x.t.toLowerCase()));
   let pick = preset ? { label: preset } : null;
   const close = () => el.remove();
@@ -8006,8 +8017,9 @@ function addBlockSheet(preset, insertAt) {
         '<button type="button" class="wka-go ab-next">Next</button>';
     } else if (!pick) {
       html += '<h2>What is it?</h2>' +
+        (top.length ? '<p class="ab-sub">Most used</p><div class="ab-grid">' + top.map((t, i) => tile(icon(t), t, 'data-top="' + i + '"')).join('') + '</div>' : '') +
         (goals.length ? '<p class="ab-sub">Your goals</p><div class="ab-grid one">' + goals.map((g, i) => tile(g.e, g.t, 'data-g="' + i + '"')).join('') + '</div><p class="ab-sub">Everyday</p>' : '') +
-        '<div class="ab-grid">' + common.map((c, i) => tile(c[0], c[1], 'data-c="' + i + '"')).join('') + mine.map((m, i) => tile('\u21BB', m.t, 'data-u="' + i + '"')).join('') + '</div>' +
+        '<div class="ab-grid">' + common.map((c, i) => tile(c[0], c[1], 'data-c="' + i + '"')).join('') + '</div>' +
         '<div class="gs-add ab-type"><input type="text" maxlength="60" placeholder="Or type it" aria-label="block name"><button type="button">Next</button></div>';
     } else {
       const usual = usualLength(pick.label) || pick.mins || null;
@@ -8031,6 +8043,7 @@ function addBlockSheet(preset, insertAt) {
     el.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', () => { const g = gymTypes()[Number(b.dataset.w)]; pick = { label: g[1], mins: g[2], workout: g[3] || null }; draw(); }));
     const nx = el.querySelector('.ab-next');
     if (nx) nx.addEventListener('click', () => { const gl = [...el.querySelectorAll('.ab-goal')].map(i => i.value.trim()).filter(Boolean).slice(0, 3); pick = { label: 'Work', mins: 60, goals: gl }; draw(); });
+    el.querySelectorAll('[data-top]').forEach(b => b.addEventListener('click', () => { const t = top[Number(b.dataset.top)]; pick = { label: t, mins: usualLength(t) || 60 }; draw(); }));
     el.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { pick = { label: mine[Number(b.dataset.u)].t }; draw(); }));
     el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
     const abd = el.querySelector('.ab-dur');
