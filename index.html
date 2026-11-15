@@ -4466,6 +4466,29 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
 .wk-blk:nth-child(4n+2) { background: color-mix(in srgb, #e57a9c 22%, var(--card)) !important; border-left-color: #e57a9c !important; }
 .wk-blk:nth-child(4n+3) { background: color-mix(in srgb, #d9a948 22%, var(--card)) !important; border-left-color: #d9a948 !important; }
 .wk-blk:nth-child(4n)   { background: color-mix(in srgb, #9b87d9 22%, var(--card)) !important; border-left-color: #9b87d9 !important; }
+
+/* week as a list: days down the page */
+.wk-look { margin: 0 0 12px; }
+.wl { display: flex; flex-direction: column; gap: 10px; }
+.wl-day { padding: 6px 16px 10px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.wl-day.today { border: 2px solid var(--pink); }
+.wl-day.past { opacity: .7; }
+.wl-h { display: flex; align-items: baseline; gap: 8px; width: 100%; min-height: 44px; padding: 6px 0; text-align: left; font-family: var(--display); color: var(--ink); background: none; border: none; cursor: pointer; }
+.wl-h b { font-size: 19px; font-weight: 700; }
+.wl-h span { font-size: 15px; color: var(--muted); }
+.wl-h small { margin-left: auto; font-size: 14px; color: var(--muted); }
+.wl-day ul { list-style: none; margin: 0; padding: 0; }
+.wl-day li { display: grid; grid-template-columns: 74px 1fr auto; align-items: center; gap: 10px; min-height: 46px; padding: 6px 0 6px 10px; border-top: 1px solid var(--hair); border-left: 4px solid var(--c, var(--hair)); margin-left: -4px; cursor: pointer; }
+.wl-day li time { font-size: 15px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.wl-day li span { min-width: 0; font-size: 17px; color: var(--ink); overflow-wrap: break-word; }
+.wl-day li span i { font-style: normal; margin-right: 6px; }
+.wl-day li small { font-size: 14px; color: var(--muted); }
+.wl-day li.done span, .wl-day li.done time { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.wl-day li.live { background: color-mix(in srgb, var(--pink) 14%, transparent); border-radius: 0 10px 10px 0; border-left-color: var(--pink); }
+.wl-empty { width: 100%; min-height: 44px; padding: 0; text-align: left; font: 500 16px var(--display); color: var(--pink-d); background: none; border: none; cursor: pointer; }
+
+.wl-day.fold { padding-bottom: 6px; }
+.wl-day.fold .wl-h small::after { content: " \203A"; }
 </style>
 </head>
 <body>
@@ -4724,7 +4747,7 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:31</footer>
+  <footer>Mr.O:17:41</footer>
 </div>
 
 <script>
@@ -12165,7 +12188,7 @@ function renderGoals() {
     if (goalsTab === 'week') {
       const gs = areaGoals(a.k);
       body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button>'; }).join('') +
-        (gs.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
+        (gs.length < MAX_LIFE_GOALS && (weekGoalCount() < MAX_WEEK_ALL || !gs.length) ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
     } else if (goalsTab === 'month') {
       const g = MG[a.k];
       body = monthEdit === a.k || !g
@@ -12908,7 +12931,7 @@ function lifeDetail(box, a) {
       '</li>';
   });
   html += '</ol>';
-  if (gs.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL) html += '<button type="button" class="lf-addlink lf-addgoal">+ Add goal ' + (gs.length + 1) + '</button>';
+  if (gs.length < MAX_LIFE_GOALS && (weekGoalCount() < MAX_WEEK_ALL || !gs.length)) html += '<button type="button" class="lf-addlink lf-addgoal">+ Add goal ' + (gs.length + 1) + '</button>';
   html += '<button type="button" class="w3-link">Why so few goals?</button>';
   box.innerHTML = html;
 
@@ -13942,6 +13965,9 @@ function stepDoneOn(g, k) {
 let planMode = 'day';
 try { planMode = localStorage.getItem(KEY + '.planmode') === 'week' ? 'week' : 'day'; } catch {}
 let weekOf = null;   // the Monday of the week on show
+let weekLook = 'list';
+const wlOpen = new Set();   // past days you unfolded   // list (days down the page) or cal (time grid)
+try { weekLook = localStorage.getItem(KEY + '.weeklook') === 'cal' ? 'cal' : 'list'; } catch {}
 const WK_COLS = ['#f0b0c2', '#9cc6e4', '#e3cfa6', '#c8c2c0'];
 const mondayOf = k => { const d = fromKey(k); return shiftKey(k, -((d.getDay() + 6) % 7)); };
 
@@ -13952,7 +13978,7 @@ function setPlanMode(m) {
   view.classList.toggle('wk', m === 'week');
   document.getElementById('week-body').hidden = m !== 'week';
   document.querySelectorAll('#plan-seg [data-pm]').forEach(b => b.classList.toggle('on', b.dataset.pm === m));
-  if (m === 'week') renderWeek();
+  if (m === 'week') { renderWeek.scrolled = false; renderWeek(); }
   else { const np = document.getElementById('nowpill'); if (np) np.classList.remove('on'); }
 }
 
@@ -13976,11 +14002,29 @@ function renderWeek() {
   let html = '<div class="wk-head"><div><b>' + (days.includes(today) ? 'This week' : weekOf > today ? 'Coming week' : 'Past week') + '</b><small>' + range + '</small></div>' +
     '<div class="wk-nav"><button type="button" data-wk="-1" aria-label="previous week">\u2190</button><button type="button" data-wk="0">now</button><button type="button" data-wk="1" aria-label="next week">\u2192</button></div></div>';
 
-  html += '<div class="wk-strip">' + days.map((k, n) => { const d = fromKey(k);
+  html += '<div class="md-seg wk-look"><button type="button" class="md-seg-b' + (weekLook === 'list' ? ' on' : '') + '" data-look="list">List</button><button type="button" class="md-seg-b' + (weekLook === 'cal' ? ' on' : '') + '" data-look="cal">Calendar</button></div>';
+  if (weekLook === 'cal') html += '<div class="wk-strip">' + days.map((k, n) => { const d = fromKey(k);
     return '<button type="button" class="wk-day' + (k === today ? ' today' : '') + (all[n].length ? ' has' : '') + '" data-day="' + k + '" aria-label="plan ' + FULL[d.getDay()] + '">' +
       cap(FULL[d.getDay()].slice(0, 3)) + '<b>' + d.getDate() + '</b><i></i></button>'; }).join('') + '</div>';
 
   html += '<button type="button" class="wk-add" id="wk-add"><span class="plusbox">+</span> Add a block</button>';
+
+  if (weekLook === 'list') {
+    // days down the page, each with its blocks: time, name, length
+    const goalOf = id => { for (const a of AREAS) for (const g of areaGoals(a.k)) if (g.setAt === id) return a; return null; };
+    const nowM = new Date().getHours() * 60 + new Date().getMinutes();
+    html += '<div class="wl">' + days.map((k, n) => { const d = fromKey(k), bs = all[n], isT = k === today, past = k < today;
+      const raw = (state.days[k] || {}).blocks || [];
+      const fold = past && bs.length && !wlOpen.has(k);
+      return '<section class="wl-day' + (isT ? ' today' : '') + (past ? ' past' : '') + (fold ? ' fold' : '') + '" id="wl-' + k + '">' +
+        '<button type="button" class="wl-h" ' + (past && bs.length ? 'data-fold="' + k + '"' : 'data-day="' + k + '"') + '><b>' + (isT ? 'Today' : cap(FULL[d.getDay()])) + '</b><span>' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</span>' +
+          '<small>' + (bs.length ? (bs.some(b => b.done) ? bs.filter(b => b.done).length + ' of ' + bs.length + ' done' : bs.length + (bs.length === 1 ? ' block' : ' blocks')) : '') + '</small></button>' +
+        (fold ? '' : bs.length
+          ? '<ul>' + bs.map(b => { const a = raw[b.i] && raw[b.i].step ? goalOf(raw[b.i].step) : null, live = isT && nowM >= b.from && nowM < b.to;
+              return '<li class="' + (b.done ? 'done' : '') + (live ? ' live' : '') + '" data-day="' + k + '"' + (a ? ' style="--c:' + a.c + '"' : '') + '><time>' + clock(b.from) + '</time><span>' + (a ? '<i>' + a.e + '</i>' : '') + esc(b.label) + '</span><small>' + (b.done ? '\u2713' : minsLabel(b.to - b.from)) + '</small></li>'; }).join('') + '</ul>'
+          : '<button type="button" class="wl-empty" data-addto="' + k + '">+ Plan ' + (isT ? 'today' : cap(FULL[d.getDay()])) + '</button>') +
+        '</section>'; }).join('') + '</div>';
+  }
 
   // the hours on show: 7am to 10pm, wider if a plan goes outside that
   let lo = 7 * 60, hi = 22 * 60;
@@ -13991,13 +14035,13 @@ function renderWeek() {
   for (let m = lo; m <= hi; m += 120) hours += '<span style="top:' + ((m - lo) * PX) + 'px">' + clock(m).replace(':00', '') + '</span>';
   const nowM = new Date().getHours() * 60 + new Date().getMinutes();
   // wide days that scroll sideways; the hours stay put on the left
-  html += '<div class="wk-scroll"><div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hcol"><div class="wk-ch"></div><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div></div>' +
+  if (weekLook === 'cal') html += '<div class="wk-scroll"><div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hcol"><div class="wk-ch"></div><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div></div>' +
     days.map((k, n) => '<div class="wk-dcol' + (k === today ? ' today' : '') + '"><button type="button" class="wk-ch" data-day="' + k + '">' + cap(FULL[fromKey(k).getDay()]) + ' <b>' + fromKey(k).getDate() + '</b></button><div class="wk-col' + (k === today ? ' today' : '') + '" data-addto="' + k + '" style="height:' + H + 'px">' +
       all[n].map(b => { const c = WK_COLS[[...b.label.toLowerCase()].reduce((x, ch) => x + ch.charCodeAt(0), 0) % WK_COLS.length];
         return '<button type="button" class="wk-blk' + (b.done ? ' done' : '') + '" data-day="' + k + '" style="--q:' + c + ';top:' + ((b.from - lo) * PX) + 'px;height:' + Math.max(14, (b.to - b.from) * PX - 2) + 'px" title="' + esc(b.label + ', ' + clock(b.from) + ' to ' + clock(b.to)) + '">' + esc(b.label) + ((b.to - b.from) * PX >= 40 ? '<small>' + clock(b.from) + '</small>' : '') + '</button>'; }).join('') +
       (k === key(new Date()) && nowM >= lo && nowM <= hi ? '<i class="wk-now" style="top:' + ((nowM - lo) * PX) + 'px"></i>' : '') +
     '</div></div>').join('') + '</div></div>';
-  if (!planned) html += '<p class="wk-empty">Nothing planned this week yet. Tap a day to add a block.</p>';
+  if (!planned && weekLook === 'cal') html += '<p class="wk-empty">Nothing planned this week yet. Tap a day to add a block.</p>';
 
   // copy a day: only into an empty day, so nothing gets lost
   const opt = sel => days.map(k => '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + cap(FULL[fromKey(k).getDay()]) + '</option>').join('');
@@ -14017,12 +14061,15 @@ function renderWeek() {
   }));
   document.getElementById('wk-add').addEventListener('click', () => weekAddSheet(days.includes(today) ? today : days[0], days));
   box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) weekAddSheet(c.dataset.addto, days); }));
+  box.querySelectorAll('[data-fold]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.fold; wlOpen.has(k) ? wlOpen.delete(k) : wlOpen.add(k); renderWeek(); }));
+  if (weekLook === 'list' && !renderWeek.scrolled && days.includes(today)) { renderWeek.scrolled = true; const t = document.getElementById('wl-' + today); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: 'smooth' }), 60); }
+  box.querySelectorAll('[data-look]').forEach(b => b.addEventListener('click', () => { weekLook = b.dataset.look; try { localStorage.setItem(KEY + '.weeklook', weekLook); } catch {} renderWeek(); }));
   // open on today, or the first planned day
   const sc = box.querySelector('.wk-scroll'), cols = box.querySelectorAll('.wk-dcol');
   // each day takes 85% of the space, so the edge of the next day shows you can swipe
-  if (sc) box.querySelector('.wk-cal').style.setProperty('--dw', Math.max(110, Math.round((sc.clientWidth - box.querySelector('.wk-hcol').offsetWidth) * 0.85)) + 'px');
+  if (sc && weekLook === 'cal') box.querySelector('.wk-cal').style.setProperty('--dw', Math.max(110, Math.round((sc.clientWidth - box.querySelector('.wk-hcol').offsetWidth) * 0.85)) + 'px');
   const at = days.indexOf(today) >= 0 ? days.indexOf(today) : Math.max(0, all.findIndex(x => x.length));
-  if (sc && cols[at]) sc.scrollLeft = cols[at].offsetLeft - box.querySelector('.wk-hcol').offsetWidth;
+  if (sc && cols[at] && weekLook === 'cal') sc.scrollLeft = cols[at].offsetLeft - box.querySelector('.wk-hcol').offsetWidth;
   document.getElementById('wk-go').addEventListener('click', () => {
     const f = document.getElementById('wk-from').value, t = document.getElementById('wk-to').value;
     const msg = document.getElementById('wk-msg'), src = state.days[f];
