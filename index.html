@@ -144,7 +144,7 @@ body {
   max-width: 30rem;
   margin: 0 auto;
   padding-inline: 18px;
-  padding-block: 24px 40px;
+  padding-block: 24px calc(84px + env(safe-area-inset-bottom));
 }
 
 /* ---------- brick primitives ---------- */
@@ -1418,8 +1418,8 @@ color: var(--muted);
 }
 
 footer {
-  margin-top: 34px;
-  margin-bottom: 86px;
+  margin-top: 20px;
+  margin-bottom: 0;
   font-family: var(--mono); font-size: 12px;
 color: var(--muted); text-align: center;
 }
@@ -4247,6 +4247,22 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 }
 
 #bugtoast { position: fixed; z-index: 100; left: 12px; right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); padding: 12px 14px; font: 500 14px/1.4 var(--display); color: #fff; background: #b9566f; border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); overflow-wrap: anywhere; }
+
+.gl-steps { display: block; width: 100%; min-height: 32px; margin: -4px 0 6px; padding: 0 0 0 20px; text-align: left; font: 400 13px var(--display); color: var(--muted); background: none; border: none; cursor: pointer; }
+.gl-steps.none { color: color-mix(in srgb, var(--pink-d) 80%, var(--muted)); }
+.gs-h { margin: 0; font-size: 22px; font-weight: 600; }
+.gs-goal { margin: 4px 0 0; font-size: 15px; font-weight: 500; }
+.gs-ask { margin: 10px 0 14px; font-size: 14px; color: var(--muted); }
+.gs-list { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.gs-list li { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 6px 0 14px; font-size: 16px; background: var(--paper); border: 1px solid var(--hair); border-radius: 14px; }
+.gs-list li span { flex: 1; }
+.gs-list li button { width: 40px; height: 40px; font-size: 20px; color: var(--muted); background: none; border: none; cursor: pointer; }
+.gs-add { display: flex; gap: 8px; }
+.gs-add input { flex: 1; min-width: 0; min-height: 46px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; }
+.gs-add button { min-height: 46px; padding: 0 16px; font: 600 15px var(--display); color: var(--ink); background: color-mix(in srgb, var(--pink) 28%, var(--card)); border: none; border-radius: 14px; cursor: pointer; }
+.gs-max { font-size: 13px; color: var(--muted); }
+.lf-wiz .gs-ed { margin: 0 0 18px; text-align: left; }
+.qp-c.goal { background: color-mix(in srgb, var(--pink) 18%, var(--card)); }
 </style>
 </head>
 <body>
@@ -4505,7 +4521,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 16:58</footer>
+  <footer>Mr.O:17:02</footer>
 </div>
 
 <script>
@@ -4517,7 +4533,7 @@ function bugToast(e) {
     const where = e && e.lineno ? ' (line ' + e.lineno + ')' : (e && e.stack ? ' (' + String(e.stack).split('\n').slice(0, 2).join(' ').replace(/\s+/g, ' ').slice(0, 120) + ')' : '');
     let t = document.getElementById('bugtoast');
     if (!t) { t = document.createElement('div'); t.id = 'bugtoast'; t.addEventListener('click', () => t.remove()); document.body.appendChild(t); }
-    t.textContent = 'Something broke: ' + msg + where + ' · build ' + ((document.querySelector('footer') || {}).textContent || '').split('build ').pop() + '. Tap to close.';
+    t.textContent = 'Something broke: ' + msg + where + ' · build ' + ((document.querySelector('footer') || {}).textContent || '').split(':').slice(1).join(':') + '. Tap to close.';
   } catch {}
 }
 window.addEventListener('error', e => bugToast(e));
@@ -5454,6 +5470,7 @@ function openNameSheet(b) {
           row('\u{1F4BC}', 'Work', 'needs an outcome') + row('\u{1F9D8}', 'Rest', 'break, walk, nap…', null, true) +
           row('\u{1F465}', 'Meeting', 'topic and agenda', null, true) + row('\u{1F3CB}️', 'Workout', '') +
           MEAL_SLOTS.map(([k, name, e]) => { const plan = mealsFor(fromKey(viewDay).getDay())[k]; return row(e, name, plan ? 'planned: ' + plan : 'no meal planned'); }).join('') +
+          (() => { const S = goalSteps(); return S.length ? '<p class="ns-sub">Your goals</p>' + S.map(x => row(x.e, x.t, x.goal)).join('') : ''; })() +
           (mine.length ? '<p class="ns-sub">Your usual</p>' + mine.map(x => row('↻', x.t, minsLabel(Number(x.mins) || 60))).join('') : '') +
         '</div>';
     }
@@ -5483,6 +5500,8 @@ function openNameSheet(b) {
       if (k === 'Workout') return set('Workout', 60);
       const ms = MEAL_SLOTS.find(x => x[1] === k);
       if (ms) { b.meal = ms[0]; return set(k, ms[0] === 'b' ? 30 : 45); }
+      const gst = goalSteps().find(x => x.t === k);
+      if (gst) { b.step = gst.id; return set(k, 60); }
       const u = usualLabels(5).find(x => x.t === k); set(k, u && Number(u.mins));
     }));
   };
@@ -5515,6 +5534,7 @@ function quickPicks(b) {
   chip('Rest ›', () => { pickStep = { b, step: 'rest' }; renderDay(); });
   chip('Meeting ›', () => { pickStep = { b, step: 'meet' }; renderDay(); });
   chip('Workout', () => set('Workout', 60));
+  goalSteps().slice(0, 6).forEach(x => chip(x.e + ' ' + x.t, () => { b.step = x.id; set(x.t, 60); }, 'goal'));
   usualLabels(4).forEach(x => chip(x.t, () => set(x.t, Number(x.mins) || null), 'mine'));
   return wrap;
 }
@@ -11936,7 +11956,8 @@ function renderGoals() {
     let body = '';
     if (goalsTab === 'week') {
       const gs = areaGoals(a.k);
-      body = gs.map(g => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '"><i class="lf-dot ' + st[0] + '"></i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span><small>' + st[1] + '</small></button>'; }).join('') +
+      body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '"><i class="lf-dot ' + st[0] + '"></i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span><small>' + st[1] + '</small></button>' +
+        '<button type="button" class="gl-steps' + ((g.actions || []).length ? '' : ' none') + (g.private || a.k === 'love' ? ' priv' : '') + '" data-steps="' + a.k + ':' + gi + '">' + ((g.actions || []).length ? esc(g.actions.join(' \u00b7 ')) : '+ steps to get there') + '</button>'; }).join('') +
         (gs.length < MAX_LIFE_GOALS && weekGoalCount() < MAX_WEEK_ALL ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
     } else if (goalsTab === 'month') {
       const g = MG[a.k];
@@ -11959,6 +11980,7 @@ function renderGoals() {
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
   on('[data-wk]', el => { lifeOpen = el.dataset.wk; areaGoalsOpen = true; lifeSetup = null; show('life'); window.scrollTo(0, 0); });
+  on('[data-steps]', el => { const [ak, gi] = el.dataset.steps.split(':'); stepsSheet(ak, Number(gi)); });
   on('[data-wkadd]', el => { goalsReturn = true; lifeOpen = null; lifeSetup = { i: AREAS.findIndex(x => x.k === el.dataset.wkadd), text: '', one: true }; show('life'); window.scrollTo(0, 0); });
   on('[data-bignew]', el => { goalsReturn = true; lifeOpen = null; if (!state.life[el.dataset.bignew]) state.life[el.dataset.bignew] = { goals: [], ids: [] }; bigEdit = { a: el.dataset.bignew, i: -1, text: '', months: Number(goalsTab) }; show('life'); window.scrollTo(0, 0); });
   on('[data-bigopen]', () => { lifeOpen = null; lifeTab = 'big'; show('life'); window.scrollTo(0, 0); });
@@ -12252,7 +12274,7 @@ function measureScore(id, ks) {
 function goalScore(g, ks) {
   if (g.m === 'dyn' && g.dyn) return dynScore(g.dyn, ks);
   if (g.m === 'custom') {
-    const v = ks.filter(k => (g.days || []).includes(k)).length;
+    const v = ks.filter(k => (g.days || []).includes(k) || stepDoneOn(g, k)).length;
     const target = scaleTarget(g.target || 5, 'days', false, ks.length);
     return { v, target, pct: Math.min(100, Math.round(v / target * 100)) };
   }
@@ -13223,6 +13245,7 @@ function lifeWizard(box) {
       const was = goals[st.replace] || {};
       if (m === 'custom' && was.m === 'custom') g.days = was.days || [];   // keep the days you ticked
       if (was.private) g.private = true;
+      if (was.actions) g.actions = was.actions;   // keep its steps
       goals[st.replace] = g;
       areaGoals(a.k); save();
       lifeSetup = null; lifeOpen = a.k; renderLife();
@@ -13230,11 +13253,24 @@ function lifeWizard(box) {
     }
     goals.push(g);
     areaGoals(a.k); save();
-    lifeSetup = { ...st, text: '', pick: null, said: null, saved: true };
+    lifeSetup = { ...st, text: '', pick: null, said: null, steps: goals.length - 1 };   // next: the steps to get there
     renderLife();
   };
   const used = goals.filter((g, j) => j !== st.replace).map(g => g.m).filter(m => m !== 'custom');
   const options = Object.keys(MEASURES).filter(id => MEASURES[id].area === a.k && !used.includes(id));
+
+  // the steps that get you there: they become picks when you plan a day
+  if (st.steps !== undefined && goals[st.steps]) {
+    const g = goals[st.steps];
+    box.innerHTML = '<div class="lf-wiz" style="--c:' + a.c + '">' + step + '<h1>Steps</h1>' +
+      '<p class="lf-yours">“' + esc(g.text) + '”</p>' +
+      '<p class="lf-ask">What steps will get you there this week?</p>' +
+      '<div class="gs-ed"></div>' +
+      '<div class="lf-btns col"><button type="button" class="lf-btn main" data-a="next">Next</button></div></div>';
+    stepsEditor(box.querySelector('.gs-ed'), g, a);
+    box.querySelector('[data-a=next]').addEventListener('click', () => { lifeSetup = { ...st, steps: undefined, saved: true }; renderLife(); });
+    return;
+  }
 
   // after saving: show the goals so far, add another or move on
   if (st.saved) {
@@ -13689,6 +13725,59 @@ async function chatSend(text) {
   });
 }
 
+
+/* =========== goal steps ===========
+   each weekly goal can have a few steps that get you there (Gym, 10k walk).
+   they show up as picks when you plan a day. a block made from a step
+   remembers it (b.step = the goal's id), and ticking it counts for that goal. */
+const MAX_STEPS = 6;
+const goalId = g => { if (!g.setAt) g.setAt = Date.now() + Math.floor(Math.random() * 1000); return g.setAt; };
+function goalSteps() {
+  const out = [];
+  try {
+    for (const a of AREAS) for (const g of areaGoals(a.k)) for (const t of (g.actions || [])) out.push({ t, e: a.e, a: a.k, id: goalId(g), goal: g.text });
+  } catch {}
+  return out;
+}
+function stepDoneOn(g, k) {
+  if (!g.actions || !g.actions.length) return false;
+  const id = g.setAt, names = g.actions.map(x => x.toLowerCase());
+  return ((state.days[k] || {}).blocks || []).some(b => b.done && (b.step === id || names.includes((b.label || '').trim().toLowerCase())));
+}
+// the list of steps with a box to add more, used in setup and in the sheet
+function stepsEditor(root, g, a) {
+  const draw = () => {
+    const S = g.actions || [];
+    root.innerHTML = '<ul class="gs-list">' + S.map((t, i) => '<li><span>' + esc(t) + '</span><button type="button" data-rm="' + i + '" aria-label="remove ' + esc(t) + '">\u00d7</button></li>').join('') + '</ul>' +
+      (S.length < MAX_STEPS ? '<div class="gs-add"><input type="text" maxlength="40" placeholder="' + (S.length ? 'another step' : 'e.g. ' + ({ health: 'Gym', wealth: 'Apply to 2 jobs', love: 'Call mum', self: 'Read 20 pages' })[a.k]) + '" aria-label="add a step"><button type="button">Add</button></div>' : '<p class="gs-max">' + MAX_STEPS + ' steps at most.</p>');
+    root.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { g.actions.splice(Number(b.dataset.rm), 1); save(); draw(); }));
+    const inp = root.querySelector('.gs-add input');
+    if (!inp) return;
+    const add = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; }
+      g.actions = g.actions || [];
+      if (!g.actions.some(x => x.toLowerCase() === t.toLowerCase())) g.actions.push(t);
+      goalId(g); save(); draw(); const n = root.querySelector('.gs-add input'); if (n) n.focus(); };
+    root.querySelector('.gs-add button').addEventListener('click', add);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+  };
+  draw();
+}
+function stepsSheet(ak, gi) {
+  const a = AREAS.find(x => x.k === ak), g = areaGoals(ak)[gi];
+  if (!a || !g) return;
+  const old = document.getElementById('gssheet'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'gssheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet" role="dialog" aria-modal="true" aria-label="Steps"><span class="w3-grab"></span>' +
+    '<h2 class="gs-h">' + a.e + ' Steps</h2><p class="gs-goal">' + esc(g.text) + '</p><p class="gs-ask">What steps will get you there this week? They show up when you plan a day.</p>' +
+    '<div class="gs-ed"></div><button type="button" class="wka-go gs-done">Done</button></div>';
+  document.body.appendChild(el);
+  stepsEditor(el.querySelector('.gs-ed'), g, a);
+  const close = () => { el.remove(); if (document.body.dataset.view === 'goals') renderGoals(); };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('.gs-done').addEventListener('click', close);
+}
+
 /* =========== plan: week =========== */
 /* a strip of 7 days (tap one to plan it), a calendar of the whole week,
    and "copy a day" to reuse a plan. blocks run one after another from the
@@ -13803,6 +13892,7 @@ function weekAddSheet(day0, days) {
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet wka" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>' +
     '<h2>Add a block</h2>' +
     '<input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="what is it? e.g. Gym" aria-label="block name">' +
+    (() => { const S = goalSteps(); return S.length ? '<b class="wka-h">From your goals</b><div class="wka-row" id="wka-steps">' + S.map(x => '<button type="button" data-st="' + esc(x.t) + '">' + x.e + ' ' + esc(x.t) + '</button>').join('') + '</div>' : ''; })() +
     '<b class="wka-h">How long</b><div class="wka-row" id="wka-lens">' + LENS.map(([m, t]) => '<button type="button" data-m="' + m + '"' + (m === mins ? ' class="on"' : '') + '>' + t + '</button>').join('') + '</div>' +
     '<b class="wka-h">Which days?</b><div class="wka-days" id="wka-days">' + days.map(k => '<button type="button" data-k="' + k + '"' + (pick.has(k) ? ' class="on"' : '') + '>' + cap(FULL[fromKey(k).getDay()].slice(0, 3)) + '</button>').join('') + '</div>' +
     '<div class="wka-quick"><button type="button" data-q="wd">Weekdays</button><button type="button" data-q="all">Every day</button><button type="button" data-q="one">Just ' + cap(FULL[fromKey(day0).getDay()]) + '</button></div>' +
@@ -13819,6 +13909,7 @@ function weekAddSheet(day0, days) {
   const close = () => el.remove();
   el.querySelector('.w3-back').addEventListener('click', close);
   name.addEventListener('input', sync);
+  el.querySelectorAll('#wka-steps button').forEach(b => b.addEventListener('click', () => { name.value = b.dataset.st; sync(); }));
   el.querySelectorAll('#wka-lens button').forEach(b => b.addEventListener('click', () => { mins = Number(b.dataset.m); sync(); }));
   el.querySelectorAll('#wka-days button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; pick.has(k) ? pick.delete(k) : pick.add(k); sync(); }));
   el.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
@@ -13833,7 +13924,8 @@ function weekAddSheet(day0, days) {
     for (const k of pick) {
       if (!state.days[k]) state.days[k] = { start: k === planKey() ? nowHHMM() : '08:00', blocks: [] };
       state.days[k].touched = true;
-      state.days[k].blocks.push({ label, mins });
+      const gst = goalSteps().find(x => x.t.toLowerCase() === label.toLowerCase());
+      state.days[k].blocks.push(gst ? { label, mins, step: gst.id } : { label, mins });
     }
     save(); close(); renderWeek();
   });
