@@ -4632,7 +4632,7 @@ html { background: var(--paper) !important; }
 #view-day .datebar .big small, #view-home .pghead span { font-family: "Poppins", sans-serif; }
 #view-home .pghead span, .hm-sec, #view-goals .gl-ah b, .nc-tag, .fx-label {
   letter-spacing: 2px !important; text-transform: uppercase; font-size: 12px !important; }
-#view-home#view-home .hm-now.hm-now b, #view-day .nowcard:not(.past) .nc-name, .focus .fx-name, .cy .cy-h, .wka h2, .ls h2, .gs-h, .fd h2 {
+#view-home#view-home .hm-gt b, #view-home#view-home .hm-now.hm-now b, #view-day .nowcard:not(.past) .nc-name, .focus .fx-name, .cy .cy-h, .wka h2, .ls h2, .gs-h, .fd h2 {
   font-family: var(--serif) !important; font-weight: 600 !important; }
 /* rose gold details */
 .tabs .brick:not(.flat) { background: var(--gold) !important; color: #3a1f29 !important; }
@@ -14078,7 +14078,7 @@ for (const k in TABS) TABS[k][0].addEventListener('click', () => show(k));
 function fillHeads() {
   const t = todayKey(), d = new Date(), set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
   const h = d.getHours();
-  set('home-hi', h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening');
+  set('home-hi', (h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening') + ', Mrs.O');
   set('home-date', FULL[d.getDay()].replace(/^./, c => c.toUpperCase()) + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()].replace(/^./, c => c.toUpperCase()));
   set('food-sub', state.food.filter(f => key(new Date(f.at)) === t).length + ' today');
   set('ideas-sub', 'only you');
