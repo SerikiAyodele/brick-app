@@ -4976,12 +4976,6 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 #view-day .start-row { align-items: center; padding: 6px 6px 6px 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; }
 #view-day .start-row input { min-height: 44px; }
 
-/* home fits one screen on the phone, even with the next step card and the phone's top bar */
-#view-home#view-home#view-home .pghead { margin-top: 0 !important; margin-bottom: 18px !important; padding-bottom: 14px !important; }
-#view-home#view-home#view-home .hm-quick { margin-top: 14px !important; margin-bottom: 16px !important; }
-#view-home#view-home#view-home .hm-sec { margin: 18px 2px 10px !important; }
-#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { min-height: 100px !important; padding: 14px 16px !important; }
-#view-home#view-home#view-home#view-home#view-home .hm-area em { padding-top: 6px; font-size: 24px !important; }
 #view-home#view-home#view-home .hm-nudge { margin-bottom: 12px !important; }
 </style>
 </head>
@@ -5243,7 +5237,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:05</footer>
+  <footer>Mr.O:20:09</footer>
 </div>
 
 <script>
@@ -7775,7 +7769,7 @@ function commitStart() {
   setStart(toMins(v.slice(0, 5)));
 }
 
-startInput.addEventListener('change', commitStart);
+startInput.addEventListener('change', () => { if (document.activeElement !== startInput) commitStart(); });   // while typing, wait for blur
 document.getElementById('day-undo').addEventListener('click', undoDay);
 document.getElementById('show-toggle').addEventListener('click', () => { if (showOn()) exitShow(); else startShow(); });
 document.getElementById('show-exit').addEventListener('click', exitShow);
@@ -15195,7 +15189,15 @@ function weekAddSheet(day0, days, preset, after) {
     }
     el.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => draw(1)));
     const st = el.querySelector('#wka-st');
-    st.addEventListener('change', () => { if (/^\d{2}:\d{2}/.test(st.value)) { start = st.value.slice(0, 5); draw(2); } });
+    // update the times in place, never redraw while the time picker is open (that closed it)
+    const refresh = () => {
+      if (!/^\d{2}:\d{2}/.test(st.value)) return;
+      start = st.value.slice(0, 5);
+      const at = toMins(start) + used(day0);
+      const e = el.querySelector('.wk2-hrs small'); if (e) e.textContent = 'ends ' + clock(at + mins);
+      const n = el.querySelector('.wka-note'); if (n) n.textContent = 'On ' + DAY0 + ' it starts at ' + clock(at) + ', after what is already planned.';
+    };
+    st.addEventListener('input', refresh); st.addEventListener('change', refresh); st.addEventListener('blur', refresh);
     el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { mins = Number(b.dataset.m); draw(2); }));
     el.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { mins = Math.max(15, Math.min(720, mins + Number(b.dataset.d))); draw(2); }));
     el.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; pick.has(k) ? pick.delete(k) : pick.add(k); if (!pick.size) pick.add(day0); draw(2); }));
