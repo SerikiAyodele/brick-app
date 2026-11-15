@@ -5020,6 +5020,32 @@ body[data-view="home"] footer { position: relative; margin: 0 !important; paddin
 .ls-add { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 0 0 14px; }
 .ls-add button { min-height: 52px; font: 600 17px var(--display); color: var(--ink); background: color-mix(in srgb, var(--pink) 16%, var(--card)); border: 1px solid color-mix(in srgb, var(--pink) 40%, var(--hair)); border-radius: 16px; cursor: pointer; }
 .ls-add button:active { transform: scale(.96); }
+/* plan: just enough room at the bottom to clear the tab bar (no now pill on this page) */
+body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* brain dump */
+.bd { margin: 0 0 18px; padding: 14px 16px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 22px; }
+.bd-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+.bd-h b { font-size: 17px; font-weight: 600; }
+.bd-h small { font-size: 13px; color: var(--muted); }
+.bd-add { display: flex; gap: 8px; }
+.bd-add input { flex: 1; min-width: 0; min-height: 48px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 14px; }
+.bd-add button { flex: none; width: 48px; min-height: 48px; font: 500 24px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 14px; cursor: pointer; }
+.bd-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.bd-list li { display: flex; align-items: center; gap: 12px; min-height: 50px; border-bottom: 1px solid var(--hair); }
+.bd-list li:last-child { border-bottom: 0; }
+.bd-list li span { flex: 1; min-width: 0; font-size: 17px; line-height: 1.35; overflow-wrap: break-word; }
+.bd-list.done li span { color: var(--muted); }
+.bd-tick { flex: none; width: 28px; height: 28px; padding: 0; font-size: 14px; color: #fff; background: none; border: 2px solid color-mix(in srgb, var(--pink) 60%, var(--hair)); border-radius: 50%; cursor: pointer; }
+.bd-tick.on { background: var(--pink); border-color: var(--pink); }
+.bd-plan { flex: none; min-height: 36px; padding: 0 12px; font: 500 14px var(--display); color: var(--pink-d); background: none; border: 1px solid color-mix(in srgb, var(--pink) 40%, var(--hair)); border-radius: 18px; cursor: pointer; }
+.bd-done { display: block; min-height: 40px; margin: 6px 0 0; padding: 0; font: 500 14px var(--display); color: var(--muted); background: none; border: none; text-decoration: underline; cursor: pointer; }
+
+/* what's this block: a clear way out */
+.ns-sheet { position: relative; }
+.ns-x { position: absolute; top: 14px; right: 14px; z-index: 2; width: 44px; height: 44px; font-size: 26px; line-height: 1; color: var(--ink); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
+.ns-sheet .ns-h, .ns-sheet .ns-head { padding-right: 56px; }
+.ns-cancel { display: block; width: 100%; min-height: 50px; margin-top: 14px; font: 600 16px var(--display); color: var(--ink); background: var(--slot); border: none; border-radius: 25px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -5155,6 +5181,7 @@ body[data-view="home"] footer { position: relative; margin: 0 !important; paddin
 
     <div id="day-goal"></div>
     <div id="carry-slot"></div>
+    <div id="dump-slot"></div>
 
     <div class="start-row">
       <label for="start">Start at</label>
@@ -5280,7 +5307,7 @@ body[data-view="home"] footer { position: relative; margin: 0 !important; paddin
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:00</footer>
+  <footer>Mr.O:21:16</footer>
 </div>
 
 <script>
@@ -5341,7 +5368,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [] };
 
 function load() {
   try {
@@ -5387,7 +5414,8 @@ function load() {
         people:    Array.isArray(d.people) ? d.people : [],
         monthGoals: d.monthGoals && typeof d.monthGoals === 'object' ? d.monthGoals : {},
         habitsCleared: d.habitsCleared || 0,
-        habitsOld: Array.isArray(d.habitsOld) ? d.habitsOld : []
+        habitsOld: Array.isArray(d.habitsOld) ? d.habitsOld : [],
+        dump: Array.isArray(d.dump) ? d.dump : []
       };
     }
     const old = localStorage.getItem(OLD);
@@ -6252,7 +6280,7 @@ function openNameSheet(b) {
   const row = (icon, text, sub, fn, more) => '<button type="button" class="ns-row" data-k="' + esc(text) + '"><span class="ns-i">' + icon + '</span><b>' + esc(text) + '</b>' +
     (sub ? '<small>' + esc(sub) + '</small>' : '') + (more ? '<i>›</i>' : '') + '</button>';
   const draw = step => {
-    let html = '<div class="w3-back"></div><div class="w3-sheet ns-sheet" role="dialog" aria-modal="true"><span class="w3-grab"></span>';
+    let html = '<div class="w3-back"></div><div class="w3-sheet ns-sheet" role="dialog" aria-modal="true"><span class="w3-grab"></span><button type="button" class="ns-x" aria-label="close">\u00d7</button>';
     if (step === 'rest') {
       html += '<div class="ns-head"><button type="button" class="ns-back">←</button><h2>What kind of rest?</h2></div><div class="ns-list">' +
         REST_KINDS.map(([t, m]) => row({ 'Break': '☕', 'Walk': '\u{1F6B6}', 'Nap': '\u{1F634}', 'Shower': '\u{1F6BF}', 'Movie time': '\u{1F3AC}', 'Music': '\u{1F3A7}', 'Pray': '\u{1F64F}', 'Do nothing': '\u{1F343}' }[t] || '•', t, minsLabel(m))).join('') + '</div>';
@@ -6272,8 +6300,10 @@ function openNameSheet(b) {
           (mine.length ? '<p class="ns-sub">Your usual</p>' + mine.map(x => row('↻', x.t, minsLabel(Number(x.mins) || 60))).join('') : '') +
         '</div>';
     }
-    el.innerHTML = html + '</div>';
+    el.innerHTML = html + '<button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
     el.querySelector('.w3-back').addEventListener('click', close);
+    el.querySelector('.ns-x').addEventListener('click', close);
+    el.querySelector('.ns-cancel').addEventListener('click', close);
     const back = el.querySelector('.ns-back'); if (back) back.addEventListener('click', () => draw(null));
     const inp = el.querySelector('.ns-in');
     if (step === 'meet') {
@@ -7346,6 +7376,7 @@ function renderDayGoal() {
 
 function renderDay() {
   renderDayGoal();
+  renderDump();
   renderCarry();
   const day = dayFor(viewDay);
   const d = fromKey(viewDay);
@@ -7839,7 +7870,36 @@ document.getElementById('block-add').addEventListener('click', () => addBlockShe
    1. what: picture tiles, your goals first, or type it
    2. how long: your usual first, each with the time it ends
    the block is only added once both are picked, so no empty blocks. */
-function addBlockSheet() {
+
+/* ---- brain dump ----
+   things that come up during the day: type, tick, or plan it as a block.
+   not-done items stay until ticked; done ones show until the day ends. */
+let dumpOpenDone = false;
+function renderDump() {
+  const slot = document.getElementById('dump-slot');
+  if (!slot) return;
+  if (viewDay !== planKey()) { slot.innerHTML = ''; return; }
+  const L = state.dump || (state.dump = []), t = todayKey();
+  const open = L.filter(x => !x.done), doneToday = L.filter(x => x.done && key(new Date(x.doneAt || x.at)) === t);
+  slot.innerHTML = '<section class="bd"><div class="bd-h"><b>Brain dump</b><small>' + (open.length ? open.length + ' to do' : 'things that come up') + '</small></div>' +
+    '<div class="bd-add"><input type="text" maxlength="140" placeholder="Something came up?" aria-label="add to brain dump"><button type="button" aria-label="add">+</button></div>' +
+    (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
+    (doneToday.length ? '<button type="button" class="bd-done">' + (dumpOpenDone ? 'Hide' : 'Show') + ' ' + doneToday.length + ' done</button>' +
+      (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
+    '</section>';
+  const inp = slot.querySelector('.bd-add input');
+  const add = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } L.push({ id: Date.now().toString(36), text: v, done: false, at: Date.now() }); save(); renderDump(); const n = document.querySelector('#dump-slot .bd-add input'); if (n) n.focus(); };
+  slot.querySelector('.bd-add button').addEventListener('click', add);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+  slot.querySelectorAll('[data-dt]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dt); if (!x) return; x.done = !x.done; x.doneAt = Date.now(); save(); renderDump(); }));
+  slot.querySelectorAll('[data-dp]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dp); if (!x) return; x.done = true; x.doneAt = Date.now(); x.planned = true; save(); renderDump(); addBlockSheet(x.text); }));
+  const dd = slot.querySelector('.bd-done'); if (dd) dd.addEventListener('click', () => { dumpOpenDone = !dumpOpenDone; renderDump(); });
+  // tidy: done items from before today drop off
+  const keep = L.filter(x => !x.done || key(new Date(x.doneAt || x.at)) === t);
+  if (keep.length !== L.length) { state.dump = keep; save(); }
+}
+
+function addBlockSheet(preset) {
   const old = document.getElementById('addsheet'); if (old) old.remove();
   const el = document.createElement('div');
   el.id = 'addsheet'; el.className = 'w3';
@@ -7859,7 +7919,7 @@ function addBlockSheet() {
     return W.concat([['\u{1F3C3}', 'Cardio', 45], ['\u{1F9D8}', 'Yoga', 45], ['\u{1F3CA}', 'Swim', 45], ['\u{1F3BE}', 'Tennis', 60], ['\u{1F6B4}', 'Cycling', 45], ['\u{1F483}', 'Dance', 45]]); };
   let step = null;   // null, 'rest', 'gym' or 'work'
   const mine = usualLabels(2).filter(x => !common.some(c => c[1].toLowerCase() === x.t.toLowerCase()) && !goals.some(g => g.t.toLowerCase() === x.t.toLowerCase()));
-  let pick = null;
+  let pick = preset ? { label: preset } : null;
   const close = () => el.remove();
   const add = mins => {
     const b = { label: pick.label, mins, done: false };
