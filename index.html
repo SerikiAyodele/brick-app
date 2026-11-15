@@ -15,9 +15,9 @@
     try { t = localStorage.getItem('paper.by.mia.v2.theme') || 'auto'; } catch (e) {}
     var dark = t === 'dark' || (t === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
     if (t !== 'auto') document.documentElement.setAttribute('data-theme', t);
-    document.documentElement.style.background = dark ? '#1e1814' : '#faf4ea';
+    document.documentElement.style.background = dark ? '#000000' : '#ffffff';
     var m = document.querySelector('meta[name=theme-color]');
-    if (m) m.setAttribute('content', dark ? '#1e1814' : '#faf4ea');
+    if (m) m.setAttribute('content', dark ? '#000000' : '#ffffff');
   })();
 </script>
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -4496,6 +4496,48 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
 #view-home#view-home .hm-quick .hq.food { --q: #e3874f; }
 #view-home .hm-quick { gap: 6px; }
 #view-home .hm-quick .hq { padding: 0 8px; font-size: 13.5px; }
+
+/* day page, calm: fewer things to read (dyslexia friendly) */
+#view-day .at .endat { display: none; }
+#view-day .bin { display: none; }
+#view-day.sorting .bin { display: inline-flex; }
+#view-day.calm .start-row { display: none; }
+#focusnudge { display: none !important; }
+#view-day .line .what, #view-day .pl-name { font-size: 18px; }
+#view-day .line .at { font-size: 15px; }
+#view-day .line.ticked .what, #view-day .line.ticked .pl-name { text-decoration: none !important; color: var(--muted); }
+.donefold { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; margin: 0 0 6px; padding: 0 14px; font: 500 16px var(--display); color: var(--muted); text-align: left; background: color-mix(in srgb, var(--pink) 8%, var(--card)); border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; }
+.donefold i { font-style: normal; display: grid; place-items: center; width: 26px; height: 26px; font-size: 14px; color: #fff; background: var(--pink); border-radius: 50%; }
+.donefold b { flex: 1; font-weight: 600; color: var(--ink); }
+.donefold span { font-size: 14px; text-decoration: underline; }
+
+/* goal page: steps, and pink where you act */
+.lf-gm-steps { flex: none; min-height: 36px; margin-right: 6px; padding: 0 14px; font: 600 14px var(--display); color: var(--pink-d); background: var(--pink-s); border: none; border-radius: 18px; cursor: pointer; }
+.lf-gm-sl { margin: 4px 0 0 30px; font-size: 14px; color: var(--muted); }
+.lf-today { background: var(--pink) !important; color: #fff !important; border: none !important; }
+.lf-today.on { background: var(--pink-s) !important; color: var(--pink-d) !important; }
+.lf-gm-edit { color: var(--ink) !important; }
+.gs-h { margin: 0; font-size: 22px; font-weight: 600; }
+.gs-goal { margin: 4px 0 0; font-size: 15px; font-weight: 500; }
+.gs-ask { margin: 10px 0 14px; font-size: 14px; color: var(--muted); }
+.gs-list { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.gs-list li { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 6px 0 14px; font-size: 16px; background: var(--paper); border: 1px solid var(--hair); border-radius: 14px; }
+.gs-list li span { flex: 1; }
+.gs-list li button { width: 40px; height: 40px; font-size: 20px; color: var(--muted); background: none; border: none; cursor: pointer; }
+.gs-add { display: flex; gap: 8px; }
+.gs-add input { flex: 1; min-width: 0; min-height: 46px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; }
+.gs-add button { min-height: 46px; padding: 0 16px; font: 600 15px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 14px; cursor: pointer; }
+.gs-max { font-size: 13px; color: var(--muted); }
+html { background: var(--paper) !important; }
+
+.ls-rm { display: block; width: 100%; min-height: 48px; margin-top: 14px; font: 500 16px var(--display); color: #c2415d; background: none; border: 1px solid color-mix(in srgb, #c2415d 35%, var(--hair)); border-radius: 18px; cursor: pointer; }
+
+.totop { display: block; width: 100%; min-height: 52px; margin: 18px 0 0; font: 600 17px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 26px; cursor: pointer; }
+
+.gl-in, #view-goals .gl-in { width: 100%; min-height: 48px; padding: 0 14px; font: 16px var(--display); color: var(--ink) !important; background: var(--paper) !important; border: 1px solid var(--hair) !important; border-radius: 14px; }
+.gl-in::placeholder { color: var(--muted); }
+
+.wl-next { margin: 14px 4px 0; font-size: 14px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -4647,6 +4689,7 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
     </button>
 
     <div class="total" id="total"></div>
+    <button type="button" class="totop" id="day-top">↑ Back to top</button>
   </section>
 
   <!-- ============ IDEAS ============ -->
@@ -4754,7 +4797,7 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:42</footer>
+  <footer>Mr.O:17:53</footer>
 </div>
 
 <script>
@@ -4916,6 +4959,7 @@ function planMin(k) { return Math.floor((Date.now() - fromKey(k).getTime()) / 60
 
 let viewDay = planKey();
 let noteFor = null;   // the timestamp of the check in being annotated
+let dayShowDone = false;  // finished blocks fold into one line unless opened
 let sortingDay = false;   // planning mode: number, drag, set lengths, then Finish plan
 let sortingKey = null;
 let compactDay = !!state.compact;
@@ -6452,7 +6496,8 @@ function lengthPicker(b, from, len) {
           '<button type="button" class="wka-go ls-set">Set ' + minsLabel(other) + '</button><button type="button" class="ls-back">Back</button>'
         : '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === len ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' +
             (m === usual ? '<i>your usual</i>' : '') + '<small>ends ' + clock(from + m) + '</small></button>').join('') +
-          '<button type="button" class="ls-row ls-other" data-other="1"><b>Other</b><small>' + (opts.includes(len) ? '' : 'now ' + minsLabel(len)) + '</small></button></div>') +
+          '<button type="button" class="ls-row ls-other" data-other="1"><b>Other</b><small>' + (opts.includes(len) ? '' : 'now ' + minsLabel(len)) + '</small></button></div>' +
+          '<button type="button" class="ls-rm">Remove this block</button>') +
       '</div>';
     el.querySelector('.w3-back').addEventListener('click', close);
     el.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
@@ -6460,6 +6505,13 @@ function lengthPicker(b, from, len) {
     el.querySelectorAll('[data-o]').forEach(x => x.addEventListener('click', () => { other = Math.max(15, Math.min(720, other + Number(x.dataset.o))); draw(true); }));
     const st = el.querySelector('.ls-set'); if (st) st.addEventListener('click', () => keep(other));
     const bk = el.querySelector('.ls-back'); if (bk) bk.addEventListener('click', () => draw(false));
+    const rm = el.querySelector('.ls-rm');
+    if (rm) rm.addEventListener('click', () => {
+      if (rm.dataset.sure !== '1') { rm.dataset.sure = '1'; rm.textContent = 'Tap again to remove ' + (name || 'it'); return; }
+      const bl = dayFor(viewDay).blocks, at = bl.indexOf(b);
+      if (at >= 0) bl.splice(at, 1);
+      save(); el.remove(); customFor = null; renderDay(); renderHabits();
+    });
   };
   draw(false);
   document.body.appendChild(el);
@@ -6717,6 +6769,9 @@ function renderDay() {
   }
 
   startInput.value = hhmm(toMins(day.start));
+  const dv = document.getElementById('view-day');
+  dv.classList.toggle('sorting', !!sortingDay);
+  dv.classList.toggle('calm', day.blocks.length > 0 && !sortingDay);
   if (!daySnap || daySnap.k !== viewDay) { try { daySnap = snapNow(); } catch {} }
   updateUndo();
   blockList.innerHTML = '';
@@ -6748,6 +6803,18 @@ function renderDay() {
     const len  = Number(b.mins) || 60;   // guard against anything odd in saved data
     const from = at;
     at = at + len;
+
+    // finished blocks fold into one line, so the page shows what is left
+    if (!sortingDay && b.done && i < firstOpen && firstOpen > 0) {
+      if (i === 0) {
+        const f = document.createElement('button');
+        f.type = 'button'; f.className = 'donefold' + (dayShowDone ? ' open' : '');
+        f.innerHTML = '<i>\u2713</i><b>' + firstOpen + ' done</b><span>' + (dayShowDone ? 'hide' : 'show') + '</span>';
+        f.addEventListener('click', () => { dayShowDone = !dayShowDone; renderDay(); });
+        sheet.appendChild(f);
+      }
+      if (!dayShowDone) return;
+    }
 
     const h = habitNamed(b.label);
 
@@ -7093,7 +7160,8 @@ function renderDay() {
       save(); renderDay();
     });
 
-    tools.append(arr, squash);
+    const topBar = !day.planSnap && viewDay >= planKey() && day.blocks.some(b => !b.done);   // the Plan my day bar already shows up top
+    if (topBar) tools.append(squash); else tools.append(arr, squash);
     // alarms: a web app can't set iPhone alarms, so hand the times to a Shortcut that can
     const ups = upcomingStarts(day);
     if (viewDay === planKey() && ups.length) {
@@ -7177,6 +7245,7 @@ document.getElementById('block-add').addEventListener('click', () => {
   save(); renderDay(); renderHabits();
 });
 
+document.getElementById('day-top').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 document.getElementById('day-prev').addEventListener('click',  () => { viewDay = shiftKey(viewDay, -1); renderDay(); });
 document.getElementById('day-next').addEventListener('click',  () => { viewDay = shiftKey(viewDay,  1); renderDay(); });
 document.getElementById('day-today').addEventListener('click', () => { viewDay = planKey(); renderDay(); });
@@ -12259,9 +12328,10 @@ function renderGoals() {
   on('[data-motick]', el => { const g = MG[el.dataset.motick]; g.done = !g.done; save(); renderGoals(); });
   on('[data-moed]', el => { monthEdit = el.dataset.moed; renderGoals(); const i = box.querySelector('[data-mo="' + monthEdit + '"]'); if (i) { i.value = MG[monthEdit].text; i.focus(); } });
   box.querySelectorAll('[data-mo]').forEach(i => {
-    const commit = () => { const t = i.value.trim(), k = i.dataset.mo; if (t) MG[k] = { text: t, done: MG[k] ? MG[k].done : false }; else if (monthEdit === k) delete MG[k]; monthEdit = null; save(); renderGoals(); };
+    const commit = next => { const t = i.value.trim(), k = i.dataset.mo; if (t) MG[k] = { text: t, done: MG[k] ? MG[k].done : false }; else if (monthEdit === k) delete MG[k]; monthEdit = null; save(); renderGoals();
+      if (next) { const n = box.querySelector('[data-mo="' + next + '"]'); if (n) n.focus(); } };   // keep your place in the next box
     i.addEventListener('keydown', e => { if (e.key === 'Enter') commit(); });
-    i.addEventListener('blur', () => { if (i.value.trim() || monthEdit === i.dataset.mo) commit(); });
+    i.addEventListener('blur', e => { const nx = e.relatedTarget && e.relatedTarget.dataset ? e.relatedTarget.dataset.mo : null; if (i.value.trim() || monthEdit === i.dataset.mo) commit(nx); });
   });
 }
 
@@ -12947,7 +13017,8 @@ function lifeDetail(box, a) {
     const open = lifeExpanded === a.k + ':' + n;
     const did = custom && (g.days || []).includes(todayKey());
     html += '<li class="lf-gm' + (open ? ' open' : '') + '" data-open-goal="' + n + '">' +
-      '<div class="lf-gm-row"><i class="lf-dot ' + st + '" title="' + stText + '"></i><b class="lf-g-text' + P + '">' + esc(g.text) + '</b><button type="button" class="lf-gm-edit" data-edit="' + n + '">Edit</button></div>' +
+      '<div class="lf-gm-row"><i class="lf-dot ' + st + '" title="' + stText + '"></i><b class="lf-g-text' + P + '">' + esc(g.text) + '</b><button type="button" class="lf-gm-steps" data-gsteps="' + n + '">Steps</button><button type="button" class="lf-gm-edit" data-edit="' + n + '">Edit</button></div>' +
+      ((g.actions || []).length ? '<p class="lf-gm-sl' + P + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') +
       '<div class="lf-gm-num"><span>' + num + '</span><span class="lf-gm-st ' + st + '">' + stText + '</span></div>' +
       '<i class="lf-g-bar"><u data-w="' + (sc.pct || 0) + '"></u></i>' +
       (() => { const L = goalTodayLinks(g, a.k); return L.length ? '<p class="lf-link' + P + '">Today \u00b7 ' + L.map(x => esc(x.t) + (x.ok ? ' \u2713' : ' \u2717')).join(' \u00b7 ') + '</p>' : ''; })() +
@@ -12991,6 +13062,7 @@ function lifeDetail(box, a) {
     const id = a.k + ':' + li.dataset.openGoal;
     lifeExpanded = lifeExpanded === id ? null : id; renderLife();
   }));
+  box.querySelectorAll('[data-gsteps]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); stepsSheet(a.k, Number(b.dataset.gsteps), () => renderLife()); }));
   box.querySelectorAll('[data-lock]').forEach(b => b.addEventListener('click', () => {
     const g = gs[Number(b.dataset.lock)]; g.private = !g.private; save(); renderLife();
   }));
@@ -13888,9 +13960,9 @@ function applyTheme(t) {
   const root = document.documentElement;
   if (t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', t);
   const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
-  root.style.background = dark ? '#1e1814' : '#faf4ea';
+  root.style.background = dark ? '#000000' : '#ffffff';
   const m = document.querySelector('meta[name=theme-color]');
-  if (m) m.setAttribute('content', dark ? '#1e1814' : '#faf4ea');
+  if (m) m.setAttribute('content', dark ? '#000000' : '#ffffff');
   document.querySelectorAll('#theme-seg button').forEach(b => b.classList.toggle('on', b.dataset.th === t));
 }
 let theme = 'auto';
@@ -13993,14 +14065,52 @@ const goalId = g => { if (!g.setAt) g.setAt = Date.now() + Math.floor(Math.rando
 function goalSteps() {
   const out = [];
   try {
-    for (const a of AREAS) areaGoals(a.k).forEach((g, gi) => out.push({ t: g.text, e: a.e, a: a.k, gi, id: goalId(g), goal: a.name }));
+    for (const a of AREAS) areaGoals(a.k).forEach((g, gi) => {
+      out.push({ t: g.text, e: a.e, a: a.k, gi, id: goalId(g), goal: a.name });
+      for (const st of (g.actions || [])) out.push({ t: st, e: a.e, a: a.k, gi, id: goalId(g), goal: g.text });   // its steps
+    });
   } catch {}
   return out;
 }
 function stepDoneOn(g, k) {
-  const id = g.setAt, names = [String(g.text || '').trim().toLowerCase()];
+  const id = g.setAt, names = [g.text, ...(g.actions || [])].map(x => String(x || '').trim().toLowerCase());
   return ((state.days[k] || {}).blocks || []).some(b => b.done && (b.step === id || names.includes((b.label || '').trim().toLowerCase())));
 }
+// steps for a goal: a list with a box to add more
+const MAX_STEPS = 6;
+function stepsEditor(root, g, a) {
+  const draw = () => {
+    const S = g.actions || [];
+    root.innerHTML = '<ul class="gs-list">' + S.map((t, i) => '<li><span>' + esc(t) + '</span><button type="button" data-rm="' + i + '" aria-label="remove ' + esc(t) + '">×</button></li>').join('') + '</ul>' +
+      (S.length < MAX_STEPS ? '<div class="gs-add"><input type="text" maxlength="40" placeholder="' + (S.length ? 'another step' : 'e.g. ' + ({ health: 'Gym', wealth: 'Apply to 2 jobs', love: 'Call mum', self: 'Read 20 pages' })[a.k]) + '" aria-label="add a step"><button type="button">Add</button></div>' : '<p class="gs-max">' + MAX_STEPS + ' steps at most.</p>');
+    root.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { g.actions.splice(Number(b.dataset.rm), 1); save(); draw(); }));
+    const inp = root.querySelector('.gs-add input');
+    if (!inp) return;
+    const add = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; }
+      g.actions = g.actions || [];
+      if (!g.actions.some(x => x.toLowerCase() === t.toLowerCase())) g.actions.push(t);
+      goalId(g); save(); draw(); const n = root.querySelector('.gs-add input'); if (n) n.focus(); };
+    root.querySelector('.gs-add button').addEventListener('click', add);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+  };
+  draw();
+}
+function stepsSheet(ak, gi, after) {
+  const a = AREAS.find(x => x.k === ak), g = areaGoals(ak)[gi];
+  if (!a || !g) return;
+  const old = document.getElementById('gssheet'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'gssheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet" role="dialog" aria-modal="true" aria-label="Steps"><span class="w3-grab"></span>' +
+    '<h2 class="gs-h">Steps</h2><p class="gs-goal">' + esc(g.text) + '</p><p class="gs-ask">What steps will get you there this week? They show up when you plan a day.</p>' +
+    '<div class="gs-ed"></div><button type="button" class="wka-go gs-done">Save</button></div>';
+  document.body.appendChild(el);
+  stepsEditor(el.querySelector('.gs-ed'), g, a);
+  const close = () => { el.remove(); if (after) after(); };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('.gs-done').addEventListener('click', close);
+}
+
 /* =========== plan: week =========== */
 /* a strip of 7 days (tap one to plan it), a calendar of the whole week,
    and "copy a day" to reuse a plan. blocks run one after another from the
@@ -14056,10 +14166,14 @@ function renderWeek() {
     // days down the page, each with its blocks: time, name, length
     const goalOf = id => { for (const a of AREAS) for (const g of areaGoals(a.k)) if (g.setAt === id) return a; return null; };
     const nowM = new Date().getHours() * 60 + new Date().getMinutes();
-    html += '<div class="wl">' + days.map((k, n) => { const d = fromKey(k), bs = all[n], isT = k === today, past = k < today;
+    // the next week follows under this one, so the next Monday is always just below
+    const next = days.map(k => shiftKey(k, 7));
+    const nd = fromKey(next[0]), nz = fromKey(next[6]);
+    html += '<div class="wl">' + days.concat(next).map((k, n) => { const d = fromKey(k), bs = n < 7 ? all[n] : blocksOf(k), isT = k === today, past = k < today;
       const raw = (state.days[k] || {}).blocks || [];
       const fold = past && bs.length && !wlOpen.has(k);
-      return '<section class="wl-day' + (isT ? ' today' : '') + (past ? ' past' : '') + (fold ? ' fold' : '') + '" id="wl-' + k + '">' +
+      return (n === 7 ? '<p class="wl-next">Next week \u00b7 ' + nd.getDate() + ' ' + cap(MONTHS[nd.getMonth()].slice(0, 3)) + ' to ' + nz.getDate() + ' ' + cap(MONTHS[nz.getMonth()].slice(0, 3)) + '</p>' : '') +
+        '<section class="wl-day' + (isT ? ' today' : '') + (past ? ' past' : '') + (fold ? ' fold' : '') + '" id="wl-' + k + '">' +
         '<button type="button" class="wl-h" ' + (past && bs.length ? 'data-fold="' + k + '"' : 'data-day="' + k + '"') + '><b>' + (isT ? 'Today' : cap(FULL[d.getDay()])) + '</b><span>' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</span>' +
           '<small>' + (bs.length ? (bs.some(b => b.done) ? bs.filter(b => b.done).length + ' of ' + bs.length + ' done' : bs.length + (bs.length === 1 ? ' block' : ' blocks')) : '') + '</small></button>' +
         (fold ? '' : bs.length
@@ -14102,8 +14216,8 @@ function renderWeek() {
   box.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
     viewDay = b.dataset.day; setPlanMode('day'); renderDay(); window.scrollTo(0, 0);
   }));
-  document.getElementById('wk-add').addEventListener('click', () => weekAddSheet(days.includes(today) ? today : days[0], days));
-  box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) weekAddSheet(c.dataset.addto, days); }));
+  document.getElementById('wk-add').addEventListener('click', () => days.includes(today) ? weekAddSheet(today, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(today, x))) : weekAddSheet(days[0], days));   // from today: the next 7 days
+  box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) { const k = c.dataset.addto, m = mondayOf(k); weekAddSheet(k, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(m, x))); } }));
   box.querySelectorAll('[data-fold]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.fold; wlOpen.has(k) ? wlOpen.delete(k) : wlOpen.add(k); renderWeek(); }));
   if (weekLook === 'list' && !renderWeek.scrolled && days.includes(today)) { renderWeek.scrolled = true; const t = document.getElementById('wl-' + today); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: 'smooth' }), 60); }
   box.querySelectorAll('[data-look]').forEach(b => b.addEventListener('click', () => { weekLook = b.dataset.look; try { localStorage.setItem(KEY + '.weeklook', weekLook); } catch {} renderWeek(); }));
