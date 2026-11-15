@@ -3832,6 +3832,20 @@ html body[data-view="day"] {
 .hubback { margin-bottom: 4px; }
 
 /* habits as streaks */
+.hb-link { font-style: normal; font-size: 12px; color: var(--muted); }
+.hb-link.on { color: color-mix(in srgb, var(--c) 75%, var(--ink)); font-weight: 500; }
+.hb-card .month-head { margin: 16px 0 10px; padding-top: 14px; border-top: 1px solid var(--hair); }
+.hb-card .month-label { font: 600 14px "Poppins", sans-serif; text-transform: capitalize; }
+.hb-card .nav { width: 36px; height: 36px; padding: 0; font: 500 16px "Poppins", sans-serif; background: var(--hair); border: none; border-radius: 50%; }
+.hb-card .grid { gap: 6px 4px; justify-items: center; }
+.hb-card .grid .lbl { font-size: 11px; font-weight: 500; text-transform: uppercase; }
+.hb-card .cell { width: 100%; max-width: 38px; aspect-ratio: 1; padding: 0; font: 500 12px "Poppins", sans-serif; color: var(--muted); background: var(--hair); background-image: none; border: none; border-radius: 50%; outline: none; }
+.hb-card .cell.on { color: #fff; background: var(--c); background-image: none; }
+.hb-card .cell.today { box-shadow: inset 0 0 0 2px var(--c); color: var(--ink); }
+.hb-card .cell.on.today { box-shadow: none; color: #fff; }
+.hb-card .cell.blank { background: none; }
+.hb-card .count { margin-top: 12px; font: 500 13px "Poppins", sans-serif; }
+.hb-card .danger { display: block; margin-top: 6px; padding: 8px 0; font: 500 13px "Poppins", sans-serif; color: #c4553f; text-decoration: none; }
 .hb-add input { width: 100%; font: 400 16px "Poppins", sans-serif; padding: 13px 14px; border-radius: 16px; }
 .hb-full, .hb-empty { margin: 0 4px; font-size: 13px; color: var(--muted); line-height: 1.5; }
 .hb-empty { margin-top: 12px; }
@@ -4283,7 +4297,7 @@ body, body[data-view] {
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 16:20</footer>
+  <footer>everything saves on this device · build 16:12</footer>
 </div>
 
 <script>
@@ -4294,7 +4308,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {} };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [] };
 
 function load() {
   try {
@@ -4338,7 +4352,9 @@ function load() {
         imported:  Array.isArray(d.imported) ? d.imported : [],
         grocLists: Array.isArray(d.grocLists) ? d.grocLists : [],
         people:    Array.isArray(d.people) ? d.people : [],
-        monthGoals: d.monthGoals && typeof d.monthGoals === 'object' ? d.monthGoals : {}
+        monthGoals: d.monthGoals && typeof d.monthGoals === 'object' ? d.monthGoals : {},
+        habitsCleared: d.habitsCleared || 0,
+        habitsOld: Array.isArray(d.habitsOld) ? d.habitsOld : []
       };
     }
     const old = localStorage.getItem(OLD);
@@ -4457,6 +4473,9 @@ function lastSevenDays() {
   return out;
 }
 
+// Nov 2026: Mia asked to start habits fresh and add them herself. done once; the old ones are kept aside
+if (!state.habitsCleared) { state.habitsOld = state.habits; state.habits = []; state.habitsCleared = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} }
+
 /* habits as streaks. a habit takes about 66 days of doing it to become
    automatic (UCL study, Lally 2009). so: build 1 or 2 at once, 3 at most,
    and a habit that reaches 66 days moves to "locked in" and frees a slot. */
@@ -4476,7 +4495,7 @@ function renderHabits() {
     const week = lastSevenDays().map(d => { const k = key(d); return '<span class="hb-d' + (marks.has(k) ? ' on' : '') + (k === today ? ' now' : '') + '"><i></i>' + DAYS[d.getDay()][0] + '</span>'; }).join('');
     return '<div class="hb-card' + (done ? ' done' : '') + '" data-h="' + h.id + '" style="--c:' + (h.color || '#d9718e') + '">' +
       '<div class="hb-top"><div class="hb-fire"><b>' + n + '</b><span>' + (n ? '\u{1F525}' : '\u{1F331}') + '</span></div>' +
-        '<button type="button" class="hb-name"><b></b><small>' + (lockedIn ? 'locked in \u00b7 best ' + bestStreak(h.marks) : Math.min(h.marks.length, HABIT_DAYS) + ' of ' + HABIT_DAYS + ' days to automatic' + (bestStreak(h.marks) > n ? ' \u00b7 best ' + bestStreak(h.marks) : '')) + '</small></button>' +
+        '<button type="button" class="hb-name"><b></b><em class="hb-link"></em><small>' + (lockedIn ? 'locked in \u00b7 best ' + bestStreak(h.marks) : Math.min(h.marks.length, HABIT_DAYS) + ' of ' + HABIT_DAYS + ' days to automatic' + (bestStreak(h.marks) > n ? ' \u00b7 best ' + bestStreak(h.marks) : '')) + '</small></button>' +
         '<button type="button" class="hb-tick" aria-label="' + (done ? 'undo today' : 'done today') + '">\u2713</button></div>' +
       (lockedIn ? '' : '<i class="hb-bar"><u style="width:' + Math.round(Math.min(1, h.marks.length / HABIT_DAYS) * 100) + '%"></u></i>') +
       '<div class="hb-week">' + week + '</div></div>';
@@ -4485,12 +4504,15 @@ function renderHabits() {
   if (building.length < HABIT_MAX) html += '<div class="hb-add"><input type="text" maxlength="40" placeholder="+ a habit you want to build" aria-label="new habit"></div>';
   else html += '<p class="hb-full">You\u2019re building ' + HABIT_MAX + '. That\u2019s the most that works: one more spreads you too thin. Each one frees up at ' + HABIT_DAYS + ' days.</p>';
   html += building.map(card).join('');
-  if (!state.habits.length) html += '<p class="hb-empty">Start with one small thing you can do every day, even on a bad day. Small and daily beats big and sometimes.</p>';
+  if (!state.habits.length) html += '<p class="hb-empty">Start with one small thing you can do every day, even on a bad day. If it is also in your plan, brick ticks it for you when you finish that block.</p>';
   if (locked.length) html += '<div class="hm-sec">Locked in</div>' + locked.map(card).join('');
   habitList.innerHTML = html;
   habitList.querySelectorAll('.hb-card').forEach(el => {
     const h = state.habits.find(x => x.id === el.dataset.h);
     el.querySelector('.hb-name b').textContent = h.name;
+    const blk = habitBlock(h);
+    el.querySelector('.hb-link').textContent = blk ? '\u{1F517} ticks itself from your ' + blk + ' block' : 'not in your plan, tick it here';
+    if (blk) el.querySelector('.hb-link').classList.add('on');
     el.querySelector('.hb-tick').addEventListener('click', () => {
       const was = h.marks.includes(today);
       toggle(h, today);
@@ -4641,8 +4663,7 @@ function renderSuggestion() {
   const slot = document.getElementById('suggest-slot');
   slot.innerHTML = '';
 
-  // one at a time, and only while there is room for another habit
-  if (state.habits.filter(h => h.marks.length < HABIT_DAYS).length >= HABIT_MAX) return;
+  return;   // habits are added by hand now; brick links them to the plan itself
   for (const s of findSuggestions().slice(0, 1)) {
     const pretty = s.label.charAt(0).toUpperCase() + s.label.slice(1);
 
@@ -5958,10 +5979,26 @@ function lengthPicker(b, from, len) {
   return box;
 }
 
+const HB_STOP = new Set(['the', 'a', 'an', 'to', 'my', 'and', 'of', 'for', 'in', 'on', 'at', 'with', 'do', 'go', 'get', 'have', 'take', 'min', 'mins', 'minutes', 'hour', 'hours', 'page', 'pages', 'every', 'day', 'daily', 'morning', 'night', 'evening']);
+const hbWords = t => String(t || '').toLowerCase().replace(/[^a-z ]/g, ' ').split(/\s+/).filter(w => w.length > 2 && !HB_STOP.has(w))
+  .map(w => w.replace(/(ing|ings)$/, '').replace(/(es|s)$/, '').replace(/(.)\1$/, '$1'));
 function habitNamed(label) {
   const l = (label || '').trim().toLowerCase();
   if (!l) return null;
-  return state.habits.find(h => h.name.trim().toLowerCase() === l) || null;
+  const exact = state.habits.find(h => h.name.trim().toLowerCase() === l);
+  if (exact) return exact;
+  const bw = new Set(hbWords(l));
+  const close = (w, k) => w === k || (k.length >= 4 && w.length >= 4 && (w.startsWith(k) || k.startsWith(w)));   // pray / prayer
+  return state.habits.find(h => { const k = hbWords(h.name)[0]; return k && [...bw].some(w => close(w, k)); }) || null;
+}
+// the plan block a habit is tied to, from today or the last 2 weeks
+function habitBlock(h) {
+  for (let i = 0; i < 14; i++) {
+    const d = state.days[shiftKey(todayKey(), -i)];
+    const b = d && (d.blocks || []).find(x => habitNamed(x.label) === h);
+    if (b) return b.label.trim();
+  }
+  return null;
 }
 
 function lastPlanned(from) {
@@ -6409,7 +6446,7 @@ function renderDay() {
       isa.style.setProperty('--c', h.color || PALETTE[0]);
       isa.innerHTML = '<i></i>habit';
       mid.appendChild(isa);
-    } else if ((b.label || '').trim().length > 1) {
+    } else if (false) {
       const track = document.createElement('button');
       track.className = 'track';
       track.type = 'button';
