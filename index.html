@@ -4823,6 +4823,34 @@ html { background: var(--paper) !important; }
 .focus .fx-growing { margin-top: 28px !important; }
 .focus .fx-time { margin-top: 36px !important; }
 body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: none !important; }
+
+/* add a block: big picture tiles, then how long */
+.ab h2 { margin: 0 0 12px; font-size: 24px; font-weight: 600; }
+.ab-sub { margin: 4px 2px 8px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.ab-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.ab-t { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 14px; text-align: left; font-family: var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; transition: transform .12s; }
+.ab-t:active { transform: scale(.97); }
+.ab-t span { flex: none; font-size: 24px; line-height: 1; }
+.ab-t b { min-width: 0; font-size: 17px; font-weight: 500; line-height: 1.25; overflow-wrap: break-word; }
+.ab-type { margin-top: 4px; }
+.ab .fp-head b { font-size: 18px; color: var(--muted); }
+
+.ab-grid.one { grid-template-columns: 1fr; }
+.ab-grid.one .ab-t b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* home: back to separate cards, compact so it reads at a glance, each with a fine rose gold edge */
+#view-home#view-home#view-home#view-home .hm-areas { display: flex !important; flex-direction: column !important; gap: 10px !important; margin: 10px 0 0 !important; border: none !important; border-radius: 0 !important; overflow: visible !important; background: none !important; }
+#view-home#view-home#view-home#view-home .hm-goals.hm-goals, #view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area {
+  border: 1px solid transparent !important; border-radius: 18px !important;
+  background: linear-gradient(var(--card), var(--card)) padding-box, linear-gradient(135deg, rgba(247, 211, 220, .9), rgba(230, 162, 180, .55) 50%, rgba(185, 116, 136, .8)) border-box !important;
+  box-shadow: 0 1px 0 rgba(185, 116, 136, .08), 0 10px 24px -18px rgba(120, 60, 80, .45) !important; }
+#view-home#view-home#view-home#view-home .hm-goals.hm-goals { padding: 14px 18px !important; }
+#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { padding: 12px 18px !important; }
+#view-home#view-home .hm-area.hm-area::before { display: none !important; content: none !important; }
+#view-home#view-home .hm-area .hm-an { display: flex; align-items: center; gap: 8px; }
+#view-home#view-home .hm-area .hm-an::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
+:root[data-theme="dark"] #view-home#view-home#view-home#view-home :is(.hm-goals.hm-goals, .hm-areas .hm-area.hm-area) { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .8) !important; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #view-home#view-home#view-home#view-home :is(.hm-goals.hm-goals, .hm-areas .hm-area.hm-area) { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .8) !important; } }
 </style>
 </head>
 <body>
@@ -5083,7 +5111,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:24</footer>
+  <footer>Mr.O:19:32</footer>
 </div>
 
 <script>
@@ -7628,12 +7656,65 @@ startInput.addEventListener('blur', commitStart);
   }
 })();
 
-document.getElementById('block-add').addEventListener('click', () => {
-  const d = dayFor(viewDay);
-  d.blocks.push({ label: '', mins: 60, done: false });
-  focusNew = d.blocks.length - 1;          // opens the naming panel for it
-  save(); renderDay(); renderHabits();
-});
+document.getElementById('block-add').addEventListener('click', () => addBlockSheet());
+
+/* add a block in two big, calm steps (easy to read with dyslexia):
+   1. what: picture tiles, your goals first, or type it
+   2. how long: your usual first, each with the time it ends
+   the block is only added once both are picked, so no empty blocks. */
+function addBlockSheet() {
+  const old = document.getElementById('addsheet'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'addsheet'; el.className = 'w3';
+  const day = dayFor(viewDay);
+  const endOfDay = day.blocks.reduce((m, b) => m + (Number(b.mins) || 60), toMins(day.start));
+  const h = new Date().getHours(), meal = h < 11 ? MEAL_SLOTS[0] : h < 16 ? MEAL_SLOTS[1] : MEAL_SLOTS[2];
+  const seen = new Set();
+  const goals = (typeof goalSteps === 'function' ? goalSteps() : []).filter(g => { const k = g.t.trim().toLowerCase(); if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 5);
+  const common = [['\u{1F4BC}', 'Work', 60], ['\u2615', 'Break', 15], ['\u{1F6B6}', 'Walk', 30], ['\u{1F3CB}\uFE0F', 'Gym', 60],
+                  [meal[2], meal[1], meal[0] === 'b' ? 30 : 45], ['\u{1F465}', 'Meeting', 30], ['\u{1F4D6}', 'Read', 30], ['\u{1F64F}', 'Pray', 15]];
+  const mine = usualLabels(2).filter(x => !common.some(c => c[1].toLowerCase() === x.t.toLowerCase()) && !goals.some(g => g.t.toLowerCase() === x.t.toLowerCase()));
+  let pick = null;
+  const close = () => el.remove();
+  const add = mins => {
+    const b = { label: pick.label, mins, done: false };
+    if (pick.step) b.step = pick.step;
+    const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
+    day.touched = true; day.blocks.push(b);
+    save(); close(); renderDay(); renderHabits();
+  };
+  const tile = (e, t, data) => '<button type="button" class="ab-t" ' + data + '><span>' + e + '</span><b>' + esc(t) + '</b></button>';
+  const draw = () => {
+    let html = '<div class="w3-back"></div><div class="w3-sheet ab" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>';
+    if (!pick) {
+      html += '<h2>What is it?</h2>' +
+        (goals.length ? '<p class="ab-sub">Your goals</p><div class="ab-grid one">' + goals.map((g, i) => tile(g.e, g.t, 'data-g="' + i + '"')).join('') + '</div><p class="ab-sub">Everyday</p>' : '') +
+        '<div class="ab-grid">' + common.map((c, i) => tile(c[0], c[1], 'data-c="' + i + '"')).join('') + mine.map((m, i) => tile('\u21BB', m.t, 'data-u="' + i + '"')).join('') + '</div>' +
+        '<div class="gs-add ab-type"><input type="text" maxlength="60" placeholder="Or type it" aria-label="block name"><button type="button">Next</button></div>';
+    } else {
+      const usual = usualLength(pick.label) || pick.mins || null;
+      let opts = [15, 30, 45, 60, 90, 120];
+      if (usual && !opts.includes(usual)) opts = [usual, ...opts];
+      opts.sort((a, b) => (b === usual) - (a === usual));
+      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div><h2>How long?</h2>' +
+        '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock(endOfDay + m) + '</small>' : '') + '</button>').join('') + '</div>';
+    }
+    html += '<button type="button" class="ls-cancel">Cancel</button></div>';
+    el.innerHTML = html;
+    el.querySelector('.w3-back').addEventListener('click', close);
+    el.querySelector('.ls-cancel').addEventListener('click', close);
+    el.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => { const g = goals[Number(b.dataset.g)]; pick = { label: g.t, step: g.id }; draw(); }));
+    el.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => { const c = common[Number(b.dataset.c)]; pick = { label: c[1], mins: c[2] }; draw(); }));
+    el.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { pick = { label: mine[Number(b.dataset.u)].t }; draw(); }));
+    el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
+    const bk = el.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => { pick = null; draw(); });
+    const inp = el.querySelector('.ab-type input');
+    if (inp) { const go = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; } pick = { label: t }; draw(); };
+      el.querySelector('.ab-type button').addEventListener('click', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); }
+  };
+  draw();
+  document.body.appendChild(el);
+}
 
 document.getElementById('sug-day').addEventListener('click', () => suggestSheet('day'));
 document.getElementById('day-top').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
