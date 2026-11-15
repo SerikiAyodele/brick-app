@@ -27,7 +27,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap">
 
 <style>
 /* Blocks that snap together. Graph paper underneath, studs on top,
@@ -4032,53 +4032,6 @@ body, body[data-view] {
 .fh { background: linear-gradient(160deg, color-mix(in srgb, #8b6cf6 24%, var(--card)), color-mix(in srgb, var(--pink) 10%, var(--card)) 80%) !important; }
 .tabs .brick:not(.flat) { background: color-mix(in srgb, var(--pink) 28%, var(--card)); }
 
-/* home: drawn on paper. light pink ruled paper, pencil outlines, a pink
-   marker shade, handwriting for titles and big numbers (body text stays
-   Poppins so it is easy to read). */
-body[data-view="home"] { --sk-paper: #fdeef2; --sk-line: rgba(134, 185, 217, .32); --sk-margin: rgba(217, 113, 142, .45);
-  --sk-ink: #4a3a40; --sk-shade: #f6c6d3; --sk-fill: #fff8fa; --sk-hand: "Caveat", "Bradley Hand", cursive; }
-:root[data-theme="dark"] body[data-view="home"] { --sk-paper: #2a2024; --sk-line: rgba(134, 185, 217, .14); --sk-margin: rgba(217, 113, 142, .35);
-  --sk-ink: #f3dde4; --sk-shade: #6e4553; --sk-fill: #33272c; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body[data-view="home"] { --sk-paper: #2a2024; --sk-line: rgba(134, 185, 217, .14);
-  --sk-margin: rgba(217, 113, 142, .35); --sk-ink: #f3dde4; --sk-shade: #6e4553; --sk-fill: #33272c; } }
-html body[data-view="home"], :root:not([data-theme="light"]) body[data-view="home"] {
-  background-color: var(--sk-paper) !important;
-  background-image: linear-gradient(90deg, transparent 22px, var(--sk-margin) 22px, var(--sk-margin) 24px, transparent 24px),
-                    linear-gradient(var(--sk-line) 1px, transparent 1px) !important;
-  background-size: 100% 100%, 100% 34px !important; background-attachment: local; }
-body[data-view="home"] #view-home .pghead h1 { font: 700 46px/1 var(--sk-hand); letter-spacing: 0; color: var(--sk-ink); }
-body[data-view="home"] #view-home .pghead span { font: 500 20px var(--sk-hand); letter-spacing: 0; text-transform: none; color: var(--pink-d); }
-body[data-view="home"] #view-home .hm-sec { font: 700 26px var(--sk-hand); letter-spacing: 0; text-transform: none; color: var(--sk-ink); margin: 26px 4px 8px; }
-/* every card: a wobbly pencil outline with a pink marker shadow */
-body[data-view="home"] #view-home :is(.hm-now, .hm-goals, .hm-area, .hm-nudge, .hm-mood, .hm-room, .hq) {
-  background: var(--sk-fill) !important; color: var(--sk-ink); border: 2px solid var(--sk-ink) !important;
-  border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px !important; box-shadow: 4px 5px 0 var(--sk-shade) !important; }
-body[data-view="home"] #view-home .hm-now::after { display: none; }
-body[data-view="home"] #view-home .hm-now { transform: rotate(-.6deg); padding: 20px 22px; }
-body[data-view="home"] #view-home .hm-now b { font: 700 34px/1.1 var(--sk-hand); letter-spacing: 0; color: var(--sk-ink); }
-body[data-view="home"] #view-home .hm-now :is(.hm-lbl, .hm-sub, .hm-prog) { color: color-mix(in srgb, var(--sk-ink) 65%, transparent); }
-body[data-view="home"] #view-home .hm-now.live .hm-lbl, body[data-view="home"] #view-home .hm-now.empty .hm-sub { color: var(--pink-d); }
-body[data-view="home"] #view-home .hm-bar { height: 8px; background: transparent !important; border: 1.5px solid var(--sk-ink); border-radius: 6px 3px 7px 3px; }
-body[data-view="home"] #view-home .hm-bar u { background: repeating-linear-gradient(-45deg, var(--pink) 0 3px, transparent 3px 6px) !important; }
-body[data-view="home"] #view-home .hq { border-radius: 30px 8px 26px 10px / 10px 26px 8px 30px !important; box-shadow: 2px 3px 0 var(--sk-shade) !important; }
-body[data-view="home"] #view-home .hq:nth-child(even) { transform: rotate(.8deg); }
-body[data-view="home"] #view-home .hq:nth-child(odd) { transform: rotate(-.6deg); }
-body[data-view="home"] #view-home .hm-goals { transform: rotate(.4deg); }
-body[data-view="home"] #view-home .hm-gt b { font: 700 28px var(--sk-hand); }
-body[data-view="home"] #view-home .hm-gbars i { background: transparent; border: 1.5px solid var(--sk-ink); border-radius: 3px 5px 2px 4px; }
-body[data-view="home"] #view-home .hm-gbars u { background: repeating-linear-gradient(-45deg, var(--c) 0 3px, transparent 3px 5px); border-radius: 0; }
-body[data-view="home"] #view-home .hm-area:nth-child(1) { transform: rotate(-1deg); }
-body[data-view="home"] #view-home .hm-area:nth-child(2) { transform: rotate(.9deg); }
-body[data-view="home"] #view-home .hm-area:nth-child(3) { transform: rotate(.7deg); }
-body[data-view="home"] #view-home .hm-area:nth-child(4) { transform: rotate(-.8deg); }
-body[data-view="home"] #view-home .hm-area:active, body[data-view="home"] #view-home .hm-now:active { transform: scale(.97); }
-body[data-view="home"] #view-home .hm-ae { background: none !important; border: 1.5px dashed var(--sk-ink); border-radius: 50% 45% 55% 48%; }
-/* the area name, underlined with a highlighter in its colour */
-body[data-view="home"] #view-home .hm-an { font: 700 24px var(--sk-hand); color: var(--sk-ink) !important;
-  background: linear-gradient(transparent 55%, color-mix(in srgb, var(--c) 55%, transparent) 55%, color-mix(in srgb, var(--c) 55%, transparent) 90%, transparent 90%); padding: 0 2px; align-self: flex-start; }
-body[data-view="home"] #view-home .hm-area em { font: 700 32px/1.1 var(--sk-hand); letter-spacing: 0; color: var(--sk-ink); }
-body[data-view="home"] #view-home .hm-area em i, body[data-view="home"] #view-home .hm-area small { color: color-mix(in srgb, var(--sk-ink) 62%, transparent); }
-
 /* wallet: one Notion style table, in pink */
 .nt { margin: 14px 0 8px; }
 .nt-title { display: flex; align-items: baseline; gap: 8px; font: 600 20px var(--display); margin: 0 2px 8px; }
@@ -4471,7 +4424,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 16:39</footer>
+  <footer>everything saves on this device · build 16:40</footer>
 </div>
 
 <script>
