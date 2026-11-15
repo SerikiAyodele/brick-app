@@ -4446,6 +4446,26 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
 #view-goals#view-goals .gl-area { border-left: 4px solid var(--c) !important; }
 #view-home#view-home .hm-gbars i { background: color-mix(in srgb, var(--c) 25%, var(--card)) !important; }
 #view-home#view-home .hm-gbars u { background: var(--c) !important; }
+
+/* more colour, still minimal: tints that carry meaning */
+#view-home#view-home .hm-now.hm-now { background: color-mix(in srgb, var(--pink) 9%, var(--card)) !important; border-color: color-mix(in srgb, var(--pink) 30%, var(--hair)) !important; }
+#view-home#view-home .hm-area.hm-area { background: color-mix(in srgb, var(--c) 11%, var(--card)) !important; border-color: color-mix(in srgb, var(--c) 32%, var(--hair)) !important; }
+#view-home#view-home .hm-area .hm-an { color: color-mix(in srgb, var(--c) 70%, var(--ink)) !important; }
+#view-home#view-home .hm-area .hm-an::before { width: 10px; height: 10px; }
+#view-home#view-home .hm-area em { color: color-mix(in srgb, var(--c) 45%, var(--ink)) !important; }
+#view-home#view-home .hm-quick .hq span { filter: none !important; }
+#view-home#view-home .hm-quick .hq { --q: var(--pink); background: color-mix(in srgb, var(--q) 12%, var(--card)) !important; border-color: color-mix(in srgb, var(--q) 35%, var(--hair)) !important; }
+#view-home#view-home .hm-quick .hq:nth-child(1) { --q: #5aa86b; }
+#view-home#view-home .hm-quick .hq:nth-child(2) { --q: #5fa8dc; }
+#view-home#view-home .hm-quick .hq:nth-child(3) { --q: #e5b53d; }
+#view-home#view-home .hm-goals.hm-goals { background: linear-gradient(110deg, color-mix(in srgb, #5fa8dc 8%, var(--card)), color-mix(in srgb, #9b87d9 8%, var(--card))) !important; }
+#view-goals#view-goals .gl-area { background: color-mix(in srgb, var(--c) 7%, var(--card)) !important; }
+#view-goals#view-goals .gl-ah b { color: color-mix(in srgb, var(--c) 70%, var(--ink)) !important; }
+.wk-blk { --q: var(--pink) !important; }
+.wk-blk:nth-child(4n+1) { background: color-mix(in srgb, #5fa8dc 22%, var(--card)) !important; border-left-color: #5fa8dc !important; }
+.wk-blk:nth-child(4n+2) { background: color-mix(in srgb, #e57a9c 22%, var(--card)) !important; border-left-color: #e57a9c !important; }
+.wk-blk:nth-child(4n+3) { background: color-mix(in srgb, #d9a948 22%, var(--card)) !important; border-left-color: #d9a948 !important; }
+.wk-blk:nth-child(4n)   { background: color-mix(in srgb, #9b87d9 22%, var(--card)) !important; border-left-color: #9b87d9 !important; }
 </style>
 </head>
 <body>
@@ -4704,7 +4724,7 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:28</footer>
+  <footer>Mr.O:17:31</footer>
 </div>
 
 <script>
@@ -12261,13 +12281,13 @@ function homeCard(m) {
    then each week it shows how close you are. rules, not AI. */
 
 const AREAS = [
-  { k: 'health', c: '#9cc6e4', e: '\u{1F49A}', name: 'Health', ask: 'What do you want for your body and health?',
+  { k: 'health', c: '#5fa8dc', e: '\u{1F49A}', name: 'Health', ask: 'What do you want for your body and health?',
     eg: 'e.g. get stronger at the gym and stop feeling tired in the afternoon' },
-  { k: 'wealth', c: '#e3cfa6', e: '\u{1F4B0}', name: 'Wealth', ask: 'What do you want for your money and career?',
+  { k: 'wealth', c: '#d9a948', e: '\u{1F4B0}', name: 'Wealth', ask: 'What do you want for your money and career?',
     eg: 'e.g. grow my income, learn Go and get a better job' },
-  { k: 'love', c: '#f0b0c2',   e: '\u{1F496}', name: 'Love',   ask: 'What do you want for your relationships?',
+  { k: 'love', c: '#e57a9c',   e: '\u{1F496}', name: 'Love',   ask: 'What do you want for your relationships?',
     eg: 'e.g. spend more real time with my family and call my friends more' },
-  { k: 'self', c: '#c8c2c0',   e: '✨',    name: 'Self',   ask: 'What do you want for yourself, inside?',
+  { k: 'self', c: '#9b87d9',   e: '✨',    name: 'Self',   ask: 'What do you want for yourself, inside?',
     eg: 'e.g. read more, pray daily and feel calmer' }
 ];
 
