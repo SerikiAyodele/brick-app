@@ -4793,6 +4793,36 @@ html { background: var(--paper) !important; }
 #view-home#view-home .hm-area .hm-ae { display: none !important; }
 
 .wl-day li.done span, .wl-day li.done time { text-decoration: none !important; color: var(--muted) !important; opacity: .7; }
+
+/* home on one screen, with more luxury: one list card for Goals and the areas, fine rose gold lines, serif numbers */
+#view-home#view-home .pghead { position: relative; margin-bottom: 16px !important; padding-bottom: 14px; }
+#view-home#view-home .pghead::after { content: ""; position: absolute; left: 0; bottom: 0; width: 64px; height: 2px; border-radius: 1px; background: var(--gold); }
+#view-home#view-home .pghead h1 { font-size: 30px !important; }
+#view-home#view-home .hm-now.hm-now { padding: 16px 18px !important; gap: 4px !important; border-radius: 20px !important; }
+#view-home#view-home .hm-now.hm-now b { font-size: 24px !important; }
+#view-home#view-home .hm-now .hm-sub { font-size: 14px; }
+#view-home#view-home .hm-now .hm-prog { margin-top: 8px; }
+#view-home#view-home .hm-quick { margin-top: 12px !important; margin-bottom: 14px !important; }
+#view-home#view-home .hm-quick .hq { min-height: 42px !important; font-size: 14px !important; padding: 0 14px !important; }
+#view-home#view-home .hm-sec { display: none !important; }
+#view-home#view-home#view-home#view-home .hm-goals.hm-goals { margin: 0 !important; padding: 14px 18px !important; border-radius: 20px 20px 0 0 !important; border: 1px solid var(--hair) !important; border-bottom: none !important; background: var(--card) !important; }
+#view-home#view-home .hm-goals .hm-gt b { font-size: 19px !important; }
+#view-home#view-home .hm-gbars { height: 26px; }
+#view-home#view-home .hm-areas { gap: 0 !important; margin: 0 !important; border: 1px solid var(--hair); border-top: none; border-radius: 0 0 20px 20px; overflow: hidden; background: var(--card); }
+#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { position: relative; padding: 11px 18px !important; border: 0 solid transparent !important; outline: none !important; border-radius: 0 !important; background: var(--card) !important; box-shadow: none !important; }
+#view-home#view-home .hm-area.hm-area::before { content: "" !important; display: block !important; position: absolute; left: 18px; right: 18px; top: 0; height: 1px; background: linear-gradient(90deg, transparent, #e6a2b4 20%, #b97488 50%, #e6a2b4 80%, transparent); opacity: .55; }
+#view-home#view-home .hm-area .hm-an { font-size: 15px !important; letter-spacing: 1.5px !important; }
+#view-home#view-home .hm-area small { font-size: 12.5px !important; }
+#view-home#view-home .hm-area em { font-family: var(--serif, inherit) !important; font-size: 22px !important; font-weight: 600 !important; }
+
+/* goals: no leftover step line; focus room: even more room */
+#view-goals .gl-sl { display: none !important; }
+.focus .fx-label { display: none !important; }
+.focus .fx-stage { width: min(68vw, 250px) !important; margin-top: 36px !important; }
+.focus .fx-quote { display: none !important; }
+.focus .fx-growing { margin-top: 28px !important; }
+.focus .fx-time { margin-top: 36px !important; }
+body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: none !important; }
 </style>
 </head>
 <body>
@@ -5053,7 +5083,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:18</footer>
+  <footer>Mr.O:19:24</footer>
 </div>
 
 <script>
@@ -14783,7 +14813,7 @@ function renderWeek() {
   box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) { const k = c.dataset.addto, m = mondayOf(k); weekAddSheet(k, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(m, x))); } }));
   box.querySelectorAll('[data-sel]').forEach(b => b.addEventListener('click', () => { renderWeek.sel = b.dataset.sel; renderWeek(); }));
   box.querySelectorAll('[data-fold]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.fold; wlOpen.has(k) ? wlOpen.delete(k) : wlOpen.add(k); renderWeek(); }));
-  if (weekLook === 'list' && !renderWeek.scrolled && days.includes(today)) { renderWeek.scrolled = true; const t = document.getElementById('wl-' + today); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: 'smooth' }), 60); }
+  if (false && weekLook === 'list' && !renderWeek.scrolled && days.includes(today)) { renderWeek.scrolled = true; const t = document.getElementById('wl-' + today); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: 'smooth' }), 60); }
   box.querySelectorAll('[data-look]').forEach(b => b.addEventListener('click', () => { weekLook = b.dataset.look; try { localStorage.setItem(KEY + '.weeklook', weekLook); } catch {} renderWeek(); }));
   // open on today, or the first planned day
   const sc = box.querySelector('.wk-scroll'), cols = box.querySelectorAll('.wk-dcol');
