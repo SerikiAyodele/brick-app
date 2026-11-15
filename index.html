@@ -4977,6 +4977,31 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 #view-day .start-row input { min-height: 44px; }
 
 #view-home#view-home#view-home .hm-nudge { margin-bottom: 12px !important; }
+
+/* how long: type a number, pick min or hours */
+.df { display: flex; gap: 10px; align-items: stretch; }
+.df input { flex: 1; min-width: 0; min-height: 60px; padding: 0 18px; font: 600 26px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; }
+.df input:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 3px var(--pink-s); }
+.df-u { display: flex; padding: 4px; background: var(--slot); border-radius: 18px; }
+.df-u button { min-width: 74px; padding: 0 14px; font: 600 15px var(--display); color: var(--muted); background: none; border: none; border-radius: 14px; cursor: pointer; }
+.df-u button.on { color: var(--ink); background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.wk2-ends { margin: 10px 2px 0; font-size: 15px; color: var(--muted); }
+.wk2-ends b { color: var(--ink); font-weight: 600; }
+.ab .ab-dur { margin-top: 6px; }
+.ab .ab-add { margin-top: 14px; }
+.ab .ab-sub { margin-top: 22px; }
+.ab h2 { margin-bottom: 14px; }
+
+/* home ends at the bottom of the screen: no extra space below, gaps scale with the screen */
+body[data-view="home"] .wrap { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important; }
+body[data-view="home"] footer { margin: 0; padding: 2px 0 0; font-size: 11px; }
+#view-home#view-home#view-home .pghead { margin-top: 0 !important; margin-bottom: 2.4vh !important; padding-bottom: 1.8vh !important; }
+#view-home#view-home#view-home .hm-quick { margin-top: 1.8vh !important; margin-bottom: 2.4vh !important; }
+#view-home#view-home#view-home .hm-nudge { margin-bottom: 1.4vh !important; }
+#view-home#view-home#view-home .hm-sec { margin: 2.6vh 2px 1.4vh !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas { gap: 1.3vh 12px !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { min-height: 11vh !important; }
+#view-home#view-home#view-home #quote { display: none; }
 </style>
 </head>
 <body>
@@ -5237,7 +5262,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:09</footer>
+  <footer>Mr.O:20:16</footer>
 </div>
 
 <script>
@@ -7849,6 +7874,8 @@ function addBlockSheet() {
       if (usual && !opts.includes(usual)) opts = [usual, ...opts];
       opts.sort((a, b) => (b === usual) - (a === usual));
       html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div><h2>How long?</h2>' +
+        '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b>' + clock(endOfDay) + '</b> \u00b7 ends at <b class="ab-end">' + clock(endOfDay + (usual || 60)) + '</b></p>' +
+        '<button type="button" class="wka-go ab-add">Add</button><p class="ab-sub">Or tap one</p>' +
         '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock(endOfDay + m) + '</small>' : '') + '</button>').join('') + '</div>';
     }
     html += '<button type="button" class="ls-cancel">Cancel</button></div>';
@@ -7865,6 +7892,10 @@ function addBlockSheet() {
     if (nx) nx.addEventListener('click', () => { const gl = [...el.querySelectorAll('.ab-goal')].map(i => i.value.trim()).filter(Boolean).slice(0, 3); pick = { label: 'Work', mins: 60, goals: gl }; draw(); });
     el.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { pick = { label: mine[Number(b.dataset.u)].t }; draw(); }));
     el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
+    const abd = el.querySelector('.ab-dur');
+    if (abd) { let cur = usualLength(pick.label) || pick.mins || 60;
+      durField(abd, cur, m => { cur = m; el.querySelector('.ab-end').textContent = clock(endOfDay + m); });
+      el.querySelector('.ab-add').addEventListener('click', () => add(cur)); }
     const bk = el.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => { if (pick) pick = null; else step = null; draw(); });
     const inp = el.querySelector('.ab-type input');
     if (inp) { const go = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; } pick = { label: t }; draw(); };
@@ -15133,6 +15164,18 @@ function renderWeek() {
 // it goes at the end of each day's plan (blocks run one after another).
 // 90 -> "1h 30m", 60 -> "1 hour", 30 -> "30 min"
 const hrsLabel = m => { const h = Math.floor(m / 60), r = m % 60; return h ? (h + (h === 1 && !r ? ' hour' : 'h') + (r ? ' ' + r + 'm' : '')) : r + ' min'; };
+// how long, typed: a number and min or hours. calls back with minutes, never redraws (keeps the keyboard up)
+function durField(root, mins, onChange) {
+  let unit = mins >= 60 && mins % 30 === 0 ? 'h' : 'min';
+  const val = () => unit === 'h' ? String(+(mins / 60).toFixed(2)) : String(mins);
+  root.innerHTML = '<div class="df"><input type="number" inputmode="decimal" min="0" step="any" aria-label="how long"><div class="df-u"><button type="button" data-u="min">min</button><button type="button" data-u="h">hours</button></div></div>';
+  const inp = root.querySelector('input'), bs = root.querySelectorAll('[data-u]');
+  const paint = () => { inp.value = val(); bs.forEach(b => b.classList.toggle('on', b.dataset.u === unit)); };
+  inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!(v > 0)) return; mins = Math.max(5, Math.min(1440, Math.round(unit === 'h' ? v * 60 : v))); onChange(mins); });
+  bs.forEach(b => b.addEventListener('click', () => { unit = b.dataset.u; paint(); }));
+  paint();
+  return { set(m) { mins = m; paint(); } };
+}
 function weekAddSheet(day0, days, preset, after) {
   // two calm steps: 1 what (type it or tap a tile), 2 when (start, how long, which days)
   const old = document.getElementById('wksheet'); if (old) old.remove();
@@ -15164,7 +15207,7 @@ function weekAddSheet(day0, days, preset, after) {
         '<button type="button" class="wk2-what" ' + (preset ? 'disabled' : 'data-back="1"') + '><b>' + esc(label) + '</b>' + (preset ? '' : '<span>change</span>') + '</button>' +
         '<div class="wk2-start"><label for="wka-st">' + DAY0 + ' starts at</label><input type="time" id="wka-st" step="300" value="' + start + '"></div>' +
         '<p class="wk2-h">How long</p>' +
-        '<div class="wk2-hrs"><button type="button" data-d="-15" aria-label="15 minutes less">\u2212</button><div><b>' + hrsLabel(mins) + '</b><small>ends ' + clock(at + mins) + '</small></div><button type="button" data-d="15" aria-label="15 minutes more">+</button></div>' +
+        '<div class="wk2-dur"></div><p class="wk2-ends">Ends at <b>' + clock(at + mins) + '</b></p>' +
         '<div class="wk2-lens">' + [30, 60, 90, 120].map(m => '<button type="button" data-m="' + m + '"' + (m === mins ? ' class="on"' : '') + '><b>' + hrsLabel(m) + '</b></button>').join('') + '</div>' +
         '<p class="wk2-h">Which days</p><div class="wka-days">' + days.map(k => '<button type="button" data-k="' + k + '"' + (pick.has(k) ? ' class="on"' : '') + '>' + cap(FULL[fromKey(k).getDay()].slice(0, 3)) + '</button>').join('') + '</div>' +
         '<div class="wka-quick"><button type="button" data-q="all">Every day</button></div>' +
@@ -15194,12 +15237,13 @@ function weekAddSheet(day0, days, preset, after) {
       if (!/^\d{2}:\d{2}/.test(st.value)) return;
       start = st.value.slice(0, 5);
       const at = toMins(start) + used(day0);
-      const e = el.querySelector('.wk2-hrs small'); if (e) e.textContent = 'ends ' + clock(at + mins);
+      const e = el.querySelector('.wk2-ends b'); if (e) e.textContent = clock(at + mins);
       const n = el.querySelector('.wka-note'); if (n) n.textContent = 'On ' + DAY0 + ' it starts at ' + clock(at) + ', after what is already planned.';
     };
     st.addEventListener('input', refresh); st.addEventListener('change', refresh); st.addEventListener('blur', refresh);
     el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { mins = Number(b.dataset.m); draw(2); }));
-    el.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { mins = Math.max(15, Math.min(720, mins + Number(b.dataset.d))); draw(2); }));
+    const endsAt = () => { const e = el.querySelector('.wk2-ends b'); if (e) e.textContent = clock(toMins(start) + used(day0) + mins); };
+    durField(el.querySelector('.wk2-dur'), mins, m => { mins = m; endsAt(); el.querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', Number(b.dataset.m) === m)); });
     el.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; pick.has(k) ? pick.delete(k) : pick.add(k); if (!pick.size) pick.add(day0); draw(2); }));
     el.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
       pick.clear();
