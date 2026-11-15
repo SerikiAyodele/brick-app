@@ -4655,6 +4655,49 @@ html { background: var(--paper) !important; }
 #view-goals .gl-sl { margin: -6px 0 6px 40px; font-size: 14px; color: var(--muted); }
 #view-goals .gl-btns { display: flex; gap: 8px; margin: 0 0 10px 40px; }
 #view-goals .gl-btns button { flex: 1; min-height: 40px; padding: 0 8px; white-space: nowrap; font: 600 14px var(--display); color: var(--pink-d); background: var(--pink-s); border: none; border-radius: 20px; cursor: pointer; }
+
+/* focus room: more room to breathe */
+.focus .fx-growing { margin-top: 18px !important; font-size: 15px !important; line-height: 1.5; max-width: 30ch; margin-left: auto !important; margin-right: auto !important; }
+.focus .fx-time { margin-top: 28px !important; }
+.focus .fx-ends { display: block; margin-top: 6px; }
+.focus .fx-quote { margin-top: 48px !important; font-size: 15px !important; }
+#roomsheet .ls-row.on { margin-bottom: 8px; }
+
+#focus > .fx-moodsheet.small { top: auto !important; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); left: 50% !important; right: auto !important; transform: translateX(-50%); width: auto !important; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; backdrop-filter: none !important; }
+.fxm-ask { min-height: 48px; padding: 0 20px; font: 500 16px var(--display); color: #fbf1e7; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .18); border-radius: 24px; cursor: pointer; }
+.fxm-ask span { opacity: .6; }
+
+#view-home#view-home .hm-quick { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px !important; }
+#view-home#view-home .hm-quick .hq { width: auto !important; min-width: 0; justify-content: flex-start; padding: 0 14px !important; font-size: 15px !important; }
+.mn-pred { margin: 0 0 12px; padding: 10px 14px; font-size: 15px; line-height: 1.4; color: var(--ink); background: var(--pink-s); border-radius: 14px; }
+.mn-pred b { font-weight: 600; }
+#view-home .hm-quick .hq.pred em { display: flex; flex-direction: column; align-items: flex-start; font-style: normal; line-height: 1.1; }
+#view-home .hm-quick .hq.pred em small { font-size: 11px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+
+/* feelings picker, used on Home and in the Focus room */
+.fp-fams { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.fp-fams button { display: flex; flex-direction: column; align-items: center; gap: 6px; min-height: 84px; padding: 12px 4px; font: 500 14px var(--display); color: var(--ink); background: color-mix(in srgb, var(--c) 14%, var(--card)); border: 1px solid color-mix(in srgb, var(--c) 35%, var(--hair)); border-radius: 20px; cursor: pointer; transition: transform .15s; }
+.fp-fams button:active, .fp-words button:active { transform: scale(.96); }
+.fp-fams span { font-size: 26px; line-height: 1; }
+.fp-head { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; }
+.fp-head span { font-size: 26px; }
+.fp-head b { font-family: var(--serif, inherit); font-size: 22px; font-weight: 600; }
+.fp-back { width: 40px; height: 40px; font-size: 18px; color: var(--muted); background: none; border: 1px solid var(--hair); border-radius: 50%; cursor: pointer; }
+.fp-words { display: flex; flex-wrap: wrap; gap: 10px; }
+.fp-words button { min-height: 48px; padding: 0 20px; font: 500 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid color-mix(in srgb, var(--c) 45%, var(--hair)); border-radius: 24px; cursor: pointer; }
+.fp-words button.on { color: #fff; background: var(--c); }
+/* focus room: the small ask takes the quote's place; the full sheet is glass with a rose gold edge */
+#focus.asking .fx-quote { visibility: hidden; }
+#focus > .fx-moodsheet:not(.small) { left: 12px !important; right: 12px !important; width: auto !important; max-width: none !important; margin: 0 !important; transform: none !important; box-sizing: border-box; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; padding: 20px 18px 22px !important;
+  background: rgba(28, 20, 22, .82) !important; backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid rgba(230, 162, 180, .35) !important; border-radius: 28px !important; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .06) !important; }
+#focus .fx-moodsheet .fxm-top b { font-family: var(--serif, inherit); font-size: 22px; font-weight: 600; color: #fbf1e7; }
+#focus .fx-moodsheet .fp-fams button, #focus .fx-moodsheet .fp-words button { color: #fbf1e7; background: rgba(255, 255, 255, .06); border-color: rgba(230, 162, 180, .25); }
+#focus .fx-moodsheet .fp-words button.on { background: linear-gradient(135deg, #f7d3dc, #e6a2b4 55%, #b97488); color: #2a1a1f; }
+#focus .fx-moodsheet .fp-head b { color: #fbf1e7; }
+#focus .fx-moodsheet .fp-back { color: #fbf1e7; border-color: rgba(255, 255, 255, .2); }
+.fxm-thanks { margin: 6px 0; text-align: center; font-family: var(--serif, inherit); font-size: 20px; color: #fbf1e7; }
+#focus > .fx-moodsheet.small { bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important; }
 </style>
 </head>
 <body>
@@ -4915,7 +4958,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:50</footer>
+  <footer>Mr.O:18:55</footer>
 </div>
 
 <script>
@@ -6217,6 +6260,25 @@ const ROOM_PLANTS = [
   { k: 'lavender',  name: 'Cosmos',        sub: 'light as air',     leaf: '#5f9e48', petal: ['#f3e4ff', '#a678d6'], mid: '#f2c12e', n: 8, rings: 1, shape: 'round' }
 ];
 
+// food you can grow while you focus. each step is said calmly, one per stage.
+const ROOM_CROPS = [
+  { k: 'onion', name: 'Onion', crop: '\u{1F9C5}', leaf: '#5a9e55', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A small onion bulb sits in the soil, tip up.', 'Roots reach down into the cool earth.', 'Thin green shoots rise, hollow and tall.',
+    'Under the soil, the bulb slowly swells.', 'The leaves bend over. It is nearly ready.', 'Your onion is ready to lift.'] },
+  { k: 'rice', name: 'Rice', crop: '\u{1F33E}', leaf: '#6aa553', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A rice seed rests in warm, wet soil.', 'A tiny shoot pushes up toward the light.', 'Thin blades grow, side by side like grass.',
+    'The stalks stand tall in shallow water.', 'Heads of grain form and turn gold.', 'Your rice is ripe and ready to cut.'] },
+  { k: 'tomato', name: 'Tomato', crop: '\u{1F345}', leaf: '#4f9a4f', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A tomato seed sleeps in soft soil.', 'Two round seed leaves open up.', 'The stem grows strong and smells green.',
+    'Small yellow flowers appear.', 'Green fruit grows and starts to blush.', 'Your tomato is red and ready to pick.'] },
+  { k: 'carrot', name: 'Carrot', crop: '\u{1F955}', leaf: '#5f9e48', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A tiny carrot seed rests near the top.', 'Fine feathery leaves peek out.', 'The leaves grow bushy above the soil.',
+    'Below, the root grows long and orange.', 'The top of the carrot shows at the soil.', 'Your carrot is ready to pull.'] },
+  { k: 'potato', name: 'Potato', crop: '\u{1F954}', leaf: '#4d9a5a', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A piece of potato with an eye is planted.', 'A pale sprout finds its way up.', 'Leafy green stems fill the pot.',
+    'Small white flowers open on top.', 'Under the soil, new potatoes grow.', 'Your potatoes are ready to dig up.'] }
+];
+
 const ROOM_POTS = [
   { name: 'terracotta', body: '#c9714a', rim: '#d9825a' },
   { name: 'blue ceramic', body: '#4f7fb3', rim: '#6a98c8' },
@@ -6321,7 +6383,8 @@ function plantSVG(stage, was, plant, pot) {
   if (stage >= 2) p.push('<g' + g(2) + '>' + stem(30.2, 23) + leafPath(20, 26.5, -8.5, -5) + '</g>');
   if (stage >= 3) p.push('<g' + g(3) + '>' + stem(23.2, 16.5) + leafPath(20, 20.5, 8, -5) + '</g>');
   if (stage >= 4) p.push('<g' + g(4) + '>' + stem(16.7, 11.5) + '</g>');
-  if (stage >= 4) p.push('<g' + (stage > was ? ' class="' + (stage === 5 ? 'bloom' : 'grow') + '"' : '') + '>' + plantTop(plant, stage) + '</g>');
+  if (stage >= 4) p.push('<g' + (stage > was ? ' class="' + (stage === 5 ? 'bloom' : 'grow') + '"' : '') + '>' +
+    (plant.crop ? '<text x="20" y="' + (stage === 5 ? 15 : 13) + '" font-size="' + (stage === 5 ? 12 : 7) + '" text-anchor="middle" dominant-baseline="middle">' + plant.crop + '</text>' : plantTop(plant, stage)) + '</g>');
   // each drawing gets its own shading names, so two on one page do not mix colours
   const uid = 'fl' + (++plantSVG.n || (plantSVG.n = 1)) + '_';
   return ('<svg viewBox="0 0 40 50" aria-hidden="true">' + flowerDefs(plant) + '<g class="sway">' + p.join('') + '</g>' + potSVG(pot) + '</svg>')
@@ -6400,7 +6463,7 @@ function openFocusFree(mins) {
 }
 
 function startRoom(b, end) {
-  const plant = pick(ROOM_PLANTS);
+  const plant = Math.random() < .5 ? pick(ROOM_CROPS) : pick(ROOM_PLANTS);
   // the pot changes at one or two random points on the way
   const changes = new Set([1, 2, 3, 4].sort(() => Math.random() - .5).slice(0, 1 + Math.floor(Math.random() * 2)));
   focus = { b, end, start: Date.now(), stage: -1, timer: null, plant, pot: pick(ROOM_POTS), changes,
@@ -6408,8 +6471,8 @@ function startRoom(b, end) {
 
   const el = document.getElementById('focus');
   el.querySelector('.fx-name').textContent = b.label || 'focus';
-  el.querySelector('.fx-ends').textContent = 'left · ends ' + clockOf(end);
-  el.querySelector('.fx-growing').textContent = 'Growing ' + plant.name + ' · ' + plant.sub;
+  el.querySelector('.fx-ends').textContent = 'ends ' + clockOf(end);
+  el.querySelector('.fx-growing').textContent = plant.steps ? plant.name + ' \u00b7 ' + plant.steps[0] : 'Growing ' + plant.name + ' \u00b7 ' + plant.sub;
   focusGoals();
   const note = el.querySelector('.fx-note');
   note.textContent = '';
@@ -6466,9 +6529,28 @@ function roomText() {
 }
 
 // how do you feel: pops up by itself when a check-in is due (an hour after the last)
-function roomMood() {
+function roomMood(open) {
   const sh = document.querySelector('#focus .fx-moodsheet');
-  if (!sh.hidden) return;
+  if (!sh.hidden && !open) return;
+  // first a small quiet button, so the plant keeps its room. the grid opens on tap.
+  const room = document.getElementById('focus');
+  if (!open) {
+    sh.innerHTML = '<button type="button" class="fxm-ask">How do you feel? <span>\u203a</span></button>';
+    sh.classList.add('small'); sh.hidden = false; room.classList.add('asking');
+    sh.querySelector('.fxm-ask').addEventListener('click', () => roomMood(true));
+    return;
+  }
+  sh.classList.remove('small');
+  sh.innerHTML = '<div class="fxm-top"><b>How do you feel?</b><button type="button" class="fxm-x" aria-label="not now">\u2715</button></div><div class="fp"></div>';
+  const done = () => { sh.hidden = true; room.classList.remove('asking'); };
+  sh.querySelector('.fxm-x').addEventListener('click', () => { done(); if (focus) focus.moodSnooze = Date.now(); });
+  feelPicker(sh.querySelector('.fp'), (mood, feel) => {
+    state.moods.push({ at: Date.now(), mood, feel, part: partOfDay(new Date().getHours()), note: '', after: focus && focus.b ? focus.b.label || '' : '' });
+    save();
+    sh.innerHTML = '<p class="fxm-thanks">Noted: ' + esc(feel) + '</p>';
+    setTimeout(done, 1300);
+  });
+  return;
   sh.innerHTML = '<div class="fxm-top"><b>How do you feel?</b><button type="button" class="fxm-x" aria-label="not now">✕</button></div><div class="fxm-grid">' + MOODS.map(m =>
     '<button type="button" data-m="' + m.k + '" style="--c:' + m.c + '"><span>' + m.e + '</span>' + m.k + '</button>').join('') + '</div>';
   sh.hidden = false;
@@ -6493,6 +6575,7 @@ function tickFocus() {
       focus.pot = pick(ROOM_POTS.filter(p => p !== focus.pot));    // a new pot along the way
     }
     el.querySelector('.fx-plant').innerHTML = plantSVG(stage, focus.stage < 0 ? stage : focus.stage, focus.plant, focus.pot);
+    if (focus.plant.steps && stage < 5) el.querySelector('.fx-growing').textContent = focus.plant.name + ' \u00b7 ' + focus.plant.steps[stage];
     focus.stage = stage;
   }
 
@@ -6513,7 +6596,8 @@ function tickFocus() {
                : m + ':' + String(sec).padStart(2, '0'));
   if (stage < 5) {
     const gone = Math.floor((now - focus.start) / 60000);
-    el.querySelector('.fx-ends').textContent = 'left · ' + (gone >= 60 ? Math.floor(gone / 60) + 'h ' + (gone % 60) + 'm' : gone + ' min') + ' gone · ends ' + clockOf(focus.end);
+    el.querySelector('.fx-ends').textContent = 'ends ' + clockOf(focus.end);   // one thing to read
+    void gone;
   }
   el.querySelector('.fx-arc').style.strokeDashoffset = 879.6 * (1 - k);
   el.querySelector('.fx-plant').classList.toggle('done', stage === 5);
@@ -6525,7 +6609,7 @@ function tickFocus() {
     el.querySelector('.fx-ends').textContent = n === 0 ? 'you stayed with it the whole way'
       : 'you left the room ' + (n === 1 ? 'once' : n === 2 ? 'twice' : n + ' times');
     el.querySelector('.fx-note').textContent = '';
-    el.querySelector('.fx-growing').textContent = focus.plant.name + ' is fully grown';
+    el.querySelector('.fx-growing').textContent = focus.plant.steps ? focus.plant.steps[5] : focus.plant.name + ' is fully grown';
     el.querySelector('.fx-done').hidden = false;
   }
 }
@@ -6549,15 +6633,36 @@ function openRoomFromHome() {
       at += len;
     }
   }
+  // the block you are on now (any kind), so you can focus until it ends
+  let cur = null;
+  if (day && day.blocks.length) {
+    let at = toMins(day.start); const nm = planMin(viewDay);
+    for (const b of day.blocks) { const len = Number(b.mins) || 60; if (!cur && !b.done && nm >= at && nm < at + len) cur = { b, at, len, left: at + len - nm }; at += len; }
+  }
   const old = document.getElementById('roomsheet'); if (old) old.remove();
   const el = document.createElement('div');
   el.id = 'roomsheet'; el.className = 'w3';
-  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet"><span class="w3-grab"></span><h2>Focus room</h2>' +
-    '<p class="pin-sub">How long do you want to focus?</p><div class="rs-opts">' +
-    [25, 50, 90].map(m => '<button type="button" class="lf-btn" data-m="' + m + '">' + minsLabel(m) + '</button>').join('') + '</div></div>';
+  const endAt = m => clockOf(Date.now() + m * 60000);
+  let other = 30;
+  const draw = more => {
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls"><span class="w3-grab"></span><h2>Focus</h2><p class="ls-from">How long?</p>' +
+      (more
+        ? '<div class="ls-step"><button type="button" data-o="-5" aria-label="5 minutes less">\u2212</button><div><b>' + minsLabel(other) + '</b><small>ends ' + endAt(other) + '</small></div><button type="button" data-o="5" aria-label="5 minutes more">+</button></div>' +
+          '<button type="button" class="wka-go" data-m="' + other + '">Start ' + minsLabel(other) + '</button><button type="button" class="ls-back">Back</button>'
+        : (cur && cur.left >= 5 ? '<button type="button" class="ls-row on" data-cur="1"><b>' + esc(cur.b.label || 'This block') + '</b><i>until it ends</i><small>' + minsLabel(cur.left) + ' \u00b7 ' + endAt(cur.left) + '</small></button>' : '') +
+          '<div class="ls-list">' + [15, 25, 45, 60, 90, 120].map(m => '<button type="button" class="ls-row" data-m="' + m + '"><b>' + minsLabel(m) + '</b><small>ends ' + endAt(m) + '</small></button>').join('') +
+          '<button type="button" class="ls-row ls-other" data-other="1"><b>Other</b></button></div>') +
+      '<button type="button" class="ls-cancel">Cancel</button></div>';
+    el.querySelector('.w3-back').addEventListener('click', () => el.remove());
+    el.querySelector('.ls-cancel').addEventListener('click', () => el.remove());
+    el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { el.remove(); openFocusFree(Number(b.dataset.m)); }));
+    const c = el.querySelector('[data-cur]'); if (c) c.addEventListener('click', () => { el.remove(); openFocus(cur.b, cur.at, cur.len); });
+    const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
+    el.querySelectorAll('[data-o]').forEach(b => b.addEventListener('click', () => { other = Math.max(5, Math.min(240, other + Number(b.dataset.o))); draw(true); }));
+    const bk = el.querySelector('.ls-back'); if (bk) bk.addEventListener('click', () => draw(false));
+  };
+  draw(false);
   document.body.appendChild(el);
-  el.querySelector('.w3-back').addEventListener('click', () => el.remove());
-  el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { el.remove(); openFocusFree(Number(b.dataset.m)); }));
 }
 
 /* ---- undo for the day page ----
@@ -7426,6 +7531,34 @@ const MOODS = [
   { k: 'anxious',     e: '\u{1F32A}', c: '#e3a27a' },
   { k: 'low',         e: '\u{1F327}', c: '#a99bd4' }
 ];
+
+/* ---- feelings: every kind of emotion, in two calm steps ----
+   first one of 8 families, then the exact word. each word maps to one of
+   the mood types above, so stats and history keep working. */
+const FEELINGS = [
+  { k: 'Happy',   e: '\u2600\uFE0F', c: '#e8c46a', w: [['joyful', 'good'], ['grateful', 'good'], ['proud', 'good'], ['excited', 'good'], ['hopeful', 'good']] },
+  { k: 'Calm',    e: '\u{1F343}', c: '#93bf7f', w: [['calm', 'calm'], ['content', 'calm'], ['relaxed', 'calm'], ['focused', 'focused'], ['safe', 'calm']] },
+  { k: 'Love',    e: '\u{1F497}', c: '#e38fa8', w: [['loved', 'good'], ['close', 'good'], ['tender', 'calm'], ['caring', 'good']] },
+  { k: 'Okay',    e: '\u2601\uFE0F', c: '#86b9d9', w: [['okay', 'okay'], ['neutral', 'okay'], ['meh', 'okay'], ['unfocused', 'unfocused']] },
+  { k: 'Sad',     e: '\u{1F327}', c: '#a99bd4', w: [['sad', 'low'], ['lonely', 'low'], ['hurt', 'low'], ['disappointed', 'low'], ['empty', 'low']] },
+  { k: 'Worried', e: '\u{1F300}', c: '#e3a27a', w: [['anxious', 'anxious'], ['stressed', 'stressed'], ['overwhelmed', 'stressed'], ['nervous', 'anxious'], ['insecure', 'anxious']] },
+  { k: 'Angry',   e: '\u{1F525}', c: '#d9718e', w: [['angry', 'stressed'], ['frustrated', 'stressed'], ['annoyed', 'stressed'], ['jealous', 'stressed'], ['resentful', 'stressed']] },
+  { k: 'Tired',   e: '\u{1F319}', c: '#8a7768', w: [['tired', 'tired'], ['drained', 'tired'], ['bored', 'bored'], ['unmotivated', 'unmotivated'], ['restless', 'unfocused']] }
+];
+// draws the picker into box; onPick(moodKey, word) when a word is chosen
+function feelPicker(box, onPick) {
+  const draw = fam => {
+    const F = FEELINGS.find(x => x.k === fam);
+    box.innerHTML = F
+      ? '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><span>' + F.e + '</span><b>' + F.k + '</b></div>' +
+        '<div class="fp-words">' + F.w.map(([w, m]) => '<button type="button" data-w="' + w + '" data-m="' + m + '" style="--c:' + F.c + '">' + w + '</button>').join('') + '</div>'
+      : '<div class="fp-fams">' + FEELINGS.map(f => '<button type="button" data-f="' + f.k + '" style="--c:' + f.c + '"><span>' + f.e + '</span>' + f.k + '</button>').join('') + '</div>';
+    box.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => draw(b.dataset.f)));
+    const bk = box.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => draw(null));
+    box.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', () => { b.classList.add('on'); onPick(b.dataset.m, b.dataset.w); }));
+  };
+  draw(null);
+}
 
 /* ---- a meal block, ticked ----
    asks if you had what your meals timetable says. yes logs it to Fuel.
@@ -12238,7 +12371,10 @@ function renderHomeQuick(box) {
   const last = state.moods.slice().sort((a, b) => b.at - a.at)[0];
   // the mood button only shows when it is time: an hour after your last check-in
   const due = !last || Date.now() - last.at >= MOOD_EVERY;
-  if (due) btn('due', '<span>\u{1F642}</span>Mood', () => quickSheet('mood'));
+  // the next mood, read from your past check-ins at that time of day
+  const pr = moodNext(due ? Date.now() : last.at + MOOD_EVERY), pm = pr && MOODS.find(m => m.k === pr.mood);
+  if (pm) btn((due ? 'due ' : '') + 'two pred', '<span>' + pm.e + '</span><em>' + (due ? 'Mood' : 'Next') + '<small>likely ' + pm.k + '</small></em>', () => quickSheet('mood'));
+  else if (due) btn('due', '<span>\u{1F642}</span>Mood', () => quickSheet('mood'));
   else { const lm = MOODS.find(m => m.k === last.mood); btn('quiet', '<span>' + (lm ? lm.e : '\u{1F642}') + '</span>', () => quickSheet('mood')); }   // today's moods, no asking
   box.appendChild(row);
 }
@@ -12278,6 +12414,30 @@ function foodSheet() {
   setTimeout(() => inp.focus(), 50);
 }
 
+/* how you will likely feel at a time: past check-ins around that hour (last 60 days).
+   the same weekday, recent weeks, and the same plan block count more. null if fewer than 3. */
+function moodNext(at) {
+  const t = new Date(at), H = t.getHours() + t.getMinutes() / 60, wd = t.getDay(), since = Date.now() - 60 * 86400000;
+  let blk = '';
+  try { const k = planKey(), d = state.days[k]; if (d && d.blocks) { let m = toMins(d.start); const tm = t.getHours() * 60 + t.getMinutes();
+    for (const b of d.blocks) { const len = Number(b.mins) || 60; if (tm >= m && tm < m + len) { blk = (b.label || '').trim().toLowerCase(); break; } m += len; } } } catch {}
+  const score = {}; let n = 0;
+  for (const x of state.moods || []) {
+    if (!x || x.at < since || !x.mood) continue;
+    const d = new Date(x.at), h = d.getHours() + d.getMinutes() / 60;
+    let gap = Math.abs(h - H); gap = Math.min(gap, 24 - gap);
+    if (gap > 1.5) continue;
+    let w = 1;
+    if (d.getDay() === wd) w *= 2;
+    if (Date.now() - x.at < 14 * 86400000) w *= 1.5;
+    if (blk && (x.after || '').trim().toLowerCase() === blk) w *= 2;
+    score[x.mood] = (score[x.mood] || 0) + w; n++;
+  }
+  if (n < 3) return null;
+  const best = Object.keys(score).sort((a, b) => score[b] - score[a])[0];
+  return { mood: best, n, at, blk };
+}
+
 function quickSheet(kind) {
   const old = document.getElementById('qsheet'); if (old) old.remove();
   const el = document.createElement('div');
@@ -12289,6 +12449,8 @@ function quickSheet(kind) {
   el.querySelector('.w3-back').addEventListener('click', close);
   if (kind === 'sleep') return sleepSheet(body, close);
   moodSheet(body, close, el);
+  const pr = moodNext(Date.now()), pm = pr && MOODS.find(m => m.k === pr.mood);
+  if (pm) body.insertAdjacentHTML('afterbegin', '<p class="mn-pred">' + pm.e + ' Around now you usually feel <b>' + pm.k + '</b>' + (pr.blk ? ' during ' + esc(pr.blk) : '') + '. From ' + pr.n + ' past check-ins.</p>');
 }
 
 /* sleep: last night, the week, edit for an hour after you log, see you tomorrow */
@@ -12341,7 +12503,7 @@ function moodSheet(body, close, el, force) {
   if (!force && last && Date.now() - last.at < MOOD_EVERY) {
     const md = MOODS.find(x => x.k === last.mood);
     body.innerHTML = '<div class="sp-top"><span class="sp-moon">' + (md ? md.e : '\u2022') + '</span><div><small>Last check-in, ' + agoText(Date.now() - last.at) + ' ago</small>' +
-      '<b>' + cap(last.mood) + '</b><span>next one in ' + agoText(last.at + MOOD_EVERY - Date.now()) + '</span></div></div>' +
+      '<b>' + cap(last.feel || last.mood) + '</b><span>next one in ' + agoText(last.at + MOOD_EVERY - Date.now()) + '</span></div></div>' +
       // every check-in today, newest first, with its time
       (today.length ? '<p class="mp-h">Today</p><ol class="mp-list">' + today.slice().reverse().map(m => { const d = MOODS.find(x => x.k === m.mood);
         return '<li><time>' + clockOf(m.at) + '</time><span>' + (d ? d.e : '\u2022') + '</span><b>' + m.mood + '</b>' + (m.note ? '<small>' + esc(m.note) + '</small>' : '') + '</li>'; }).join('') + '</ol>' : '') +
@@ -12355,13 +12517,12 @@ function moodSheet(body, close, el, force) {
     (today.length ? '<div class="mp-line">' + today.slice(-8).map(m => { const md = MOODS.find(x => x.k === m.mood);
       return '<span title="' + m.mood + '">' + (md ? md.e : '•') + '<small>' + clockOf(m.at).replace(/:00/, '') + '</small></span>'; }).join('') + '</div>'
                   : '<p class="sp-note" style="margin-top:0">No check-ins yet today.</p>') +
-    '<div class="mp-grid">' + MOODS.map(m => '<button type="button" data-mood="' + m.k + '" style="--c:' + m.c + '"><span>' + m.e + '</span>' + m.k + '</button>').join('') + '</div>' +
+    '<div class="fp"></div>' +
     '<button type="button" class="lf-skip qs-hist">All history ›</button>';
-  body.querySelectorAll('[data-mood]').forEach(b => b.addEventListener('click', () => {
-    b.classList.add('pop');
-    state.moods.push({ at: Date.now(), mood: b.dataset.mood, part: partOfDay(new Date().getHours()), note: '' }); save();
+  feelPicker(body.querySelector('.fp'), (mood, feel) => {
+    state.moods.push({ at: Date.now(), mood, feel, part: partOfDay(new Date().getHours()), note: '' }); save();
     setTimeout(close, 260);
-  }));
+  });
   body.querySelector('.qs-hist').addEventListener('click', () => { el.remove(); show('mood'); window.scrollTo(0, 0); });
 }
 
