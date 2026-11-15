@@ -4698,6 +4698,26 @@ html { background: var(--paper) !important; }
 #focus .fx-moodsheet .fp-back { color: #fbf1e7; border-color: rgba(255, 255, 255, .2); }
 .fxm-thanks { margin: 6px 0; text-align: center; font-family: var(--serif, inherit); font-size: 20px; color: #fbf1e7; }
 #focus > .fx-moodsheet.small { bottom: calc(40px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* area pages (Health and the rest): a summary on top, then calm rows with an icon, a number and an arrow */
+#view-life .hp-sum { margin: 6px 0 18px; padding: 18px; background: color-mix(in srgb, var(--c) 11%, var(--card)); border: 1px solid color-mix(in srgb, var(--c) 30%, var(--hair)); border-radius: 22px; }
+#view-life .hp-hero small { display: block; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: color-mix(in srgb, var(--c) 70%, var(--ink)); }
+#view-life .hp-hero b { display: block; margin-top: 2px; font-family: var(--serif, inherit); font-size: 34px; font-weight: 600; line-height: 1.1; color: var(--ink); }
+#view-life .hp-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+#view-life .hp-chip { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; min-width: 0; }
+#view-life .hp-chip i { font-style: normal; font-size: 18px; line-height: 1; }
+#view-life .hp-chip b { font-size: 17px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+#view-life .hp-chip small { font-size: 12px; color: var(--muted); }
+#view-life .hp-list { display: flex; flex-direction: column; gap: 10px; }
+#view-life .hp-row { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; padding: 12px 16px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 20px; cursor: pointer; transition: transform .12s; }
+#view-life .hp-row:active { transform: scale(.98); }
+#view-life .hp-ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; font-style: normal; font-size: 22px; background: color-mix(in srgb, var(--c) 14%, var(--card)); border-radius: 14px; }
+#view-life .hp-row span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+#view-life .hp-row b { font-size: 17px; font-weight: 600; }
+#view-life .hp-row small { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#view-life .hp-row em { flex: none; font-style: normal; font-size: 20px; font-weight: 700; color: color-mix(in srgb, var(--c) 75%, var(--ink)); font-variant-numeric: tabular-nums; }
+#view-life .hp-row em i { font-style: normal; font-size: 13px; font-weight: 500; color: var(--muted); }
+#view-life .hp-row s { flex: none; text-decoration: none; font-size: 22px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -4958,7 +4978,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:55</footer>
+  <footer>Mr.O:19:00</footer>
 </div>
 
 <script>
@@ -13311,8 +13331,20 @@ function areaPortals(box, a) {
   });
   if (a.k === 'health') doors.push({ tab: 'goals', go: 'goals', name: 'Journey', c: a.c, big: j ? journeyDay(j, Date.now()) : '+',
                cap: j ? 'days \u00b7 ' + j.name : 'quitting or starting something' });
-  box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">' + a.name + '</h1><div class="hp-grid">' +
-    doors.map(d => '<button type="button" class="hp-door" data-door="' + d.go + '" style="--c:' + d.c + '"><b>' + d.name + '</b><em>' + d.big + '</em><small>' + esc(d.cap) + '</small></button>').join('') + '</div>';
+  const ICON = { food: '\u{1F37D}\uFE0F', gym: '\u{1F3C3}\u200D\u2640\uFE0F', mood: '\u{1FA7A}', money: '\u{1F4B3}', habits: '\u2705', ideas: '\u{1F4AC}', people: '\u{1F48C}', love: '\u{1F49E}', goals: '\u{1F331}' };
+  // health: a short summary of today on top
+  let sum = '';
+  if (a.k === 'health') {
+    const t = todayKey(), sl = typeof sleepOn === 'function' ? sleepOn(t) : null;
+    const fn = state.food.filter(f => key(new Date(f.at)) === t).length;
+    const lm = state.moods.filter(m => key(new Date(m.at)) === t).sort((x, y) => y.at - x.at)[0], mm = lm && MOODS.find(m => m.k === lm.mood);
+    const chip = (ic, v, l) => '<span class="hp-chip"><i>' + ic + '</i><b>' + v + '</b><small>' + l + '</small></span>';
+    sum = '<div class="hp-sum" style="--c:' + a.c + '">' +
+      (j ? '<div class="hp-hero"><small>' + esc(j.name) + '</small><b>Day ' + journeyDay(j, Date.now()) + '</b></div>' : '<div class="hp-hero"><small>Today</small><b>' + cap(FULL[new Date().getDay()]) + '</b></div>') +
+      '<div class="hp-chips">' + chip('\u{1F634}', sl ? dur(sleepMins(sl)) : '\u2013', 'sleep') + chip('\u{1F37D}\uFE0F', fn, 'food') + chip(mm ? mm.e : '\u{1F642}', mm ? mm.k : '\u2013', 'mood') + '</div></div>';
+  }
+  box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">' + a.name + '</h1>' + sum + '<div class="hp-list">' +
+    doors.map(d => '<button type="button" class="hp-row" data-door="' + d.go + '" style="--c:' + a.c + '"><i class="hp-ic">' + (ICON[d.tab] || '\u2022') + '</i><span><b>' + d.name + '</b><small>' + esc(d.cap) + '</small></span><em>' + d.big + '</em><s>\u203a</s></button>').join('') + '</div>';
   box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; show('home'); window.scrollTo(0, 0); });
   box.querySelectorAll('[data-door]').forEach(b => b.addEventListener('click', () => {
     if (b.dataset.door === 'love') { lifeOpen = null; goalsTab = 'week'; show('goals'); return; }
