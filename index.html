@@ -4929,6 +4929,35 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 #view-home#view-home#view-home#view-home#view-home .hm-area .hm-an { order: 1; font-size: 13px !important; letter-spacing: 1.8px !important; }
 #view-home#view-home#view-home#view-home#view-home .hm-area em { order: 2; margin-top: auto; padding-top: 10px; text-align: left !important; font-size: 28px !important; line-height: 1.1; }
 #view-home#view-home#view-home#view-home#view-home .hm-area small { order: 3; margin-top: 2px; font-size: 12.5px !important; }
+
+/* plan week: a summary on top, mini timelines in the list, hour lines in the calendar */
+.ws { margin: 4px 0 16px; padding: 16px 18px; border: 1px solid transparent; border-radius: 22px;
+  background: linear-gradient(color-mix(in srgb, var(--pink) 7%, var(--card)), color-mix(in srgb, var(--pink) 7%, var(--card))) padding-box, var(--gold, linear-gradient(135deg, #f7d3dc, #b97488)) border-box; }
+.ws-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ws-nums span { display: flex; flex-direction: column; }
+.ws-nums b { font-family: var(--display); font-size: 24px; font-weight: 700; line-height: 1.15; color: var(--ink); }
+.ws-nums b i { font-style: normal; font-size: 15px; font-weight: 500; color: var(--muted); }
+.ws-nums small { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.ws-bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 14px; }
+.ws-bar { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0; background: none; border: none; cursor: pointer; }
+.ws-bar i { display: flex; flex-direction: column; justify-content: flex-end; width: 100%; max-width: 30px; height: 52px; background: var(--slot); border-radius: 8px; overflow: hidden; }
+.ws-bar s { display: flex; flex-direction: column; justify-content: flex-end; width: 100%; background: color-mix(in srgb, var(--pink) 30%, var(--card)); text-decoration: none; }
+.ws-bar u { display: block; width: 100%; background: var(--pink); }
+.ws-bar small { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ws-bar.today small { color: var(--pink-d); }
+.wl-tl { padding: 0 18px 12px; }
+.wl-tl span { display: block; margin-bottom: 6px; font-size: 13px; color: var(--muted); }
+.wl-bar { display: flex; gap: 2px; height: 8px; border-radius: 4px; overflow: hidden; }
+.wl-bar i { display: block; min-width: 3px; background: color-mix(in srgb, var(--q) 60%, var(--card)); }
+.wl-bar i.done { filter: saturate(1.6) brightness(.92); }
+.wl-bar i.done { background: var(--q); }
+.wl-day.today { border: 1px solid transparent !important; background: linear-gradient(var(--card), var(--card)) padding-box, var(--gold, linear-gradient(135deg, #f7d3dc, #b97488)) border-box !important; }
+.wg-d em { display: block; font-style: normal; font-size: 11px; font-weight: 500; color: var(--muted); }
+.wg-d.today em, .wg-d.sel em { color: var(--pink-d); }
+.wg-body { background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 21.6px, color-mix(in srgb, var(--hair) 60%, transparent) 21.6px, color-mix(in srgb, var(--hair) 60%, transparent) 22.6px); }
+.wg-col i:not(.done) { opacity: .45; }
+.wg-col i.done { filter: saturate(1.6) brightness(.92); }
+.wg-col u { background: var(--gold-1, #d68fa3) !important; height: 2px !important; }
 </style>
 </head>
 <body>
@@ -5189,7 +5218,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:53</footer>
+  <footer>Mr.O:19:58</footer>
 </div>
 
 <script>
@@ -14926,6 +14955,14 @@ function renderWeek() {
     return '<button type="button" class="wk-day' + (k === today ? ' today' : '') + (all[n].length ? ' has' : '') + '" data-day="' + k + '" aria-label="plan ' + FULL[d.getDay()] + '">' +
       cap(FULL[d.getDay()].slice(0, 3)) + '<b>' + d.getDate() + '</b><i></i></button>'; }).join('') + '</div>';
 
+  // the week at a glance: hours planned, blocks done, days planned, a bar per day
+  {
+    const mins = all.map(bs => bs.reduce((t, b) => t + (b.to - b.from), 0)), done = all.map(bs => bs.filter(b => b.done).reduce((t, b) => t + (b.to - b.from), 0));
+    const tot = mins.reduce((a, b) => a + b, 0), nb = all.reduce((t, bs) => t + bs.length, 0), nd = all.reduce((t, bs) => t + bs.filter(b => b.done).length, 0), mx = Math.max(60, ...mins);
+    html += '<div class="ws"><div class="ws-nums"><span><b>' + (tot ? hrsLabel(tot) : '0') + '</b><small>planned</small></span><span><b>' + nd + '<i>/' + nb + '</i></b><small>done</small></span><span><b>' + planned + '<i>/7</i></b><small>days</small></span></div>' +
+      '<div class="ws-bars">' + days.map((k, n) => '<button type="button" class="ws-bar' + (k === today ? ' today' : '') + '" data-day="' + k + '" aria-label="' + FULL[fromKey(k).getDay()] + ', ' + hrsLabel(mins[n] || 0) + '"><i><s style="height:' + Math.round(mins[n] / mx * 100) + '%"><u style="height:' + (mins[n] ? Math.round(done[n] / mins[n] * 100) : 0) + '%"></u></s></i><small>' + FULL[fromKey(k).getDay()].slice(0, 1).toUpperCase() + '</small></button>').join('') + '</div></div>';
+  }
+
   html += '<button type="button" class="wk-add" id="wk-add"><span class="plusbox">+</span> Add a block</button>';
 
   if (weekLook === 'list') {
@@ -14941,6 +14978,8 @@ function renderWeek() {
         '<section class="wl-day' + (isT ? ' today' : '') + (past ? ' past' : '') + (fold ? ' fold' : '') + '" id="wl-' + k + '">' +
         '<button type="button" class="wl-h" ' + (past && bs.length ? 'data-fold="' + k + '"' : 'data-day="' + k + '"') + '><b>' + (isT ? 'Today' : cap(FULL[d.getDay()])) + '</b><span>' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</span>' +
           '<small>' + (bs.length ? (bs.some(b => b.done) ? bs.filter(b => b.done).length + ' of ' + bs.length + ' done' : bs.length + (bs.length === 1 ? ' block' : ' blocks')) : '') + '</small></button>' +
+        (bs.length ? '<div class="wl-tl"><span>' + clock(bs[0].from) + ' to ' + clock(bs[bs.length - 1].to) + ' \u00b7 ' + hrsLabel(bs.reduce((t, b) => t + (b.to - b.from), 0)) + '</span><div class="wl-bar">' +
+          bs.map(b => '<i class="' + (b.done ? 'done' : '') + '" style="flex:' + (b.to - b.from) + ';--q:' + WK_COLS[[...String(b.label).toLowerCase()].reduce((x, ch) => x + ch.charCodeAt(0), 0) % WK_COLS.length] + '"></i>').join('') + '</div></div>' : '') +
         (fold ? '' : bs.length
           ? '<ul>' + bs.map(b => { const a = raw[b.i] && raw[b.i].step ? goalOf(raw[b.i].step) : null, live = isT && nowM >= b.from && nowM < b.to;
               return '<li class="' + (b.done ? 'done' : '') + (live ? ' live' : '') + '" data-day="' + k + '"' + (a ? ' style="--c:' + a.c + '"' : '') + '><time>' + clock(b.from) + '</time><span>' + (a ? '<i>' + a.e + '</i>' : '') + esc(b.label) + '</span><small>' + (b.done ? '\u2713' : minsLabel(b.to - b.from)) + '</small></li>'; }).join('') + '</ul>'
@@ -14972,7 +15011,7 @@ function renderWeek() {
     let hrs = '';
     for (let m = lo; m <= hi; m += 180) hrs += '<span style="top:' + ((m - lo) * G) + 'px">' + clock(m).replace(':00', '') + '</span>';
     html += '<div class="wg"><div class="wg-head"><span></span>' + days.map(k => { const d = fromKey(k);
-        return '<button type="button" class="wg-d' + (k === sel ? ' sel' : '') + (k === today ? ' today' : '') + '" data-sel="' + k + '"><small>' + FULL[d.getDay()].slice(0, 1).toUpperCase() + '</small><b>' + d.getDate() + '</b></button>'; }).join('') + '</div>' +
+        return '<button type="button" class="wg-d' + (k === sel ? ' sel' : '') + (k === today ? ' today' : '') + '" data-sel="' + k + '"><small>' + FULL[d.getDay()].slice(0, 1).toUpperCase() + '</small><b>' + d.getDate() + '</b><em>' + (all[days.indexOf(k)].length ? Math.round(all[days.indexOf(k)].reduce((t, b) => t + (b.to - b.from), 0) / 60 * 2) / 2 + 'h' : '\u00a0') + '</em></button>'; }).join('') + '</div>' +
       '<div class="wg-body" style="height:' + GH + 'px"><div class="wg-hrs">' + hrs + '</div>' + days.map((k, n) =>
         '<button type="button" class="wg-col' + (k === sel ? ' sel' : '') + '" data-sel="' + k + '" aria-label="' + FULL[fromKey(k).getDay()] + '">' +
           all[n].map(b => '<i class="' + (b.done ? 'done' : '') + '" style="--q:' + colOf(b.label) + ';top:' + ((b.from - lo) * G) + 'px;height:' + Math.max(3, (b.to - b.from) * G - 1.5) + 'px"></i>').join('') +
