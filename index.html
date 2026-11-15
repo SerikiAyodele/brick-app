@@ -4190,6 +4190,61 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
 .wka-note { margin: 14px 0 0; font-size: 13px; color: var(--muted); }
 .wka-go { width: 100%; min-height: 48px; margin-top: 14px; font: 600 16px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 24px; cursor: pointer; }
 .wka-go:disabled { opacity: .45; cursor: default; }
+
+/* home: stickers. pastel cards with a white die cut edge, big tilted emoji */
+#view-home .hm-now, #view-home .hm-goals, #view-home .hm-area, #view-home .hm-quick .hq {
+  border: 4px solid #fff !important; box-shadow: 0 2px 0 rgba(59,45,37,.06), 0 10px 22px -10px rgba(59,45,37,.28) !important; }
+#view-home .hm-now { position: relative !important; background: #fbd3df !important; color: var(--ink) !important; border-radius: 28px !important; padding: 22px 22px 22px !important; overflow: visible !important; }
+#view-home .hm-now::before { display: none !important; }
+#view-home .hm-now::after { content: "\1F338" !important; display: block !important; position: absolute; right: 14px; top: -18px; width: auto; height: auto;
+  font-size: 54px; background: none !important; transform: rotate(12deg); filter: drop-shadow(0 4px 0 #fff) drop-shadow(0 6px 8px rgba(0,0,0,.18)); border-radius: 0; }
+#view-home .hm-now b { color: var(--ink) !important; font-size: 28px !important; font-weight: 700 !important; }
+#view-home .hm-now :is(.hm-lbl, .hm-sub, .hm-prog) { color: #9a5a6c !important; }
+#view-home .hm-now.empty .hm-sub, #view-home .hm-now.live .hm-lbl { color: #c2416a !important; font-weight: 600; }
+#view-home .hm-quick .hq { border-radius: 22px !important; color: var(--ink) !important; font-weight: 600; }
+#view-home .hm-quick .hq:nth-child(1) { background: #f6e6c3 !important; transform: rotate(-2deg); }
+#view-home .hm-quick .hq:nth-child(2) { background: #cfe4f4 !important; transform: rotate(1.5deg); }
+#view-home .hm-quick .hq:nth-child(3) { background: #fbd3df !important; transform: rotate(-1deg); }
+#view-home .hm-goals { background: #e7e0f6 !important; border-radius: 26px !important; }
+#view-home .hm-gt b { font-size: 22px; font-weight: 700; }
+#view-home .hm-sec { font-size: 22px !important; font-weight: 700 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--ink) !important; }
+#view-home .hm-areas { gap: 16px !important; }
+#view-home .hm-area { overflow: visible !important; border-radius: 26px !important; background: var(--a) !important; padding-top: 34px !important; }
+#view-home .hm-area::before, #view-home .hm-area::after { display: none !important; }
+#view-home .hm-area[data-open="health"] { --a: #cfe4f4; }
+#view-home .hm-area[data-open="wealth"] { --a: #f6e6c3; }
+#view-home .hm-area[data-open="love"]   { --a: #fbd3df; }
+#view-home .hm-area[data-open="self"]   { --a: #e7e0f6; }
+#view-home .hm-ae { position: absolute; top: -22px; left: 10px; width: auto !important; height: auto !important; font-size: 46px !important; background: none !important; box-shadow: none !important; border: 0 !important; backdrop-filter: none !important;
+  filter: drop-shadow(0 3px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 6px 8px rgba(0,0,0,.18)); }
+#view-home .hm-area:nth-child(1) .hm-ae { transform: rotate(-12deg); }
+#view-home .hm-area:nth-child(2) .hm-ae { transform: rotate(10deg); }
+#view-home .hm-area:nth-child(3) .hm-ae { transform: rotate(8deg); }
+#view-home .hm-area:nth-child(4) .hm-ae { transform: rotate(-10deg); }
+#view-home .hm-area .hm-an { color: var(--ink) !important; font-size: 15px !important; font-weight: 700 !important; }
+#view-home .hm-area em { color: var(--ink) !important; font-size: 30px !important; font-weight: 700 !important; }
+#view-home .hm-area small { color: color-mix(in srgb, var(--ink) 65%, transparent) !important; }
+/* dark: the same stickers, deeper pastels, a soft cream edge */
+:root[data-theme="dark"] #view-home { --st-edge: #f3e3e8; --st-pink: #7a4558; --st-blue: #3f5f7a; --st-cream: #6e5a3a; --st-lilac: #54496f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #view-home { --st-edge: #f3e3e8; --st-pink: #7a4558; --st-blue: #3f5f7a; --st-cream: #6e5a3a; --st-lilac: #54496f; } }
+:root[data-theme="dark"] #view-home :is(.hm-now, .hm-goals, .hm-area, .hm-quick .hq) { border-color: var(--st-edge) !important; color: #fbf1e7 !important; }
+:root[data-theme="dark"] #view-home .hm-now, :root[data-theme="dark"] #view-home .hm-area[data-open="love"], :root[data-theme="dark"] #view-home .hm-quick .hq:nth-child(3) { background: var(--st-pink) !important; }
+:root[data-theme="dark"] #view-home .hm-area[data-open="health"], :root[data-theme="dark"] #view-home .hm-quick .hq:nth-child(2) { background: var(--st-blue) !important; }
+:root[data-theme="dark"] #view-home .hm-area[data-open="wealth"], :root[data-theme="dark"] #view-home .hm-quick .hq:nth-child(1) { background: var(--st-cream) !important; }
+:root[data-theme="dark"] #view-home .hm-goals, :root[data-theme="dark"] #view-home .hm-area[data-open="self"] { background: var(--st-lilac) !important; }
+:root[data-theme="dark"] #view-home :is(.hm-now b, .hm-area .hm-an, .hm-area em, .hm-quick .hq) { color: #fbf1e7 !important; }
+:root[data-theme="dark"] #view-home :is(.hm-now .hm-lbl, .hm-now .hm-sub, .hm-now .hm-prog, .hm-area small) { color: rgba(251, 241, 231, .78) !important; }
+:root[data-theme="dark"] #view-home .hm-now.empty .hm-sub, :root[data-theme="dark"] #view-home .hm-now.live .hm-lbl { color: #ffc2d4 !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) #view-home :is(.hm-now, .hm-goals, .hm-area, .hm-quick .hq) { border-color: var(--st-edge) !important; color: #fbf1e7 !important; }
+  :root:not([data-theme="light"]) #view-home .hm-now, :root:not([data-theme="light"]) #view-home .hm-area[data-open="love"], :root:not([data-theme="light"]) #view-home .hm-quick .hq:nth-child(3) { background: var(--st-pink) !important; }
+  :root:not([data-theme="light"]) #view-home .hm-area[data-open="health"], :root:not([data-theme="light"]) #view-home .hm-quick .hq:nth-child(2) { background: var(--st-blue) !important; }
+  :root:not([data-theme="light"]) #view-home .hm-area[data-open="wealth"], :root:not([data-theme="light"]) #view-home .hm-quick .hq:nth-child(1) { background: var(--st-cream) !important; }
+  :root:not([data-theme="light"]) #view-home .hm-goals, :root:not([data-theme="light"]) #view-home .hm-area[data-open="self"] { background: var(--st-lilac) !important; }
+  :root:not([data-theme="light"]) #view-home :is(.hm-now b, .hm-area .hm-an, .hm-area em, .hm-quick .hq) { color: #fbf1e7 !important; }
+  :root:not([data-theme="light"]) #view-home :is(.hm-now .hm-lbl, .hm-now .hm-sub, .hm-now .hm-prog, .hm-area small) { color: rgba(251, 241, 231, .78) !important; }
+  :root:not([data-theme="light"]) #view-home .hm-now.empty .hm-sub, :root:not([data-theme="light"]) #view-home .hm-now.live .hm-lbl { color: #ffc2d4 !important; }
+}
 </style>
 </head>
 <body>
@@ -4448,7 +4503,7 @@ body, body[data-view] { background-image: radial-gradient(color-mix(in srgb, var
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 16:46</footer>
+  <footer>everything saves on this device · build 16:51</footer>
 </div>
 
 <script>
