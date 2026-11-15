@@ -4017,6 +4017,20 @@ body, body[data-view] {
 #view-day .nowcard:not(.past) { background: linear-gradient(150deg, color-mix(in srgb, var(--pink) 18%, var(--card)), var(--card) 75%) !important; }
 .fh { background: linear-gradient(160deg, color-mix(in srgb, #8b6cf6 24%, var(--card)), color-mix(in srgb, var(--pink) 10%, var(--card)) 80%) !important; }
 .tabs .brick:not(.flat) { background: color-mix(in srgb, var(--pink) 28%, var(--card)); }
+
+/* chat with Claude */
+.ch-log { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 14px; }
+.ch-empty { color: var(--muted); font-size: 15px; line-height: 1.5; padding: 18px 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.ch-msg { max-width: 85%; padding: 10px 14px; border-radius: 18px; font-size: 16px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ch-msg.me { align-self: flex-end; background: var(--pink-s); color: var(--ink); border-bottom-right-radius: 6px; }
+.ch-msg.ai { align-self: flex-start; background: var(--card); border: 1px solid var(--hair); border-bottom-left-radius: 6px; }
+.ch-msg.wait { color: var(--muted); }
+.ch-msg.err { align-self: flex-start; color: var(--muted); font-size: 14px; background: none; padding: 2px 4px; }
+.ch-form { position: sticky; bottom: 84px; display: flex; gap: 8px; align-items: flex-end; padding: 8px; background: var(--card); border: 1px solid var(--hair); border-radius: 22px; }
+.ch-form textarea { flex: 1; min-height: 40px; max-height: 140px; resize: none; border: 0; background: transparent; color: var(--ink); font: 16px/1.4 var(--display); padding: 9px 8px; outline: none; }
+.ch-form button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 18px; background: var(--pink); color: #fff; font: 600 15px var(--display); cursor: pointer; }
+.ch-form button:disabled { opacity: .45; cursor: default; }
+.ch-clear { display: block; margin: 14px auto 0; min-height: 40px; padding: 0 14px; border: 0; background: none; color: var(--muted); font: 14px var(--display); text-decoration: underline; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -4102,6 +4116,7 @@ body, body[data-view] {
     <button class="brick flat" id="tab-goals"  role="tab" aria-selected="false" aria-controls="view-goals" hidden>goals</button>
     <button class="brick flat" id="tab-people" role="tab" aria-selected="false" aria-controls="view-people" hidden>people</button>
     <button class="brick flat" id="tab-stats"  role="tab" aria-selected="false" aria-controls="view-stats">stats</button>
+    <button class="brick flat" id="tab-chat"   role="tab" aria-selected="false" aria-controls="view-chat">chat</button>
     <button class="brick flat" id="show-toggle" type="button">Show mode</button>
     <div class="mp-theme">
       <span>Look</span>
@@ -4257,7 +4272,18 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 13:12</footer>
+  <!-- ============ CHAT ============ -->
+  <section id="view-chat" role="tabpanel" aria-labelledby="tab-chat" hidden>
+    <header class="pghead"><h1>Chat</h1><span>with Claude</span></header>
+    <div id="chat-log" class="ch-log" aria-live="polite"></div>
+    <form id="chat-form" class="ch-form">
+      <textarea id="chat-input" rows="1" maxlength="2000" placeholder="Ask Claude anything" aria-label="Message to Claude"></textarea>
+      <button id="chat-send" type="submit" disabled>Send</button>
+    </form>
+    <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
+  </section>
+
+  <footer>everything saves on this device · build 16:20</footer>
 </div>
 
 <script>
@@ -13165,7 +13191,8 @@ const TABS = {
   money:  [document.getElementById('tab-money'),  document.getElementById('view-money')],
   life:   [document.getElementById('tab-life'),   document.getElementById('view-life')],
   people: [document.getElementById('tab-people'), document.getElementById('view-people')],
-  goals:  [document.getElementById('tab-goals'),  document.getElementById('view-goals')]
+  goals:  [document.getElementById('tab-goals'),  document.getElementById('view-goals')],
+  chat:   [document.getElementById('tab-chat'),   document.getElementById('view-chat')]
 };
 
 /* ---- now pill ----
@@ -13235,6 +13262,7 @@ function show(which) {
   if (which === 'money') renderMoney();
   if (which === 'people') renderPeople();
   if (which === 'goals') renderGoals();
+  if (which === 'chat')  renderChat();
   updateNowPill();
   try { localStorage.setItem(KEY + '.tab', which); } catch {}
 }
@@ -13255,7 +13283,7 @@ function fillHeads() {
 }
 
 // "more" opens a small panel above the bar
-const IN_MORE = ['stats'];
+const IN_MORE = ['stats', 'chat'];
 const moreBtn = document.getElementById('tab-more');
 const morePanel = document.getElementById('more-panel');
 
@@ -13291,6 +13319,86 @@ document.querySelectorAll('#theme-seg button').forEach(b => b.addEventListener('
   applyTheme(theme);
 }));
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (theme === 'auto') applyTheme('auto'); });
+
+/* =========== chat =========== */
+/* talk to Claude through the laptop server (/api/chat). the key stays on the
+   laptop. the chat itself is kept on this device only, last 40 messages. */
+const CHAT_KEY = KEY + '.chat';
+let chatMsgs = [];
+try { chatMsgs = JSON.parse(localStorage.getItem(CHAT_KEY) || '[]'); if (!Array.isArray(chatMsgs)) chatMsgs = []; } catch { chatMsgs = []; }
+let chatBusy = false, chatErr = '';
+const chatSave = () => { chatMsgs = chatMsgs.slice(-40); try { localStorage.setItem(CHAT_KEY, JSON.stringify(chatMsgs)); } catch {} };
+
+// a small picture of today so Claude can help with your real day
+function chatContext() {
+  const out = [], d = new Date();
+  out.push('Now: ' + d.toDateString() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'));
+  try {
+    for (const a of AREAS) {
+      const gs = (areaGoals(a.k) || []).map(g => g.text).filter(Boolean);
+      if (gs.length) out.push(a.name + ' goals: ' + gs.join('; '));
+    }
+    const blocks = ((state.days[todayKey()] || {}).blocks || []).map(b => b.label).filter(Boolean);
+    if (blocks.length) out.push('Today\'s plan: ' + blocks.join(', '));
+  } catch {}
+  return out.join('\n').slice(0, 3000);
+}
+
+function renderChat() {
+  const log = document.getElementById('chat-log');
+  let h = '';
+  if (!chatMsgs.length) h = '<div class="ch-empty">Ask Claude anything. It can see your goals and today\'s plan, so you can ask things like <b>what should I focus on today?</b></div>';
+  for (const m of chatMsgs) h += '<div class="ch-msg ' + (m.role === 'user' ? 'me' : 'ai') + '">' + esc(m.content) + '</div>';
+  if (chatBusy) h += '<div class="ch-msg ai wait">Thinking\u2026</div>';
+  if (chatErr) h += '<div class="ch-msg err">' + esc(chatErr) + '</div>';
+  log.innerHTML = h;
+  document.getElementById('chat-clear').hidden = !chatMsgs.length || chatBusy;
+  chatSendState();
+}
+
+function chatSendState() {
+  document.getElementById('chat-send').disabled = chatBusy || !document.getElementById('chat-input').value.trim();
+}
+
+async function chatSend(text) {
+  chatMsgs.push({ role: 'user', content: text });
+  chatSave(); chatBusy = true; chatErr = ''; renderChat();
+  window.scrollTo(0, document.body.scrollHeight);
+  let reply = null, why = '';
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 60000);
+    const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatMsgs.slice(-20), context: chatContext() }), signal: ctl.signal });
+    clearTimeout(timer);
+    const out = await r.json().catch(() => null);
+    if (r.ok && out && typeof out.reply === 'string') reply = out.reply;
+    else why = r.status === 429 ? 'Too many messages. Try again in a bit.'
+             : [404, 405, 501, 503].includes(r.status) ? 'Chat only works on the laptop version for now.'
+             : 'Claude could not answer. Try again.';
+  } catch { why = 'No connection to the laptop. Try again.'; }
+  chatBusy = false;
+  if (reply) { chatMsgs.push({ role: 'assistant', content: reply }); chatSave(); }
+  else chatErr = why;
+  renderChat();
+  window.scrollTo(0, document.body.scrollHeight);
+}
+
+{
+  const input = document.getElementById('chat-input');
+  const grow = () => { input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 140) + 'px'; };
+  input.addEventListener('input', () => { grow(); chatSendState(); });
+  document.getElementById('chat-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || chatBusy) return;
+    input.value = ''; grow();
+    chatSend(text);
+  });
+  document.getElementById('chat-clear').addEventListener('click', () => {
+    chatMsgs = []; chatErr = ''; chatSave(); renderChat();
+  });
+}
 
 /* =========== go =========== */
 
