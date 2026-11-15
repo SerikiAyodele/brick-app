@@ -4851,6 +4851,24 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 #view-home#view-home .hm-area .hm-an::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--c); flex: none; }
 :root[data-theme="dark"] #view-home#view-home#view-home#view-home :is(.hm-goals.hm-goals, .hm-areas .hm-area.hm-area) { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .8) !important; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #view-home#view-home#view-home#view-home :is(.hm-goals.hm-goals, .hm-areas .hm-area.hm-area) { box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .8) !important; } }
+
+/* home: a quiet divider between Goals and the four areas */
+#view-home#view-home#view-home .hm-sec { display: flex !important; align-items: center; gap: 12px; margin: 18px 2px 8px !important; font-size: 11px !important; font-weight: 600 !important;
+  letter-spacing: 2.5px !important; text-transform: uppercase !important; color: transparent !important; background: none !important; }
+#view-home#view-home#view-home .hm-sec { background-image: linear-gradient(135deg, #e6a2b4, #b97488) !important; -webkit-background-clip: text !important; background-clip: text !important; }
+#view-home#view-home#view-home .hm-sec::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(214, 143, 163, .7), rgba(214, 143, 163, 0)); }
+#view-home#view-home#view-home#view-home .hm-areas { margin-top: 0 !important; }
+
+/* weekly goals: Edit on each row */
+#view-goals .gl-rowwrap { position: relative; }
+#view-goals .gl-rowwrap .gl-row { padding-right: 70px !important; }
+#view-goals .gl-edbtn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1; min-height: 40px; padding: 0 12px; font: 500 14px var(--display); color: var(--muted); background: none; border: 1px solid var(--hair); border-radius: 20px; cursor: pointer; }
+#view-goals .gl-edbtn:disabled { font-size: 12px; opacity: .8; }
+#view-goals .gl-edit { padding: 10px 0 12px; border-bottom: 1px solid var(--hair); }
+#view-goals .gl-ebtns { display: flex; gap: 8px; margin-top: 8px; }
+#view-goals .gl-ebtns button { min-height: 44px; padding: 0 16px; font: 600 15px var(--display); color: var(--ink); background: var(--hair); border: none; border-radius: 22px; cursor: pointer; }
+#view-goals .gl-ebtns button:first-child { color: #fff; background: var(--pink); }
+#view-goals .gl-ebtns button.rm { margin-left: auto; color: #c2415d; background: none; border: 1px solid color-mix(in srgb, #c2415d 35%, var(--hair)); }
 </style>
 </head>
 <body>
@@ -5111,7 +5129,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:32</footer>
+  <footer>Mr.O:19:36</footer>
 </div>
 
 <script>
@@ -12814,6 +12832,19 @@ document.addEventListener('click', e => {
    and 2 a week per area (5 in all). the area pages hold the systems
    that move them: Fuel, Move, Wallet, People and the rest. */
 let goalsTab = 'week';
+let goalEditing = null;   // "area:index" of the weekly goal being edited
+// weekly goals can be edited twice in any 8 hours, so they stay steady
+const GOAL_EDIT_KEY = 'paper.by.mia.v2.goaledits';
+function goalEditsLeft() {
+  let ts = []; try { ts = JSON.parse(localStorage.getItem(GOAL_EDIT_KEY) || '[]'); } catch {}
+  ts = ts.filter(t => Date.now() - t < 8 * 3600e3);
+  return { n: 2 - ts.length, next: ts.length ? Math.min(...ts) + 8 * 3600e3 : Date.now() };
+}
+function goalEditUsed() {
+  let ts = []; try { ts = JSON.parse(localStorage.getItem(GOAL_EDIT_KEY) || '[]'); } catch {}
+  ts = ts.filter(t => Date.now() - t < 8 * 3600e3); ts.push(Date.now());
+  try { localStorage.setItem(GOAL_EDIT_KEY, JSON.stringify(ts)); } catch {}
+}
 let monthEdit = null;   // area key being typed
 function renderGoals() {
   const box = document.getElementById('goals-body');
@@ -12827,7 +12858,9 @@ function renderGoals() {
     let body = '';
     if (goalsTab === 'week') {
       const gs = areaGoals(a.k);
-      body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct); return '<button type="button" class="gl-row" data-wk="' + a.k + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button>' +
+      body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct);
+        if (goalEditing === a.k + ':' + gi) return '<div class="gl-edit"><input type="text" class="gl-in" maxlength="100" data-gein="' + a.k + ':' + gi + '" aria-label="edit goal"><div class="gl-ebtns"><button type="button" data-gesave="' + a.k + ':' + gi + '">Save</button><button type="button" data-gecancel="1">Cancel</button><button type="button" class="rm" data-germ="' + a.k + ':' + gi + '">Remove</button></div></div>';
+        return '<div class="gl-rowwrap"><button type="button" class="gl-edbtn" data-ged="' + a.k + ':' + gi + '" aria-label="edit ' + esc(g.text) + '">Edit</button><button type="button" class="gl-row" data-wk="' + a.k + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button></div>' +
         ((g.actions || []).length ? '<p class="gl-sl' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') +
         '<div class="gl-btns"><button type="button" data-gls="' + a.k + ':' + gi + '">' + ((g.actions || []).length ? 'Edit steps' : '+ Add steps') + '</button><button type="button" data-glsug="' + a.k + ':' + gi + '">\u2728 Suggest steps</button></div>'; }).join('') +
         (gs.length < MAX_LIFE_GOALS && (weekGoalCount() < MAX_WEEK_ALL || !gs.length) ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
@@ -12853,7 +12886,26 @@ function renderGoals() {
   box.querySelectorAll('.gl-mt').forEach(el => { el.textContent = MG[el.dataset.moed].text; if (MG[el.dataset.moed].done) el.classList.add('done'); });
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
-  // goal rows are just text now: no page opens behind them
+  // goal rows are just text; Edit changes the words (twice in 8 hours)
+  on('[data-ged]', el => {
+    const left = goalEditsLeft();
+    if (left.n <= 0) { el.textContent = 'again at ' + clockOf(left.next); el.disabled = true; return; }
+    goalEditing = el.dataset.ged; renderGoals();
+    const i = box.querySelector('[data-gein]'); if (i) { const [ak, gi] = goalEditing.split(':'); i.value = areaGoals(ak)[Number(gi)].text; i.focus(); }
+  });
+  on('[data-gecancel]', () => { goalEditing = null; renderGoals(); });
+  on('[data-gesave]', el => {
+    const [ak, gi] = el.dataset.gesave.split(':'), g = areaGoals(ak)[Number(gi)], t = box.querySelector('[data-gein]').value.trim();
+    if (g && t && t !== g.text) { g.text = t; g.own = true; save(); goalEditUsed(); }
+    goalEditing = null; renderGoals();
+  });
+  on('[data-germ]', el => {
+    if (el.dataset.sure !== '1') { el.dataset.sure = '1'; el.textContent = 'Tap again to remove'; return; }
+    const [ak, gi] = el.dataset.germ.split(':'), gs2 = areaGoals(ak);
+    gs2.splice(Number(gi), 1); areaGoals(ak); save(); goalEditUsed();
+    goalEditing = null; renderGoals();
+  });
+  box.querySelectorAll('[data-gein]').forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') box.querySelector('[data-gesave]').click(); }));
   on('[data-gls]', el => { const [ak, gi] = el.dataset.gls.split(':'); stepsSheet(ak, Number(gi), renderGoals); });
   on('[data-glsug]', el => { const [ak, gi] = el.dataset.glsug.split(':'); stepsSheet(ak, Number(gi), renderGoals, true); });
   on('[data-wkadd]', el => { goalsReturn = true; lifeOpen = null; lifeSetup = { i: AREAS.findIndex(x => x.k === el.dataset.wkadd), text: '', one: true }; show('life'); window.scrollTo(0, 0); });
