@@ -4754,6 +4754,45 @@ html { background: var(--paper) !important; }
 #view-home#view-home#view-home .hm-areas .hm-area em { color: var(--ink) !important; }
 #view-home#view-home#view-home .hm-areas .hm-area .hm-an { color: var(--muted) !important; }
 #view-home#view-home#view-home .hm-goals { background: var(--card) !important; border: 1px solid rgba(214, 143, 163, .22) !important; }
+
+/* week at a glance */
+.wg { padding: 12px 10px 14px 4px; background: var(--card); border: 1px solid var(--hair); border-radius: 22px; }
+.wg-head, .wg-body { display: grid; grid-template-columns: 34px repeat(7, 1fr); gap: 4px; }
+.wg-head { margin-bottom: 8px; }
+.wg-d { display: flex; flex-direction: column; align-items: center; gap: 1px; min-height: 48px; padding: 4px 0; font-family: var(--display); color: var(--muted); background: none; border: none; border-radius: 14px; cursor: pointer; }
+.wg-d small { font-size: 11px; font-weight: 600; letter-spacing: 1px; }
+.wg-d b { font-size: 16px; font-weight: 600; color: var(--ink); }
+.wg-d.today small { color: var(--pink-d); }
+.wg-d.sel { background: color-mix(in srgb, var(--pink) 22%, transparent); }
+.wg-body { position: relative; }
+.wg-hrs { position: relative; }
+.wg-hrs span { position: absolute; right: 4px; transform: translateY(-50%); font-size: 10px; color: var(--muted); white-space: nowrap; }
+.wg-col { position: relative; padding: 0; background: color-mix(in srgb, var(--ink) 3%, transparent); border: none; border-radius: 10px; cursor: pointer; overflow: hidden; }
+.wg-col.sel { background: color-mix(in srgb, var(--pink) 12%, transparent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--pink) 55%, transparent); }
+.wg-col i { position: absolute; left: 3px; right: 3px; background: color-mix(in srgb, var(--q) 75%, var(--card)); border-radius: 4px; }
+.wg-col i.done { opacity: .45; }
+.wg-col u { position: absolute; left: 0; right: 0; height: 2px; background: var(--pink-d); }
+.wg-day { margin-top: 12px; }
+.wg-day .wl-h small { color: var(--pink-d) !important; }
+
+/* home: no squares. quick buttons are slim pills in one line (swipe for more), the areas are a list of rows */
+#view-home#view-home .hm-quick { display: flex !important; gap: 8px !important; overflow-x: auto; margin: 0 -18px 12px !important; padding: 2px 18px 4px; scrollbar-width: none; }
+#view-home#view-home .hm-quick::-webkit-scrollbar { display: none; }
+#view-home#view-home .hm-quick .hq { flex: none !important; flex-direction: row !important; align-items: center !important; justify-content: center !important; gap: 8px !important;
+  width: auto !important; min-height: 46px !important; padding: 0 16px !important; border-radius: 23px !important; font-size: 15px !important; white-space: nowrap; }
+#view-home#view-home .hm-quick .hq span { font-size: 18px !important; }
+#view-home#view-home .hm-quick .hq.pred em { flex-direction: row !important; align-items: baseline !important; gap: 6px; }
+#view-home#view-home .hm-quick .hq.pred em small { font-size: 13px !important; }
+#view-home#view-home .hm-quick .hq.due::after { top: 6px; right: 8px; }
+#view-home#view-home .hm-areas { display: flex !important; flex-direction: column !important; gap: 10px !important; }
+#view-home#view-home .hm-area.hm-area { display: grid !important; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-items: center; column-gap: 12px;
+  min-height: 0 !important; padding: 16px 18px !important; border-radius: 20px !important; }
+#view-home#view-home .hm-area .hm-an { grid-column: 1; grid-row: 1; margin: 0 !important; font-size: 17px !important; }
+#view-home#view-home .hm-area small { grid-column: 1; grid-row: 2; margin-top: 2px; font-size: 13px !important; }
+#view-home#view-home .hm-area em { grid-column: 2; grid-row: 1 / span 2; font-size: 24px !important; text-align: right; }
+#view-home#view-home .hm-area .hm-ae { display: none !important; }
+
+.wl-day li.done span, .wl-day li.done time { text-decoration: none !important; color: var(--muted) !important; opacity: .7; }
 </style>
 </head>
 <body>
@@ -5014,7 +5053,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:11</footer>
+  <footer>Mr.O:19:16</footer>
 </div>
 
 <script>
@@ -14660,7 +14699,7 @@ function renderWeek() {
     '<div class="wk-nav"><button type="button" data-wk="-1" aria-label="previous week">\u2190</button><button type="button" data-wk="0">now</button><button type="button" data-wk="1" aria-label="next week">\u2192</button></div></div>';
 
   html += '<div class="md-seg wk-look"><button type="button" class="md-seg-b' + (weekLook === 'list' ? ' on' : '') + '" data-look="list">List</button><button type="button" class="md-seg-b' + (weekLook === 'cal' ? ' on' : '') + '" data-look="cal">Calendar</button></div>';
-  if (weekLook === 'cal') html += '<div class="wk-strip">' + days.map((k, n) => { const d = fromKey(k);
+  if (weekLook === 'calold') html += '<div class="wk-strip">' + days.map((k, n) => { const d = fromKey(k);
     return '<button type="button" class="wk-day' + (k === today ? ' today' : '') + (all[n].length ? ' has' : '') + '" data-day="' + k + '" aria-label="plan ' + FULL[d.getDay()] + '">' +
       cap(FULL[d.getDay()].slice(0, 3)) + '<b>' + d.getDate() + '</b><i></i></button>'; }).join('') + '</div>';
 
@@ -14695,13 +14734,33 @@ function renderWeek() {
   for (let m = lo; m <= hi; m += 120) hours += '<span style="top:' + ((m - lo) * PX) + 'px">' + clock(m).replace(':00', '') + '</span>';
   const nowM = new Date().getHours() * 60 + new Date().getMinutes();
   // wide days that scroll sideways; the hours stay put on the left
-  if (weekLook === 'cal') html += '<div class="wk-scroll"><div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hcol"><div class="wk-ch"></div><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div></div>' +
+  if (weekLook === 'calold') html += '<div class="wk-scroll"><div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hcol"><div class="wk-ch"></div><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div></div>' +
     days.map((k, n) => '<div class="wk-dcol' + (k === today ? ' today' : '') + '"><button type="button" class="wk-ch" data-day="' + k + '">' + cap(FULL[fromKey(k).getDay()]) + ' <b>' + fromKey(k).getDate() + '</b></button><div class="wk-col' + (k === today ? ' today' : '') + '" data-addto="' + k + '" style="height:' + H + 'px">' +
       all[n].map(b => { const c = WK_COLS[[...b.label.toLowerCase()].reduce((x, ch) => x + ch.charCodeAt(0), 0) % WK_COLS.length];
         return '<button type="button" class="wk-blk' + (b.done ? ' done' : '') + '" data-day="' + k + '" style="--q:' + c + ';top:' + ((b.from - lo) * PX) + 'px;height:' + Math.max(4, (b.to - b.from) * PX - 2) + 'px" title="' + esc(b.label + ', ' + clock(b.from) + ' to ' + clock(b.to)) + '"' + ((b.to - b.from) * PX < 16 ? ' data-tiny="1"' : (b.to - b.from) * PX < 26 ? ' data-short="1"' : '') + '>' + esc(b.label) + ((b.to - b.from) * PX >= 40 ? '<small>' + clock(b.from) + '</small>' : '') + '</button>'; }).join('') +
       (k === key(new Date()) && nowM >= lo && nowM <= hi ? '<i class="wk-now" style="top:' + ((nowM - lo) * PX) + 'px"></i>' : '') +
     '</div></div>').join('') + '</div></div>';
-  if (!planned && weekLook === 'cal') html += '<p class="wk-empty">Nothing planned this week yet. Tap a day to add a block.</p>';
+  if (weekLook === 'cal') {
+    // the whole week at a glance: 7 days side by side, blocks as colour bars.
+    // tap a day to read it underneath, in big text.
+    const sel = days.includes(renderWeek.sel) ? renderWeek.sel : days.includes(today) ? today : (days[all.findIndex(x => x.length)] || days[0]);
+    const GH = 340, G = GH / Math.max(60, hi - lo);
+    const colOf = lbl => WK_COLS[[...String(lbl).toLowerCase()].reduce((x, ch) => x + ch.charCodeAt(0), 0) % WK_COLS.length];
+    let hrs = '';
+    for (let m = lo; m <= hi; m += 180) hrs += '<span style="top:' + ((m - lo) * G) + 'px">' + clock(m).replace(':00', '') + '</span>';
+    html += '<div class="wg"><div class="wg-head"><span></span>' + days.map(k => { const d = fromKey(k);
+        return '<button type="button" class="wg-d' + (k === sel ? ' sel' : '') + (k === today ? ' today' : '') + '" data-sel="' + k + '"><small>' + FULL[d.getDay()].slice(0, 1).toUpperCase() + '</small><b>' + d.getDate() + '</b></button>'; }).join('') + '</div>' +
+      '<div class="wg-body" style="height:' + GH + 'px"><div class="wg-hrs">' + hrs + '</div>' + days.map((k, n) =>
+        '<button type="button" class="wg-col' + (k === sel ? ' sel' : '') + '" data-sel="' + k + '" aria-label="' + FULL[fromKey(k).getDay()] + '">' +
+          all[n].map(b => '<i class="' + (b.done ? 'done' : '') + '" style="--q:' + colOf(b.label) + ';top:' + ((b.from - lo) * G) + 'px;height:' + Math.max(3, (b.to - b.from) * G - 1.5) + 'px"></i>').join('') +
+          (k === key(new Date()) && nowM >= lo && nowM <= hi ? '<u style="top:' + ((nowM - lo) * G) + 'px"></u>' : '') +
+        '</button>').join('') + '</div></div>';
+    // the chosen day, readable
+    const si = days.indexOf(sel), sd = fromKey(sel), sb = all[si];
+    html += '<section class="wl-day wg-day"><button type="button" class="wl-h" data-day="' + sel + '"><b>' + (sel === today ? 'Today' : cap(FULL[sd.getDay()])) + '</b><span>' + sd.getDate() + ' ' + cap(MONTHS[sd.getMonth()].slice(0, 3)) + '</span><small>Open \u203a</small></button>' +
+      (sb.length ? '<ul>' + sb.map(b => '<li class="' + (b.done ? 'done' : '') + (sel === today && nowM >= b.from && nowM < b.to ? ' live' : '') + '" data-day="' + sel + '" style="--c:' + colOf(b.label) + '"><time>' + clock(b.from) + '</time><span>' + esc(b.label) + '</span><small>' + (b.done ? '\u2713' : minsLabel(b.to - b.from)) + '</small></li>').join('') + '</ul>'
+        : '<button type="button" class="wl-empty" data-addto="' + sel + '">+ Plan ' + (sel === today ? 'today' : cap(FULL[sd.getDay()])) + '</button>') + '</section>';
+  }
 
   // copy a day: only into an empty day, so nothing gets lost
   const opt = sel => days.map(k => '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + cap(FULL[fromKey(k).getDay()]) + '</option>').join('');
@@ -14722,6 +14781,7 @@ function renderWeek() {
   }));
   document.getElementById('wk-add').addEventListener('click', () => days.includes(today) ? weekAddSheet(today, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(today, x))) : weekAddSheet(days[0], days));   // from today: the next 7 days
   box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) { const k = c.dataset.addto, m = mondayOf(k); weekAddSheet(k, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(m, x))); } }));
+  box.querySelectorAll('[data-sel]').forEach(b => b.addEventListener('click', () => { renderWeek.sel = b.dataset.sel; renderWeek(); }));
   box.querySelectorAll('[data-fold]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.fold; wlOpen.has(k) ? wlOpen.delete(k) : wlOpen.add(k); renderWeek(); }));
   if (weekLook === 'list' && !renderWeek.scrolled && days.includes(today)) { renderWeek.scrolled = true; const t = document.getElementById('wl-' + today); if (t) setTimeout(() => t.scrollIntoView({ block: 'start', behavior: 'smooth' }), 60); }
   box.querySelectorAll('[data-look]').forEach(b => b.addEventListener('click', () => { weekLook = b.dataset.look; try { localStorage.setItem(KEY + '.weeklook', weekLook); } catch {} renderWeek(); }));
