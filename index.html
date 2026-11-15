@@ -2198,15 +2198,15 @@ body[data-view="day"] { background-image: none; }
 .jr-felt { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
 
 #life-body .hp-title { margin: 8px 0 22px; font-size: 32px; font-weight: 600; line-height: 1.2; }
-.hp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.hp-door { display: flex; flex-direction: column; align-items: flex-start; min-height: 150px; padding: 16px; text-align: left; cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--c) 28%, var(--hair)); border-radius: 24px; color: var(--ink); font-family: inherit;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--c) 22%, var(--card)), var(--card) 85%); }
-.hp-door:active { transform: scale(.97); }
-.hp-door b { font-size: 16px; font-weight: 600; }
-.hp-door em { margin-top: auto; font-style: normal; font-size: 30px; font-weight: 600; line-height: 1.1; color: var(--c); }
-.hp-door em i { font-style: normal; font-size: 14px; margin-left: 2px; }
-.hp-door small { margin-top: 4px; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.hp-grid { display: flex; flex-direction: column; gap: 10px; }
+.hp-door { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-items: center; column-gap: 12px; width: 100%; min-height: 76px; padding: 14px 18px; text-align: left; cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--c) 28%, var(--hair)); border-left: 5px solid var(--c); border-radius: 20px; color: var(--ink); font-family: inherit;
+  background: linear-gradient(100deg, color-mix(in srgb, var(--c) 16%, var(--card)), var(--card) 75%); }
+.hp-door:active { transform: scale(.98); }
+.hp-door b { grid-column: 1; grid-row: 1; font-size: 17px; font-weight: 600; }
+.hp-door small { grid-column: 1; grid-row: 2; font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.hp-door em { grid-column: 2; grid-row: 1 / 3; font-style: normal; font-size: 26px; font-weight: 600; color: var(--c); }
+.hp-door em i { font-style: normal; font-size: 13px; margin-left: 2px; }
 .jr-note { font-size: 12px; color: var(--muted); margin: 14px 0 0; }
 .jr-acts { display: flex; gap: 10px; margin-top: 12px; }
 .jr-form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
@@ -4114,7 +4114,7 @@ body, body[data-view] {
     <div id="mood-log"></div>
   </section>
 
-  <footer>everything saves on this device · build 12:38</footer>
+  <footer>everything saves on this device · build 12:40</footer>
 </div>
 
 <script>
