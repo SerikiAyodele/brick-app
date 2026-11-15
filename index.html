@@ -5051,6 +5051,49 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
 #lensheet .ls-save { margin: 6px 0 16px; }
 
 #lensheet .ls-list, #lensheet .ls-add + .ab-sub { display: none !important; }
+
+/* holding a block must not select its text (the blue on iPhone) */
+#view-day .line, #view-day .line * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+#view-day .line input, #view-day .line textarea { -webkit-user-select: text; user-select: text; }
+#view-day .line.holding { background: color-mix(in srgb, var(--pink) 10%, transparent); border-radius: 14px; }
+
+/* quit journey: days clean, craving help, slips */
+.jr-clean { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 0; }
+.jr-clean span { display: flex; flex-direction: column; padding: 10px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.jr-clean b { font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.1; }
+.jr-clean small { font-size: 12px; color: var(--muted); }
+.jr-sos { display: flex; gap: 8px; margin-top: 10px; }
+.jr-sos button { flex: 1; min-height: 50px; font: 600 16px var(--display); border-radius: 25px; cursor: pointer; }
+.jr-crave { color: #fff; background: var(--pink); border: none; }
+.jr-slip { color: var(--ink); background: var(--card); border: 1px solid var(--dash); }
+.cr { position: relative; max-height: 92vh; overflow-y: auto; }
+.cr h2 { margin: 2px 56px 6px 0; font-family: var(--serif, inherit); font-size: 26px; font-weight: 600; }
+.cr-sub { margin: 0 0 16px; font-size: 15px; line-height: 1.45; color: var(--muted); }
+.cr-time { padding: 16px; text-align: center; background: var(--pink-s); border-radius: 20px; }
+.cr-time b { display: block; font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); }
+.cr-time i { display: block; height: 6px; margin-top: 10px; background: var(--card); border-radius: 3px; overflow: hidden; }
+.cr-time u { display: block; width: 0; height: 100%; background: var(--pink); transition: width 1s linear; }
+.cr-do { display: flex; flex-direction: column; gap: 8px; }
+.cr-do button { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 16px; text-align: left; font: 500 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; }
+.cr-do button span { font-size: 20px; }
+.cr-do button.on { background: var(--pink-s); border-color: var(--pink); text-decoration: line-through; }
+.cr-cue { display: flex; flex-wrap: wrap; gap: 8px; }
+.cr-cue button { min-height: 42px; padding: 0 16px; font: 500 15px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 21px; cursor: pointer; }
+.cr-cue button.on { background: var(--pink-s); border-color: var(--pink); }
+.cr .cr-done { margin-top: 18px; }
+/* goals page: habits with their streaks */
+.gl-hab { margin-top: 12px; padding: 14px 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 18px; }
+.gl-hh { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+.gl-hh b { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--pink-d); }
+.gl-hh small { font-size: 13px; color: var(--muted); }
+.gl-hrow { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 0; text-align: left; font: 500 16px var(--display); color: var(--ink); background: none; border: none; border-top: 1px solid var(--hair); cursor: pointer; }
+.gl-hab .gl-hrow:first-of-type { border-top: none; }
+.gl-hrow span { flex: 1; min-width: 0; }
+.gl-hrow em { flex: none; display: flex; align-items: baseline; gap: 4px; font-style: normal; font-size: 22px; font-weight: 700; color: var(--pink-d); }
+.gl-hrow em small { font-size: 12px; font-weight: 500; color: var(--muted); }
+.gl-htick { flex: none; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; font-size: 15px; font-weight: 700; color: #fff; background: transparent; border: 1.5px solid var(--dash); border-radius: 50%; cursor: pointer; }
+.gl-htick.on { background: var(--pink); border-color: var(--pink); }
+.gl-hj i { flex: none; width: 30px; text-align: center; font-style: normal; font-size: 20px; }
 </style>
 </head>
 <body>
@@ -5312,7 +5355,7 @@ body[data-view="day"] .wrap { padding-bottom: calc(88px + env(safe-area-inset-bo
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:19</footer>
+  <footer>Mr.O:21:24</footer>
 </div>
 
 <script>
@@ -6405,9 +6448,8 @@ function holdToAdd(row, day, i, firstOpen) {
       row.classList.remove('holding');
       try { navigator.vibrate && navigator.vibrate(12); } catch {}
       const at = Math.max(i + 1, firstOpen);
-      day.blocks.splice(at, 0, { label: '', mins: 30, done: false });
-      focusNew = at; customFor = null;
-      save(); renderDay(); renderHabits();
+      customFor = null;
+      addBlockSheet(null, at);   // the calm add sheet; the new block goes right here
     }, 550);
   });
   row.addEventListener('pointermove', e => {
@@ -7917,7 +7959,7 @@ function renderDump() {
   if (keep.length !== L.length) { state.dump = keep; save(); }
 }
 
-function addBlockSheet(preset) {
+function addBlockSheet(preset, insertAt) {
   const old = document.getElementById('addsheet'); if (old) old.remove();
   const el = document.createElement('div');
   el.id = 'addsheet'; el.className = 'w3';
@@ -7945,7 +7987,8 @@ function addBlockSheet(preset) {
     if (pick.workout) b.workout = pick.workout;
     if (pick.goals && pick.goals.length) b.goals = pick.goals.map(t => ({ text: t, done: false }));
     const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
-    day.touched = true; day.blocks.push(b);
+    day.touched = true;
+    if (Number.isInteger(insertAt) && insertAt >= 0 && insertAt <= day.blocks.length) day.blocks.splice(insertAt, 0, b); else day.blocks.push(b);
     save(); close(); renderDay(); renderHabits();
   };
   const tile = (e, t, data) => '<button type="button" class="ab-t" ' + data + '><span>' + e + '</span><b>' + esc(t) + '</b></button>';
@@ -8340,6 +8383,25 @@ const JOURNEY_PLANS = {
         tips: ['A slip is not a reset, start again the next day', 'Keep doing what worked'] }
     ]
   },
+  edibles: {
+    stages: [
+      { from: 1, to: 3, name: 'The first days',
+        feel: ['Restless or on edge', 'Hard to fall asleep', 'Not very hungry', 'Snappy or a bit anxious'],
+        tips: ['Clear out every edible at home. No just in case stash', 'Plan the hour you usually took one, often the evening, and put something new there: a walk, a shower, tea', 'Eat small meals, even if you are not hungry', 'Tell one person you trust what you are doing'] },
+      { from: 4, to: 7, name: 'The peak',
+        feel: ['Cravings at their strongest, mostly in the evening', 'Mood goes up and down', 'Very vivid dreams', 'Sweats, headaches or an upset stomach'],
+        tips: ['A craving passes in about 15 minutes. Tap Craving now and ride it out', 'Sweets that look like gummies can set off a craving. Swap them for fruit or nuts', 'Move your body, it is one of the best things for this', 'No caffeine after noon'] },
+      { from: 8, to: 14, name: 'Easing off',
+        feel: ['Most of it starts to fade', 'Sleep is still a bit off', 'Dreams are still vivid', 'A clearer head in the day'],
+        tips: ['Same bedtime every night', 'Delete the number or app you bought from', 'Notice the wins: money saved, sharper mornings'] },
+      { from: 15, to: 30, name: 'Settling in',
+        feel: ['Sleep slowly comes back', 'Some bored or low days', 'Cravings come from cues: evenings, stress, weekends, friends'],
+        tips: ['Plan your weekend evenings ahead', 'Know your cues: see what you logged in Craving now', 'If low days keep going, talk to a doctor'] },
+      { from: 31, to: null, name: 'Your new normal',
+        feel: ['Cravings are rare', 'Deeper sleep, more energy, a steadier mood'],
+        tips: ['A slip is not a reset. Log it, then carry on', 'Keep the evening routine that worked'] }
+    ]
+  },
   habit: {
     stages: [
       { from: 1, to: 3, name: 'Starting',
@@ -8404,7 +8466,20 @@ let journeyAll = false;        // the whole timeline is showing, not just today'
 let journeyOpen = false;       // the journey card shows what to expect and tips
 
 function activeJourney() { return (state.journeys || []).find(j => !j.end) || null; }
-function journeyPlan(j) { return JOURNEY_PLANS[j.kind] || JOURNEY_PLANS.habit; }
+function journeyPlan(j) {
+  if (j.kind === 'cannabis' && /edible|gumm|infused/i.test(j.name || '')) return JOURNEY_PLANS.edibles;   // edibles have their own guide
+  return JOURNEY_PLANS[j.kind] || JOURNEY_PLANS.habit;
+}
+// days clean: since the last slip (or day 1), and the best run so far
+function cleanDays(j) {
+  const slips = (j.slips || []).map(x => key(new Date(x.at))).sort();
+  const today = todayKey(), dd = (a, b) => Math.round((fromKey(b) - fromKey(a)) / 86400000);
+  const last = slips.length ? slips[slips.length - 1] : null;
+  const now = last ? dd(last, today) : dd(j.start, today) + 1;
+  let best = now, prev = j.start, first = true;
+  for (const k of slips) { best = Math.max(best, dd(prev, k) + (first ? 0 : 0)); prev = k; first = false; }
+  return { now: Math.max(0, now), best: Math.max(best, now), slips: slips.length };
+}
 function journeyDay(j, at) { return Math.round((fromKey(key(new Date(at))) - fromKey(j.start)) / 86400000) + 1; }
 function journeyStage(j, day) {
   const st = journeyPlan(j).stages;
@@ -8444,7 +8519,10 @@ function journeyHtml() {
   const open = journeyStageOpen === null ? journeyPlan(j).stages.indexOf(now) : journeyStageOpen;
   const lvl = isQuit(j) ? useLevel(j.use) : null;
   const per = j.kind === 'cannabis' && USE_STAGE[lvl];
+  const cd = isQuit(j) ? cleanDays(j) : null, cr = (j.cravings || []).filter(x => x.rode).length;
   let html = '<div class="jr" style="--c:#7daf86"><div class="jr-head"><div><span>Journey</span><b>' + esc(j.name) + '</b></div><em>Day ' + day + '</em></div>' +
+    (cd ? '<div class="jr-clean"><span><b>' + cd.now + '</b><small>days clean</small></span><span><b>' + cd.best + '</b><small>best run</small></span><span><b>' + cr + '</b><small>cravings ridden out</small></span></div>' +
+      '<div class="jr-sos"><button type="button" class="jr-crave" data-jr="crave">Craving now</button><button type="button" class="jr-slip" data-jr="slip">I slipped</button></div>' : '') +
     (!journeyOpen || !isQuit(j) ? '' : lvl ? '<p class="jr-fit">' + USE_FIT[lvl] + ' <button type="button" data-jr="ask">Change</button></p>'
                              : '<button type="button" class="jr-fitask" data-jr="ask">Make tips fit you \u00b7 3 questions</button>') +
     (() => {   // where you are: one bar, a segment per stage
@@ -8480,6 +8558,52 @@ function journeyHtml() {
   return html;
 }
 
+// a craving: 15 minutes to ride it out, things to do instead, and what set it off
+const CRAVE_DO = [['\u{1F4A7}', 'Drink a big glass of water'], ['\u{1F6B6}', 'Walk for 10 minutes'], ['\u{1F4AC}', 'Text someone'], ['\u{1F34E}', 'Eat a real snack'], ['\u{1F6BF}', 'Take a warm shower'], ['\u{1F32C}\uFE0F', 'Breathe: in 4, hold 7, out 8']];
+const CRAVE_CUE = ['Evening', 'Stressed', 'Bored', 'Saw sweets', 'Friends', 'Cannot sleep', 'Low mood'];
+function cravingSheet(j, after) {
+  if (!j) return;
+  const old = document.getElementById('crsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'crsheet'; el.className = 'w3';
+  const c = { at: Date.now(), cue: [], rode: false };
+  j.cravings = j.cravings || []; j.cravings.push(c); save();
+  const end = Date.now() + 15 * 60000;
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet cr" role="dialog" aria-modal="true" aria-label="Craving"><span class="w3-grab"></span><button type="button" class="ns-x cr-x" aria-label="close">\u00d7</button>' +
+    '<h2>Ride it out</h2><p class="cr-sub">A craving peaks and passes in about 15 minutes. You do not have to act on it.</p>' +
+    '<div class="cr-time"><b id="cr-left">15:00</b><i><u id="cr-bar"></u></i></div>' +
+    '<p class="wk2-h">Do one of these</p><div class="cr-do">' + CRAVE_DO.map(([e, t]) => '<button type="button"><span>' + e + '</span>' + t + '</button>').join('') + '</div>' +
+    '<p class="wk2-h">What set it off?</p><div class="cr-cue">' + CRAVE_CUE.map(t => '<button type="button" data-cue="' + t + '">' + t + '</button>').join('') + '</div>' +
+    '<button type="button" class="wka-go cr-done">I rode it out</button><button type="button" class="ls-cancel ns-cancel cr-later">Close for now</button></div>';
+  document.body.appendChild(el);
+  const tick = () => { const left = Math.max(0, end - Date.now()), m = Math.floor(left / 60000), sec = Math.floor(left / 1000) % 60;
+    const l = el.querySelector('#cr-left'); if (!l) return clearInterval(t); l.textContent = m + ':' + String(sec).padStart(2, '0');
+    el.querySelector('#cr-bar').style.width = Math.round((1 - left / (15 * 60000)) * 100) + '%';
+    if (!left) { l.textContent = 'You made it'; clearInterval(t); } };
+  const t = setInterval(tick, 1000); tick();
+  const close = () => { clearInterval(t); el.remove(); if (after) after(); };
+  el.querySelectorAll('.cr-do button').forEach(b => b.addEventListener('click', () => b.classList.toggle('on')));
+  el.querySelectorAll('[data-cue]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.cue, i = c.cue.indexOf(k); i < 0 ? c.cue.push(k) : c.cue.splice(i, 1); b.classList.toggle('on', i < 0); save(); }));
+  el.querySelector('.cr-done').addEventListener('click', () => { c.rode = true; save(); close(); });
+  [el.querySelector('.w3-back'), el.querySelector('.cr-x'), el.querySelector('.cr-later')].forEach(x => x.addEventListener('click', close));
+}
+// a slip: logged, kind, and the journey carries on
+function slipSheet(j, after) {
+  if (!j) return;
+  const old = document.getElementById('slsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'slsheet'; el.className = 'w3';
+  const cd = cleanDays(j);
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet cr" role="dialog" aria-modal="true" aria-label="I slipped"><span class="w3-grab"></span><button type="button" class="ns-x cr-x" aria-label="close">\u00d7</button>' +
+    '<h2>A slip is not a reset</h2><p class="cr-sub">You are still on day ' + journeyDay(j, Date.now()) + ' of your journey. Your best run of ' + cd.best + ' days stays. Log it, then carry on.</p>' +
+    '<p class="wk2-h">What set it off?</p><div class="cr-cue">' + CRAVE_CUE.map(t => '<button type="button" data-cue="' + t + '">' + t + '</button>').join('') + '</div>' +
+    '<button type="button" class="wka-go cr-done">Log the slip</button><button type="button" class="ls-cancel ns-cancel cr-later">Cancel</button></div>';
+  document.body.appendChild(el);
+  const cue = [];
+  const close = () => { el.remove(); if (after) after(); };
+  el.querySelectorAll('[data-cue]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.cue, i = cue.indexOf(k); i < 0 ? cue.push(k) : cue.splice(i, 1); b.classList.toggle('on', i < 0); }));
+  el.querySelector('.cr-done').addEventListener('click', () => { j.slips = j.slips || []; j.slips.push({ at: Date.now(), cue }); save(); close(); });
+  [el.querySelector('.w3-back'), el.querySelector('.cr-x'), el.querySelector('.cr-later')].forEach(x => x.addEventListener('click', close));
+}
+
 function wireJourney(box, redraw) {
   box.querySelectorAll('[data-jr]').forEach(b => b.addEventListener('click', () => {
     const a = b.dataset.jr;
@@ -8498,6 +8622,8 @@ function wireJourney(box, redraw) {
       save(); redraw(); return;
     }
     if (a === 'open') { journeyOpen = !journeyOpen; journeyAll = false; redraw(); return; }
+    if (a === 'crave') { cravingSheet(activeJourney(), redraw); return; }
+    if (a === 'slip') { slipSheet(activeJourney(), redraw); return; }
     if (a === 'all') { journeyAll = !journeyAll; journeyStageOpen = null; redraw(); return; }
     if (a === 'ask') { const j = activeJourney(); journeyAsk = { ...((j && j.use) || {}) }; redraw(); return; }
     if (a === 'askskip' || a === 'asksave') {
@@ -13156,11 +13282,24 @@ function renderGoals() {
     }
     return '<section class="gl-area" data-a="' + a.k + '" style="--c:' + a.c + '"><div class="gl-ah"><i>' + a.e + '</i><b>' + a.name + '</b></div>' + body + '</section>';
   }).join('') + '</div>';
+  if (goalsTab === 'week') {
+    // habits sit with the goals: up to 3, each with its streak and a tick for today; a quit journey shows its days clean
+    const H = (state.habits || []).slice(0, 3), tk = todayKey(), jj = activeJourney(), jc = jj && isQuit(jj) ? cleanDays(jj) : null;
+    html += '<section class="gl-hab"><div class="gl-hh"><b>Habits</b><small>' + H.length + ' of 3</small></div>' +
+      H.map((h, i) => { const on = (h.marks || []).includes(tk), st = streakOf(h.marks || []);
+        return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(h.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span>' + esc(h.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
+      (jc ? '<button type="button" class="gl-hrow gl-hj" data-hj="1"><i>\u{1F33F}</i><span>' + esc(jj.name) + '</span><em>' + jc.now + '<small>clean</small></em></button>' : '') +
+      (H.length < 3 ? '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>' : '') + '</section>';
+  }
   if (goalsTab === 'week') html += '<button type="button" class="ai-sug" id="sug-goals">\u2728 Suggest goals</button>';
   if (goalsTab === 'week') html += '<p class="gl-why">Few on purpose. Your brain can only push a few goals at once, so fewer get done more.</p>';
   box.innerHTML = html;
 
   const sg = box.querySelector('#sug-goals'); if (sg) sg.addEventListener('click', () => suggestSheet('goals'));
+  box.querySelectorAll('[data-htick]').forEach(b => b.addEventListener('click', () => { const h = state.habits[Number(b.dataset.htick)], tk = todayKey();
+    h.marks = h.marks || []; const i = h.marks.indexOf(tk); i < 0 ? h.marks.push(tk) : h.marks.splice(i, 1); save(); renderGoals(); }));
+  box.querySelectorAll('[data-hadd]').forEach(b => b.addEventListener('click', () => { show('habits'); window.scrollTo(0, 0); }));
+  box.querySelectorAll('[data-hj]').forEach(b => b.addEventListener('click', () => { lifeOpen = 'health'; areaGoalsOpen = true; journeyOpen = true; lifeSetup = null; show('life'); window.scrollTo(0, 0); }));
   box.querySelectorAll('.gl-mt').forEach(el => { el.textContent = MG[el.dataset.moed].text; if (MG[el.dataset.moed].done) el.classList.add('done'); });
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
