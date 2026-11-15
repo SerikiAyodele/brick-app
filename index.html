@@ -4718,6 +4718,42 @@ html { background: var(--paper) !important; }
 #view-life .hp-row em { flex: none; font-style: normal; font-size: 20px; font-weight: 700; color: color-mix(in srgb, var(--c) 75%, var(--ink)); font-variant-numeric: tabular-nums; }
 #view-life .hp-row em i { font-style: normal; font-size: 13px; font-weight: 500; color: var(--muted); }
 #view-life .hp-row s { flex: none; text-decoration: none; font-size: 22px; color: var(--muted); }
+
+#view-goals .gl-row { cursor: default; }
+.wk-blk[data-short] { padding-top: 1px !important; padding-bottom: 1px !important; font-size: 11px !important; line-height: 1.2 !important; white-space: nowrap; text-overflow: ellipsis; }
+.wk-blk[data-short] small { display: none; }
+.wk-blk.done { opacity: .75 !important; }
+.wk-hcol { box-shadow: 6px 0 8px -6px rgba(0, 0, 0, .35); }
+
+.wk-blk[data-tiny] { padding: 0 !important; font-size: 0 !important; border-radius: 3px !important; }
+
+/* ============ calm luxury: Goals as one checklist, Home area tiles ============ */
+#view-goals .gl-list { gap: 26px !important; }
+#view-goals .gl-area { padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+#view-goals .gl-area::before, #view-goals .gl-area::after { display: none !important; }
+#view-goals .gl-ah { margin: 0 0 4px !important; padding: 0 2px 8px; border-bottom: 1px solid rgba(214, 143, 163, .28); }
+#view-goals .gl-ah i { display: none !important; }
+#view-goals .gl-ah b { font-family: "Poppins", sans-serif !important; font-size: 12px !important; letter-spacing: 2.4px !important; text-transform: uppercase; color: var(--c) !important; }
+#view-goals .gl-row { min-height: 54px; padding: 8px 2px !important; border-bottom: 1px solid var(--hair); }
+#view-goals .gl-t { font-size: 17px !important; }
+#view-goals .gl-btns { display: none !important; }
+#view-goals .gl-sl { margin: -4px 0 6px 40px !important; font-size: 13px !important; color: var(--muted) !important; }
+#view-goals .gl-add { min-height: 48px; padding: 0 2px !important; font-size: 15px !important; color: var(--muted) !important; }
+#view-goals .ai-sug { background: none !important; border: 1px solid rgba(214, 143, 163, .4) !important; font-weight: 500 !important; }
+#view-home .hm-area { padding: 18px !important; min-height: 132px !important; background: var(--card) !important; border: 1px solid rgba(214, 143, 163, .22) !important; border-radius: 22px !important; box-shadow: none !important; overflow: hidden !important; }
+#view-home .hm-area::before { content: "" !important; display: block !important; position: absolute; left: 0; top: 0; right: 0; height: 3px; background: var(--c); opacity: .7; }
+#view-home .hm-ae { display: none !important; }
+#view-home .hm-area .hm-an { margin: 0 0 auto !important; font-family: "Poppins", sans-serif !important; font-size: 12px !important; font-weight: 600 !important; letter-spacing: 2px; text-transform: uppercase; color: var(--muted) !important; }
+#view-home .hm-area .hm-an::before { display: none !important; }
+#view-home .hm-area em { margin-top: 18px; font-family: var(--serif, "Poppins") !important; font-size: 30px !important; font-weight: 600 !important; color: var(--ink) !important; }
+#view-home .hm-area small { margin-top: 2px; font-size: 13px !important; color: var(--muted) !important; }
+#view-home .hm-goals { background: var(--card) !important; border: 1px solid rgba(214, 143, 163, .22) !important; box-shadow: none !important; }
+
+#view-goals#view-goals#view-goals .gl-area { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; }
+#view-home#view-home#view-home .hm-areas .hm-area { background: var(--card) !important; border: 1px solid rgba(214, 143, 163, .22) !important; }
+#view-home#view-home#view-home .hm-areas .hm-area em { color: var(--ink) !important; }
+#view-home#view-home#view-home .hm-areas .hm-area .hm-an { color: var(--muted) !important; }
+#view-home#view-home#view-home .hm-goals { background: var(--card) !important; border: 1px solid rgba(214, 143, 163, .22) !important; }
 </style>
 </head>
 <body>
@@ -4978,7 +5014,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:00</footer>
+  <footer>Mr.O:19:11</footer>
 </div>
 
 <script>
@@ -12667,7 +12703,7 @@ function renderGoals() {
   box.querySelectorAll('.gl-mt').forEach(el => { el.textContent = MG[el.dataset.moed].text; if (MG[el.dataset.moed].done) el.classList.add('done'); });
   const on = (sel, fn) => box.querySelectorAll(sel).forEach(el => el.addEventListener('click', () => fn(el)));
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
-  on('[data-wk]', el => { lifeOpen = el.dataset.wk; areaGoalsOpen = true; lifeSetup = null; show('life'); window.scrollTo(0, 0); });
+  // goal rows are just text now: no page opens behind them
   on('[data-gls]', el => { const [ak, gi] = el.dataset.gls.split(':'); stepsSheet(ak, Number(gi), renderGoals); });
   on('[data-glsug]', el => { const [ak, gi] = el.dataset.glsug.split(':'); stepsSheet(ak, Number(gi), renderGoals, true); });
   on('[data-wkadd]', el => { goalsReturn = true; lifeOpen = null; lifeSetup = { i: AREAS.findIndex(x => x.k === el.dataset.wkadd), text: '', one: true }; show('life'); window.scrollTo(0, 0); });
@@ -14284,7 +14320,7 @@ function show(which) {
   try { localStorage.setItem(KEY + '.tab', which); } catch {}
 }
 
-for (const k in TABS) TABS[k][0].addEventListener('click', () => show(k));
+for (const k in TABS) TABS[k][0].addEventListener('click', () => { show(k); window.scrollTo(0, 0); });
 
 // the small text on the right of each page title
 function fillHeads() {
@@ -14662,7 +14698,7 @@ function renderWeek() {
   if (weekLook === 'cal') html += '<div class="wk-scroll"><div class="wk-cal" style="--hr:' + HR + 'px"><div class="wk-hcol"><div class="wk-ch"></div><div class="wk-hours" style="height:' + H + 'px">' + hours + '</div></div>' +
     days.map((k, n) => '<div class="wk-dcol' + (k === today ? ' today' : '') + '"><button type="button" class="wk-ch" data-day="' + k + '">' + cap(FULL[fromKey(k).getDay()]) + ' <b>' + fromKey(k).getDate() + '</b></button><div class="wk-col' + (k === today ? ' today' : '') + '" data-addto="' + k + '" style="height:' + H + 'px">' +
       all[n].map(b => { const c = WK_COLS[[...b.label.toLowerCase()].reduce((x, ch) => x + ch.charCodeAt(0), 0) % WK_COLS.length];
-        return '<button type="button" class="wk-blk' + (b.done ? ' done' : '') + '" data-day="' + k + '" style="--q:' + c + ';top:' + ((b.from - lo) * PX) + 'px;height:' + Math.max(14, (b.to - b.from) * PX - 2) + 'px" title="' + esc(b.label + ', ' + clock(b.from) + ' to ' + clock(b.to)) + '">' + esc(b.label) + ((b.to - b.from) * PX >= 40 ? '<small>' + clock(b.from) + '</small>' : '') + '</button>'; }).join('') +
+        return '<button type="button" class="wk-blk' + (b.done ? ' done' : '') + '" data-day="' + k + '" style="--q:' + c + ';top:' + ((b.from - lo) * PX) + 'px;height:' + Math.max(4, (b.to - b.from) * PX - 2) + 'px" title="' + esc(b.label + ', ' + clock(b.from) + ' to ' + clock(b.to)) + '"' + ((b.to - b.from) * PX < 16 ? ' data-tiny="1"' : (b.to - b.from) * PX < 26 ? ' data-short="1"' : '') + '>' + esc(b.label) + ((b.to - b.from) * PX >= 40 ? '<small>' + clock(b.from) + '</small>' : '') + '</button>'; }).join('') +
       (k === key(new Date()) && nowM >= lo && nowM <= hi ? '<i class="wk-now" style="top:' + ((nowM - lo) * PX) + 'px"></i>' : '') +
     '</div></div>').join('') + '</div></div>';
   if (!planned && weekLook === 'cal') html += '<p class="wk-empty">Nothing planned this week yet. Tap a day to add a block.</p>';
@@ -14692,6 +14728,7 @@ function renderWeek() {
   // open on today, or the first planned day
   const sc = box.querySelector('.wk-scroll'), cols = box.querySelectorAll('.wk-dcol');
   // each day takes 85% of the space, so the edge of the next day shows you can swipe
+  if (sc && weekLook === 'cal') { const hw = box.querySelector('.wk-hcol').offsetWidth, dw = Math.max(110, Math.round((sc.clientWidth - hw) * 0.85)); box.querySelector('.wk-cal').style.paddingRight = Math.max(12, sc.clientWidth - hw - dw - 6) + 'px'; }
   if (sc && weekLook === 'cal') box.querySelector('.wk-cal').style.setProperty('--dw', Math.max(110, Math.round((sc.clientWidth - box.querySelector('.wk-hcol').offsetWidth) * 0.85)) + 'px');
   const at = days.indexOf(today) >= 0 ? days.indexOf(today) : Math.max(0, all.findIndex(x => x.length));
   if (sc && cols[at] && weekLook === 'cal') sc.scrollLeft = cols[at].offsetLeft - box.querySelector('.wk-hcol').offsetWidth;
