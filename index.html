@@ -4538,6 +4538,8 @@ html { background: var(--paper) !important; }
 .gl-in::placeholder { color: var(--muted); }
 
 .wl-next { margin: 14px 4px 0; font-size: 14px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); }
+
+.ls-cancel { display: block; width: 100%; min-height: 52px; margin-top: 10px; font: 600 17px var(--display); color: var(--ink); background: var(--hair); border: none; border-radius: 26px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -4797,7 +4799,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:09</footer>
+  <footer>Mr.O:18:11</footer>
 </div>
 
 <script>
@@ -6498,8 +6500,9 @@ function lengthPicker(b, from, len) {
             (m === usual ? '<i>your usual</i>' : '') + '<small>ends ' + clock(from + m) + '</small></button>').join('') +
           '<button type="button" class="ls-row ls-other" data-other="1"><b>Other</b><small>' + (opts.includes(len) ? '' : 'now ' + minsLabel(len)) + '</small></button></div>' +
           '<button type="button" class="ls-rm">Remove this block</button>') +
-      '</div>';
+      '<button type="button" class="ls-cancel">Cancel</button></div>';
     el.querySelector('.w3-back').addEventListener('click', close);
+    el.querySelector('.ls-cancel').addEventListener('click', close);
     el.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
     const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
     el.querySelectorAll('[data-o]').forEach(x => x.addEventListener('click', () => { other = Math.max(15, Math.min(720, other + Number(x.dataset.o))); draw(true); }));
