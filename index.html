@@ -27,7 +27,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600&family=Playfair+Display:wght@500;600&display=swap">
 
 <style>
 /* Blocks that snap together. Graph paper underneath, studs on top,
@@ -4622,6 +4622,26 @@ html { background: var(--paper) !important; }
 .focus .fx-goal.on span { color: var(--muted) !important; }
 .focus .fx-growing, .focus .fx-ends, .focus .fx-note, .focus .fx-quote, .focus .fx-quote small { color: var(--muted) !important; }
 .focus .fx-done { color: #fff !important; background: var(--pink) !important; border: none !important; }
+
+/* ============ LUX: hints of luxury, from the icon ============
+   an elegant serif for big headings, spaced capitals for small labels, rose gold on a few details */
+:root { --serif: "Playfair Display", Didot, "Bodoni 72", Georgia, serif;
+  --gold: linear-gradient(135deg, #f7d3dc 0%, #e6a2b4 55%, #b97488 100%); --gold-1: #d68fa3; --gold-2: #b97488; }
+.pghead h1, #view-home .pghead h1, #view-day .datebar .big, .wk-head b, #view-goals .pghead h1, .lf-detail h1, .hub-head h1, h1 {
+  font-family: var(--serif) !important; font-weight: 600 !important; letter-spacing: -.2px; }
+#view-day .datebar .big small, #view-home .pghead span { font-family: "Poppins", sans-serif; }
+#view-home .pghead span, .hm-sec, #view-goals .gl-ah b, .nc-tag, .fx-label {
+  letter-spacing: 2px !important; text-transform: uppercase; font-size: 12px !important; }
+#view-home#view-home .hm-now.hm-now b, #view-day .nowcard:not(.past) .nc-name, .focus .fx-name, .cy .cy-h, .wka h2, .ls h2, .gs-h, .fd h2 {
+  font-family: var(--serif) !important; font-weight: 600 !important; }
+/* rose gold details */
+.tabs .brick:not(.flat) { background: var(--gold) !important; color: #3a1f29 !important; }
+#view-home#view-home .hm-now.hm-now { border: 1px solid transparent !important; background: linear-gradient(color-mix(in srgb, var(--pink) 8%, var(--card)), color-mix(in srgb, var(--pink) 8%, var(--card))) padding-box, var(--gold) border-box !important; }
+#view-day .nowcard:not(.past):not(.waiting):not(.over) { border: 1px solid transparent !important; background: linear-gradient(color-mix(in srgb, var(--pink) 8%, var(--card)), color-mix(in srgb, var(--pink) 8%, var(--card))) padding-box, var(--gold) border-box !important; }
+#view-day .nowcard:not(.past) .nc-arc { stroke: var(--gold-1) !important; }
+#view-home#view-home .hm-now .hm-bar u { background: var(--gold) !important; }
+#view-goals#view-goals .gl-chk.on, .cy-row.got .cy-plus { background: var(--gold) !important; border-color: var(--gold-1) !important; color: #3a1f29 !important; }
+#view-home .pghead span { background: var(--gold); -webkit-background-clip: text; background-clip: text; color: transparent !important; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -4882,7 +4902,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:37</footer>
+  <footer>Mr.O:18:42</footer>
 </div>
 
 <script>
