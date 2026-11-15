@@ -4869,6 +4869,57 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 #view-goals .gl-ebtns button { min-height: 44px; padding: 0 16px; font: 600 15px var(--display); color: var(--ink); background: var(--hair); border: none; border-radius: 22px; cursor: pointer; }
 #view-goals .gl-ebtns button:first-child { color: #fff; background: var(--pink); }
 #view-goals .gl-ebtns button.rm { margin-left: auto; color: #c2415d; background: none; border: 1px solid color-mix(in srgb, #c2415d 35%, var(--hair)); }
+
+/* add a block (week): two calm steps with room to breathe */
+.wka2 { max-height: 90vh; overflow-y: auto; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)) !important; }
+.wka2 h2 { margin: 2px 0 16px !important; font-size: 26px !important; }
+.wk2-step { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--pink-d); }
+.wk2-type { display: flex; gap: 8px; }
+.wk2-type input { flex: 1; min-width: 0; min-height: 52px; padding: 0 16px; font: 17px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 16px; }
+.wk2-type button { min-height: 52px; padding: 0 20px; font: 600 16px var(--display); color: var(--paper); background: var(--ink); border: none; border-radius: 16px; cursor: pointer; }
+.wk2-h { margin: 22px 0 10px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.wk2-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wk2-tiles button { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 10px 14px; text-align: left; font: 500 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
+.wk2-tiles button:active { transform: scale(.97); }
+.wk2-tiles i { font-style: normal; font-size: 22px; flex: none; }
+.wk2-tiles span { min-width: 0; overflow-wrap: break-word; line-height: 1.25; }
+.wk2-what { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 56px; padding: 0 18px; font: 600 19px var(--display); color: var(--ink); background: var(--pink-s); border: none; border-radius: 16px; cursor: pointer; text-align: left; }
+.wk2-what span { font-size: 14px; font-weight: 500; color: var(--pink-d); text-decoration: underline; }
+.wk2-start { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; padding: 8px 8px 8px 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.wk2-start label { font-size: 16px; font-weight: 600; }
+.wk2-start input { min-height: 44px; padding: 0 10px; font: 600 16px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 12px; }
+.wk2-lens { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wk2-lens button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 62px; padding: 10px 16px; text-align: left; font-family: var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
+.wk2-lens b { font-size: 19px; font-weight: 600; }
+.wk2-lens small { font-size: 13px; color: var(--muted); }
+.wk2-lens button.on { background: var(--pink-s); border-color: var(--pink); }
+.wka2 .wka-days { gap: 6px; }
+.wka2 .wka-days button { min-height: 46px; }
+.wka2 .wka-quick { margin-top: 10px; }
+.wka2 .wka-note { margin-top: 16px; }
+.wka2 .wka-go { min-height: 54px; margin-top: 14px; font-size: 17px; }
+
+/* home: more room to breathe (still ends above the tab bar on her phone) */
+#view-home#view-home#view-home .pghead { margin-top: 10px !important; margin-bottom: 30px !important; padding-bottom: 22px !important; }
+#view-home#view-home#view-home .pghead span { margin-bottom: 6px; }
+#view-home#view-home#view-home .hm-quick { margin-top: 18px !important; margin-bottom: 26px !important; }
+#view-home#view-home#view-home .hm-sec { margin: 28px 2px 14px !important; }
+#view-home#view-home#view-home#view-home .hm-areas { gap: 12px !important; }
+
+.wk2-hrs { display: flex; align-items: center; gap: 12px; padding: 10px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.wk2-hrs button { flex: none; width: 56px; height: 56px; font: 600 28px var(--display); color: var(--ink); background: var(--pink-s); border: none; border-radius: 50%; cursor: pointer; }
+.wk2-hrs div { flex: 1; text-align: center; }
+.wk2-hrs b { display: block; font-family: var(--serif, inherit); font-size: 28px; font-weight: 600; line-height: 1.1; }
+.wk2-hrs small { font-size: 14px; color: var(--muted); }
+.wka2 .wk2-lens { grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+.wka2 .wk2-lens button { min-height: 46px; padding: 0 6px; align-items: center; justify-content: center; }
+.wka2 .wk2-lens b { font-size: 15px; }
+
+.wk2-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; }
+.wk2-top .wk2-step { flex: 1; }
+.wk2-x { flex: none; width: 44px; height: 44px; font-size: 26px; line-height: 1; color: var(--ink); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
+.wk2-back { flex: none; min-height: 44px; padding: 0 14px; font: 600 15px var(--display); color: var(--ink); background: var(--slot); border: none; border-radius: 22px; cursor: pointer; }
+.wk2-hrs b { font-family: var(--display) !important; }
 </style>
 </head>
 <body>
@@ -5129,7 +5180,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:36</footer>
+  <footer>Mr.O:19:43</footer>
 </div>
 
 <script>
@@ -14972,72 +15023,84 @@ function renderWeek() {
 
 // add a block from the week: name, how long, and which days it repeats on.
 // it goes at the end of each day's plan (blocks run one after another).
+// 90 -> "1h 30m", 60 -> "1 hour", 30 -> "30 min"
+const hrsLabel = m => { const h = Math.floor(m / 60), r = m % 60; return h ? (h + (h === 1 && !r ? ' hour' : 'h') + (r ? ' ' + r + 'm' : '')) : r + ' min'; };
 function weekAddSheet(day0, days, preset, after) {
+  // two calm steps: 1 what (type it or tap a tile), 2 when (start, how long, which days)
   const old = document.getElementById('wksheet'); if (old) old.remove();
   const el = document.createElement('div');
   el.id = 'wksheet'; el.className = 'w3';
   const pick = new Set([day0]);
   let mins = preset && preset.mins ? Number(preset.mins) : 60;
-  const LENS = [30, 60, 90, 120].map(m => [m, minsLabel(m)]);
-  if (!LENS.some(x => x[0] === mins)) { LENS.push([mins, minsLabel(mins)]); LENS.sort((x, y) => x[0] - y[0]); }
-  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet wka" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>' +
-    '<h2>' + (preset ? 'Bring it over' : 'Add a block') + '</h2>' +
-    '<input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="what is it? e.g. Gym" aria-label="block name">' +
-    (() => { const S = goalSteps(); if (!S.length) return '';
-      const groups = AREAS.map(a => { const xs = S.filter(x => x.a === a.k); return xs.length ? '<optgroup label="' + a.name + '">' + xs.map(x => '<option value="' + esc(x.t) + '">' + esc(x.t) + '</option>').join('') + '</optgroup>' : ''; }).join('');
-      return '<select id="wka-goal" class="wka-sel" aria-label="from your goals"><option value="">From your goals\u2026</option>' + groups + '</select>'; })() +
-    '<div class="wka-start"><label for="wka-st">' + cap(FULL[fromKey(day0).getDay()]) + ' starts at</label><input type="time" id="wka-st" step="300"></div>' +
-    '<b class="wka-h">How long</b><div class="wka-row" id="wka-lens">' + LENS.map(([m, t]) => '<button type="button" data-m="' + m + '"' + (m === mins ? ' class="on"' : '') + '>' + t + '</button>').join('') + '</div>' +
-    '<b class="wka-h">Which days?</b><div class="wka-days" id="wka-days">' + days.map(k => '<button type="button" data-k="' + k + '"' + (pick.has(k) ? ' class="on"' : '') + '>' + cap(FULL[fromKey(k).getDay()].slice(0, 3)) + '</button>').join('') + '</div>' +
-    '<div class="wka-quick"><button type="button" data-q="wd">Weekdays</button><button type="button" data-q="all">Every day</button><button type="button" data-q="one">Just ' + cap(FULL[fromKey(day0).getDay()]) + '</button></div>' +
-    '<p class="wka-note" id="wka-note">It goes at the end of each day\u2019s plan.</p>' +
-    '<button type="button" class="wka-go" id="wka-go" disabled>Add</button></div>';
-  document.body.appendChild(el);
-  const name = el.querySelector('#wka-name'), go = el.querySelector('#wka-go');
-  const d0 = state.days[day0], stIn = el.querySelector('#wka-st');
-  stIn.value = hhmm(toMins(d0 && d0.start ? d0.start : (day0 === planKey() ? nowHHMM() : '08:00')));
+  let label = preset ? (preset.label || '') : '';
+  const d0 = state.days[day0];
+  let start = hhmm(toMins(d0 && d0.start ? d0.start : (day0 === planKey() ? nowHHMM() : '08:00')));
+  const DAY0 = cap(FULL[fromKey(day0).getDay()]);
   const used = k => ((state.days[k] || {}).blocks || []).reduce((t, b) => t + (Number(b.mins) || 60), 0);
-  const note = () => { const m = toMins(stIn.value || '08:00') + used(day0);
-    el.querySelector('#wka-note').textContent = 'On ' + cap(FULL[fromKey(day0).getDay()]) + ' it starts at ' + clock(m) + ', after what is already planned.'; };
-  stIn.addEventListener('change', note); stIn.addEventListener('input', note);
-  const gsel = el.querySelector('#wka-goal');
-  if (gsel) gsel.addEventListener('change', () => { if (gsel.value) { name.value = gsel.value; sync(); } });
-  if (preset) name.value = preset.label || '';
-  const sync = () => {
-    el.querySelectorAll('#wka-days button').forEach(b => b.classList.toggle('on', pick.has(b.dataset.k)));
-    el.querySelectorAll('#wka-lens button').forEach(b => b.classList.toggle('on', Number(b.dataset.m) === mins));
-    go.disabled = !name.value.trim() || !pick.size;
-    go.textContent = pick.size > 1 ? 'Add to ' + pick.size + ' days' : 'Add';
-  };
+  const COMMON = [['\u{1F4BC}', 'Work', 60], ['\u{1F3CB}\uFE0F', 'Workout', 60], ['\u{1F9D8}', 'Rest', 30], ['\u{1F465}', 'Meeting', 30], ['\u{1F4D6}', 'Read', 30], ['\u{1F37D}\uFE0F', 'Lunch', 45]];
   const close = () => el.remove();
-  el.querySelector('.w3-back').addEventListener('click', close);
-  name.addEventListener('input', sync);
-
-  el.querySelectorAll('#wka-lens button').forEach(b => b.addEventListener('click', () => { mins = Number(b.dataset.m); sync(); }));
-  el.querySelectorAll('#wka-days button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; pick.has(k) ? pick.delete(k) : pick.add(k); sync(); }));
-  el.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
-    pick.clear();
-    if (b.dataset.q === 'one') pick.add(day0);
-    else days.forEach((k, n) => { if (b.dataset.q === 'all' || n < 5) pick.add(k); });
-    sync();
-  }));
-  go.addEventListener('click', () => {
-    const label = name.value.trim();
-    if (!label || !pick.size) return;
-    for (const k of pick) {
-      const st = /^\d{2}:\d{2}/.test(stIn.value) ? stIn.value.slice(0, 5) : '08:00';
-      if (!state.days[k]) state.days[k] = { start: st, blocks: [] };
-      else if (k === day0 || !state.days[k].blocks.length) state.days[k].start = st;   // the day you are planning, or an empty one
-      state.days[k].touched = true;
-      const gst = goalSteps().find(x => x.t.toLowerCase() === label.toLowerCase());
-      const sid = preset && preset.step ? preset.step : gst ? gst.id : null;
-      state.days[k].blocks.push(sid ? { label, mins, step: sid } : { label, mins });
+  const draw = step => {
+    let h = '<div class="w3-back"></div><div class="w3-sheet wka wka2" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>';
+    if (step === 1) {
+      const S = goalSteps();
+      h += '<div class="wk2-top"><p class="wk2-step">Step 1 of 2</p><button type="button" class="wk2-x" aria-label="close">\u00d7</button></div><h2>What is it?</h2>' +
+        '<div class="wk2-type"><input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="Type a name" aria-label="block name"><button type="button" id="wka-next">Next</button></div>' +
+        (S.length ? '<p class="wk2-h">Your goals</p><div class="wk2-tiles">' + S.map(x => '<button type="button" data-t="' + esc(x.t) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span></button>').join('') + '</div>' : '') +
+        '<p class="wk2-h">Everyday</p><div class="wk2-tiles">' + COMMON.map(([e, t, m]) => '<button type="button" data-t="' + t + '" data-mm="' + m + '"><i>' + e + '</i><span>' + t + '</span></button>').join('') + '</div>';
+    } else {
+      const LENS = [30, 60, 90, 120]; if (!LENS.includes(mins)) { LENS.push(mins); LENS.sort((a, b) => a - b); }
+      const at = toMins(start) + used(day0);
+      h += '<div class="wk2-top">' + (preset ? '<span></span>' : '<button type="button" class="wk2-back" data-back="1">\u2190 Back</button><p class="wk2-step">Step 2 of 2</p>') + '<button type="button" class="wk2-x" aria-label="close">\u00d7</button></div><h2>' + (preset ? 'Bring it over' : 'When?') + '</h2>' +
+        '<button type="button" class="wk2-what" ' + (preset ? 'disabled' : 'data-back="1"') + '><b>' + esc(label) + '</b>' + (preset ? '' : '<span>change</span>') + '</button>' +
+        '<div class="wk2-start"><label for="wka-st">' + DAY0 + ' starts at</label><input type="time" id="wka-st" step="300" value="' + start + '"></div>' +
+        '<p class="wk2-h">How long</p>' +
+        '<div class="wk2-hrs"><button type="button" data-d="-15" aria-label="15 minutes less">\u2212</button><div><b>' + hrsLabel(mins) + '</b><small>ends ' + clock(at + mins) + '</small></div><button type="button" data-d="15" aria-label="15 minutes more">+</button></div>' +
+        '<div class="wk2-lens">' + [30, 60, 90, 120].map(m => '<button type="button" data-m="' + m + '"' + (m === mins ? ' class="on"' : '') + '><b>' + hrsLabel(m) + '</b></button>').join('') + '</div>' +
+        '<p class="wk2-h">Which days</p><div class="wka-days">' + days.map(k => '<button type="button" data-k="' + k + '"' + (pick.has(k) ? ' class="on"' : '') + '>' + cap(FULL[fromKey(k).getDay()].slice(0, 3)) + '</button>').join('') + '</div>' +
+        '<div class="wka-quick"><button type="button" data-q="all">Every day</button></div>' +
+        '<p class="wka-note">On ' + DAY0 + ' it starts at ' + clock(at) + ', after what is already planned.</p>' +
+        '<button type="button" class="wka-go" id="wka-go">' + (pick.size > 1 ? 'Add to ' + pick.size + ' days' : 'Add') + '</button>';
     }
-    save(); close();
-    if (after) after([...pick]); else renderWeek();
-  });
-  sync(); note();
-  if (!preset) setTimeout(() => name.focus(), 50);
+    el.innerHTML = h + '</div>';
+    el.querySelector('.w3-back').addEventListener('click', close);
+    el.querySelector('.wk2-x').addEventListener('click', close);
+    if (step === 1) {
+      const name = el.querySelector('#wka-name');
+      name.value = label;
+      const next = () => { const v = name.value.trim(); if (!v) { name.focus(); return; } label = v; const u = usualLength(v); if (u) mins = u; draw(2); };
+      el.querySelector('#wka-next').addEventListener('click', next);
+      name.addEventListener('keydown', e => { if (e.key === 'Enter') next(); });
+      el.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { label = b.dataset.t; const u = usualLength(label); mins = u || Number(b.dataset.mm) || mins; draw(2); }));
+      setTimeout(() => name.focus(), 50);
+      return;
+    }
+    el.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => draw(1)));
+    const st = el.querySelector('#wka-st');
+    st.addEventListener('change', () => { if (/^\d{2}:\d{2}/.test(st.value)) { start = st.value.slice(0, 5); draw(2); } });
+    el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { mins = Number(b.dataset.m); draw(2); }));
+    el.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { mins = Math.max(15, Math.min(720, mins + Number(b.dataset.d))); draw(2); }));
+    el.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; pick.has(k) ? pick.delete(k) : pick.add(k); if (!pick.size) pick.add(day0); draw(2); }));
+    el.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
+      pick.clear();
+      if (b.dataset.q === 'one') pick.add(day0); else days.forEach((k, n) => { if (b.dataset.q === 'all' || n < 5) pick.add(k); });
+      draw(2);
+    }));
+    el.querySelector('#wka-go').addEventListener('click', () => {
+      if (!label.trim() || !pick.size) return;
+      for (const k of pick) {
+        if (!state.days[k]) state.days[k] = { start, blocks: [] };
+        else if (k === day0 || !state.days[k].blocks.length) state.days[k].start = start;   // the day you are planning, or an empty one
+        state.days[k].touched = true;
+        const gst = goalSteps().find(x => x.t.toLowerCase() === label.toLowerCase());
+        const sid = preset && preset.step ? preset.step : gst ? gst.id : null;
+        state.days[k].blocks.push(sid ? { label, mins, step: sid } : { label, mins });
+      }
+      save(); close();
+      if (after) after([...pick]); else renderWeek();
+    });
+  };
+  draw(preset ? 2 : 1);
+  document.body.appendChild(el);
 }
 document.querySelectorAll('#plan-seg [data-pm]').forEach(b => b.addEventListener('click', () => {
   if (b.dataset.pm === 'week') weekOf = mondayOf(viewDay || planKey());
