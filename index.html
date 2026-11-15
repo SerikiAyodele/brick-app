@@ -5125,6 +5125,39 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
 .pl-rm { flex: none; width: 40px; height: 40px; margin-left: 4px; font-size: 22px; line-height: 1; color: var(--muted); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
 .ns-remove { display: block; width: 100%; min-height: 50px; margin-top: 14px; font: 600 16px var(--display); color: #c2416a; background: color-mix(in srgb, #c2416a 8%, var(--card)); border: 1px solid color-mix(in srgb, #c2416a 25%, var(--hair)); border-radius: 25px; cursor: pointer; }
+
+/* habits: minimal, subtle, a touch of luxury */
+#view-goals#view-goals#view-goals .gl-hab { margin: 6px 0 22px !important; padding: 0 !important; background: none !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+#view-goals#view-goals#view-goals .gl-hh { margin: 0 0 4px; padding: 0 2px 8px; border-bottom: 1px solid rgba(214, 143, 163, .28); }
+#view-goals#view-goals#view-goals .gl-hh b { font-size: 12px; letter-spacing: 2.4px; }
+#view-goals#view-goals#view-goals .gl-hab > .gl-add { min-height: 48px; padding: 0 2px !important; border-bottom: 1px solid var(--hair); }
+#view-goals#view-goals#view-goals .gl-quit { margin: 0 !important; padding: 14px 2px 12px !important; background: none !important; border: 0 !important; border-bottom: 1px solid var(--hair) !important; border-radius: 0 !important; }
+#view-goals#view-goals#view-goals .gl-qh i { font-size: 18px; opacity: .9; }
+#view-goals#view-goals#view-goals .gl-qh b { font-family: var(--serif, inherit); font-size: 19px; font-weight: 600; }
+#view-goals#view-goals#view-goals .gl-qh small { margin-left: auto; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--pink-d); }
+#view-goals#view-goals#view-goals .gl-quit .jr-clean { display: flex !important; flex-wrap: wrap; gap: 4px 14px !important; margin: 8px 0 12px 30px !important; padding: 0 !important; background: none !important; border: 0 !important; }
+#view-goals#view-goals#view-goals .gl-quit .jr-clean span { display: inline-flex !important; align-items: baseline; gap: 5px; padding: 0 !important; min-height: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; }
+#view-goals#view-goals#view-goals .gl-quit .jr-clean b { font-size: 15px !important; font-weight: 600; color: var(--ink); }
+#view-goals#view-goals#view-goals .gl-quit .jr-clean small { font-size: 13px !important; color: var(--muted); }
+#view-goals#view-goals#view-goals .gl-quit .jr-sos { display: flex; gap: 8px; margin: 0 0 10px 30px !important; }
+#view-goals#view-goals#view-goals .gl-quit .jr-sos button { flex: none !important; min-height: 40px !important; padding: 0 16px !important; font: 500 14px var(--display) !important; border-radius: 20px !important; box-shadow: none !important; }
+#view-goals#view-goals#view-goals .gl-quit .jr-crave { color: var(--pink-d) !important; background: none !important; border: 1px solid color-mix(in srgb, var(--pink) 55%, transparent) !important; }
+#view-goals#view-goals#view-goals .gl-quit .jr-slip { color: var(--muted) !important; background: none !important; border: 1px solid var(--hair) !important; }
+#view-goals#view-goals#view-goals .gl-qtip { margin: 0 0 6px 30px !important; font-size: 14px !important; line-height: 1.5; color: var(--muted) !important; }
+#view-goals#view-goals#view-goals .gl-qtip b { font-weight: 600; color: color-mix(in srgb, var(--ink) 75%, var(--muted)); }
+#view-goals#view-goals#view-goals .gl-qend { margin-left: 30px !important; min-height: 36px; font-size: 13px !important; color: var(--muted) !important; }
+
+#view-goals#view-goals#view-goals .gl-quit .jr-clean b, #view-goals#view-goals#view-goals .gl-quit .jr-clean small { display: inline !important; }
+#view-goals#view-goals#view-goals .gl-hform { padding: 8px 0 10px; border-bottom: 1px solid var(--hair); }
+
+#view-goals#view-goals#view-goals .gl-quit .jr-clean span { flex-direction: row !important; }
+
+.gl-qi { margin-top: 12px; padding-top: 10px; border-top: 1px solid color-mix(in srgb, #7daf86 25%, var(--hair)); }
+.gl-qi small { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: #5f8f69; }
+.gl-qi p { display: flex; gap: 10px; margin: 8px 0 0; font-size: 15px; line-height: 1.45; color: var(--ink); }
+.gl-qi i { flex: none; font-style: normal; font-size: 18px; line-height: 1.3; }
+.gl-qact { display: block; min-height: 40px; margin-top: 8px; padding: 0 14px; font: 600 14px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 20px; cursor: pointer; }
+.gl-qact:disabled { background: var(--pink-s); color: var(--pink-d); }
 </style>
 </head>
 <body>
@@ -5386,7 +5419,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:34</footer>
+  <footer>Mr.O:21:39</footer>
 </div>
 
 <script>
@@ -5642,7 +5675,7 @@ function renderHabits() {
       '<div class="hb-week">' + week + '</div></div>';
   };
   let html = '';
-  if (building.length < HABIT_MAX) html += '<div class="hb-add"><input type="text" maxlength="40" placeholder="+ a habit you want to build" aria-label="new habit"></div>';
+  if (building.length < HABIT_MAX) html += '<div class="hb-add gs-add"><input type="text" maxlength="40" placeholder="a habit you want to build" aria-label="new habit"><button type="button">Add</button></div>';
   else html += '<p class="hb-full">You\u2019re building ' + HABIT_MAX + '. That\u2019s the most that works: one more spreads you too thin. Each one frees up at ' + HABIT_DAYS + ' days.</p>';
   html += building.map(card).join('');
   if (!state.habits.length) html += '<p class="hb-empty">Start with one small thing you can do every day, even on a bad day. If it is also in your plan, brick ticks it for you when you finish that block.</p>';
@@ -5663,10 +5696,11 @@ function renderHabits() {
     if (openHabit === h.id) el.appendChild(monthPanel(h));
   });
   const add = habitList.querySelector('.hb-add input');
-  if (add) add.addEventListener('keydown', e => {
-    if (e.key !== 'Enter' || !add.value.trim()) return;
-    addHabit(cap(add.value.trim()));
-  });
+  if (add) {
+    const go = () => { if (!add.value.trim()) { add.focus(); return; } addHabit(cap(add.value.trim())); };
+    add.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    habitList.querySelector('.hb-add button').addEventListener('click', go);
+  }
   const sub = document.getElementById('habits-sub'); if (sub) sub.textContent = building.length + ' of ' + HABIT_MAX + ' building';
 }
 
@@ -8527,9 +8561,54 @@ function journeyPlan(j) {
   if (j.kind === 'cannabis' && /edible|gumm|infused/i.test(j.name || '')) return JOURNEY_PLANS.edibles;   // edibles have their own guide
   return JOURNEY_PLANS[j.kind] || JOURNEY_PLANS.habit;
 }
+// edibles you logged in Fuel since day 1, as day keys
+function foodSlips(j) {
+  if (!j || !/edible|gumm|infused|cannabis|weed|thc/i.test(j.name || '') && j.kind !== 'cannabis') return [];
+  return (state.food || []).filter(f => key(new Date(f.at)) >= j.start && entryKinds(f).includes('cannabis')).map(f => key(new Date(f.at)));
+}
+// what the data says: food, moods, sleep and your days, read together. the 3 most useful, with one action at most
+function quitInsights(j) {
+  const out = [], now = Date.now(), tk = todayKey(), H = new Date().getHours(), wk = now - 7 * 86400000;
+  const hourOf = at => new Date(at).getHours();
+  // food: an edible logged
+  const fs = (state.food || []).filter(f => f.at > wk && entryKinds(f).includes('cannabis'));
+  if (fs.length) out.push({ w: 9, e: '\u{1F37D}\uFE0F', t: 'You logged ' + esc(fs[0].what) + ' in Fuel. It counts as a slip, not a reset. Your best run stays.' });
+  // when it hits: cravings, slips and logged edibles by hour
+  const hits = (j.cravings || []).map(c => c.at).concat((j.slips || []).map(x => x.at), fs.map(f => f.at)).filter(a => a > now - 30 * 86400000);
+  const byH = {}; hits.forEach(a => { const h = hourOf(a); byH[h] = (byH[h] || 0) + 1; byH[(h + 1) % 24] = (byH[(h + 1) % 24] || 0) + .5; });
+  const peak = hits.length >= 2 ? Number(Object.keys(byH).sort((a, b) => byH[b] - byH[a])[0]) : 21;
+  const from = (peak + 23) % 24, label = clock(from * 60).replace(':00', '') + ' to ' + clock(((peak + 2) % 24) * 60).replace(':00', '');
+  const day = state.days[tk], bs = typeof blocksOf === 'function' ? blocksOf(tk) : [];
+  const covered = bs.some(b => b.from < (from + 3) * 60 && b.to > from * 60);
+  if (H < peak + 2) out.push({ w: covered ? 3 : 8, e: '\u{1F319}', t: (hits.length >= 2 ? 'Your cravings usually come around ' : 'For most people cravings come around ') + label + '. ' + (covered ? 'You have something planned then. Good.' : 'Nothing is planned then today.'),
+    act: covered ? null : { label: 'Add an evening walk to today', block: { label: 'Evening walk', mins: 30 } } });
+  // sleep: the last 3 nights
+  const nights = [0, 1, 2].map(n => typeof sleepOn === 'function' ? sleepOn(shiftKey(tk, -n)) : null).filter(Boolean).map(sleepMins).filter(m => m > 0);
+  if (nights.length >= 2) { const avg = Math.round(nights.reduce((a, b) => a + b, 0) / nights.length);
+    out.push(avg < 390 ? { w: 7, e: '\u{1F634}', t: 'You slept about ' + dur(avg) + ' a night lately. Cravings hit harder when you are tired. An early night tonight helps.' }
+                       : { w: 2, e: '\u{1F634}', t: 'You are sleeping about ' + dur(avg) + ' a night. That protects you from cravings.' }); }
+  // mood: stressed, anxious or low this week, and whether cravings follow
+  const bad = (state.moods || []).filter(m => m.at > wk && ['stressed', 'anxious', 'low', 'unmotivated'].includes(m.mood));
+  if (bad.length >= 2) { const cueStress = (j.cravings || []).filter(c => c.at > wk && (c.cue || []).some(x => /stress|low/i.test(x))).length;
+    out.push({ w: cueStress ? 8 : 5, e: '\u{1F300}', t: 'You felt stressed, anxious or low ' + bad.length + ' times this week' + (cueStress ? ', and ' + cueStress + ' craving' + (cueStress === 1 ? '' : 's') + ' came with it' : '') + '. When it comes, try the breathing in Craving now.' }); }
+  // food: sweets this week, and no dinner yet in the evening
+  const sweets = (state.food || []).filter(f => f.at > wk && entryKinds(f).includes('sugar') && !entryKinds(f).includes('cannabis')).length;
+  if (sweets >= 3) out.push({ w: 5, e: '\u{1F36C}', t: 'You logged sweets ' + sweets + ' times this week. Sweets that look like gummies can set off a craving. Swap some for fruit or nuts.' });
+  const ate = (state.food || []).some(f => key(new Date(f.at)) === tk && new Date(f.at).getHours() >= 16);
+  if (H >= 18 && !ate) out.push({ w: 6, e: '\u{1F37D}\uFE0F', t: 'No dinner logged yet. Evening hunger can feel like a craving, so eat a proper meal.' });
+  // your days: cravings on lighter days
+  const cdays = [...new Set((j.cravings || []).concat(j.slips || []).map(c => key(new Date(c.at))))];
+  if (cdays.length >= 2 && typeof blocksOf === 'function') {
+    const hrs = k => blocksOf(k).reduce((t, b) => t + (b.to - b.from), 0) / 60;
+    const all = []; for (let n = 1; n <= 14; n++) all.push(shiftKey(tk, -n));
+    const cAvg = cdays.reduce((t, k) => t + hrs(k), 0) / cdays.length, rest = all.filter(k => !cdays.includes(k)), oAvg = rest.length ? rest.reduce((t, k) => t + hrs(k), 0) / rest.length : 0;
+    if (oAvg - cAvg >= 1.5) out.push({ w: 6, e: '\u{1F5D3}\uFE0F', t: 'Cravings came on lighter days, about ' + Math.round(cAvg) + 'h planned against ' + Math.round(oAvg) + 'h on other days. Plan something for quiet evenings.' });
+  }
+  return out.sort((a, b) => b.w - a.w).slice(0, 3);
+}
 // days clean: since the last slip (or day 1), and the best run so far
 function cleanDays(j) {
-  const slips = (j.slips || []).map(x => key(new Date(x.at))).sort();
+  const slips = [...new Set((j.slips || []).map(x => key(new Date(x.at))).concat(foodSlips(j)))].sort();
   const today = todayKey(), dd = (a, b) => Math.round((fromKey(b) - fromKey(a)) / 86400000);
   const last = slips.length ? slips[slips.length - 1] : null;
   const now = last ? dd(last, today) : dd(j.start, today) + 1;
@@ -13309,18 +13388,21 @@ function goalEditUsed() {
 let monthEdit = null;   // area key being typed
 // habits, together with the goals: up to 3 with streaks, plus a quit journey with its days clean and help
 let quitForm = false;
+let habitForm = false;   // the add-a-habit box on the Goals page
 function habitsHtml() {
   const H = (state.habits || []).slice(0, 3), tk = todayKey(), jj = activeJourney(), q = jj && isQuit(jj) ? jj : null, jc = q ? cleanDays(q) : null;
   let h = '<section class="gl-hab"><div class="gl-hh"><b>Habits</b><small>' + H.length + ' of 3</small></div>' +
     H.map((x, i) => { const on = (x.marks || []).includes(tk), st = streakOf(x.marks || []);
       return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(x.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span>' + esc(x.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
-    (H.length < 3 ? '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>' : '');
+    (H.length < 3 ? (habitForm ? '<div class="gs-add gl-hform"><input type="text" id="hf-name" maxlength="40" placeholder="e.g. Read 10 pages" aria-label="new habit"><button type="button" data-hsave="1">Add</button></div>'
+                              : '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>') : '');
   if (q) {
     const day = journeyDay(q, Date.now()), stg = journeyStage(q, day), tip = stg.tips[(day - stg.from) % stg.tips.length];
     h += '<div class="gl-quit"><div class="gl-qh"><i>\u{1F33F}</i><b>' + esc(q.name) + '</b><small>Day ' + day + '</small></div>' +
       '<div class="jr-clean"><span><b>' + jc.now + '</b><small>days clean</small></span><span><b>' + jc.best + '</b><small>best run</small></span><span><b>' + (q.cravings || []).filter(c => c.rode).length + '</b><small>cravings ridden out</small></span></div>' +
       '<div class="jr-sos"><button type="button" class="jr-crave" data-q="crave">Craving now</button><button type="button" class="jr-slip" data-q="slip">I slipped</button></div>' +
       '<p class="gl-qtip"><b>' + stg.name + ':</b> ' + tip + '</p>' +
+      (() => { const I = quitInsights(q); return I.length ? '<div class="gl-qi"><small>What your data says</small>' + I.map((x, n) => '<p><i>' + x.e + '</i><span>' + x.t + (x.act ? '<button type="button" class="gl-qact" data-qact="' + n + '">' + x.act.label + '</button>' : '') + '</span></p>').join('') + '</div>' : ''; })() +
       '<button type="button" class="gl-qend" data-q="end">End this</button></div>';
   } else if (quitForm) {
     h += '<div class="gl-quit"><b class="gl-qf">Quit something</b><input type="text" id="qf-name" maxlength="60" placeholder="e.g. Quit edibles"><label for="qf-start">Day 1 was</label><input type="date" id="qf-start" value="' + tk + '" max="' + tk + '">' +
@@ -13331,7 +13413,18 @@ function habitsHtml() {
 function wireHabits(box, redraw) {
   box.querySelectorAll('[data-htick]').forEach(b => b.addEventListener('click', () => { const x = state.habits[Number(b.dataset.htick)], tk = todayKey();
     x.marks = x.marks || []; const i = x.marks.indexOf(tk); i < 0 ? x.marks.push(tk) : x.marks.splice(i, 1); save(); redraw(); }));
-  box.querySelectorAll('[data-hadd]').forEach(b => b.addEventListener('click', () => { show('habits'); window.scrollTo(0, 0); }));
+  box.querySelectorAll('[data-hadd]').forEach(b => b.addEventListener('click', () => { habitForm = true; redraw(); setTimeout(() => { const i = document.getElementById('hf-name'); if (i) i.focus(); }, 30); }));
+  box.querySelectorAll('[data-hsave]').forEach(b => {
+    const inp = document.getElementById('hf-name');
+    const go = () => { const v = (inp.value || '').trim(); if (!v) { inp.focus(); return; } addHabit(cap(v)); habitForm = false; redraw(); };
+    b.addEventListener('click', go); if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  });
+  box.querySelectorAll('[data-qact]').forEach(b => b.addEventListener('click', () => {
+    const q = activeJourney(), x = q && quitInsights(q)[Number(b.dataset.qact)];
+    if (!x || !x.act) return;
+    const d = dayFor(planKey()); d.touched = true; d.blocks.push({ ...x.act.block }); save();
+    b.textContent = 'Added to today \u2713'; b.disabled = true;
+  }));
   box.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
     const a = b.dataset.q, q = activeJourney();
     if (a === 'crave') return cravingSheet(q, redraw);
