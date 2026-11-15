@@ -4045,6 +4045,33 @@ body, body[data-view] {
 .ch-form button { min-height: 40px; padding: 0 16px; border: 0; border-radius: 18px; background: var(--pink); color: #fff; font: 600 15px var(--display); cursor: pointer; }
 .ch-form button:disabled { opacity: .45; cursor: default; }
 .ch-clear { display: block; margin: 14px auto 0; min-height: 40px; padding: 0 14px; border: 0; background: none; color: var(--muted); font: 14px var(--display); text-decoration: underline; cursor: pointer; }
+
+/* home, more colour (still minimal): berry Now card, a colour per quick
+   button, a soft rainbow on Goals, bolder area tiles */
+#view-home .hm-now { background: linear-gradient(145deg, #c0607c 0%, #9a4f74 52%, #634a7a 100%) !important;
+  box-shadow: 0 22px 40px -22px rgba(120, 60, 90, .75); }
+#view-home .hm-now::after { right: -50px; top: -50px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(255, 196, 150, .45), transparent 70%); }
+#view-home .hm-now::before { content: ""; position: absolute; left: -40px; bottom: -60px; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(150, 200, 235, .28), transparent 70%); pointer-events: none; }
+#view-home .hm-now .hm-lbl, #view-home .hm-now .hm-sub, #view-home .hm-now .hm-prog { color: rgba(255, 244, 240, .85); }
+#view-home .hm-now.live .hm-lbl, #view-home .hm-now.empty .hm-sub { color: #ffe1b8; }
+#view-home .hm-now .hm-bar { background: rgba(255, 244, 240, .22); }
+#view-home .hm-now .hm-bar u { background: #ffe1b8; }
+#view-home .hm-quick .hq { position: relative; --q: var(--pink); background: color-mix(in srgb, var(--q) 24%, var(--card)); border: none; }
+#view-home .hm-quick .hq.room { --q: #7daf86; }
+#view-home .hm-quick .hq:nth-child(2) { --q: #86b9d9; }
+#view-home .hm-quick .hq:nth-child(3) { --q: #e8c46a; }
+#view-home .hq.due::after { content: ""; position: absolute; top: 8px; right: 12px; width: 7px; height: 7px; border-radius: 50%; background: var(--pink); }
+#view-home .hm-goals { background: linear-gradient(110deg, color-mix(in srgb, #7daf86 16%, var(--card)), color-mix(in srgb, #c9965a 12%, var(--card)) 35%, color-mix(in srgb, #e38fa8 14%, var(--card)) 65%, color-mix(in srgb, #8fb7d8 18%, var(--card))); }
+#view-home .hm-gbars i { background: color-mix(in srgb, var(--c) 40%, var(--card)); }
+#view-home .hm-area { background: linear-gradient(160deg, color-mix(in srgb, var(--c) 44%, var(--card)), color-mix(in srgb, var(--c) 14%, var(--card)) 85%); }
+#view-home .hm-area::after { content: ""; position: absolute; right: -24px; top: -24px; width: 84px; height: 84px; border-radius: 50%; background: color-mix(in srgb, var(--c) 18%, transparent); pointer-events: none; }
+#view-home .hm-an { color: color-mix(in srgb, var(--c) 55%, var(--ink)); }
+#view-home .hm-area small { color: color-mix(in srgb, var(--c) 30%, var(--muted)); }
+#view-home .hm-ae { position: relative; z-index: 1; background: color-mix(in srgb, #fff 80%, transparent); box-shadow: 0 4px 12px -6px color-mix(in srgb, var(--c) 80%, transparent); }
+:root[data-theme="dark"] #view-home .hm-ae { background: color-mix(in srgb, #fff 16%, transparent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #view-home .hm-ae { background: color-mix(in srgb, #fff 16%, transparent); } }
+:root[data-theme="dark"] #view-home .hm-an { color: color-mix(in srgb, var(--c) 70%, #fff); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #view-home .hm-an { color: color-mix(in srgb, var(--c) 70%, #fff); } }
 </style>
 </head>
 <body>
@@ -4297,7 +4324,7 @@ body, body[data-view] {
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>everything saves on this device · build 16:12</footer>
+  <footer>everything saves on this device · build 16:45</footer>
 </div>
 
 <script>
