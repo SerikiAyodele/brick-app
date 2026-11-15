@@ -4563,6 +4563,29 @@ html { background: var(--paper) !important; }
 #view-day .nowcard:not(.past) .nc-acts { display: flex; gap: 8px; margin-top: 16px; }
 #view-day .nowcard:not(.past) .nc-act { flex: 1; min-height: 46px; font: 600 15px var(--display); color: var(--ink) !important; background: var(--card) !important; border: 1px solid var(--dash) !important; border-radius: 23px; }
 #view-day .nowcard:not(.past) .nc-act.grow { color: var(--paper) !important; background: var(--ink) !important; border-color: var(--ink) !important; }
+
+.wka-sel { width: 100%; min-height: 48px; margin-top: 10px; padding: 0 12px; font: 16px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 14px; }
+.wka-start { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; padding: 8px 8px 8px 14px; background: var(--pink-s); border-radius: 14px; }
+.wka-start label { font-size: 15px; font-weight: 600; color: var(--ink); }
+.wka-start input { min-height: 44px; padding: 0 10px; font: 600 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; }
+
+/* plan: the Now card, v3. the ring is back (one pink, slim), warm pink card, name beside it, next under a line */
+#view-day .nowcard:not(.past) { display: grid !important; grid-template-columns: 104px 1fr; column-gap: 18px; align-items: center;
+  padding: 20px !important; background: color-mix(in srgb, var(--pink) 10%, var(--card)) !important; border: 1px solid color-mix(in srgb, var(--pink) 28%, var(--hair)) !important; }
+#view-day .nowcard:not(.past)::before { display: none; }
+#view-day .nowcard.waiting, #view-day .nowcard.over { background: var(--card) !important; border-color: var(--hair) !important; }
+#view-day .nowcard:not(.past) .nc-ring { display: block !important; width: 104px; height: 104px; grid-row: 1; grid-column: 1; }
+#view-day .nowcard:not(.past) .nc-track { stroke: color-mix(in srgb, var(--pink) 16%, var(--card)); stroke-width: 7; }
+#view-day .nowcard:not(.past) .nc-arc { stroke: var(--pink) !important; stroke-width: 7; stroke-linecap: round; filter: none !important; }
+#view-day .nowcard.waiting .nc-arc, #view-day .nowcard.over .nc-arc { stroke: var(--dash) !important; }
+#view-day .nowcard:not(.past) .nc-left { font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -.2px; }
+#view-day .nowcard:not(.past) .nc-unit { font-size: 12px; color: var(--muted); }
+#view-day .nowcard:not(.past) .nc-info { grid-row: 1; grid-column: 2; gap: 2px; }
+#view-day .nowcard:not(.past) .nc-name { margin-top: 0; font-size: 24px; }
+#view-day .nowcard .nc-big, #view-day .nowcard .nc-bar { display: none !important; }
+#view-day .nowcard:not(.past) .nc-next { grid-column: 1 / -1; }
+#view-day .nowcard:not(.past) .nc-info .nc-next { position: relative; margin: 0; }
+#view-day .nowcard:not(.past) .nc-acts { grid-column: 1 / -1; margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -4822,7 +4845,7 @@ html { background: var(--paper) !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:14</footer>
+  <footer>Mr.O:18:21</footer>
 </div>
 
 <script>
@@ -4839,6 +4862,42 @@ function bugToast(e) {
 }
 window.addEventListener('error', e => bugToast(e));
 window.addEventListener('unhandledrejection', e => bugToast(e));
+
+/* =========== AI =========== */
+/* on the laptop (serve.py) the AI is same address. anywhere else (the online
+   app) it goes to brick's Cloudflare worker, which holds the key. the worker
+   needs a passcode, typed once on this device. */
+const AI_URL = '';   // set after the worker is deployed
+const AI_PASS_KEY = 'paper.by.mia.v2.aipass';
+const aiLocal = () => !AI_URL || /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
+async function aiFetch(path, body, signal) {
+  const headers = { 'Content-Type': 'application/json' };
+  let url = path;
+  if (!aiLocal()) {
+    url = AI_URL + path;
+    let pass = ''; try { pass = localStorage.getItem(AI_PASS_KEY) || ''; } catch {}
+    if (!pass) { aiPassSheet(); return new Response('{"error":"passcode"}', { status: 401 }); }
+    headers['X-Brick-Pass'] = pass;
+  }
+  const r = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body), signal });
+  if (r.status === 401 && !aiLocal()) { try { localStorage.removeItem(AI_PASS_KEY); } catch {} aiPassSheet(true); }
+  return r;
+}
+function aiPassSheet(wrong) {
+  if (document.getElementById('aipass')) return;
+  const el = document.createElement('div');
+  el.id = 'aipass'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet" role="dialog" aria-modal="true" aria-label="AI passcode"><span class="w3-grab"></span>' +
+    '<h2 class="gs-h">AI passcode</h2><p class="gs-ask">' + (wrong ? 'That passcode did not work. Try again.' : 'Type your AI passcode once. It stays on this phone.') + '</p>' +
+    '<div class="gs-add"><input type="password" autocomplete="current-password" aria-label="AI passcode"><button type="button">Save</button></div></div>';
+  document.body.appendChild(el);
+  const inp = el.querySelector('input');
+  const ok = () => { const v = inp.value.trim(); if (!v) return; try { localStorage.setItem(AI_PASS_KEY, v); } catch {} el.remove(); };
+  el.querySelector('.w3-back').addEventListener('click', () => el.remove());
+  el.querySelector('.gs-add button').addEventListener('click', ok);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
+  setTimeout(() => inp.focus(), 50);
+}
 
 /* =========== storage =========== */
 
@@ -11154,7 +11213,7 @@ async function makePlan(a) {
   try {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 90000);
-    const r = await fetch('/api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answers: a }), signal: ctl.signal });
+    const r = await aiFetch('/api/plan', { answers: a }, ctl.signal);
     clearTimeout(timer);
     if (r.ok) { const out = await r.json(); if (out && Array.isArray(out.workouts) && out.workouts.length) return { plan: out, source: 'ai' }; }
   } catch {}
@@ -13580,8 +13639,7 @@ async function aiGoal(area, text, ids) {
   try {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 20000);
-    const r = await fetch('/api/goal', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                         body: JSON.stringify({ area, text, measures }), signal: ctl.signal });
+    const r = await aiFetch('/api/goal', { area, text, measures }, ctl.signal);
     clearTimeout(timer);
     if (!r.ok) return null;
     const out = await r.json();
@@ -14055,12 +14113,12 @@ async function chatSend(text) {
   try {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 60000);
-    const r = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: chatMsgs.slice(-20), context: chatContext() }), signal: ctl.signal });
+    const r = await aiFetch('/api/chat', { messages: chatMsgs.slice(-20), context: chatContext() }, ctl.signal);
     clearTimeout(timer);
     const out = await r.json().catch(() => null);
     if (r.ok && out && typeof out.reply === 'string') reply = out.reply;
     else why = r.status === 429 ? 'Too many messages. Try again in a bit.'
+             : r.status === 401 ? 'Type your AI passcode, then send again.'
              : [404, 405, 501, 503].includes(r.status) ? 'Chat only works on the laptop version for now.'
              : 'Claude could not answer. Try again.';
   } catch { why = 'No connection to the laptop. Try again.'; }
@@ -14197,8 +14255,8 @@ function renderWeek() {
     // days down the page, each with its blocks: time, name, length
     const goalOf = id => { for (const a of AREAS) for (const g of areaGoals(a.k)) if (g.setAt === id) return a; return null; };
     const nowM = new Date().getHours() * 60 + new Date().getMinutes();
-    // next Monday sits at the end, so the next week is one tap away
-    const next = [shiftKey(days[0], 7)];
+    // only this week (the arrows move to other weeks)
+    const next = [];
     html += '<div class="wl">' + days.concat(next).map((k, n) => { const d = fromKey(k), bs = n < 7 ? all[n] : blocksOf(k), isT = k === today, past = k < today;
       const raw = (state.days[k] || {}).blocks || [];
       const fold = past && bs.length && !wlOpen.has(k);
@@ -14284,14 +14342,25 @@ function weekAddSheet(day0, days, preset, after) {
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet wka" role="dialog" aria-modal="true" aria-label="Add a block"><span class="w3-grab"></span>' +
     '<h2>' + (preset ? 'Bring it over' : 'Add a block') + '</h2>' +
     '<input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="what is it? e.g. Gym" aria-label="block name">' +
-    (() => { const S = goalSteps(); return S.length ? '<b class="wka-h">From your goals</b><div class="wka-row" id="wka-steps">' + S.map(x => '<button type="button" data-st="' + esc(x.t) + '">' + x.e + ' ' + esc(x.t) + '</button>').join('') + '</div>' : ''; })() +
+    (() => { const S = goalSteps(); if (!S.length) return '';
+      const groups = AREAS.map(a => { const xs = S.filter(x => x.a === a.k); return xs.length ? '<optgroup label="' + a.name + '">' + xs.map(x => '<option value="' + esc(x.t) + '">' + esc(x.t) + '</option>').join('') + '</optgroup>' : ''; }).join('');
+      return '<select id="wka-goal" class="wka-sel" aria-label="from your goals"><option value="">From your goals\u2026</option>' + groups + '</select>'; })() +
+    '<div class="wka-start"><label for="wka-st">' + cap(FULL[fromKey(day0).getDay()]) + ' starts at</label><input type="time" id="wka-st" step="300"></div>' +
     '<b class="wka-h">How long</b><div class="wka-row" id="wka-lens">' + LENS.map(([m, t]) => '<button type="button" data-m="' + m + '"' + (m === mins ? ' class="on"' : '') + '>' + t + '</button>').join('') + '</div>' +
     '<b class="wka-h">Which days?</b><div class="wka-days" id="wka-days">' + days.map(k => '<button type="button" data-k="' + k + '"' + (pick.has(k) ? ' class="on"' : '') + '>' + cap(FULL[fromKey(k).getDay()].slice(0, 3)) + '</button>').join('') + '</div>' +
     '<div class="wka-quick"><button type="button" data-q="wd">Weekdays</button><button type="button" data-q="all">Every day</button><button type="button" data-q="one">Just ' + cap(FULL[fromKey(day0).getDay()]) + '</button></div>' +
-    '<p class="wka-note">It goes at the end of each day\u2019s plan.</p>' +
+    '<p class="wka-note" id="wka-note">It goes at the end of each day\u2019s plan.</p>' +
     '<button type="button" class="wka-go" id="wka-go" disabled>Add</button></div>';
   document.body.appendChild(el);
   const name = el.querySelector('#wka-name'), go = el.querySelector('#wka-go');
+  const d0 = state.days[day0], stIn = el.querySelector('#wka-st');
+  stIn.value = hhmm(toMins(d0 && d0.start ? d0.start : (day0 === planKey() ? nowHHMM() : '08:00')));
+  const used = k => ((state.days[k] || {}).blocks || []).reduce((t, b) => t + (Number(b.mins) || 60), 0);
+  const note = () => { const m = toMins(stIn.value || '08:00') + used(day0);
+    el.querySelector('#wka-note').textContent = 'On ' + cap(FULL[fromKey(day0).getDay()]) + ' it starts at ' + clock(m) + ', after what is already planned.'; };
+  stIn.addEventListener('change', note); stIn.addEventListener('input', note);
+  const gsel = el.querySelector('#wka-goal');
+  if (gsel) gsel.addEventListener('change', () => { if (gsel.value) { name.value = gsel.value; sync(); } });
   if (preset) name.value = preset.label || '';
   const sync = () => {
     el.querySelectorAll('#wka-days button').forEach(b => b.classList.toggle('on', pick.has(b.dataset.k)));
@@ -14302,7 +14371,7 @@ function weekAddSheet(day0, days, preset, after) {
   const close = () => el.remove();
   el.querySelector('.w3-back').addEventListener('click', close);
   name.addEventListener('input', sync);
-  el.querySelectorAll('#wka-steps button').forEach(b => b.addEventListener('click', () => { name.value = b.dataset.st; sync(); }));
+
   el.querySelectorAll('#wka-lens button').forEach(b => b.addEventListener('click', () => { mins = Number(b.dataset.m); sync(); }));
   el.querySelectorAll('#wka-days button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; pick.has(k) ? pick.delete(k) : pick.add(k); sync(); }));
   el.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
@@ -14315,7 +14384,9 @@ function weekAddSheet(day0, days, preset, after) {
     const label = name.value.trim();
     if (!label || !pick.size) return;
     for (const k of pick) {
-      if (!state.days[k]) state.days[k] = { start: k === planKey() ? nowHHMM() : '08:00', blocks: [] };
+      const st = /^\d{2}:\d{2}/.test(stIn.value) ? stIn.value.slice(0, 5) : '08:00';
+      if (!state.days[k]) state.days[k] = { start: st, blocks: [] };
+      else if (k === day0 || !state.days[k].blocks.length) state.days[k].start = st;   // the day you are planning, or an empty one
       state.days[k].touched = true;
       const gst = goalSteps().find(x => x.t.toLowerCase() === label.toLowerCase());
       const sid = preset && preset.step ? preset.step : gst ? gst.id : null;
@@ -14324,7 +14395,7 @@ function weekAddSheet(day0, days, preset, after) {
     save(); close();
     if (after) after([...pick]); else renderWeek();
   });
-  sync();
+  sync(); note();
   if (!preset) setTimeout(() => name.focus(), 50);
 }
 document.querySelectorAll('#plan-seg [data-pm]').forEach(b => b.addEventListener('click', () => {
