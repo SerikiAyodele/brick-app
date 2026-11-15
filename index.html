@@ -4920,6 +4920,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
 .wk2-x { flex: none; width: 44px; height: 44px; font-size: 26px; line-height: 1; color: var(--ink); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
 .wk2-back { flex: none; min-height: 44px; padding: 0 14px; font: 600 15px var(--display); color: var(--ink); background: var(--slot); border: none; border-radius: 22px; cursor: pointer; }
 .wk2-hrs b { font-family: var(--display) !important; }
+.wk2-sel { min-height: 54px !important; margin-top: 0 !important; font-size: 17px !important; border-radius: 16px !important; }
 </style>
 </head>
 <body>
@@ -5180,7 +5181,7 @@ body[data-view="goals"] #nowpill, body[data-view="life"] #nowpill { display: non
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:43</footer>
+  <footer>Mr.O:19:47</footer>
 </div>
 
 <script>
@@ -15045,7 +15046,8 @@ function weekAddSheet(day0, days, preset, after) {
       const S = goalSteps();
       h += '<div class="wk2-top"><p class="wk2-step">Step 1 of 2</p><button type="button" class="wk2-x" aria-label="close">\u00d7</button></div><h2>What is it?</h2>' +
         '<div class="wk2-type"><input type="text" id="wka-name" maxlength="60" list="preset-names" placeholder="Type a name" aria-label="block name"><button type="button" id="wka-next">Next</button></div>' +
-        (S.length ? '<p class="wk2-h">Your goals</p><div class="wk2-tiles">' + S.map(x => '<button type="button" data-t="' + esc(x.t) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span></button>').join('') + '</div>' : '') +
+        (S.length ? '<p class="wk2-h">From your goals</p><select id="wka-goal" class="wka-sel wk2-sel" aria-label="from your goals"><option value="">Pick a goal or step\u2026</option>' +
+          AREAS.map(a => { const xs = S.filter(x => x.a === a.k); return xs.length ? '<optgroup label="' + a.name + '">' + xs.map(x => '<option value="' + esc(x.t) + '">' + esc(x.t) + '</option>').join('') + '</optgroup>' : ''; }).join('') + '</select>' : '') +
         '<p class="wk2-h">Everyday</p><div class="wk2-tiles">' + COMMON.map(([e, t, m]) => '<button type="button" data-t="' + t + '" data-mm="' + m + '"><i>' + e + '</i><span>' + t + '</span></button>').join('') + '</div>';
     } else {
       const LENS = [30, 60, 90, 120]; if (!LENS.includes(mins)) { LENS.push(mins); LENS.sort((a, b) => a - b); }
@@ -15071,6 +15073,8 @@ function weekAddSheet(day0, days, preset, after) {
       el.querySelector('#wka-next').addEventListener('click', next);
       name.addEventListener('keydown', e => { if (e.key === 'Enter') next(); });
       el.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { label = b.dataset.t; const u = usualLength(label); mins = u || Number(b.dataset.mm) || mins; draw(2); }));
+      const gsel = el.querySelector('#wka-goal');
+      if (gsel) gsel.addEventListener('change', () => { if (gsel.value) { label = gsel.value; const u = usualLength(label); if (u) mins = u; draw(2); } });
       setTimeout(() => name.focus(), 50);
       return;
     }
