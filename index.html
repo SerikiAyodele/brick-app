@@ -4489,6 +4489,13 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
 
 .wl-day.fold { padding-bottom: 6px; }
 .wl-day.fold .wl-h small::after { content: " \203A"; }
+
+.fd h2 { margin: 0 0 14px; font-size: 22px; font-weight: 600; }
+.fd-h { margin: 16px 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.fd-done { margin: 14px 0 0; font-size: 16px; font-weight: 600; color: var(--pink-d); }
+#view-home#view-home .hm-quick .hq.food { --q: #e3874f; }
+#view-home .hm-quick { gap: 6px; }
+#view-home .hm-quick .hq { padding: 0 8px; font-size: 13.5px; }
 </style>
 </head>
 <body>
@@ -4747,7 +4754,7 @@ html body, html body[data-view], html body[data-view="day"] { background: var(--
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:41</footer>
+  <footer>Mr.O:17:42</footer>
 </div>
 
 <script>
@@ -11997,12 +12004,48 @@ function renderHomeQuick(box) {
   // sleep is always here: pink until today's night is logged, then it shows the hours
   const sl = sleepOn(todayKey());
   btn(sl ? '' : 'due', '<span>\u{1F634}</span>' + (sl ? dur(sleepMins(sl)) : 'Sleep'), () => quickSheet('sleep'));
+  btn('food', '<span>\u{1F37D}\uFE0F</span>Food', () => foodSheet());   // a quick add, for anything not in the plan
   const last = state.moods.slice().sort((a, b) => b.at - a.at)[0];
   // the mood button only shows when it is time: an hour after your last check-in
   const due = !last || Date.now() - last.at >= MOOD_EVERY;
   if (due) btn('due', '<span>\u{1F642}</span>Mood', () => quickSheet('mood'));
   else { const lm = MOODS.find(m => m.k === last.mood); btn('quiet', '<span>' + (lm ? lm.e : '\u{1F642}') + '</span>', () => quickSheet('mood')); }   // today's moods, no asking
   box.appendChild(row);
+}
+
+
+/* quick food: log something from Home without opening Fuel.
+   meals in the plan log themselves when you tick them; this is for the extras. */
+function foodSheet() {
+  const old = document.getElementById('fdsheet'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'fdsheet'; el.className = 'w3';
+  const since = Date.now() - 30 * 86400000, tally = {}, keep = {};
+  for (const f of state.food) { if (f.at < since) continue; const k = String(f.what || '').trim().toLowerCase(); if (!k) continue; tally[k] = (tally[k] || 0) + 1; keep[k] = keep[k] || f.what.trim(); }
+  const usual = Object.keys(tally).sort((a, b) => tally[b] - tally[a]).slice(0, 6).map(k => keep[k]);
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet fd" role="dialog" aria-modal="true" aria-label="Log food"><span class="w3-grab"></span>' +
+    '<h2>What did you eat?</h2>' +
+    '<div class="gs-add"><input type="text" id="fd-in" maxlength="120" list="food-past" placeholder="e.g. apple, jollof rice" aria-label="what you ate"><button type="button" id="fd-go">Log</button></div>' +
+    (usual.length ? '<p class="fd-h">Your usual</p><div class="wka-row">' + usual.map(t => '<button type="button" data-f="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>' : '') +
+    '<p class="fd-done" id="fd-done" hidden></p></div>';
+  document.body.appendChild(el);
+  const inp = el.querySelector('#fd-in');
+  const close = () => { el.remove(); renderHome(); };
+  const log = what => {
+    what = String(what || '').trim(); if (!what) { inp.focus(); return; }
+    const id = Date.now() + '';
+    state.food.unshift({ id, at: Date.now(), what, meal: mealFor(what) });
+    state.food.sort((a, b) => b.at - a.at);
+    save();
+    const d = el.querySelector('#fd-done'); d.hidden = false; d.textContent = 'Logged ' + what + '.';
+    inp.value = '';
+    setTimeout(close, 700);
+  };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('#fd-go').addEventListener('click', () => log(inp.value));
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') log(inp.value); });
+  el.querySelectorAll('[data-f]').forEach(b => b.addEventListener('click', () => log(b.dataset.f)));
+  setTimeout(() => inp.focus(), 50);
 }
 
 function quickSheet(kind) {
