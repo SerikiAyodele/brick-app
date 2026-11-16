@@ -5158,6 +5158,42 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .gl-qi i { flex: none; font-style: normal; font-size: 18px; line-height: 1.3; }
 .gl-qact { display: block; min-height: 40px; margin-top: 8px; padding: 0 14px; font: 600 14px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 20px; cursor: pointer; }
 .gl-qact:disabled { background: var(--pink-s); color: var(--pink-d); }
+
+/* plan: each block shows its end time again, small and soft under the start */
+#view-day .line .at .endat { display: block !important; margin-top: 2px; font-size: 13px; font-weight: 400; color: var(--muted); }
+
+/* focus room: abundance back (quiet), and your forest */
+.focus .fx-quote { display: block !important; margin: 26px auto 0 !important; max-width: 30ch; font-size: 15px !important; line-height: 1.5; text-align: center; opacity: .8; }
+.focus .fx-quote small { display: block; margin-bottom: 4px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #e6a2b4; }
+.focus .fx-forest { position: relative; z-index: 2; margin: 22px auto 0; max-width: 300px; text-align: center; }
+.fx-fr-h { display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: rgba(251, 241, 231, .55); }
+.fx-fr-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 4px; margin-top: 6px; font-size: 18px; line-height: 1.2; }
+.fx-fr-row i { font-style: normal; }
+.fx-forest.new .fx-fr-row i:last-child { animation: bloom 1.2s cubic-bezier(.3, 1.6, .5, 1) both; }
+
+#focus.asking .fx-quote { visibility: visible !important; }
+#focus.focus { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* cutting down */
+.tp { margin-top: 10px; }
+.tp-now { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.tp-now small { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.tp-now b { font-size: 24px; font-weight: 700; color: var(--ink); }
+.tp-now em { font-style: normal; font-size: 14px; font-weight: 600; color: #c2416a; }
+.tp-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+.tp-week span { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.tp-week i { display: grid; place-items: center; width: 32px; height: 32px; font-style: normal; font-size: 14px; font-weight: 700; color: #fff; background: var(--slot); border-radius: 50%; }
+.tp-week .ok i { background: #7daf86; }
+.tp-week .over i { background: #e57a9c; }
+.tp-week .now i { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--pink); }
+.tp-week small { font-size: 11px; font-weight: 600; color: var(--muted); }
+.tp-plan { margin: 10px 2px 0; font-size: 13px; line-height: 1.45; color: var(--muted); }
+.tp-edit { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; padding: 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; font-size: 15px; }
+.tp-edit select { min-height: 40px; margin: 0 6px; padding: 0 8px; font: 16px var(--display); color: var(--ink); background: var(--paper); border: 1px solid var(--hair); border-radius: 10px; }
+
+#focus > .fx-moodsheet.small { position: relative !important; inset: auto !important; left: auto !important; right: auto !important; bottom: auto !important; top: auto !important; transform: none !important; display: flex; justify-content: center; width: 100% !important; margin: 22px auto 0 !important; z-index: 2; }
+
+#focus.focus { overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
 </style>
 </head>
 <body>
@@ -5219,6 +5255,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     </div>
     <p class="fx-note"></p>
 
+    <div class="fx-forest" aria-label="your forest"></div>
     <ul class="fx-goals"></ul>
     <button class="fx-done" id="focus-done" type="button" hidden>Back to my plan</button>
     <p class="fx-quote"></p>
@@ -5419,7 +5456,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:39</footer>
+  <footer>Mr.O:07:25</footer>
 </div>
 
 <script>
@@ -5480,7 +5517,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [] };
 
 function load() {
   try {
@@ -5527,7 +5564,8 @@ function load() {
         monthGoals: d.monthGoals && typeof d.monthGoals === 'object' ? d.monthGoals : {},
         habitsCleared: d.habitsCleared || 0,
         habitsOld: Array.isArray(d.habitsOld) ? d.habitsOld : [],
-        dump: Array.isArray(d.dump) ? d.dump : []
+        dump: Array.isArray(d.dump) ? d.dump : [],
+        forest: Array.isArray(d.forest) ? d.forest : []
       };
     }
     const old = localStorage.getItem(OLD);
@@ -6879,6 +6917,42 @@ function plantSVG(stage, was, plant, pot) {
 }
 
 // words on the screen: a new abundance line every 3 minutes
+// trees for your forest, each step said calmly
+const ROOM_TREES = [
+  { k: 'oak', name: 'Oak', crop: '\u{1F333}', leaf: '#4f8f45', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'An acorn rests in the soil.', 'A root reaches down first, then a shoot.', 'Two small leaves, wavy at the edges.',
+    'The stem turns to wood, strong and steady.', 'Branches spread out to catch the light.', 'Your oak stands tall in your forest.'] },
+  { k: 'pine', name: 'Pine', crop: '\u{1F332}', leaf: '#3f7a4a', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A winged pine seed lands softly.', 'A thin shoot with a crown of needles.', 'Soft needles fan out in a ring.',
+    'A new layer of branches each season.', 'It smells fresh and clean.', 'Your pine joins your forest.'] },
+  { k: 'palm', name: 'Palm', crop: '\u{1F334}', leaf: '#5aa055', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A coconut sits half in warm sand.', 'A green spike pushes out.', 'The first long leaf unfolds.',
+    'The trunk rises, ring by ring.', 'Wide leaves sway in the breeze.', 'Your palm sways in your forest.'] },
+  { k: 'bamboo', name: 'Bamboo', crop: '\u{1F38B}', leaf: '#6aa553', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A small bamboo shoot waits underground.', 'It breaks through the soil.', 'It grows fast, segment by segment.',
+    'Thin leaves rustle at each joint.', 'It bends in the wind and does not break.', 'Your bamboo grows in your forest.'] },
+  { k: 'olive', name: 'Olive tree', crop: '\u{1FAD2}', leaf: '#7f9f6a', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'An olive pit rests in dry, sunny soil.', 'A silver green shoot appears.', 'Narrow leaves, soft and pale.',
+    'The trunk twists slowly, getting wise.', 'Small fruits begin to form.', 'Your olive tree is part of your forest.'] },
+  { k: 'lemon', name: 'Lemon tree', crop: '\u{1F34B}', leaf: '#4f9a4f', petal: ['#fff', '#fff'], mid: '#fff', steps: [
+    'A lemon seed sleeps in warm soil.', 'Glossy leaves open up.', 'The little tree smells of citrus.',
+    'White blossoms open, sweet and light.', 'Green fruits turn bright yellow.', 'Your lemon tree brightens your forest.'] }
+];
+const FLOWER_EMOJI = { rose: '\u{1F339}', peony: '\u{1F338}', sunflower: '\u{1F33B}', lotus: '\u{1FAB7}', hibiscus: '\u{1F33A}', tulip: '\u{1F337}', lily: '\u{1F490}', blossom: '\u{1F338}', lavender: '\u{1F490}' };
+const plantEmoji = p => p.crop || FLOWER_EMOJI[p.k] || '\u{1F33F}';
+function pickRoomPlant() {
+  const all = ROOM_PLANTS.concat(ROOM_CROPS, ROOM_TREES);
+  const recent = (state.forest || []).slice(-6).map(x => x.k);
+  const fresh = all.filter(p => !recent.includes(p.k));
+  return pick(fresh.length ? fresh : all);
+}
+// your forest: everything you have grown, softly at the bottom of the room
+function forestHtml() {
+  const F = state.forest || [];
+  if (!F.length) return '<span class="fx-fr-h">Your forest starts with this one</span>';
+  return '<span class="fx-fr-h">Your forest \u00b7 ' + F.length + '</span><span class="fx-fr-row">' + F.slice(-24).map(x => '<i title="' + esc(x.name || '') + '">' + x.e + '</i>').join('') + '</span>';
+}
+
 const ROOM_ABUNDANCE = [
   'There is enough time for what matters today.',
   'Good things are already on their way to me.',
@@ -6950,7 +7024,7 @@ function openFocusFree(mins) {
 }
 
 function startRoom(b, end) {
-  const plant = Math.random() < .5 ? pick(ROOM_CROPS) : pick(ROOM_PLANTS);
+  const plant = pickRoomPlant();
   // the pot changes at one or two random points on the way
   const changes = new Set([1, 2, 3, 4].sort(() => Math.random() - .5).slice(0, 1 + Math.floor(Math.random() * 2)));
   focus = { b, end, start: Date.now(), stage: -1, timer: null, plant, pot: pick(ROOM_POTS), changes,
@@ -6960,6 +7034,7 @@ function startRoom(b, end) {
   el.querySelector('.fx-name').textContent = b.label || 'focus';
   el.querySelector('.fx-ends').textContent = 'ends ' + clockOf(end);
   el.querySelector('.fx-growing').textContent = plant.steps ? plant.name + ' \u00b7 ' + plant.steps[0] : 'Growing ' + plant.name + ' \u00b7 ' + plant.sub;
+  const fr = el.querySelector('.fx-forest'); if (fr) { fr.innerHTML = forestHtml(); fr.classList.remove('new'); }
   focusGoals();
   const note = el.querySelector('.fx-note');
   note.textContent = '';
@@ -7098,6 +7173,13 @@ function tickFocus() {
     el.querySelector('.fx-note').textContent = '';
     el.querySelector('.fx-growing').textContent = focus.plant.steps ? focus.plant.steps[5] : focus.plant.name + ' is fully grown';
     el.querySelector('.fx-done').hidden = false;
+    if (!focus.planted) {
+      focus.planted = true;
+      state.forest = state.forest || [];
+      state.forest.push({ k: focus.plant.k, e: plantEmoji(focus.plant), name: focus.plant.name, at: Date.now(), mins: Math.round((focus.end - focus.start) / 60000) });
+      save();
+      const fr = el.querySelector('.fx-forest'); if (fr) { fr.innerHTML = forestHtml(); fr.classList.add('new'); }
+    }
   }
 }
 
@@ -13386,6 +13468,50 @@ function goalEditUsed() {
   try { localStorage.setItem(GOAL_EDIT_KEY, JSON.stringify(ts)); } catch {}
 }
 let monthEdit = null;   // area key being typed
+/* cutting down, step by step: a plan of how many a day, week by week, down to none.
+   each one you have is a tap (and edibles you log in Fuel count too). */
+let taperEdit = false;
+const isTaper = j => !!j && j.kind === 'cannabis' && /edible|gumm|infused/i.test(j.name || '') && j.mode !== 'stop';
+function taperOf(j) { if (!j.taper) { j.taper = { start: todayKey(), from: 2, weeks: 1 }; save(); } return j.taper; }
+function taperSteps(t) { const f = Math.max(1, Math.min(6, t.from || 2)), out = [f]; let n = f; while (n > 1) { n = n > 2 ? Math.ceil(n / 2) : 1; if (out[out.length - 1] !== n) out.push(n); } return out.concat(['alt', 0]); }
+function taperAllow(j, k) {
+  const t = taperOf(j), d = Math.round((fromKey(k) - fromKey(t.start)) / 86400000); if (d < 0) return null;
+  const st = taperSteps(t), wi = Math.min(st.length - 1, Math.floor(d / (7 * (t.weeks || 1)))), v = st[wi];
+  return { n: v === 'alt' ? (d % 2 === 0 ? 1 : 0) : v, step: wi, alt: v === 'alt', of: st.length };
+}
+function usesOn(j, k) {
+  const taps = (j.uses || []).filter(u => key(new Date(u.at)) === k).map(u => u.at);
+  const logged = (state.food || []).filter(f => key(new Date(f.at)) === k && entryKinds(f).includes('cannabis')).map(f => f.at).filter(a => !taps.some(x => Math.abs(x - a) < 45 * 60000));
+  return taps.length + logged.length;
+}
+const planWords = t => taperSteps(t).map(v => v === 'alt' ? 'every other day' : v === 0 ? 'none' : v + ' a day').join(', ');
+function taperHtml(j) {
+  const t = taperOf(j), tk = todayKey(), A = taperAllow(j, tk), used = usesOn(j, tk), left = Math.max(0, A.n - used);
+  const ws = shiftKey(tk, -((Math.round((fromKey(tk) - fromKey(t.start)) / 86400000)) % 7)), days = [0, 1, 2, 3, 4, 5, 6].map(n => shiftKey(ws, n));
+  // days on plan: only from the first day you logged one, so empty days before do not count
+  const first = (j.uses || []).map(u => key(new Date(u.at))).sort()[0] || tk;
+  let good = 0; for (let n = 1; n <= 30; n++) { const k = shiftKey(tk, -n); if (k < first) break; const a = taperAllow(j, k); if (!a) break; if (usesOn(j, k) <= a.n) good++; }
+  return '<div class="tp"><div class="tp-now"><span><small>Today</small><b>' + (A.n === 0 ? (used ? used + ' had' : 'None today') : left + ' of ' + A.n + ' left') + '</b></span><em>' + (A.n === 0 && !used ? '\u{1F33F}' : used > A.n ? 'over by ' + (used - A.n) : '') + '</em></div>' +
+    '<div class="tp-week">' + days.map(k => { const a = taperAllow(j, k), u = usesOn(j, k), fut = k > tk;
+      return '<span class="' + (fut ? 'fut' : !a ? 'fut' : u <= a.n ? 'ok' : 'over') + (k === tk ? ' now' : '') + '"><i>' + (fut || !a ? '' : u <= a.n ? '\u2713' : u) + '</i><small>' + FULL[fromKey(k).getDay()].slice(0, 1).toUpperCase() + '</small></span>'; }).join('') + '</div>' +
+    '<p class="tp-plan">Step ' + (A.step + 1) + ' of ' + A.of + ' \u00b7 ' + planWords(t) + ', ' + (t.weeks || 1) + ' week' + ((t.weeks || 1) > 1 ? 's' : '') + ' each \u00b7 ' + good + ' day' + (good === 1 ? '' : 's') + ' on plan</p>' +
+    '<div class="jr-sos"><button type="button" class="jr-crave" data-q="had">I had one</button><button type="button" class="jr-slip" data-q="crave">Craving now</button></div>' +
+    (taperEdit ? '<div class="tp-edit"><label>Start at <select id="tp-from">' + [1, 2, 3, 4].map(n => '<option' + (n === (t.from || 2) ? ' selected' : '') + '>' + n + '</option>').join('') + '</select> a day</label>' +
+      '<label>Each step lasts <select id="tp-weeks">' + [1, 2].map(n => '<option value="' + n + '"' + (n === (t.weeks || 1) ? ' selected' : '') + '>' + n + ' week' + (n > 1 ? 's' : '') + '</option>').join('') + '</select></label><button type="button" class="wka-go" data-q="tpsave">Save and start today</button></div>'
+               : '<button type="button" class="gl-qend" data-q="tpedit">Change the plan</button>') + '</div>';
+}
+// one tip for cutting down, picked for right now
+function taperTip(j) {
+  const tk = todayKey(), A = taperAllow(j, tk), used = usesOn(j, tk), H = new Date().getHours();
+  const yAt = (j.uses || []).filter(u => key(new Date(u.at)) === shiftKey(tk, -1)).map(u => new Date(u.at).getHours()).sort((a, b) => a - b)[0];
+  const pool = [];
+  if (A.n > used && yAt !== undefined) pool.push('Yesterday your first was around ' + clock(yAt * 60).replace(':00', '') + '. Try to push today\u2019s a little later.');
+  if (A.n > used) pool.push('Keep only today\u2019s amount in the house. The rest out of sight, or gone.');
+  if (A.n <= used) pool.push('You have had today\u2019s amount. A craving passes in about 15 minutes: tap Craving now.');
+  if (H >= 20) pool.push('If you take one to fall asleep, try a warm shower and no screens instead tonight.');
+  pool.push('Have it after a proper meal, not instead of one.', 'Half a dose still counts as one, and it is a step down.', 'Notice what you feel just before you want one. That is your cue.');
+  return pool[Math.floor(Date.now() / (15 * 60000)) % pool.length];
+}
 // habits, together with the goals: up to 3 with streaks, plus a quit journey with its days clean and help
 let quitForm = false;
 let habitForm = false;   // the add-a-habit box on the Goals page
@@ -13399,10 +13525,9 @@ function habitsHtml() {
   if (q) {
     const day = journeyDay(q, Date.now()), stg = journeyStage(q, day), tip = stg.tips[(day - stg.from) % stg.tips.length];
     h += '<div class="gl-quit"><div class="gl-qh"><i>\u{1F33F}</i><b>' + esc(q.name) + '</b><small>Day ' + day + '</small></div>' +
-      '<div class="jr-clean"><span><b>' + jc.now + '</b><small>days clean</small></span><span><b>' + jc.best + '</b><small>best run</small></span><span><b>' + (q.cravings || []).filter(c => c.rode).length + '</b><small>cravings ridden out</small></span></div>' +
-      '<div class="jr-sos"><button type="button" class="jr-crave" data-q="crave">Craving now</button><button type="button" class="jr-slip" data-q="slip">I slipped</button></div>' +
-      '<p class="gl-qtip"><b>' + stg.name + ':</b> ' + tip + '</p>' +
-      (() => { const I = quitInsights(q); return I.length ? '<div class="gl-qi"><small>What your data says</small>' + I.map((x, n) => '<p><i>' + x.e + '</i><span>' + x.t + (x.act ? '<button type="button" class="gl-qact" data-qact="' + n + '">' + x.act.label + '</button>' : '') + '</span></p>').join('') + '</div>' : ''; })() +
+      (isTaper(q) ? taperHtml(q) : '<div class="jr-clean"><span><b>' + jc.now + '</b><small>days clean</small></span><span><b>' + jc.best + '</b><small>best run</small></span><span><b>' + (q.cravings || []).filter(c => c.rode).length + '</b><small>cravings ridden out</small></span></div>' +
+        '<div class="jr-sos"><button type="button" class="jr-crave" data-q="crave">Craving now</button><button type="button" class="jr-slip" data-q="slip">I slipped</button></div>') +
+      '<p class="gl-qtip"><b>' + (isTaper(q) ? 'Tip' : stg.name) + ':</b> ' + (isTaper(q) ? taperTip(q) : tip) + '</p>' +
       '<button type="button" class="gl-qend" data-q="end">End this</button></div>';
   } else if (quitForm) {
     h += '<div class="gl-quit"><b class="gl-qf">Quit something</b><input type="text" id="qf-name" maxlength="60" placeholder="e.g. Quit edibles"><label for="qf-start">Day 1 was</label><input type="date" id="qf-start" value="' + tk + '" max="' + tk + '">' +
@@ -13428,6 +13553,9 @@ function wireHabits(box, redraw) {
   box.querySelectorAll('[data-q]').forEach(b => b.addEventListener('click', () => {
     const a = b.dataset.q, q = activeJourney();
     if (a === 'crave') return cravingSheet(q, redraw);
+    if (a === 'had') { q.uses = q.uses || []; q.uses.push({ at: Date.now() }); save(); redraw(); offerUndo('one edible', () => { q.uses.pop(); save(); redraw(); }); return; }
+    if (a === 'tpedit') { taperEdit = !taperEdit; redraw(); return; }
+    if (a === 'tpsave') { const t = taperOf(q); t.from = Number(document.getElementById('tp-from').value) || 2; t.weeks = Number(document.getElementById('tp-weeks').value) || 1; t.start = todayKey(); taperEdit = false; save(); redraw(); return; }
     if (a === 'slip') return slipSheet(q, redraw);
     if (a === 'new') { quitForm = true; redraw(); setTimeout(() => { const i = document.getElementById('qf-name'); if (i) i.focus(); }, 30); return; }
     if (a === 'cancel') { quitForm = false; redraw(); return; }
