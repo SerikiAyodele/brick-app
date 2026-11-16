@@ -5279,6 +5279,16 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 /* delete a block straight from the day (no Reorder needed): a quiet x */
 #view-day#view-day .line .bin { display: inline-flex !important; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; margin-left: 4px; font-size: 18px; color: var(--muted); background: none; border: none; border-radius: 50%; opacity: .55; cursor: pointer; }
 #view-day#view-day .line .bin:active { opacity: 1; background: var(--hair); }
+
+/* roll over unticked tasks */
+.ro { margin: 0 0 14px; padding: 12px 14px; background: var(--pink-s); border-radius: 16px; }
+.ro-h { margin: 0 0 8px; font-size: 14px; font-weight: 600; color: var(--ink); }
+.ro-i { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 0 4px; text-align: left; font: 500 16px var(--display); color: var(--ink); background: none; border: none; border-top: 1px solid color-mix(in srgb, var(--pink) 20%, transparent); cursor: pointer; }
+.ro-i span { flex: none; display: grid; place-items: center; width: 26px; height: 26px; font-weight: 700; color: #fff; background: var(--pink); border-radius: 50%; }
+.ro-acts { display: flex; gap: 8px; margin-top: 10px; }
+.ro-acts button { flex: 1; min-height: 44px; font: 600 15px var(--display); border-radius: 22px; cursor: pointer; }
+.ro-all { color: #fff; background: var(--ink); border: none; }
+.ro-skip { color: var(--ink); background: var(--card); border: 1px solid var(--hair); }
 </style>
 </head>
 <body>
@@ -5541,7 +5551,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:11</footer>
+  <footer>Mr.O:12:47</footer>
 </div>
 
 <script>
@@ -6057,6 +6067,34 @@ function agendaTime(text) {
 let todoEdit = null;   // { g, n } while typing one
 let listSheet = null;  // { b, field, from } while the goals or agenda panel is open
 
+/* roll over: tasks you did not tick in your last work block (today or the last week)
+   can come into this one. each one only once. */
+function leftoverTasks(b) {
+  const tk = planKey();
+  for (let n = 0; n <= 7; n++) {
+    const k = shiftKey(tk, -n), d = state.days[k]; if (!d || !d.blocks) continue;
+    let bs = d.blocks;
+    if (n === 0) { const i = bs.indexOf(b); bs = i >= 0 ? bs.slice(0, i) : bs.filter(x => x !== b && x.done); }
+    for (let j = bs.length - 1; j >= 0; j--) {
+      const x = bs[j]; if (x === b || !Array.isArray(x.goals) || !x.goals.length) continue;
+      const items = x.goals.filter(g => !g.done && !g.rolled && (g.text || '').trim());
+      if (items.length) return { src: x, k, items };
+    }
+  }
+  return null;
+}
+function rolloverBox(b, field, lo) {
+  const box = document.createElement('div'); box.className = 'ro';
+  const when = lo.k === planKey() ? 'earlier today' : lo.k === shiftKey(planKey(), -1) ? 'yesterday' : cap(FULL[fromKey(lo.k).getDay()]);
+  box.innerHTML = '<p class="ro-h">Not done in ' + esc(lo.src.label || 'your last block') + ', ' + when + '</p>' +
+    lo.items.map((g, i) => '<button type="button" class="ro-i" data-ro="' + i + '"><span>+</span>' + esc(g.text) + '</button>').join('') +
+    '<div class="ro-acts"><button type="button" class="ro-all">Bring ' + (lo.items.length > 1 ? 'all ' + lo.items.length : 'it') + ' over</button><button type="button" class="ro-skip">Leave them</button></div>';
+  const take = list => { b[field] = b[field] || []; list.forEach(g => { if (!b[field].some(x => x.text === g.text && !x.done)) b[field].push({ text: g.text, done: false }); g.rolled = true; }); save(); paintListSheet(); };
+  box.querySelectorAll('[data-ro]').forEach(x => x.addEventListener('click', () => take([lo.items[Number(x.dataset.ro)]])));
+  box.querySelector('.ro-all').addEventListener('click', () => take(lo.items));
+  box.querySelector('.ro-skip').addEventListener('click', () => { lo.items.forEach(g => { g.rolled = true; }); save(); paintListSheet(); });
+  return box;
+}
 function openListSheet(b, field, from) {
   listSheet = { b, field, from };
   // an empty list opens straight into typing, once, when the panel opens
@@ -6078,6 +6116,7 @@ function paintListSheet() {
     '<button type="button" class="ls-x" aria-label="close">\u00d7</button></div><div class="ls-body"></div>' +
     '<button type="button" class="lf-btn main ls-done">Done</button></div>';
   el.querySelector('h2').textContent = b.label || 'block';
+  if (field !== 'agenda') { const lo = leftoverTasks(b); if (lo) el.querySelector('.ls-body').appendChild(rolloverBox(b, field, lo)); }
   el.querySelector('.ls-body').appendChild(goalList(b, field, from));
   const close = () => { listSheet = null; goalEdit = null; todoEdit = null; el.remove(); renderDay(); };
   el.querySelector('.w3-back').addEventListener('click', close);
