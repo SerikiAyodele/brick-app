@@ -5289,6 +5289,67 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .ro-acts button { flex: 1; min-height: 44px; font: 600 15px var(--display); border-radius: 22px; cursor: pointer; }
 .ro-all { color: #fff; background: var(--ink); border: none; }
 .ro-skip { color: var(--ink); background: var(--card); border: 1px solid var(--hair); }
+
+/* carry over, as a checklist */
+.cy2-h { display: flex; align-items: baseline; justify-content: space-between; }
+.cy2-h b { font-family: var(--serif, inherit); font-size: 22px; font-weight: 600; }
+.cy2-h small { font-size: 13px; color: var(--muted); }
+.cy2-list { display: flex; flex-direction: column; margin: 6px 0 4px; }
+.cy2-row { display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--hair); }
+.cy2-row:first-child { border-top: none; }
+.cy2-pick { flex: 1; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 6px 2px; text-align: left; font-family: var(--display); color: var(--ink); background: none; border: none; cursor: pointer; }
+.cy2-pick i { flex: none; display: grid; place-items: center; width: 28px; height: 28px; font-style: normal; font-size: 14px; font-weight: 700; color: #fff; border: 1.5px solid var(--dash); border-radius: 50%; }
+.cy2-row.on .cy2-pick i, .cy2-row.got .cy2-pick i { background: var(--pink); border-color: var(--pink); }
+.cy2-pick span { display: flex; flex-direction: column; min-width: 0; }
+.cy2-pick b { font-size: 17px; font-weight: 500; overflow-wrap: break-word; }
+.cy2-pick small { font-size: 13px; color: var(--muted); }
+.cy2-row.wasdone:not(.on):not(.got) .cy2-pick b { color: var(--muted); }
+.cy2-row.got .cy2-pick b { color: var(--muted); }
+.cy2-days { flex: none; width: 40px; height: 40px; font-size: 17px; color: var(--muted); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
+.cy2-go:disabled { opacity: .4; }
+.cy2-note { margin: 8px 2px 0; font-size: 12.5px; color: var(--muted); }
+#view-day #dump-slot { margin-top: 18px; }
+
+/* focus room: brain dump, feeling next, forest list */
+.focus .fx-dump { min-height: 40px; padding: 0 14px; font: 600 14px var(--display); color: var(--ink) !important; background: rgba(255,255,255,.10) !important; border: 1px solid rgba(255,255,255,.16) !important; border-radius: 20px; cursor: pointer; }
+.focus .fx-next { position: relative; z-index: 2; margin: 12px auto 0; max-width: 30ch; text-align: center; font-size: 15px; line-height: 1.45; color: var(--muted); }
+.focus .fx-next:empty { display: none; }
+.focus .fx-quote { color: var(--ink) !important; opacity: .9; font-size: 16px !important; }
+.fx-fr-open { display: inline-block; padding: 6px 10px; font: 500 13px var(--display); color: inherit; background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.fr-w3 { z-index: 60; }
+.fr { position: relative; max-height: 88vh; overflow-y: auto; }
+.fr h2 { margin: 2px 56px 4px 0; font-family: var(--serif, inherit); font-size: 26px; font-weight: 600; }
+.fr-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.fr-list li { display: flex; gap: 12px; align-items: center; min-height: 56px; border-top: 1px solid var(--hair); }
+.fr-list i { flex: none; width: 36px; text-align: center; font-style: normal; font-size: 28px !important; }
+.fr-list span { display: flex; flex-direction: column; }
+.fr-list b { font-size: 16px; font-weight: 600; }
+.fr-list b small { font-weight: 400; color: var(--muted); }
+.fr-list span > small { font-size: 13px; color: var(--muted); }
+.fr-bd { margin-top: 12px; }
+.fr-bd li { min-height: 44px; border-top: 1px solid var(--hair); display: flex; align-items: center; font-size: 16px; }
+.tw-dump { display: block; width: 100%; min-height: 46px; margin: 10px 0 0; font: 600 15px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 23px; cursor: pointer; }
+#view-day #dumpcarry-slot .cy2 { margin-top: 12px; }
+
+/* health: mood and what moves it */
+.ml { margin: 4px 0 18px; padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.ml-h { margin: 0 0 12px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.ml-week { display: grid; grid-template-columns: repeat(7, 1fr); }
+.ml-week span { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.ml-week i { width: 28px; height: 28px; border-radius: 50%; background: var(--slot); }
+.ml-week .good i { background: #7daf86; }
+.ml-week .ok i { background: #e8c46a; }
+.ml-week .bad i { background: #e57a9c; }
+.ml-week small { font-size: 12px; font-weight: 600; color: var(--muted); }
+.ml-empty { margin: 16px 0 0; font-size: 15px; line-height: 1.5; color: var(--muted); }
+.ml-sub { margin: 18px 0 6px; font-size: 15px; font-weight: 600; }
+.ml-sub.up { color: #5f8f69; }
+.ml-sub.down { color: #c2416a; }
+.ml-list { list-style: none; margin: 0; padding: 0; }
+.ml-list li { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--hair); }
+.ml-list li:first-child { border-top: none; }
+.ml-list b { font-size: 17px; font-weight: 500; }
+.ml-list small { font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -5425,7 +5486,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
     <div id="day-goal"></div>
     <div id="carry-slot"></div>
-    <div id="dump-slot"></div>
+    <div id="dumpcarry-slot"></div>
 
     <div class="start-row">
       <label for="start">Start at</label>
@@ -5443,6 +5504,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     </button>
 
     <div class="total" id="total"></div>
+    <div id="dump-slot"></div>
     <button type="button" class="totop" id="day-top">↑ Back to top</button>
   </section>
 
@@ -5470,6 +5532,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
         </div>
       </div>
     </div>
+    <button type="button" class="tw-dump" id="tw-dump">\u{1F9E0} Brain dump</button>
     <div id="idea-list"></div>
   </section>
 
@@ -5551,7 +5614,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:47</footer>
+  <footer>Mr.O:19:52</footer>
 </div>
 
 <script>
@@ -6050,7 +6113,7 @@ let goalEdit = null;
 // a short tickable list under a block: goals on focus blocks, an agenda on meetings and dates
 const LIST_KINDS = {
   goals:  { max: MAX_GOALS, first: 'what will you finish?', next: 'second task', more: '+ second task', noun: 'task' },
-  agenda: { max: 50, first: 'add a point', next: 'next point', more: '+ add a point', noun: 'agenda point' }
+  agenda: { max: 1, first: 'the one outcome you want', next: 'outcome', more: '', noun: 'outcome' }
 };
 
 // "intro 5m", "budget 10 min", "demo 1h": the time written in an agenda point
@@ -6112,7 +6175,7 @@ function paintListSheet() {
   el.id = 'listsheet';
   el.className = 'w3' + (old ? ' still' : '');
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls-sheet" role="dialog" aria-modal="true">' +
-    '<span class="w3-grab"></span><div class="ls-head"><div><small>' + (field === 'agenda' ? 'Agenda' : 'Tasks') + '</small><h2></h2></div>' +
+    '<span class="w3-grab"></span><div class="ls-head"><div><small>' + (field === 'agenda' ? 'Outcome' : 'Tasks') + '</small><h2></h2></div>' +
     '<button type="button" class="ls-x" aria-label="close">\u00d7</button></div><div class="ls-body"></div>' +
     '<button type="button" class="lf-btn main ls-done">Done</button></div>';
   el.querySelector('h2').textContent = b.label || 'block';
@@ -6773,8 +6836,8 @@ function nowCard(day) {
         const lb = document.createElement('button');
         lb.type = 'button';
         lb.className = 'nc-act';
-        lb.textContent = L.length ? (f === 'agenda' ? 'Agenda ' : 'Tasks ') + L.filter(x => x.done).length + '/' + L.length
-                                  : (f === 'agenda' ? '+ Add agenda' : '+ Add task');
+        lb.textContent = L.length ? (f === 'agenda' ? (L[0].done ? 'Outcome \u2713' : 'Outcome') : 'Tasks ' + L.filter(x => x.done).length + '/' + L.length)
+                                  : (f === 'agenda' ? '+ Add outcome' : '+ Add task');
         lb.addEventListener('click', () => openListSheet(w.b, f, w.from));
         acts.appendChild(lb);
         if (f === 'goals' && (now >= w.a || w === open)) {
@@ -7076,10 +7139,44 @@ function pickRoomPlant() {
   return pick(fresh.length ? fresh : all);
 }
 // your forest: everything you have grown, softly at the bottom of the room
+// the forest, one by one: what grew, on what, how long it took and how often you left
+function forestSheet() {
+  const F = (state.forest || []).slice().reverse();
+  const old = document.getElementById('frsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'frsheet'; el.className = 'w3 fr-w3';
+  const day = at => { const k = key(new Date(at)); return k === todayKey() ? 'today' : k === shiftKey(todayKey(), -1) ? 'yesterday' : new Date(at).getDate() + ' ' + cap(MONTHS[new Date(at).getMonth()].slice(0, 3)); };
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet fr" role="dialog" aria-modal="true" aria-label="Your forest"><span class="w3-grab"></span><button type="button" class="ns-x fr-x" aria-label="close">\u00d7</button>' +
+    '<h2>Your forest</h2><p class="cr-sub">' + F.length + ' grown \u00b7 ' + hrsLabel(F.reduce((t, x) => t + (x.mins || 0), 0)) + ' of focus</p>' +
+    '<ul class="fr-list">' + F.map(x => '<li><i>' + x.e + '</i><span><b>' + esc(x.name || '') + (x.task ? ' <small>on ' + esc(x.task) + '</small>' : '') + '</b><small>' + day(x.at) + ' \u00b7 took ' + hrsLabel(x.mins || 0) +
+      (x.left === undefined ? '' : ' \u00b7 ' + (x.left ? 'left ' + (x.left === 1 ? 'once' : x.left + ' times') : 'stayed the whole way')) + '</small></span></li>').join('') + '</ul></div>';
+  document.body.appendChild(el);
+  const close = () => el.remove();
+  el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.fr-x').addEventListener('click', close);
+}
+// brain dump from anywhere: a small sheet that adds to the same list as the Plan page
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#tw-dump')) dumpSheet(); });
+function dumpSheet() {
+  const old = document.getElementById('bdsheet'); if (old) old.remove();
+  const L = state.dump || (state.dump = []);
+  const el = document.createElement('div'); el.id = 'bdsheet'; el.className = 'w3 fr-w3';
+  const draw = () => {
+    const open = L.filter(x => !x.done);
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet fr" role="dialog" aria-modal="true" aria-label="Brain dump"><span class="w3-grab"></span><button type="button" class="ns-x fr-x" aria-label="close">\u00d7</button>' +
+      '<h2>Brain dump</h2><p class="cr-sub">Get it out of your head. It waits on your Plan page.</p>' +
+      '<div class="gs-add"><input type="text" maxlength="140" placeholder="Something came up?" aria-label="add to brain dump"><button type="button">Add</button></div>' +
+      (open.length ? '<ul class="bd-list fr-bd">' + open.slice(-8).reverse().map(x => '<li><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') + '</div>';
+    const inp = el.querySelector('input');
+    const add = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } L.push({ id: Date.now().toString(36), text: v, done: false, at: Date.now() }); save(); draw(); el.querySelector('input').focus(); };
+    el.querySelector('.gs-add button').addEventListener('click', add); inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+    el.querySelector('.w3-back').addEventListener('click', () => el.remove()); el.querySelector('.fr-x').addEventListener('click', () => el.remove());
+    setTimeout(() => inp.focus(), 50);
+  };
+  draw(); document.body.appendChild(el);
+}
 function forestHtml() {
   const F = state.forest || [];
   if (!F.length) return '<span class="fx-fr-h">Your forest starts with this one</span>';
-  return '<span class="fx-fr-h">Your forest \u00b7 ' + F.length + '</span><span class="fx-fr-row">' + F.slice(-24).map(x => '<i title="' + esc(x.name || '') + '">' + x.e + '</i>').join('') + '</span>';
+  return '<button type="button" class="fx-fr-h fx-fr-open">Your forest \u00b7 ' + F.length + ' \u203a</button><span class="fx-fr-row">' + F.slice(-24).map(x => '<i title="' + esc(x.name || '') + '">' + x.e + '</i>').join('') + '</span>';
 }
 
 // what the focus room says, one at a time, every 5 minutes: flow tips, abundance, motivation (100)
@@ -7167,6 +7264,13 @@ function startRoom(b, end) {
   el.querySelector('.fx-ends').textContent = 'ends ' + clockOf(end);
   el.querySelector('.fx-growing').textContent = plant.steps ? plant.name + ' \u00b7 ' + plant.steps[0] : 'Growing ' + plant.name + ' \u00b7 ' + plant.sub;
   const fr = el.querySelector('.fx-forest'); if (fr) { fr.innerHTML = forestHtml(); fr.classList.remove('new'); }
+  if (!el.querySelector('.fx-dump')) {
+    const db = document.createElement('button'); db.type = 'button'; db.className = 'fx-dump'; db.textContent = 'Brain dump';
+    db.addEventListener('click', dumpSheet);
+    const tb = el.querySelector('.fx-topbtns') || el.querySelector('.fx-top'); tb.insertBefore(db, tb.firstChild);
+  }
+  if (!el.querySelector('.fx-next')) { const nx = document.createElement('p'); nx.className = 'fx-next'; el.querySelector('.fx-time').after(nx); }
+  roomNext();
   focusGoals();
   const note = el.querySelector('.fx-note');
   note.textContent = '';
@@ -7198,6 +7302,7 @@ function focusGoals() {
   }
 }
 
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('.fx-fr-open')) forestSheet(); });
 function closeFocus() {
   if (focus) clearInterval(focus.timer);
   focus = null;
@@ -7208,6 +7313,13 @@ function closeFocus() {
   if (!document.getElementById('view-home').hidden) renderHome();
 }
 
+// how you will likely feel in 30 minutes, from your past check-ins. it changes every 30 minutes
+function roomNext() {
+  const p = document.querySelector('#focus .fx-next'); if (!p || !focus) return;
+  const slot = Math.floor(Date.now() / (30 * 60000)); if (p.dataset.slot === String(slot)) return; p.dataset.slot = slot;
+  const pr = typeof moodNext === 'function' ? moodNext(Date.now() + 30 * 60000) : null, m = pr && MOODS.find(x => x.k === pr.mood);
+  p.textContent = m ? m.e + ' In 30 minutes you will likely feel ' + m.k + '.' + (['tired', 'unfocused', 'bored', 'low', 'unmotivated'].includes(m.k) ? ' Plan a short break before then.' : '') : '';
+}
 function roomText() {
   const el = document.getElementById('focus').querySelector('.fx-quote');
   el.classList.remove('in');
@@ -7280,6 +7392,7 @@ function tickFocus() {
   el.style.backgroundColor = 'rgb(' + mix(13, 34) + ',' + mix(12, 23) + ',' + mix(13, 16) + ')';
 
   if (now - focus.textAt >= 5 * 60000) roomText();
+  roomNext();
   // a check-in is due: ask here, unless you said not now in the last 15 minutes
   const lastMood = state.moods.reduce((m, x) => Math.max(m, x.at), 0);
   if (stage < 5 && now - lastMood >= MOOD_EVERY && now - (focus.moodSnooze || 0) >= 15 * 60000 && now - focus.start >= 60000) roomMood();
@@ -7309,7 +7422,7 @@ function tickFocus() {
     if (!focus.planted) {
       focus.planted = true;
       state.forest = state.forest || [];
-      state.forest.push({ k: focus.plant.k, e: plantEmoji(focus.plant), name: focus.plant.name, at: Date.now(), mins: Math.round((focus.end - focus.start) / 60000) });
+      state.forest.push({ k: focus.plant.k, e: plantEmoji(focus.plant), name: focus.plant.name, at: Date.now(), mins: Math.round((Date.now() - focus.start) / 60000), left: focus.leaves || 0, task: focus.b.label || '' });
       save();
       const fr = el.querySelector('.fx-forest'); if (fr) { fr.innerHTML = forestHtml(); fr.classList.add('new'); }
     }
@@ -7526,6 +7639,29 @@ function lastPlanned(from) {
   return null;
 }
 
+/* planning a day: things from the brain dump can become blocks on it */
+function renderDumpCarry() {
+  const slot = document.getElementById('dumpcarry-slot'); if (!slot) return;
+  slot.innerHTML = '';
+  const day = dayFor(viewDay), L = (state.dump || []).filter(x => !x.done);
+  if (!L.length || day.noDump) return;
+  const planning = !day.blocks.length || day.carryOpen || viewDay > planKey() || day.dumpOpen;
+  if (!planning) return;
+  const name = viewDay === planKey() ? 'today' : viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()]);
+  const pick = new Set((day.dumpPick || []).filter(id => L.some(x => x.id === id)));
+  const box = document.createElement('div'); box.className = 'suggest studs cy cy2';
+  box.innerHTML = '<div class="cy2-h"><b>From your brain dump</b><small>' + L.length + ' waiting</small></div>' +
+    '<p class="cy-sub">Tick what you want to do ' + name + '.</p><div class="cy2-list">' +
+    L.map(x => '<div class="cy2-row' + (pick.has(x.id) ? ' on' : '') + '"><button type="button" class="cy2-pick" data-dc="' + x.id + '"><i>' + (pick.has(x.id) ? '\u2713' : '') + '</i><span><b>' + esc(x.text) + '</b><small>' + minsLabel(usualLength(x.text) || 30) + '</small></span></button></div>').join('') + '</div>' +
+    '<div class="cy-btns"><button type="button" class="cy-all dc-go"' + (pick.size ? '' : ' disabled') + '>Add ' + (pick.size || '') + ' to ' + name + '</button><button type="button" class="cy-done dc-no">Not now</button></div>';
+  box.querySelectorAll('[data-dc]').forEach(b => b.addEventListener('click', () => { const id = b.dataset.dc; day.dumpPick = day.dumpPick || []; const i = day.dumpPick.indexOf(id); i < 0 ? day.dumpPick.push(id) : day.dumpPick.splice(i, 1); day.dumpOpen = true; save(); renderDumpCarry(); }));
+  box.querySelector('.dc-go').addEventListener('click', () => {
+    for (const x of L) if (pick.has(x.id)) { day.blocks.push({ label: x.text, mins: usualLength(x.text) || 30 }); x.done = true; x.doneAt = Date.now(); x.planned = true; }
+    day.dumpPick = []; day.touched = true; day.dumpOpen = (state.dump || []).some(x => !x.done); save(); renderDay(); renderHabits();
+  });
+  box.querySelector('.dc-no').addEventListener('click', () => { day.noDump = true; day.dumpOpen = false; save(); renderDumpCarry(); });
+  slot.appendChild(box);
+}
 function renderCarry() {
   const slot = document.getElementById('carry-slot');
   slot.innerHTML = '';
@@ -7553,22 +7689,28 @@ function renderCarry() {
   };
 
   const box = document.createElement('div');
-  box.className = 'suggest studs cy';
-  box.innerHTML = '<p class="cy-h">' + when + ' you planned these.</p><p class="cy-sub">Tap one to bring it over, then pick the days.</p>' +
-    '<div class="cy-list">' + items.map((b, n) => { const d = DURATIONS.find(x => x.mins === b.mins);
-      return '<button type="button" class="cy-row' + (got.includes(n) ? ' got' : '') + '" data-n="' + n + '"' + (got.includes(n) ? ' disabled' : '') + '>' +
-        '<span class="cy-plus">' + (got.includes(n) ? '\u2713' : '+') + '</span><b>' + esc(b.label) + '</b><small>' + (got.includes(n) ? 'added' : (d ? d.label : b.mins + 'm')) + '</small></button>'; }).join('') + '</div>' +
-    '<div class="cy-btns">' + (got.length < items.length ? '<button type="button" class="cy-all">Bring all</button>' : '') +
-    '<button type="button" class="cy-done">' + (got.length ? 'Done' : 'Start fresh') + '</button></div>';
-  // tap one: same name and length, and pick which days this week it goes on (today is picked)
-  box.querySelectorAll('.cy-row:not(.got)').forEach(r => r.addEventListener('click', () => {
-    const n = Number(r.dataset.n), b = items[n];
+  box.className = 'suggest studs cy cy2';
+  if (!day.carryPick || day.carryPick.from !== prev.k) day.carryPick = { from: prev.k, n: items.map((b, n) => b.done ? -1 : n).filter(n => n >= 0) };
+  const pick = new Set(day.carryPick.n.filter(n => !got.includes(n)));
+  const left = items.map((_, n) => n).filter(n => !got.includes(n));
+  box.innerHTML = '<div class="cy2-h"><b>' + when + '</b><small>' + items.filter(b => b.done).length + ' of ' + items.length + ' done</small></div>' +
+    '<p class="cy-sub">Tick what comes with you today. Same lengths as before.</p>' +
+    '<div class="cy2-list">' + items.map((b, n) => { const g = got.includes(n), on = pick.has(n);
+      return '<div class="cy2-row' + (g ? ' got' : on ? ' on' : '') + (b.done ? ' wasdone' : '') + '"><button type="button" class="cy2-pick" data-p="' + n + '"' + (g ? ' disabled' : '') + ' aria-label="' + esc(b.label) + '">' +
+        '<i>' + (g || on ? '\u2713' : '') + '</i><span><b>' + esc(b.label) + '</b><small>' + (g ? 'added' : minsLabel(Number(b.mins) || 60) + (b.done ? ' \u00b7 done then' : ' \u00b7 not done')) + '</small></span></button>' +
+        (g ? '' : '<button type="button" class="cy2-days" data-d="' + n + '" aria-label="pick days for ' + esc(b.label) + '">\u2197</button>') + '</div>'; }).join('') + '</div>' +
+    '<div class="cy-btns">' + (left.length ? '<button type="button" class="cy-all cy2-go"' + (pick.size ? '' : ' disabled') + '>Bring ' + (pick.size || '') + ' to today</button>' : '') +
+    '<button type="button" class="cy-done">' + (got.length ? 'Done' : 'Start fresh') + '</button></div>' +
+    '<p class="cy2-note">\u2197 puts one on other days this week.</p>';
+  box.querySelectorAll('[data-p]').forEach(r => r.addEventListener('click', () => { const n = Number(r.dataset.p), a = day.carryPick.n, k = a.indexOf(n); k < 0 ? a.push(n) : a.splice(k, 1); save(); renderCarry(); }));
+  box.querySelectorAll('[data-d]').forEach(r => r.addEventListener('click', () => {
+    const n = Number(r.dataset.d), b = items[n];
     weekAddSheet(viewDay, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(viewDay, x)), { label: b.label, mins: b.mins, step: b.step }, picks => {
       if (picks.includes(viewDay)) { got.push(n); day.carryOpen = got.length < items.length; if (!day.carryOpen) day.noCarry = true; }
       save(); renderDay(); renderHabits();
     });
   }));
-  const all = box.querySelector('.cy-all'); if (all) all.addEventListener('click', () => bring(items.map((_, n) => n)));
+  const go = box.querySelector('.cy2-go'); if (go) go.addEventListener('click', () => bring([...pick].sort((a, b) => a - b)));
   box.querySelector('.cy-done').addEventListener('click', () => { day.carryOpen = false; day.noCarry = true; save(); renderDay(); });
   slot.appendChild(box);
 }
@@ -7732,6 +7874,7 @@ function renderDay() {
   renderDayGoal();
   renderDump();
   renderCarry();
+  renderDumpCarry();
   const day = dayFor(viewDay);
   const d = fromKey(viewDay);
   const isToday = viewDay === planKey();
@@ -7853,7 +7996,7 @@ function renderDay() {
           save(); renderDay(); renderHabits();
           if (askMealAfter(b)) {}
           else if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);
-          else setTimeout(() => askMoodAfter(b), 500);
+          else setTimeout(() => afterBlock(day, day.blocks.indexOf(b), () => askMoodAfter(b)), 450);
         }, 650);
       });
       ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => tick.addEventListener(ev, stop));
@@ -7898,7 +8041,7 @@ function renderDay() {
       if (!b.done) return;
       if (askMealAfter(b)) return;   // a meal block asks about the meal first
       if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);   // that was the last one
-      else setTimeout(() => askMoodAfter(b), 500);
+      else setTimeout(() => afterBlock(day, day.blocks.indexOf(b), () => askMoodAfter(b)), 450);
     });
 
     if (sortingDay) {
@@ -13443,11 +13586,49 @@ function timeUpSheet(day, i, end) {
     save(); close(); redraw();
     if (askMealAfter(b)) return;
     if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(planKey()), 450);
-    else setTimeout(() => askMoodAfter(b), 500);
+    else setTimeout(() => afterBlock(day, day.blocks.indexOf(b), () => askMoodAfter(b)), 450);
   });
 }
 setInterval(checkTimeUp, 20000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(checkTimeUp, 800); });
+/* after a block: did you do anything else? then a small transition into the next one */
+function transitionFor(b, next) {
+  const c = (b && b.label) || '', n = (next && next.label) || '';
+  if (/meet|call|sync|1:1|interview|review/i.test(c)) return ['Write the action items while they are fresh', 5];
+  if (/meet|call|sync|1:1|interview|review/i.test(n)) return ['Open your notes and write the one outcome you want', 5];
+  if (/gym|workout|run|yoga|swim|walk|train/i.test(n)) return ['Change, and fill your water bottle', 10];
+  if (/breakfast|lunch|dinner|eat|meal/i.test(n)) return ['Wash up and put the screen away', 5];
+  if (/sleep|bed|wind ?down/i.test(n)) return ['Dim the lights and put your phone away', 15];
+  if (/work|deep|focus|study|write|code|report|project/i.test(c)) return ['Stand, stretch and refill your water', 5];
+  if (/work|deep|focus|study|write|code|report|project/i.test(n)) return ['Clear your desk and close extra tabs', 5];
+  return ['Three slow breaths, then start', 5];
+}
+function afterBlock(day, i, then) {
+  const b = day && day.blocks[i]; if (!b) { if (then) then(); return; }
+  const next = day.blocks.slice(i + 1).find(x => !x.done);
+  const old = document.getElementById('absheet2'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'absheet2'; el.className = 'w3';
+  const finish = () => { el.remove(); if (then) then(); };
+  const step2 = () => {
+    if (!next) return finish();
+    const [t, m] = transitionFor(b, next);
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet tu" role="dialog" aria-modal="true" aria-label="Next"><span class="w3-grab"></span>' +
+      '<p class="wk2-step">Next: ' + esc(next.label || 'a block') + '</p><h2>A small step in between</h2><p class="cr-sub">' + esc(t) + '.</p>' +
+      '<button type="button" class="wka-go ab2-add">Add ' + m + ' min for it</button><button type="button" class="ls-cancel ns-cancel ab2-skip">Go straight on</button></div>';
+    el.querySelector('.w3-back').addEventListener('click', finish); el.querySelector('.ab2-skip').addEventListener('click', finish);
+    el.querySelector('.ab2-add').addEventListener('click', () => { const j = day.blocks.indexOf(next); day.blocks.splice(j, 0, { label: t, mins: m, transition: true }); save(); if (document.body.dataset.view === 'day') renderDay(); finish(); });
+  };
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet tu" role="dialog" aria-modal="true" aria-label="Anything else"><span class="w3-grab"></span>' +
+    '<p class="wk2-step">' + esc(b.label || 'Block') + ' done</p><h2>Did you do anything else besides it?</h2>' +
+    '<input type="text" class="st-in" id="ab2-x" maxlength="120" placeholder="e.g. answered emails, helped Tolu">' +
+    '<button type="button" class="wka-go ab2-save">Save it</button><button type="button" class="ls-cancel ns-cancel ab2-no">No, just that</button></div>';
+  document.body.appendChild(el);
+  const inp = el.querySelector('#ab2-x');
+  el.querySelector('.w3-back').addEventListener('click', step2);
+  el.querySelector('.ab2-no').addEventListener('click', step2);
+  const sv = () => { const v = inp.value.trim(); if (v) { b.extras = b.extras || []; b.extras.push(v); save(); } step2(); };
+  el.querySelector('.ab2-save').addEventListener('click', sv); inp.addEventListener('keydown', e => { if (e.key === 'Enter') sv(); });
+}
 function stuckSheet(task) {
   const old = document.getElementById('stsheet'); if (old) old.remove();
   const el = document.createElement('div'); el.id = 'stsheet'; el.className = 'w3';
@@ -14589,6 +14770,54 @@ function goalEditRow(g, n) {
 let areaGoalsOpen = false;   // on an area page: false shows its cards, true shows Goals
 
 // each area is a short list of cards, each a door: its pages, then Goals
+/* how food and your days affect your mood: each day gets a mood score from your check-ins,
+   then days with a thing are compared with days without it (last 4 weeks) */
+const MOOD_SCORE = { good: 1, calm: 1, focused: 1, okay: .3, bored: -.4, tired: -.4, unfocused: -.4, stressed: -1, anxious: -1, low: -1, unmotivated: -1 };
+function moodByDay(n) {
+  const out = {}; const since = shiftKey(todayKey(), -n);
+  for (const m of state.moods || []) { const k = key(new Date(m.at)); if (k < since || MOOD_SCORE[m.mood] === undefined) continue; (out[k] = out[k] || []).push(MOOD_SCORE[m.mood]); }
+  for (const k in out) out[k] = out[k].reduce((a, b) => a + b, 0) / out[k].length;
+  return out;
+}
+function moodLinks() {
+  const M = moodByDay(28), days = Object.keys(M); if (days.length < 4) return { days: days.length, up: [], down: [] };
+  const foodOn = (k, kind) => (state.food || []).some(f => key(new Date(f.at)) === k && entryKinds(f).includes(kind));
+  const doneOn = (k, re) => ((state.days[k] || {}).blocks || []).some(b => b.done && re.test(b.label || ''));
+  const sleptOn = k => { const e = typeof sleepOn === 'function' ? sleepOn(k) : null, m = e && sleepMins(e); return m ? m >= 420 : null; };
+  const F = [
+    ['moved your body', k => doneOn(k, /gym|workout|walk|run|yoga|swim|cardio|dance|stretch|glute|upper/i) || ((state.gym || {})[k] || []).length > 0],
+    ['slept 7 hours or more', k => sleptOn(k)],
+    ['ate protein', k => foodOn(k, 'protein')],
+    ['ate fruit or veg', k => foodOn(k, 'fibre')],
+    ['had sweets', k => foodOn(k, 'sugar')],
+    ['had fried food', k => foodOn(k, 'fried')],
+    ['had an edible', k => foodOn(k, 'cannabis') || (state.journeys || []).some(j => (j.uses || []).some(u => key(new Date(u.at)) === k))],
+    ['had alcohol', k => foodOn(k, 'alcohol')],
+    ['had caffeine after noon', k => (state.food || []).some(f => key(new Date(f.at)) === k && new Date(f.at).getHours() >= 12 && entryKinds(f).includes('caffeine'))],
+    ['did deep work', k => doneOn(k, /deep work|focus|study|write|code|project/i)],
+    ['rested or prayed', k => doneOn(k, /rest|nap|pray|meditat|walk|read for fun|journal/i)]
+  ];
+  const res = [];
+  for (const [name, test] of F) {
+    const w = [], wo = [];
+    for (const k of days) { const v = test(k); if (v === null) continue; (v ? w : wo).push(M[k]); }
+    if (w.length < 2 || wo.length < 2) continue;
+    const avg = a => a.reduce((x, y) => x + y, 0) / a.length, d = avg(w) - avg(wo);
+    if (Math.abs(d) >= .25) res.push({ name, d, n: w.length });
+  }
+  res.sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+  return { days: days.length, up: res.filter(r => r.d > 0).slice(0, 3), down: res.filter(r => r.d < 0).slice(0, 3) };
+}
+function moodLinksHtml() {
+  const M = moodByDay(6), tk = todayKey(), L = moodLinks();
+  const dot = v => v === undefined ? '' : v >= .5 ? 'good' : v >= 0 ? 'ok' : 'bad';
+  let h = '<div class="ml"><p class="ml-h">Your mood this week</p><div class="ml-week">' +
+    [6, 5, 4, 3, 2, 1, 0].map(n => { const k = shiftKey(tk, -n); return '<span class="' + dot(M[k]) + '"><i></i><small>' + FULL[fromKey(k).getDay()].slice(0, 1).toUpperCase() + '</small></span>'; }).join('') + '</div>';
+  if (!L.up.length && !L.down.length) h += '<p class="ml-empty">' + (L.days < 4 ? 'Log your mood a few times a day, and your food and plan, for about a week. Then this shows what lifts you and what drags you down.' : 'Nothing stands out yet. Keep logging and this gets sharper.') + '</p>';
+  if (L.up.length) h += '<p class="ml-sub up">You feel better on days you</p><ul class="ml-list">' + L.up.map(r => '<li><b>' + r.name + '</b><small>' + r.n + ' days</small></li>').join('') + '</ul>';
+  if (L.down.length) h += '<p class="ml-sub down">You feel worse on days you</p><ul class="ml-list">' + L.down.map(r => '<li><b>' + r.name + '</b><small>' + r.n + ' days</small></li>').join('') + '</ul>';
+  return h + '</div>';
+}
 function areaPortals(box, a) {
   const gs = areaGoals(a.k), j = a.k === 'health' ? activeJourney() : null;
   const tabs = (AREA_PAGES[a.k] || []).concat(a.k === 'love' ? ['love'] : []);
@@ -14599,17 +14828,9 @@ function areaPortals(box, a) {
   });
   // quitting now lives with the habits on the Goals page
   const ICON = { food: '\u{1F37D}\uFE0F', gym: '\u{1F3C3}\u200D\u2640\uFE0F', mood: '\u{1FA7A}', money: '\u{1F4B3}', habits: '\u2705', ideas: '\u{1F4AC}', people: '\u{1F48C}', love: '\u{1F49E}', goals: '\u{1F331}' };
-  // health: a short summary of today on top
+  // health, simple: your week of moods, and what lifts or drags them, from your food and your days
   let sum = '';
-  if (a.k === 'health') {
-    const t = todayKey(), sl = typeof sleepOn === 'function' ? sleepOn(t) : null;
-    const fn = state.food.filter(f => key(new Date(f.at)) === t).length;
-    const lm = state.moods.filter(m => key(new Date(m.at)) === t).sort((x, y) => y.at - x.at)[0], mm = lm && MOODS.find(m => m.k === lm.mood);
-    const chip = (ic, v, l) => '<span class="hp-chip"><i>' + ic + '</i><b>' + v + '</b><small>' + l + '</small></span>';
-    sum = '<div class="hp-sum" style="--c:' + a.c + '">' +
-      (j ? '<div class="hp-hero"><small>' + esc(j.name) + '</small><b>Day ' + journeyDay(j, Date.now()) + '</b></div>' : '<div class="hp-hero"><small>Today</small><b>' + cap(FULL[new Date().getDay()]) + '</b></div>') +
-      '<div class="hp-chips">' + chip('\u{1F634}', sl ? dur(sleepMins(sl)) : '\u2013', 'sleep') + chip('\u{1F37D}\uFE0F', fn, 'food') + chip(mm ? mm.e : '\u{1F642}', mm ? mm.k : '\u2013', 'mood') + '</div></div>';
-  }
+  if (a.k === 'health') sum = moodLinksHtml();
   box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">' + a.name + '</h1>' + sum + '<div class="hp-list">' +
     doors.map(d => '<button type="button" class="hp-row" data-door="' + d.go + '" style="--c:' + a.c + '"><i class="hp-ic">' + (ICON[d.tab] || '\u2022') + '</i><span><b>' + d.name + '</b><small>' + esc(d.cap) + '</small></span><em>' + d.big + '</em><s>\u203a</s></button>').join('') + '</div>';
   box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; show('home'); window.scrollTo(0, 0); });
