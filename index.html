@@ -5233,6 +5233,12 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-home .hm-tip { padding: 8px 12px !important; margin-bottom: 10px !important; font-size: 13.5px !important; }
 #view-home#view-home#view-home#view-home .hm-gh .hm-goals.hm-goals { padding: 12px 16px !important; }
 .hb-cal span { width: 38px; margin: 0 auto; }
+
+.hb-quitbox { margin: 0 0 14px !important; padding: 0 !important; border: none !important; background: none !important; }
+.hb-quitbox .gl-quit { margin-top: 0; }
+.hb-quitbox:empty, .hb-quitbox:not(:has(*)) { display: none; }
+#view-home .hm-tip span { flex: 1; }
+#view-home .hm-tipx { flex: none; width: 32px; height: 32px; margin: -4px -6px -4px 0; font-size: 20px; line-height: 1; color: var(--muted); background: none; border: none; border-radius: 50%; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -5495,7 +5501,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:27</footer>
+  <footer>Mr.O:08:36</footer>
 </div>
 
 <script>
@@ -5757,7 +5763,8 @@ function renderHabits() {
   html += building.map(card).join('');
   if (!state.habits.length) html += '<p class="hb-empty">Start with one small thing you can do every day, even on a bad day. If it is also in your plan, brick ticks it for you when you finish that block.</p>';
   if (locked.length) html += '<div class="hm-sec">Locked in</div>' + locked.map(card).join('');
-  habitList.innerHTML = html;
+  habitList.innerHTML = '<section class="gl-hab hb-quitbox">' + quitHtml() + '</section>' + html;
+  wireHabits(habitList, renderHabits);
   habitList.querySelectorAll('.hb-card').forEach(el => {
     const h = state.habits.find(x => x.id === el.dataset.h);
     el.querySelector('.hb-name b').textContent = h.name;
@@ -13130,19 +13137,25 @@ function homeNudge() {
   return null;
 }
 // one tip at a time, from your data, changing every 15 minutes
+const TIPS_OFF = KEY + '.tipsoff';
+const tipsOff = () => { try { return JSON.parse(localStorage.getItem(TIPS_OFF) || '[]'); } catch { return []; } };
 function homeTips() {
   const out = [], j = activeJourney();
   if (j && typeof isTaper === 'function' && isTaper(j)) out.push(taperTip(j));
   if (j && typeof quitInsights === 'function') quitInsights(j).forEach(x => out.push(x.t.replace(/<[^>]+>/g, '')));
   if (j) { const st = journeyStage(j, journeyDay(j, Date.now())); st.tips.forEach(t => out.push(t)); }
   out.push('Drink a glass of water now. Tiredness is often thirst.', 'Stand up and stretch for a minute.', 'One thing at a time. Finish the block you are on.');
-  return [...new Set(out)];
+  const off = tipsOff();
+  return [...new Set(out)].filter(t => !off.includes(t));
 }
 function renderHomeTip(box) {
   const T = homeTips(); if (!T.length) return;
   const i = Math.floor(Date.now() / (15 * 60000)) % T.length;
   const d = document.createElement('div'); d.className = 'hm-tip'; d.dataset.i = i;
-  d.innerHTML = '<i>\u{1F4A1}</i><span></span>'; d.querySelector('span').textContent = T[i];
+  d.innerHTML = '<i>\u{1F4A1}</i><span></span><button type="button" class="hm-tipx" aria-label="hide this tip">\u00d7</button>'; d.querySelector('span').textContent = T[i];
+  d.querySelector('.hm-tipx').addEventListener('click', e => { e.stopPropagation();
+    try { const off = tipsOff(); off.push(d.querySelector('span').textContent); localStorage.setItem(TIPS_OFF, JSON.stringify(off.slice(-200))); } catch {}
+    const T2 = homeTips(); if (!T2.length) { d.remove(); return; } const n = Math.floor(Date.now() / (15 * 60000)) % T2.length; d.dataset.i = n; d.querySelector('span').textContent = T2[n]; });
   box.appendChild(d);
 }
 setInterval(() => { const d = document.querySelector('#view-home .hm-tip'); if (!d || document.body.dataset.view !== 'home') return;
@@ -13449,7 +13462,7 @@ function renderHome() {
       return '<i style="--c:' + x.c + '"><u style="height:' + Math.max(gs.length ? 12 : 0, sc) + '%"></u></i>'; }).join('') + '</span></button>';
   {   // habits sit beside goals: done today, and the best streak
     const H = (state.habits || []).slice(0, 3), tkh = todayKey(), dn = H.filter(x => (x.marks || []).includes(tkh)).length, best = H.length ? Math.max(...H.map(x => streakOf(x.marks || []))) : 0;
-    html = '<div class="hm-gh">' + html + '<button type="button" class="hm-goals hm-habs" data-goals="1"><span class="hm-gt"><b>Habits</b><small>' + (H.length ? dn + ' of ' + H.length + ' today' : 'up to 3') + '</small></span><em>' + (best ? best + '<i>day streak</i>' : '+') + '</em></button></div>';
+    html = '<div class="hm-gh">' + html + '<button type="button" class="hm-goals hm-habs" data-habs="1"><span class="hm-gt"><b>Habits</b><small>' + (H.length ? dn + ' of ' + H.length + ' today' : 'up to 3') + '</small></span><em>' + (best ? best + '<i>day streak</i>' : '+') + '</em></button></div>';
   }
   // the areas, each with one live number from the systems that run it
   html += '<div class="hm-sec">Today</div><div class="hm-areas">' + AREAS.map(x => {
@@ -13459,6 +13472,7 @@ function renderHome() {
   }).join('') + '</div>';
   slot.innerHTML = html;
   slot.querySelectorAll('[data-goals]').forEach(g => g.addEventListener('click', () => { goalsTab = 'week'; show('goals'); window.scrollTo(0, 0); }));
+  slot.querySelectorAll('[data-habs]').forEach(g => g.addEventListener('click', () => { show('habits'); window.scrollTo(0, 0); }));
   slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => {
     lifeTab = 'week'; lifeSetup = null; areaGoalsOpen = false; lifeOpen = b.dataset.open;
     try { show('life'); } catch (e) { bugToast(e); }
@@ -13577,13 +13591,10 @@ function taperTip(j) {
 // habits, together with the goals: up to 3 with streaks, plus a quit journey with its days clean and help
 let quitForm = false;
 let habitForm = false;   // the add-a-habit box on the Goals page
-function habitsHtml() {
-  const H = (state.habits || []).slice(0, 3), tk = todayKey(), jj = activeJourney(), q = jj && isQuit(jj) ? jj : null, jc = q ? cleanDays(q) : null;
-  let h = '<section class="gl-hab"><div class="gl-hh"><b>Habits</b><small>' + H.length + ' of 3</small></div>' +
-    H.map((x, i) => { const on = (x.marks || []).includes(tk), st = streakOf(x.marks || []);
-      return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(x.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span class="gl-hname" data-hopen="' + i + '">' + esc(x.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
-    (H.length < 3 ? (habitForm ? '<div class="gs-add gl-hform"><input type="text" id="hf-name" maxlength="40" placeholder="e.g. Read 10 pages" aria-label="new habit"><button type="button" data-hsave="1">Add</button></div>'
-                              : '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>') : '');
+// the quit or cut-down card, on its own (it sits at the top of the Habits page)
+function quitHtml() {
+  const tk = todayKey(), jj = activeJourney(), q = jj && isQuit(jj) ? jj : null, jc = q ? cleanDays(q) : null;
+  let h = '';
   if (q) {
     const day = journeyDay(q, Date.now()), stg = journeyStage(q, day), tip = stg.tips[(day - stg.from) % stg.tips.length];
     h += '<div class="gl-quit"><div class="gl-qh"><i>\u{1F33F}</i><b>' + esc(q.name) + '</b><small>Day ' + day + '</small></div>' +
@@ -13595,6 +13606,16 @@ function habitsHtml() {
     h += '<div class="gl-quit"><b class="gl-qf">Quit something</b><input type="text" id="qf-name" maxlength="60" placeholder="e.g. Quit edibles"><label for="qf-start">Day 1 was</label><input type="date" id="qf-start" value="' + tk + '" max="' + tk + '">' +
       '<div class="jr-sos"><button type="button" class="jr-crave" data-q="start">Start</button><button type="button" class="jr-slip" data-q="cancel">Cancel</button></div></div>';
   } else h += '<button type="button" class="gl-add" data-q="new">+ Quit something</button>';
+  return h;
+}
+function habitsHtml() {
+  const H = (state.habits || []).slice(0, 3), tk = todayKey(), jj = activeJourney(), q = jj && isQuit(jj) ? jj : null, jc = q ? cleanDays(q) : null;
+  let h = '<section class="gl-hab"><div class="gl-hh"><b>Habits</b><small>' + H.length + ' of 3</small></div>' +
+    H.map((x, i) => { const on = (x.marks || []).includes(tk), st = streakOf(x.marks || []);
+      return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(x.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span class="gl-hname" data-hopen="' + i + '">' + esc(x.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
+    (H.length < 3 ? (habitForm ? '<div class="gs-add gl-hform"><input type="text" id="hf-name" maxlength="40" placeholder="e.g. Read 10 pages" aria-label="new habit"><button type="button" data-hsave="1">Add</button></div>'
+                              : '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>') : '');
+  h += quitHtml();
   return h + '</section>';
 }
 function habitSheet(i, after) {
@@ -13668,7 +13689,6 @@ function renderGoals() {
   const tabs = [['week', 'Week'], ['month', 'Month'], ['6', '6 months'], ['12', '1 year']];
   let html = '<header class="pghead"><h1>Goals</h1><span>' + ({ week: weekGoalCount() + ' of ' + MAX_WEEK_ALL + ' this week', month: cap(MONTHS[new Date().getMonth()]), 6: 'one per area', 12: 'one per area' })[goalsTab] + '</span></header>' +
     '<div class="md-seg gl-tabs">' + tabs.map(([k, t]) => '<button type="button" class="md-seg-b' + (goalsTab === k ? ' on' : '') + '" data-gt="' + k + '">' + t + '</button>').join('') + '</div>';
-  if (goalsTab === 'week') html += habitsHtml();
   html += '<div class="gl-list">' + AREAS.map(a => {
     let body = '';
     if (goalsTab === 'week') {
