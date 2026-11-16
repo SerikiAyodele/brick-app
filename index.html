@@ -5275,6 +5275,10 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
 .tu-df { margin-bottom: 10px; }
 .tu-add { display: block; width: 100%; min-height: 52px; margin-top: 10px; font: 600 16px var(--display); color: var(--ink); background: var(--pink-s); border: 1px solid var(--pink); border-radius: 26px; cursor: pointer; }
+
+/* delete a block straight from the day (no Reorder needed): a quiet x */
+#view-day#view-day .line .bin { display: inline-flex !important; align-items: center; justify-content: center; flex: none; width: 36px; height: 36px; margin-left: 4px; font-size: 18px; color: var(--muted); background: none; border: none; border-radius: 50%; opacity: .55; cursor: pointer; }
+#view-day#view-day .line .bin:active { opacity: 1; background: var(--hair); }
 </style>
 </head>
 <body>
@@ -5537,7 +5541,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:08</footer>
+  <footer>Mr.O:10:11</footer>
 </div>
 
 <script>
