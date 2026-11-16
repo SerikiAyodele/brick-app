@@ -5537,7 +5537,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:06</footer>
+  <footer>Mr.O:10:08</footer>
 </div>
 
 <script>
@@ -8190,6 +8190,7 @@ document.getElementById('block-add').addEventListener('click', () => addBlockShe
    things that come up during the day: type, tick, or plan it as a block.
    not-done items stay until ticked; done ones show until the day ends. */
 let dumpOpenDone = false;
+let dumpDraft = '';   // what you are typing, kept across redraws
 function renderDump() {
   const slot = document.getElementById('dump-slot');
   if (!slot) return;
@@ -8203,7 +8204,9 @@ function renderDump() {
       (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
     '</section>';
   const inp = slot.querySelector('.bd-add input');
-  const add = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } L.push({ id: Date.now().toString(36), text: v, done: false, at: Date.now() }); save(); renderDump(); const n = document.querySelector('#dump-slot .bd-add input'); if (n) n.focus(); };
+  inp.value = dumpDraft;
+  inp.addEventListener('input', () => { dumpDraft = inp.value; });
+  const add = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } dumpDraft = ''; L.push({ id: Date.now().toString(36), text: v, done: false, at: Date.now() }); save(); renderDump(); const n = document.querySelector('#dump-slot .bd-add input'); if (n) n.focus(); };
   slot.querySelector('.bd-add button').addEventListener('click', add);
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   slot.querySelectorAll('[data-dt]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dt); if (!x) return; x.done = !x.done; x.doneAt = Date.now(); save(); renderDump(); }));
@@ -16100,7 +16103,9 @@ let fuelTick = Math.floor(Date.now() / 600000);
 setInterval(() => {
   const t = Math.floor(Date.now() / 600000);
   if (t !== fuelTick) { fuelTick = t; if (!document.getElementById('view-food').hidden && !pickingGoal) renderBodyNow(); }
-  if (!document.getElementById('view-day').hidden) renderDay();
+  // never redraw the day while you are typing on it (it would wipe your words)
+  const typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('#view-day input, #view-day textarea');
+  if (!document.getElementById('view-day').hidden && !typing) renderDay();
   if (!document.getElementById('view-home').hidden && !sorting) {
     const last = state.moods.slice().sort((a, b) => b.at - a.at)[0];
     const due = !last || Date.now() - last.at >= MOOD_EVERY;
