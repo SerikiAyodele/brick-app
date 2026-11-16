@@ -5415,6 +5415,12 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .nss-r span { flex: 1; }
 .nss-r b { font-weight: 500; font-size: 15px; color: var(--muted); }
 .nss-r i { font-style: normal; font-size: 20px; color: var(--muted); }
+
+.ab-when { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ab-when button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 60px; padding: 8px 14px; text-align: left; font-family: var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; }
+.ab-when b { font-size: 18px; font-weight: 600; }
+.ab-when small { font-size: 13px; color: var(--muted); }
+.ab-when button.on { background: var(--pink-s); border-color: var(--pink); }
 </style>
 </head>
 <body>
@@ -5680,7 +5686,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:59</footer>
+  <footer>Mr.O:20:03</footer>
 </div>
 
 <script>
@@ -8492,6 +8498,20 @@ function renderDump() {
   if (keep.length !== L.length) { state.dump = keep; save(); }
 }
 
+function usualStart(label) {
+  const nm = String(label || '').trim().toLowerCase(); if (!nm) return null;
+  const tk = planKey(), at = [];
+  for (let n = 1; n <= 30; n++) { const d = state.days[shiftKey(tk, -n)]; if (!d || !d.blocks) continue;
+    let m = toMins(d.start); for (const b of d.blocks) { if ((b.label || '').trim().toLowerCase() === nm) at.push(m); m += Number(b.mins) || 60; } }
+  if (at.length < 2) return null;
+  at.sort((a, b) => a - b); return at[Math.floor(at.length / 2)];
+}
+// where a block starting around minute u goes: before the first open block that starts at or after u
+function slotFor(blocks, start, u) {
+  let m = toMins(start), first = blocks.findIndex(b => !b.done); if (first < 0) first = blocks.length;
+  for (let i = 0; i < blocks.length; i++) { if (i >= first && m >= u - 10) return { i, at: m }; m += Number(blocks[i].mins) || 60; }
+  return { i: blocks.length, at: m };
+}
 function addBlockSheet(preset, insertAt) {
   const old = document.getElementById('addsheet'); if (old) old.remove();
   const el = document.createElement('div');
@@ -8528,6 +8548,7 @@ function addBlockSheet(preset, insertAt) {
     if (pick.goals && pick.goals.length) b.goals = pick.goals.map(t => ({ text: t, done: false }));
     const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
     day.touched = true;
+    if (!Number.isInteger(insertAt) && pick.sug && pick.where === 'usual') insertAt = pick.sug.i;   // your usual time
     if (Number.isInteger(insertAt) && insertAt >= 0 && insertAt <= day.blocks.length) day.blocks.splice(insertAt, 0, b); else day.blocks.push(b);
     save(); close(); renderDay(); renderHabits();
   };
@@ -8556,9 +8577,12 @@ function addBlockSheet(preset, insertAt) {
       if (usual && !opts.includes(usual)) opts = [usual, ...opts];
       opts.sort((a, b) => (b === usual) - (a === usual));
       html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div><h2>How long?</h2>' +
-        '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b>' + clock(endOfDay) + '</b> \u00b7 ends at <b class="ab-end">' + clock(endOfDay + (usual || 60)) + '</b></p>' +
+        (() => { const u = Number.isInteger(insertAt) ? null : usualStart(pick.label), sl = u === null ? null : slotFor(day.blocks, day.start, u);
+          pick.sug = sl && sl.i < day.blocks.length ? sl : null; if (pick.where === undefined) pick.where = pick.sug ? 'usual' : 'end';
+          return pick.sug ? '<p class="ab-sub">When</p><div class="ab-when"><button type="button" data-where="usual"' + (pick.where === 'usual' ? ' class="on"' : '') + '><b>' + clock(pick.sug.at) + '</b><small>your usual time</small></button><button type="button" data-where="end"' + (pick.where === 'end' ? ' class="on"' : '') + '><b>' + clock(endOfDay) + '</b><small>at the end</small></button></div>' : ''; })() +
+        '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b class="ab-st">' + clock(pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + '</b> \u00b7 ends at <b class="ab-end">' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + (usual || 60)) + '</b></p>' +
         '<button type="button" class="wka-go ab-add">Add</button><p class="ab-sub">Or tap one</p>' +
-        '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock(endOfDay + m) + '</small>' : '') + '</button>').join('') + '</div>';
+        '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + m) + '</small>' : '') + '</button>').join('') + '</div>';
     }
     html += '<button type="button" class="ls-cancel">Cancel</button></div>';
     el.innerHTML = html;
@@ -8577,7 +8601,9 @@ function addBlockSheet(preset, insertAt) {
     el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
     const abd = el.querySelector('.ab-dur');
     if (abd) { let cur = usualLength(pick.label) || pick.mins || 60;
-      durField(abd, cur, m => { cur = m; el.querySelector('.ab-end').textContent = clock(endOfDay + m); });
+      const st0 = () => pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay;
+      durField(abd, cur, m => { cur = m; el.querySelector('.ab-end').textContent = clock(st0() + m); });
+      el.querySelectorAll('[data-where]').forEach(x => x.addEventListener('click', () => { pick.where = x.dataset.where; draw(); }));
       el.querySelector('.ab-add').addEventListener('click', () => add(cur)); }
     const bk = el.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => { if (pick) pick = null; else step = null; draw(); });
     const inp = el.querySelector('.ab-type input');
@@ -13808,7 +13834,10 @@ function planTomorrowSheet() {
     el.querySelectorAll('[data-len]').forEach(x => x.addEventListener('change', () => { plan[Number(x.dataset.len)].mins = Number(x.value); draw(); }));
     el.querySelectorAll('[data-rm]').forEach(x => x.addEventListener('click', () => { plan.splice(Number(x.dataset.rm), 1); draw(); }));
     const inp = el.querySelector('#pt-in');
-    const addOne = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } plan.push({ label: cap(v), mins: usualLength(v) || 60 }); draw(); el.querySelector('#pt-in').focus(); };
+    const addOne = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; }
+      const nb = { label: cap(v), mins: usualLength(v) || 60 }, u = usualStart(v);
+      if (u !== null) { const sl = slotFor(plan, start, u); plan.splice(sl.i, 0, nb); } else plan.push(nb);   // at your usual time
+      draw(); el.querySelector('#pt-in').focus(); };
     el.querySelector('.ptm-add button').addEventListener('click', addOne); inp.addEventListener('keydown', e => { if (e.key === 'Enter') addOne(); });
     el.querySelector('.ptm-done').addEventListener('click', () => {
       state.days[tm] = Object.assign(state.days[tm] || {}, { start, touched: true, blocks: plan.map(b => ({ ...b, done: false })) });
