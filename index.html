@@ -5267,6 +5267,14 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .st-sub { margin-top: 12px !important; text-align: center; }
 #view-home#view-home .hm-quick .hq.stuck { --q: #9b87d9; }
 #view-day .nowcard .nc-act.nc-stuck { flex: 0 0 100%; min-height: 40px; color: var(--pink-d) !important; background: none !important; border: none !important; font-size: 14px; text-decoration: underline; }
+
+.tu h2 { margin: 2px 0 4px; font-family: var(--serif, inherit); font-size: 28px; font-weight: 600; }
+.tu-more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tu-more button { min-height: 50px; font: 600 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; }
+.tu .tu-done { margin-top: 6px; }
+
+.tu-df { margin-bottom: 10px; }
+.tu-add { display: block; width: 100%; min-height: 52px; margin-top: 10px; font: 600 16px var(--display); color: var(--ink); background: var(--pink-s); border: 1px solid var(--pink); border-radius: 26px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -5529,7 +5537,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:02</footer>
+  <footer>Mr.O:10:06</footer>
 </div>
 
 <script>
@@ -7420,11 +7428,12 @@ function lengthPicker(b, from, len) {
     el.querySelector('.w3-back').addEventListener('click', close);
     el.querySelector('.ls-cancel').addEventListener('click', close);
     el.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
-    el.querySelectorAll('[data-add]').forEach(x => x.addEventListener('click', () => keep(len + Number(x.dataset.add))));   // add time to the task
-    // the length itself, typed
+    // the length itself, typed; + and - change it, Save applies it
     const dfBox = el.querySelector('.ls-df');
     if (dfBox) { let typed = len; const endP = el.querySelector('.ls-end');
-      durField(dfBox, len, m => { typed = m; endP.textContent = clock(from) + ' to ' + clock(from + m); });
+      const paintEnd = () => { endP.textContent = clock(from) + ' to ' + clock(from + typed); el.querySelectorAll('.ls-add.minus [data-add]').forEach(x => { x.disabled = typed + Number(x.dataset.add) < 5; }); };
+      const df = durField(dfBox, len, m => { typed = m; paintEnd(); });
+      el.querySelectorAll('[data-add]').forEach(x => x.addEventListener('click', () => { typed = Math.max(5, Math.min(1440, typed + Number(x.dataset.add))); df.set(typed); paintEnd(); }));
       el.querySelector('.ls-save').addEventListener('click', () => keep(typed)); }
     const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
     el.querySelectorAll('[data-o]').forEach(x => x.addEventListener('click', () => { other = Math.max(15, Math.min(720, other + Number(x.dataset.o))); draw(true); }));
@@ -13346,6 +13355,53 @@ const STUCK_WHY = [
 ];
 const STUCK_REWARD = [['\u2615', 'Tea'], ['\u{1F6B6}', 'A walk'], ['\u{1F3A7}', 'Music'], ['\u{1F34E}', 'A snack'], ['\u{1F4F1}', '5 minutes of my phone']];
 function currentBlockLabel() { try { const bs = blocksOf(planKey()), m = new Date().getHours() * 60 + new Date().getMinutes(), b = bs.find(x => m >= x.from && m < x.to); return b ? b.label : ''; } catch { return ''; } }
+/* time is up: wherever you are in the app, a block that has run out asks
+   done, or more time. later asks again in 10 minutes. */
+const timeUpAsked = {};
+function checkTimeUp() {
+  if (document.getElementById('tusheet') || document.querySelector('.w3') || document.body.classList.contains('focusing')) return;
+  const k = planKey(), day = state.days[k];
+  if (!day || !day.blocks || !day.blocks.length) return;
+  const i = day.blocks.findIndex(b => !b.done);
+  if (i < 0) return;
+  let at = toMins(day.start); for (let n = 0; n < i; n++) at += Number(day.blocks[n].mins) || 60;
+  const b = day.blocks[i], end = at + (Number(b.mins) || 60), nowM = planMin(k);
+  if (nowM < end || nowM > end + 180) return;          // not over yet, or long gone (the plan page handles that)
+  const id = k + ':' + i + ':' + end;
+  if (timeUpAsked[id] && Date.now() < timeUpAsked[id]) return;
+  timeUpAsked[id] = Date.now() + 10 * 60000;
+  timeUpSheet(day, i, end);
+}
+function timeUpSheet(day, i, end) {
+  const b = day.blocks[i], next = day.blocks[i + 1];
+  const el = document.createElement('div'); el.id = 'tusheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet tu" role="dialog" aria-modal="true" aria-label="Time is up"><span class="w3-grab"></span>' +
+    '<p class="wk2-step">Time is up</p><h2>' + esc((b.label || '').trim() || 'This block') + '</h2><p class="cr-sub">It ended at ' + clock(end) + (next ? '. Next: ' + esc(next.label || 'a block') + '.' : '.') + '</p>' +
+    '<button type="button" class="wka-go tu-done">Done \u2713</button>' +
+    '<p class="wk2-h">Need more time?</p><div class="tu-df"></div><div class="tu-more">' + [[15, '+15 min'], [30, '+30 min'], [60, '+1 hour']].map(([m, t]) => '<button type="button" data-tm="' + m + '">' + t + '</button>').join('') + '</div>' +
+    '<button type="button" class="tu-add">Add <b>15 min</b></button>' +
+    '<button type="button" class="ls-cancel ns-cancel tu-later">Ask me in 10 minutes</button></div>';
+  document.body.appendChild(el);
+  const close = () => el.remove();
+  const redraw = () => { if (document.body.dataset.view === 'day') renderDay(); if (document.body.dataset.view === 'home') renderHome(); renderHabits(); };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('.tu-later').addEventListener('click', close);
+  let more = 15;
+  const addB = el.querySelector('.tu-add b');
+  const df = durField(el.querySelector('.tu-df'), more, m => { more = m; addB.textContent = hrsLabel(m); });
+  el.querySelectorAll('[data-tm]').forEach(x => x.addEventListener('click', () => { more = Number(x.dataset.tm); df.set(more); addB.textContent = hrsLabel(more); }));
+  el.querySelector('.tu-add').addEventListener('click', () => { b.mins = (Number(b.mins) || 60) + more; save(); close(); redraw(); });
+  el.querySelector('.tu-done').addEventListener('click', () => {
+    b.done = true;
+    const h = habitNamed(b.label); if (h && !h.marks.includes(planKey())) h.marks.push(planKey());
+    save(); close(); redraw();
+    if (askMealAfter(b)) return;
+    if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(planKey()), 450);
+    else setTimeout(() => askMoodAfter(b), 500);
+  });
+}
+setInterval(checkTimeUp, 20000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(checkTimeUp, 800); });
 function stuckSheet(task) {
   const old = document.getElementById('stsheet'); if (old) old.remove();
   const el = document.createElement('div'); el.id = 'stsheet'; el.className = 'w3';
@@ -15924,7 +15980,7 @@ function durField(root, mins, onChange) {
   inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!(v > 0)) return; mins = Math.max(5, Math.min(1440, Math.round(unit === 'h' ? v * 60 : v))); onChange(mins); });
   bs.forEach(b => b.addEventListener('click', () => { unit = b.dataset.u; paint(); }));
   paint();
-  return { set(m) { mins = m; paint(); } };
+  return { set(m) { mins = m; unit = m >= 60 && m % 30 === 0 ? 'h' : 'min'; paint(); } };
 }
 function weekAddSheet(day0, days, preset, after) {
   // two calm steps: 1 what (type it or tap a tile), 2 when (start, how long, which days)
