@@ -5350,6 +5350,71 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .ml-list li:first-child { border-top: none; }
 .ml-list b { font-size: 17px; font-weight: 500; }
 .ml-list small { font-size: 13px; color: var(--muted); }
+
+/* home, sporty: activity rings, athletic numbers, a progress bar per area. still rose gold and soft */
+:root { --sport: "Chakra Petch", "Poppins", sans-serif; }
+#view-home .hm-now .hm-prog { display: none !important; }
+#view-home .hm-rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+#view-home .hm-ring { position: relative; display: flex; align-items: center; gap: 8px; }
+#view-home .hm-ring svg { flex: none; width: 44px; height: 44px; }
+#view-home .hm-ring em { position: absolute; left: 0; top: 0; width: 44px; height: 44px; display: grid; place-items: center; font-style: normal; }
+#view-home .hm-ring em b { font-family: var(--sport); font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1; }
+#view-home .hm-ring em i { display: none; }
+#view-home .hm-ring small { font-size: 12px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: color-mix(in srgb, var(--c) 70%, var(--ink)); }
+#view-home#view-home .hm-area em, #view-home .hm-habs em, #view-home .hm-now .hm-sub b { font-family: var(--sport) !important; font-weight: 700 !important; letter-spacing: -.2px; }
+#view-home#view-home#view-home#view-home#view-home .hm-area em { font-size: 28px !important; }
+#view-home .hm-area { position: relative; }
+#view-home .hm-abar { position: absolute; left: 16px; right: 16px; bottom: 10px; height: 4px; background: color-mix(in srgb, var(--c) 18%, var(--card)); border-radius: 2px; overflow: hidden; }
+#view-home .hm-abar u { display: block; height: 100%; background: var(--c); border-radius: 2px; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { padding-bottom: 22px !important; }
+#view-home .hm-habs em { font-size: 26px !important; }
+
+#view-home#view-home .hm-now.hm-now .hm-ring em b { font-family: var(--sport) !important; font-size: 14px !important; font-weight: 700 !important; }
+#view-home .hm-rings { margin-top: 8px !important; }
+#view-home .hm-ring svg, #view-home .hm-ring em { width: 36px !important; height: 36px !important; }
+#view-home .hm-ring small { font-size: 11px !important; }
+#view-home#view-home#view-home .hm-now.hm-now { padding: 14px 18px !important; }
+#view-home#view-home#view-home .hm-now.hm-now > b { font-size: 24px !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-area em { font-size: 24px !important; padding-top: 2px !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { padding: 12px 16px 18px !important; min-height: 0 !important; }
+#view-home .hm-abar { bottom: 8px !important; height: 3px !important; z-index: 1; }
+#view-home#view-home#view-home .hm-tip { padding: 7px 12px !important; }
+#view-home .hm-gh .hm-gt small { font-size: 13px !important; }
+#view-home#view-home .hm-habs em { font-size: 22px !important; }
+#view-home .hm-habs em i { display: inline !important; margin-left: 4px; }
+#view-home .hm-gh .hm-gbars { height: 24px !important; }
+
+/* plan tomorrow */
+.pt-open { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 52px; margin: 0 0 14px; padding: 0 18px; font: 600 16px var(--display); color: var(--ink); cursor: pointer;
+  border: 1px solid transparent; border-radius: 18px; background: linear-gradient(color-mix(in srgb, var(--pink) 7%, var(--card)), color-mix(in srgb, var(--pink) 7%, var(--card))) padding-box, var(--gold, linear-gradient(135deg, #f7d3dc, #b97488)) border-box; }
+.pt-open span { font-size: 20px; color: var(--pink-d); }
+.ptm { position: relative; max-height: 92vh; overflow-y: auto; }
+.ptm h2 { margin: 2px 56px 4px 0; font-family: var(--serif, inherit); font-size: 28px; font-weight: 600; }
+.ptm-src { display: flex; flex-direction: column; gap: 8px; }
+.ptm-src button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 8px 14px; text-align: left; font-family: var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
+.ptm-src button.on { background: var(--pink-s); border-color: var(--pink); }
+.ptm-src i { flex: none; font-style: normal; font-size: 22px; }
+.ptm-src span { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ptm-src b { font-size: 16px; font-weight: 600; }
+.ptm-src small { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ptm-src em { flex: none; display: grid; place-items: center; width: 30px; height: 30px; font-style: normal; font-weight: 700; color: #fff; background: var(--pink); border-radius: 50%; }
+.ptm-start { margin-top: 16px; }
+.ptm-list { list-style: none; margin: 0; padding: 0; }
+.ptm-list li { display: flex; align-items: center; gap: 10px; min-height: 52px; border-top: 1px solid var(--hair); }
+.ptm-list time { flex: none; width: 66px; font-size: 13px; color: var(--muted); }
+.ptm-list span { flex: 1; min-width: 0; font-size: 16px; font-weight: 500; overflow-wrap: break-word; }
+.ptm-list select { flex: none; min-height: 38px; padding: 0 6px; font: 15px var(--display); color: var(--ink); background: var(--slot); border: none; border-radius: 10px; }
+.ptm-list button { flex: none; width: 38px; height: 38px; font-size: 20px; color: var(--muted); background: none; border: none; border-radius: 50%; cursor: pointer; }
+.ptm-add { margin-top: 12px; }
+
+/* a named block: a calm sheet */
+.nss-name { margin-top: 10px; }
+.nss .wk2-step { padding-right: 56px; }
+.nss-rows { margin-top: 14px; border-top: 1px solid var(--hair); }
+.nss-r { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 4px; text-align: left; font: 500 17px var(--display); color: var(--ink); background: none; border: none; border-bottom: 1px solid var(--hair); cursor: pointer; }
+.nss-r span { flex: 1; }
+.nss-r b { font-weight: 500; font-size: 15px; color: var(--muted); }
+.nss-r i { font-style: normal; font-size: 20px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -5484,6 +5549,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
       </div>
     </div>
 
+    <button type="button" class="pt-open" id="pt-open">\u{1F319} Plan tomorrow <span>\u203a</span></button>
     <div id="day-goal"></div>
     <div id="carry-slot"></div>
     <div id="dumpcarry-slot"></div>
@@ -5614,7 +5680,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:54</footer>
+  <footer>Mr.O:19:59</footer>
 </div>
 
 <script>
@@ -6700,6 +6766,28 @@ function openNameSheet(b) {
       const u = usualLabels(5).find(x => x.t === k); set(k, u && Number(u.mins));
     }));
   };
+  // a block that already has a name: a calm sheet. the full list only when you change what it is
+  const simple = () => {
+    const d = dayFor(viewDay), i = d.blocks.indexOf(b);
+    let from = toMins(d.start); for (let n = 0; n < i; n++) from += Number(d.blocks[n].mins) || 60;
+    const len = Number(b.mins) || 60, f = outcomeField ? outcomeField(b.label) : null, T = f ? (b[f] || []) : [];
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ns-sheet nss" role="dialog" aria-modal="true" aria-label="Edit block"><span class="w3-grab"></span><button type="button" class="ns-x" aria-label="close">\u00d7</button>' +
+      '<p class="wk2-step">' + clock(from) + ' to ' + clock(from + len) + '</p>' +
+      '<div class="ns-type nss-name"><input type="text" class="ns-in" maxlength="200" aria-label="block name"><button type="button" class="ns-ok">Save</button></div>' +
+      '<div class="nss-rows"><button type="button" class="nss-r" data-s="len"><span>How long</span><b>' + minsLabel(len) + '</b><i>\u203a</i></button>' +
+      (f ? '<button type="button" class="nss-r" data-s="tasks"><span>' + (f === 'agenda' ? 'Agenda' : 'Tasks') + '</span><b>' + (T.length ? T.filter(x => x.done).length + ' of ' + T.length : 'none yet') + '</b><i>\u203a</i></button>' : '') +
+      '<button type="button" class="nss-r" data-s="kind"><span>Change what it is</span><b></b><i>\u203a</i></button></div>' +
+      '<button type="button" class="ns-remove">Remove this block</button><button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
+    const inp = el.querySelector('.ns-in'); inp.value = b.label || '';
+    const go = () => { const v = inp.value.trim(); if (v) set(v); else close(); };
+    el.querySelector('.ns-ok').addEventListener('click', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+    el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.ns-x').addEventListener('click', close); el.querySelector('.ns-cancel').addEventListener('click', close);
+    el.querySelector('[data-s=len]').addEventListener('click', () => { el.remove(); lengthPicker(b, from, len); });
+    const tb = el.querySelector('[data-s=tasks]'); if (tb) tb.addEventListener('click', () => { el.remove(); openListSheet(b, f, from); });
+    el.querySelector('[data-s=kind]').addEventListener('click', () => draw(null));
+    el.querySelector('.ns-remove').addEventListener('click', () => { el.remove(); if (i >= 0) removeBlock(d, i); else renderDay(); });
+  };
+  if (!wasEmpty) { simple(); return; }
   draw(null);
 }
 
@@ -13247,6 +13335,32 @@ function tileFor(tab) {
 }
 
 // the card at the top: what you should be doing right now
+/* sporty: three rings in the Now card (plan, habits, goals) and a thin bar on each area */
+function homeRingData() {
+  const k = planKey(), bs = ((state.days[k] || {}).blocks || []), pd = bs.filter(b => b.done).length;
+  const H = (state.habits || []).slice(0, 3), tk = todayKey(), hd = H.filter(h => (h.marks || []).includes(tk)).length;
+  const ks = perKeys(0), G = AREAS.flatMap(a => areaGoals(a.k)), gon = G.filter(g => goalStatus(goalScore(g, ks).pct)[0] === 'on').length;
+  return [['Plan', pd, bs.length, '#e57a9c'], ['Habits', hd, H.length, '#d68fa3'], ['Goals', gon, G.length, '#9b87d9']];
+}
+function ringSvg(f, c) {
+  const R = 20, C = 2 * Math.PI * R, v = Math.max(0, Math.min(1, f));
+  return '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="' + R + '" fill="none" stroke="color-mix(in srgb, ' + c + ' 18%, transparent)" stroke-width="6"/>' +
+    '<circle cx="24" cy="24" r="' + R + '" fill="none" stroke="' + c + '" stroke-width="6" stroke-linecap="round" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - v)) + '" transform="rotate(-90 24 24)"/></svg>';
+}
+function renderHomeRings() {
+  const now = document.querySelector('#view-home .hm-now'); if (!now) return;
+  const old = now.querySelector('.hm-rings'); if (old) old.remove();
+  const d = document.createElement('div'); d.className = 'hm-rings';
+  d.innerHTML = homeRingData().map(([n, a, t, c]) => '<span class="hm-ring" style="--c:' + c + '">' + ringSvg(t ? a / t : 0, c) + '<em><b>' + a + '</b><i>/' + t + '</i></em><small>' + n + '</small></span>').join('');
+  now.appendChild(d);
+  // a thin bar on each area, from its goals this week
+  const ks = perKeys(0);
+  document.querySelectorAll('#view-home .hm-area[data-open]').forEach(el => {
+    const a = el.dataset.open, gs = areaGoals(a), sc = gs.length ? areaScore(a, ks) : null;
+    let bar = el.querySelector('.hm-abar'); if (!bar) { bar = document.createElement('i'); bar.className = 'hm-abar'; el.appendChild(bar); }
+    bar.innerHTML = '<u style="width:' + (sc === null ? 0 : Math.max(4, sc)) + '%"></u>'; bar.title = sc === null ? 'no goals yet' : sc + '% of this week';
+  });
+}
 function renderHomeNow() {
   const box = document.getElementById('home-now');
   const t = planKey(), d = state.days[t];
@@ -13403,7 +13517,7 @@ function renderHomeNudge(box) {
   b.innerHTML = '<i>' + n.e + '</i><span><b></b><small></small></span><s>\u203a</s>';
   b.querySelector('b').textContent = n.t; b.querySelector('small').textContent = n.s;
   b.addEventListener('click', () => {
-    if (n.go === 'tomorrow') { viewDay = shiftKey(todayKey(), 1); show('day'); return; }
+    if (n.go === 'tomorrow') { planTomorrowSheet(); return; }
     show(n.go); window.scrollTo(0, 0);
   });
   box.appendChild(b);
@@ -13630,6 +13744,80 @@ function afterBlock(day, i, then) {
   const sv = () => { const v = inp.value.trim(); if (v) { b.extras = b.extras || []; b.extras.push(v); save(); } step2(); };
   el.querySelector('.ab2-save').addEventListener('click', sv); inp.addEventListener('keydown', e => { if (e.key === 'Enter') sv(); });
 }
+/* routines: the blocks you do most mornings (before 11am) and evenings (after 6pm),
+   learned from the last 3 weeks. a block counts if it shows up on 3 days or more. */
+function routineFromHistory(kind) {
+  const tk = planKey(), seen = {};
+  for (let n = 1; n <= 21; n++) {
+    const k = shiftKey(tk, -n), d = state.days[k]; if (!d || !d.blocks) continue;
+    let at = toMins(d.start);
+    for (const b of d.blocks) {
+      const len = Number(b.mins) || 60, from = at; at += len;
+      const lab = (b.label || '').trim(); if (!lab) continue;
+      const inWin = kind === 'am' ? from >= 240 && from < 660 : from >= 1080;
+      if (!inWin) continue;
+      const kk = lab.toLowerCase(), x = seen[kk] || (seen[kk] = { label: lab, days: new Set(), starts: [], lens: {} });
+      x.days.add(k); x.starts.push(from); x.lens[len] = (x.lens[len] || 0) + 1;
+    }
+  }
+  const med = a => a.slice().sort((p, q) => p - q)[Math.floor(a.length / 2)];
+  const L = Object.values(seen).filter(x => x.days.size >= 3).map(x => ({ label: x.label, at: med(x.starts), mins: Number(Object.keys(x.lens).sort((p, q) => x.lens[q] - x.lens[p])[0]) }))
+    .sort((p, q) => p.at - q.at).slice(0, 6);
+  return L.length ? { start: hhmm(L[0].at), blocks: L.map(x => ({ label: x.label, mins: x.mins })) } : null;
+}
+
+/* plan tomorrow, in one screen: start from your routines, the same day last week,
+   or today; set when the day starts; take out what you do not need; done */
+function planTomorrowSheet() {
+  const tk = planKey(), tm = shiftKey(tk, 1), last = shiftKey(tm, -7), DN = k => cap(FULL[fromKey(k).getDay()]);
+  const cur = state.days[tm];
+  let plan = cur && cur.blocks ? cur.blocks.map(b => ({ ...b })) : [];
+  const am = routineFromHistory('am'), pm = routineFromHistory('pm');
+  let start = cur && cur.start ? cur.start : am ? am.start : '08:00';
+  const used = new Set();
+  const src = [
+    am && ['am', '\u2600\uFE0F', 'Morning routine', am.blocks],
+    (state.days[last] || {}).blocks && state.days[last].blocks.length && ['last', '\u{1F501}', 'Same as last ' + DN(last), state.days[last].blocks],
+    (state.days[tk] || {}).blocks && state.days[tk].blocks.length && ['today', '\u{1F4CB}', 'Same as today', state.days[tk].blocks],
+    pm && ['pm', '\u{1F319}', 'Evening routine', pm.blocks]
+  ].filter(Boolean);
+  const el = document.createElement('div'); el.id = 'ptsheet'; el.className = 'w3';
+  const LENS = [15, 30, 45, 60, 90, 120, 150, 180, 240];
+  const close = () => el.remove();
+  const draw = () => {
+    let at = toMins(start);
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ptm" role="dialog" aria-modal="true" aria-label="Plan tomorrow"><span class="w3-grab"></span><button type="button" class="ns-x ptm-x" aria-label="close">\u00d7</button>' +
+      '<p class="wk2-step">' + DN(tm) + ' ' + fromKey(tm).getDate() + ' ' + cap(MONTHS[fromKey(tm).getMonth()].slice(0, 3)) + '</p><h2>Plan tomorrow</h2>' +
+      (src.length ? '<p class="wk2-h">Start with</p><div class="ptm-src">' + src.map(([k, e, t, bs]) => '<button type="button" data-src="' + k + '"' + (used.has(k) ? ' class="on"' : '') + '><i>' + e + '</i><span><b>' + t + '</b><small>' + esc(bs.map(b => b.label).filter(Boolean).slice(0, 4).join(' \u00b7 ')) + '</small></span><em>' + (used.has(k) ? '\u2713' : '+') + '</em></button>').join('') + '</div>'
+                  : '<p class="cr-sub">After a few days brick learns your usual mornings and evenings and offers them here.</p>') +
+      '<div class="wk2-start ptm-start"><label for="pt-st">Day starts at</label><input type="time" id="pt-st" step="300" value="' + start + '"></div>' +
+      '<p class="wk2-h">Your day' + (plan.length ? ' \u00b7 ' + hrsLabel(plan.reduce((t, b) => t + (Number(b.mins) || 60), 0)) : '') + '</p>' +
+      (plan.length ? '<ol class="ptm-list">' + plan.map((b, i) => { const f = at; at += Number(b.mins) || 60;
+        return '<li><time>' + clock(f) + '</time><span>' + esc(b.label || 'Block') + '</span><select data-len="' + i + '" aria-label="how long">' + LENS.concat(LENS.includes(Number(b.mins)) ? [] : [Number(b.mins)]).sort((p, q) => p - q).map(m => '<option value="' + m + '"' + (m === Number(b.mins) ? ' selected' : '') + '>' + minsLabel(m) + '</option>').join('') + '</select><button type="button" data-rm="' + i + '" aria-label="remove">\u00d7</button></li>'; }).join('') + '</ol>'
+                  : '<p class="cr-sub">Nothing yet. Pick something above, or add a block.</p>') +
+      '<div class="gs-add ptm-add"><input type="text" id="pt-in" maxlength="60" list="preset-names" placeholder="Add a block, e.g. Gym"><button type="button">Add</button></div>' +
+      '<button type="button" class="wka-go ptm-done">Done</button></div>';
+    el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.ptm-x').addEventListener('click', close);
+    el.querySelectorAll('[data-src]').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.src, S = src.find(x => x[0] === k); if (!S || used.has(k)) return;
+      const have = new Set(plan.map(x => (x.label || '').trim().toLowerCase()));   // no doubles
+      const add = S[3].filter(x => (x.label || '').trim() && !have.has(x.label.trim().toLowerCase())).map(x => ({ label: x.label, mins: Number(x.mins) || 60, ...(x.step ? { step: x.step } : {}), ...(x.meeting ? { meeting: true } : {}) }));
+      if (k === 'am') { plan = add.concat(plan); if (am) start = am.start; } else plan = plan.concat(add);
+      used.add(k); draw(); }));
+    const st = el.querySelector('#pt-st'); st.addEventListener('change', () => { if (/^\d{2}:\d{2}/.test(st.value)) { start = st.value.slice(0, 5); draw(); } });
+    el.querySelectorAll('[data-len]').forEach(x => x.addEventListener('change', () => { plan[Number(x.dataset.len)].mins = Number(x.value); draw(); }));
+    el.querySelectorAll('[data-rm]').forEach(x => x.addEventListener('click', () => { plan.splice(Number(x.dataset.rm), 1); draw(); }));
+    const inp = el.querySelector('#pt-in');
+    const addOne = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } plan.push({ label: cap(v), mins: usualLength(v) || 60 }); draw(); el.querySelector('#pt-in').focus(); };
+    el.querySelector('.ptm-add button').addEventListener('click', addOne); inp.addEventListener('keydown', e => { if (e.key === 'Enter') addOne(); });
+    el.querySelector('.ptm-done').addEventListener('click', () => {
+      state.days[tm] = Object.assign(state.days[tm] || {}, { start, touched: true, blocks: plan.map(b => ({ ...b, done: false })) });
+      save(); close(); viewDay = tm; if (typeof setPlanMode === 'function') setPlanMode('day'); show('day'); window.scrollTo(0, 0);
+    });
+  };
+  draw(); document.body.appendChild(el);
+}
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#pt-open')) planTomorrowSheet(); });
 function stuckSheet(task) {
   const old = document.getElementById('stsheet'); if (old) old.remove();
   const el = document.createElement('div'); el.id = 'stsheet'; el.className = 'w3';
@@ -13825,6 +14013,7 @@ function renderHome() {
   renderHomeQuick(document.getElementById("home-now"));
   renderHomeNudge(document.getElementById("home-now"));
   renderHomeTip(document.getElementById("home-now"));
+  setTimeout(renderHomeRings, 0);
 
   const slot = document.getElementById('menu');
   slot.innerHTML = '';
