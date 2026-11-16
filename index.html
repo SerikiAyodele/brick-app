@@ -5421,6 +5421,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .ab-when b { font-size: 18px; font-weight: 600; }
 .ab-when small { font-size: 13px; color: var(--muted); }
 .ab-when button.on { background: var(--pink-s); border-color: var(--pink); }
+.dc-plus { color: var(--pink-d) !important; font-size: 18px !important; border-color: var(--pink) !important; background: var(--pink-s) !important; }
 </style>
 </head>
 <body>
@@ -5686,7 +5687,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:03</footer>
+  <footer>Mr.O:20:07</footer>
 </div>
 
 <script>
@@ -7742,18 +7743,24 @@ function renderDumpCarry() {
   if (!L.length || day.noDump) return;
   const planning = !day.blocks.length || day.carryOpen || viewDay > planKey() || day.dumpOpen;
   if (!planning) return;
-  const name = viewDay === planKey() ? 'today' : viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()]);
-  const pick = new Set((day.dumpPick || []).filter(id => L.some(x => x.id === id)));
+  const name = dayWord();
+  // one tap: an item goes straight onto the day (with undo); or all of them at once
   const box = document.createElement('div'); box.className = 'suggest studs cy cy2';
   box.innerHTML = '<div class="cy2-h"><b>From your brain dump</b><small>' + L.length + ' waiting</small></div>' +
-    '<p class="cy-sub">Tick what you want to do ' + name + '.</p><div class="cy2-list">' +
-    L.map(x => '<div class="cy2-row' + (pick.has(x.id) ? ' on' : '') + '"><button type="button" class="cy2-pick" data-dc="' + x.id + '"><i>' + (pick.has(x.id) ? '\u2713' : '') + '</i><span><b>' + esc(x.text) + '</b><small>' + minsLabel(usualLength(x.text) || 30) + '</small></span></button></div>').join('') + '</div>' +
-    '<div class="cy-btns"><button type="button" class="cy-all dc-go"' + (pick.size ? '' : ' disabled') + '>Add ' + (pick.size || '') + ' to ' + name + '</button><button type="button" class="cy-done dc-no">Not now</button></div>';
-  box.querySelectorAll('[data-dc]').forEach(b => b.addEventListener('click', () => { const id = b.dataset.dc; day.dumpPick = day.dumpPick || []; const i = day.dumpPick.indexOf(id); i < 0 ? day.dumpPick.push(id) : day.dumpPick.splice(i, 1); day.dumpOpen = true; save(); renderDumpCarry(); }));
-  box.querySelector('.dc-go').addEventListener('click', () => {
-    for (const x of L) if (pick.has(x.id)) { day.blocks.push({ label: x.text, mins: usualLength(x.text) || 30 }); x.done = true; x.doneAt = Date.now(); x.planned = true; }
-    day.dumpPick = []; day.touched = true; day.dumpOpen = (state.dump || []).some(x => !x.done); save(); renderDay(); renderHabits();
-  });
+    '<p class="cy-sub">Tap one to put it on ' + name + '.</p><div class="cy2-list">' +
+    L.map(x => '<div class="cy2-row"><button type="button" class="cy2-pick" data-dc="' + x.id + '"><i class="dc-plus">+</i><span><b>' + esc(x.text) + '</b><small>' + minsLabel(usualLength(x.text) || 30) + '</small></span></button></div>').join('') + '</div>' +
+    '<div class="cy-btns"><button type="button" class="cy-all dc-go">Add ' + (L.length > 1 ? 'all ' + L.length : 'it') + ' to ' + name + '</button><button type="button" class="cy-done dc-no">Not now</button></div>';
+  const put = list => {
+    const where = viewDay, added = [];
+    for (const x of list) { const b = { label: x.text, mins: usualLength(x.text) || 30 }; day.blocks.push(b); added.push([x, b]); x.done = true; x.doneAt = Date.now(); x.planned = true; }
+    day.touched = true; day.dumpOpen = (state.dump || []).some(x => !x.done); save(); renderDay(); renderHabits();
+    offerUndo(list.length > 1 ? list.length + ' items' : '"' + list[0].text + '"', () => {
+      const d = dayFor(where); added.forEach(([x, b]) => { const i = d.blocks.indexOf(b); if (i >= 0) d.blocks.splice(i, 1); x.done = false; x.planned = false; });
+      d.dumpOpen = true; save(); renderDay(); renderHabits();
+    });
+  };
+  box.querySelectorAll('[data-dc]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dc); if (x) put([x]); }));
+  box.querySelector('.dc-go').addEventListener('click', () => put(L));
   box.querySelector('.dc-no').addEventListener('click', () => { day.noDump = true; day.dumpOpen = false; save(); renderDumpCarry(); });
   slot.appendChild(box);
 }
