@@ -5258,6 +5258,15 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-habits .hb-d i { width: 10px !important; height: 10px !important; margin-bottom: 4px; background: var(--slot) !important; border: none !important; box-shadow: none !important; }
 #view-habits .hb-d.on i { background: var(--pink) !important; }
 #view-habits .hb-d.now { color: var(--ink) !important; font-weight: 600; }
+
+/* stuck */
+.st { position: relative; max-height: 92vh; overflow-y: auto; }
+.st h2 { margin: 2px 56px 6px 0; font-family: var(--serif, inherit); font-size: 24px; font-weight: 600; line-height: 1.25; }
+.st-in { width: 100%; min-height: 50px; padding: 0 16px; font: 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.st .st-go, .st .st-done { margin-top: 18px; }
+.st-sub { margin-top: 12px !important; text-align: center; }
+#view-home#view-home .hm-quick .hq.stuck { --q: #9b87d9; }
+#view-day .nowcard .nc-act.nc-stuck { flex: 0 0 100%; min-height: 40px; color: var(--pink-d) !important; background: none !important; border: none !important; font-size: 14px; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -5520,7 +5529,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:00</footer>
+  <footer>Mr.O:10:02</footer>
 </div>
 
 <script>
@@ -6724,6 +6733,10 @@ function nowCard(day) {
           go.textContent = 'Focus';
           go.addEventListener('click', () => openFocus(w.b, w.from, Number(w.b.mins) || 60));
           acts.appendChild(go);
+          const st = document.createElement('button');
+          st.type = 'button'; st.className = 'nc-act nc-stuck'; st.textContent = 'Stuck?';
+          st.addEventListener('click', () => stuckSheet(w.b.label));
+          acts.appendChild(st);
         }
         card.appendChild(acts);
       }
@@ -13306,7 +13319,8 @@ function renderHomeQuick(box) {
   // sleep is always here: pink until today's night is logged, then it shows the hours
   const sl = sleepOn(todayKey());
   btn(sl ? '' : 'due', '<span>\u{1F634}</span>' + (sl ? dur(sleepMins(sl)) : 'Sleep'), () => quickSheet('sleep'));
-  btn('food', '<span>\u{1F37D}\uFE0F</span>Food', () => foodSheet());   // a quick add, for anything not in the plan
+  btn('food', '<span>\u{1F37D}\uFE0F</span>Food', () => foodSheet());
+  btn('stuck', '<span>\u{1FAA8}</span>Stuck', () => stuckSheet());   // a tiny first step, 10 minutes, then a reward   // a quick add, for anything not in the plan
   const last = state.moods.slice().sort((a, b) => b.at - a.at)[0];
   // the mood button only shows when it is time: an hour after your last check-in
   const due = !last || Date.now() - last.at >= MOOD_EVERY;
@@ -13321,6 +13335,61 @@ function renderHomeQuick(box) {
 
 /* quick food: log something from Home without opening Fuel.
    meals in the plan log themselves when you tick them; this is for the extras. */
+/* stuck: when a task is boring or you are worn out. name it, say why it is hard,
+   take one tiny first step for 10 minutes, then a reward you picked */
+const STUCK_WHY = [
+  ['Boring', 'Do it badly for 10 minutes. Badly still counts.'],
+  ['Too big', 'Write the 3 smallest parts. Do the first one only.'],
+  ['Don\u2019t know where to start', 'Write the one question you need to answer first.'],
+  ['Tired', 'Do the easiest 5 minutes, then a 5 minute break.'],
+  ['Distracted', 'Phone in another room. Close every tab but one.']
+];
+const STUCK_REWARD = [['\u2615', 'Tea'], ['\u{1F6B6}', 'A walk'], ['\u{1F3A7}', 'Music'], ['\u{1F34E}', 'A snack'], ['\u{1F4F1}', '5 minutes of my phone']];
+function currentBlockLabel() { try { const bs = blocksOf(planKey()), m = new Date().getHours() * 60 + new Date().getMinutes(), b = bs.find(x => m >= x.from && m < x.to); return b ? b.label : ''; } catch { return ''; } }
+function stuckSheet(task) {
+  const old = document.getElementById('stsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'stsheet'; el.className = 'w3';
+  let t = task || currentBlockLabel(), why = null, stepTxt = '', reward = null, timer = null, end = 0, rounds = 0;
+  const close = () => { clearInterval(timer); el.remove(); };
+  const draw = mode => {
+    let h = '<div class="w3-back"></div><div class="w3-sheet st" role="dialog" aria-modal="true" aria-label="Stuck"><span class="w3-grab"></span><button type="button" class="ns-x st-x" aria-label="close">\u00d7</button>';
+    if (mode === 'run') {
+      h += '<p class="wk2-step">' + (rounds > 1 ? 'Round ' + rounds : 'Just 10 minutes') + '</p><h2>' + esc(stepTxt) + '</h2>' +
+        '<div class="cr-time"><b id="st-left">10:00</b><i><u id="st-bar"></u></i></div>' +
+        '<p class="cr-sub st-sub">' + (t ? 'On: ' + esc(t) + '. ' : '') + 'Then: ' + (reward ? reward[0] + ' ' + reward[1] : 'a break') + '</p>' +
+        '<button type="button" class="wka-go st-done">I did it</button>';
+    } else if (mode === 'done') {
+      h += '<h2>You started. That was the hard part.</h2><p class="cr-sub">' + (reward ? 'Take your reward: ' + reward[0] + ' ' + reward[1] + '.' : 'Take a short break.') + ' Or keep the momentum.</p>' +
+        '<button type="button" class="wka-go st-more">Keep going, 10 more</button><button type="button" class="ls-cancel ns-cancel st-end">Take my reward</button>';
+    } else {
+      h += '<h2>Stuck? Let\u2019s make it small.</h2>' +
+        '<p class="wk2-h">The task</p><input type="text" class="st-in" id="st-task" maxlength="80" placeholder="e.g. the report" value="' + esc(t) + '">' +
+        '<p class="wk2-h">Why is it hard?</p><div class="cr-cue">' + STUCK_WHY.map((w, i) => '<button type="button" data-why="' + i + '"' + (why === i ? ' class="on"' : '') + '>' + w[0] + '</button>').join('') + '</div>' +
+        (why !== null ? '<p class="wk2-h">Your tiny first step</p><input type="text" class="st-in" id="st-step" maxlength="120" value="' + esc(stepTxt) + '">' +
+          '<p class="wk2-h">Your reward after</p><div class="cr-cue">' + STUCK_REWARD.map((r, i) => '<button type="button" data-rw="' + i + '"' + (reward === r ? ' class="on"' : '') + '>' + r[0] + ' ' + r[1] + '</button>').join('') + '</div>' +
+          '<button type="button" class="wka-go st-go">Start 10 minutes</button>' : '');
+    }
+    el.innerHTML = h + '</div>';
+    el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.st-x').addEventListener('click', close);
+    const ti = el.querySelector('#st-task'); if (ti) ti.addEventListener('input', () => { t = ti.value; });
+    const si = el.querySelector('#st-step'); if (si) si.addEventListener('input', () => { stepTxt = si.value; });
+    el.querySelectorAll('[data-why]').forEach(b => b.addEventListener('click', () => { why = Number(b.dataset.why); stepTxt = STUCK_WHY[why][1]; draw(); }));
+    el.querySelectorAll('[data-rw]').forEach(b => b.addEventListener('click', () => { reward = STUCK_REWARD[Number(b.dataset.rw)]; el.querySelectorAll('[data-rw]').forEach(x => x.classList.toggle('on', x === b)); }));
+    const go = el.querySelector('.st-go'); if (go) go.addEventListener('click', () => { stepTxt = (stepTxt || '').trim() || 'Start, badly'; start(); });
+    const dn = el.querySelector('.st-done'); if (dn) dn.addEventListener('click', () => { clearInterval(timer); draw('done'); });
+    const mo = el.querySelector('.st-more'); if (mo) mo.addEventListener('click', () => start());
+    const en = el.querySelector('.st-end'); if (en) en.addEventListener('click', close);
+  };
+  const start = () => {
+    rounds++; end = Date.now() + 10 * 60000; draw('run'); clearInterval(timer);
+    const tick = () => { const l = el.querySelector('#st-left'); if (!l) return clearInterval(timer); const left = Math.max(0, end - Date.now());
+      l.textContent = Math.floor(left / 60000) + ':' + String(Math.floor(left / 1000) % 60).padStart(2, '0');
+      el.querySelector('#st-bar').style.width = Math.round((1 - left / 600000) * 100) + '%';
+      if (!left) { clearInterval(timer); draw('done'); } };
+    timer = setInterval(tick, 1000); tick();
+  };
+  draw(); document.body.appendChild(el);
+}
 function foodSheet() {
   const old = document.getElementById('fdsheet'); if (old) old.remove();
   const el = document.createElement('div');
