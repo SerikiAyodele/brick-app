@@ -5614,7 +5614,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:52</footer>
+  <footer>Mr.O:19:54</footer>
 </div>
 
 <script>
@@ -7640,6 +7640,7 @@ function lastPlanned(from) {
 }
 
 /* planning a day: things from the brain dump can become blocks on it */
+const dayWord = () => viewDay === planKey() ? 'today' : viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()]);
 function renderDumpCarry() {
   const slot = document.getElementById('dumpcarry-slot'); if (!slot) return;
   slot.innerHTML = '';
@@ -7694,12 +7695,12 @@ function renderCarry() {
   const pick = new Set(day.carryPick.n.filter(n => !got.includes(n)));
   const left = items.map((_, n) => n).filter(n => !got.includes(n));
   box.innerHTML = '<div class="cy2-h"><b>' + when + '</b><small>' + items.filter(b => b.done).length + ' of ' + items.length + ' done</small></div>' +
-    '<p class="cy-sub">Tick what comes with you today. Same lengths as before.</p>' +
+    '<p class="cy-sub">Tick what comes with you ' + dayWord() + '. Same lengths as before.</p>' +
     '<div class="cy2-list">' + items.map((b, n) => { const g = got.includes(n), on = pick.has(n);
       return '<div class="cy2-row' + (g ? ' got' : on ? ' on' : '') + (b.done ? ' wasdone' : '') + '"><button type="button" class="cy2-pick" data-p="' + n + '"' + (g ? ' disabled' : '') + ' aria-label="' + esc(b.label) + '">' +
         '<i>' + (g || on ? '\u2713' : '') + '</i><span><b>' + esc(b.label) + '</b><small>' + (g ? 'added' : minsLabel(Number(b.mins) || 60) + (b.done ? ' \u00b7 done then' : ' \u00b7 not done')) + '</small></span></button>' +
         (g ? '' : '<button type="button" class="cy2-days" data-d="' + n + '" aria-label="pick days for ' + esc(b.label) + '">\u2197</button>') + '</div>'; }).join('') + '</div>' +
-    '<div class="cy-btns">' + (left.length ? '<button type="button" class="cy-all cy2-go"' + (pick.size ? '' : ' disabled') + '>Bring ' + (pick.size || '') + ' to today</button>' : '') +
+    '<div class="cy-btns">' + (left.length ? '<button type="button" class="cy-all cy2-go"' + (pick.size ? '' : ' disabled') + '>Bring ' + (pick.size || '') + ' to ' + dayWord() + '</button>' : '') +
     '<button type="button" class="cy-done">' + (got.length ? 'Done' : 'Start fresh') + '</button></div>' +
     '<p class="cy2-note">\u2197 puts one on other days this week.</p>';
   box.querySelectorAll('[data-p]').forEach(r => r.addEventListener('click', () => { const n = Number(r.dataset.p), a = day.carryPick.n, k = a.indexOf(n); k < 0 ? a.push(n) : a.splice(k, 1); save(); renderCarry(); }));
