@@ -5194,6 +5194,45 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #focus > .fx-moodsheet.small { position: relative !important; inset: auto !important; left: auto !important; right: auto !important; bottom: auto !important; top: auto !important; transform: none !important; display: flex; justify-content: center; width: 100% !important; margin: 22px auto 0 !important; z-index: 2; }
 
 #focus.focus { overflow-y: auto !important; -webkit-overflow-scrolling: touch; }
+
+/* home: goals and habits side by side; a tip that changes every 15 minutes */
+#view-home .hm-gh { display: grid; grid-template-columns: 1.35fr 1fr; gap: 12px; }
+#view-home .hm-gh .hm-goals { min-width: 0; }
+#view-home .hm-habs { flex-direction: column; align-items: flex-start !important; justify-content: space-between; gap: 6px !important; }
+#view-home .hm-habs em { font-style: normal; font-size: 22px; font-weight: 700; color: var(--pink-d); line-height: 1; }
+#view-home .hm-habs em i { display: block; margin-top: 2px; font-style: normal; font-size: 11px; font-weight: 500; color: var(--muted); }
+#view-home .hm-gh .hm-gt small { white-space: normal; }
+#view-home .hm-tip { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 12px; padding: 10px 14px; font-size: 14px; line-height: 1.4; color: var(--ink); background: color-mix(in srgb, #e8c46a 12%, var(--card)); border: 1px solid color-mix(in srgb, #e8c46a 30%, var(--hair)); border-radius: 16px; }
+#view-home .hm-tip i { font-style: normal; font-size: 16px; }
+/* a habit's sheet */
+.gl-hname { cursor: pointer; text-decoration: underline; text-decoration-color: var(--hair); text-underline-offset: 4px; }
+.hb { position: relative; }
+.hb h2 { margin: 2px 56px 12px 0; font-family: var(--serif, inherit); font-size: 26px; font-weight: 600; }
+.hb-nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.hb-nums span { display: flex; flex-direction: column; padding: 10px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.hb-nums b { font-size: 26px; font-weight: 700; color: var(--pink-d); line-height: 1.1; }
+.hb-nums b i { font-style: normal; font-size: 14px; color: var(--muted); }
+.hb-nums small { font-size: 12px; color: var(--muted); }
+.hb-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.hb-week button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0; background: none; border: none; cursor: pointer; }
+.hb-week button:disabled { opacity: .4; cursor: default; }
+.hb-week i { display: grid; place-items: center; width: 38px; height: 38px; font-style: normal; font-weight: 700; color: #fff; background: var(--slot); border-radius: 50%; }
+.hb-week .on i { background: var(--pink); }
+.hb-week .now i { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--pink-s); }
+.hb-week small { font-size: 12px; color: var(--muted); }
+.hb-calh { display: flex; align-items: center; justify-content: space-between; margin: 18px 0 8px; }
+.hb-calh b { font-size: 16px; font-weight: 600; }
+.hb-calh button { width: 40px; height: 40px; font-size: 18px; color: var(--ink); background: var(--slot); border: none; border-radius: 50%; cursor: pointer; }
+.hb-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.hb-cal small { font-size: 11px; font-weight: 600; color: var(--muted); padding-bottom: 4px; }
+.hb-cal span { display: grid; place-items: center; height: 38px; font-size: 14px; color: var(--ink); border-radius: 50%; }
+.hb-cal span.on { color: #fff; background: var(--pink); }
+.hb-cal span.now { box-shadow: inset 0 0 0 2px var(--pink); }
+.hb-tog { display: block; width: 100%; min-height: 48px; margin-top: 16px; font: 600 15px var(--display); color: var(--pink-d); background: var(--pink-s); border: none; border-radius: 24px; cursor: pointer; }
+
+#view-home .hm-tip { padding: 8px 12px !important; margin-bottom: 10px !important; font-size: 13.5px !important; }
+#view-home#view-home#view-home#view-home .hm-gh .hm-goals.hm-goals { padding: 12px 16px !important; }
+.hb-cal span { width: 38px; margin: 0 auto; }
 </style>
 </head>
 <body>
@@ -5456,7 +5495,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:25</footer>
+  <footer>Mr.O:07:27</footer>
 </div>
 
 <script>
@@ -13090,6 +13129,24 @@ function homeNudge() {
   if (h >= 20 && !(state.days[shiftKey(t, 1)] && state.days[shiftKey(t, 1)].blocks.length)) return { e: '\u{1F319}', t: 'Plan tomorrow', s: 'a plan made tonight means an easier morning', go: 'tomorrow' };
   return null;
 }
+// one tip at a time, from your data, changing every 15 minutes
+function homeTips() {
+  const out = [], j = activeJourney();
+  if (j && typeof isTaper === 'function' && isTaper(j)) out.push(taperTip(j));
+  if (j && typeof quitInsights === 'function') quitInsights(j).forEach(x => out.push(x.t.replace(/<[^>]+>/g, '')));
+  if (j) { const st = journeyStage(j, journeyDay(j, Date.now())); st.tips.forEach(t => out.push(t)); }
+  out.push('Drink a glass of water now. Tiredness is often thirst.', 'Stand up and stretch for a minute.', 'One thing at a time. Finish the block you are on.');
+  return [...new Set(out)];
+}
+function renderHomeTip(box) {
+  const T = homeTips(); if (!T.length) return;
+  const i = Math.floor(Date.now() / (15 * 60000)) % T.length;
+  const d = document.createElement('div'); d.className = 'hm-tip'; d.dataset.i = i;
+  d.innerHTML = '<i>\u{1F4A1}</i><span></span>'; d.querySelector('span').textContent = T[i];
+  box.appendChild(d);
+}
+setInterval(() => { const d = document.querySelector('#view-home .hm-tip'); if (!d || document.body.dataset.view !== 'home') return;
+  const T = homeTips(), i = Math.floor(Date.now() / (15 * 60000)) % T.length; if (String(i) !== d.dataset.i) { d.dataset.i = i; d.querySelector('span').textContent = T[i]; } }, 60000);
 function renderHomeNudge(box) {
   const n = homeNudge();
   if (!n) return;
@@ -13378,6 +13435,7 @@ function renderHome() {
   renderHomeNow();
   renderHomeQuick(document.getElementById("home-now"));
   renderHomeNudge(document.getElementById("home-now"));
+  renderHomeTip(document.getElementById("home-now"));
 
   const slot = document.getElementById('menu');
   slot.innerHTML = '';
@@ -13389,6 +13447,10 @@ function renderHome() {
     (all.length ? onT + ' of ' + all.length + ' on track this week' : 'set this week\u2019s goals') + '</small></span>' +
     '<span class="hm-gbars">' + AREAS.map(x => { const gs = areaGoals(x.k), sc = gs.length ? areaScore(x.k, ks) : 0;
       return '<i style="--c:' + x.c + '"><u style="height:' + Math.max(gs.length ? 12 : 0, sc) + '%"></u></i>'; }).join('') + '</span></button>';
+  {   // habits sit beside goals: done today, and the best streak
+    const H = (state.habits || []).slice(0, 3), tkh = todayKey(), dn = H.filter(x => (x.marks || []).includes(tkh)).length, best = H.length ? Math.max(...H.map(x => streakOf(x.marks || []))) : 0;
+    html = '<div class="hm-gh">' + html + '<button type="button" class="hm-goals hm-habs" data-goals="1"><span class="hm-gt"><b>Habits</b><small>' + (H.length ? dn + ' of ' + H.length + ' today' : 'up to 3') + '</small></span><em>' + (best ? best + '<i>day streak</i>' : '+') + '</em></button></div>';
+  }
   // the areas, each with one live number from the systems that run it
   html += '<div class="hm-sec">Today</div><div class="hm-areas">' + AREAS.map(x => {
     const L = areaLive(x.k);
@@ -13396,7 +13458,7 @@ function renderHome() {
       '<b class="hm-an">' + x.name + '</b><em>' + L.big + '</em><small>' + esc(L.cap) + '</small></button>';
   }).join('') + '</div>';
   slot.innerHTML = html;
-  slot.querySelector('[data-goals]').addEventListener('click', () => { show('goals'); window.scrollTo(0, 0); });
+  slot.querySelectorAll('[data-goals]').forEach(g => g.addEventListener('click', () => { goalsTab = 'week'; show('goals'); window.scrollTo(0, 0); }));
   slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => {
     lifeTab = 'week'; lifeSetup = null; areaGoalsOpen = false; lifeOpen = b.dataset.open;
     try { show('life'); } catch (e) { bugToast(e); }
@@ -13519,7 +13581,7 @@ function habitsHtml() {
   const H = (state.habits || []).slice(0, 3), tk = todayKey(), jj = activeJourney(), q = jj && isQuit(jj) ? jj : null, jc = q ? cleanDays(q) : null;
   let h = '<section class="gl-hab"><div class="gl-hh"><b>Habits</b><small>' + H.length + ' of 3</small></div>' +
     H.map((x, i) => { const on = (x.marks || []).includes(tk), st = streakOf(x.marks || []);
-      return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(x.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span>' + esc(x.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
+      return '<div class="gl-hrow"><button type="button" class="gl-htick' + (on ? ' on' : '') + '" data-htick="' + i + '" aria-label="' + esc(x.name) + (on ? ', done today' : ', not done today') + '">' + (on ? '\u2713' : '') + '</button><span class="gl-hname" data-hopen="' + i + '">' + esc(x.name) + '</span><em>' + st + '<small>day' + (st === 1 ? '' : 's') + '</small></em></div>'; }).join('') +
     (H.length < 3 ? (habitForm ? '<div class="gs-add gl-hform"><input type="text" id="hf-name" maxlength="40" placeholder="e.g. Read 10 pages" aria-label="new habit"><button type="button" data-hsave="1">Add</button></div>'
                               : '<button type="button" class="gl-add" data-hadd="1">+ ' + (H.length ? 'another habit' : 'a habit') + '</button>') : '');
   if (q) {
@@ -13535,7 +13597,36 @@ function habitsHtml() {
   } else h += '<button type="button" class="gl-add" data-q="new">+ Quit something</button>';
   return h + '</section>';
 }
+function habitSheet(i, after) {
+  const x = (state.habits || [])[i]; if (!x) return;
+  const old = document.getElementById('hbsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'hbsheet'; el.className = 'w3';
+  let cal = false, mo = new Date(); mo.setDate(1);
+  const close = () => { el.remove(); if (after) after(); };
+  const best = () => { const ks = [...(x.marks || [])].sort(); let b = 0, run = 0, prev = null; for (const k of ks) { run = prev && shiftKey(prev, 1) === k ? run + 1 : 1; b = Math.max(b, run); prev = k; } return b; };
+  const draw = () => {
+    const tk = todayKey(), d = fromKey(tk), mon = shiftKey(tk, -((d.getDay() + 6) % 7)), wk = [0, 1, 2, 3, 4, 5, 6].map(n => shiftKey(mon, n)), M = new Set(x.marks || []);
+    let h = '<div class="w3-back"></div><div class="w3-sheet hb" role="dialog" aria-modal="true" aria-label="' + esc(x.name) + '"><span class="w3-grab"></span><button type="button" class="ns-x hb-x" aria-label="close">\u00d7</button>' +
+      '<h2>' + esc(x.name) + '</h2><div class="hb-nums"><span><b>' + streakOf(x.marks || []) + '</b><small>day streak</small></span><span><b>' + best() + '</b><small>best</small></span><span><b>' + wk.filter(k => M.has(k)).length + '<i>/7</i></b><small>this week</small></span></div>' +
+      '<p class="wk2-h">This week</p><div class="hb-week">' + wk.map(k => '<button type="button" class="' + (M.has(k) ? 'on' : '') + (k === tk ? ' now' : '') + '" data-hk="' + k + '"' + (k > tk ? ' disabled' : '') + '><i>' + (M.has(k) ? '\u2713' : '') + '</i><small>' + FULL[fromKey(k).getDay()].slice(0, 3) + '</small></button>').join('') + '</div>';
+    if (cal) {
+      const y = mo.getFullYear(), m = mo.getMonth(), first = (new Date(y, m, 1).getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate();
+      h += '<div class="hb-calh"><button type="button" data-mo="-1" aria-label="previous month">\u2190</button><b>' + cap(MONTHS[m]) + ' ' + y + '</b><button type="button" data-mo="1" aria-label="next month">\u2192</button></div><div class="hb-cal">' +
+        ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(c => '<small>' + c + '</small>').join('') + '<span></span>'.repeat(first) +
+        Array.from({ length: n }, (_, k) => { const dk = key(new Date(y, m, k + 1)); return '<span class="' + (M.has(dk) ? 'on' : '') + (dk === tk ? ' now' : '') + '">' + (k + 1) + '</span>'; }).join('') + '</div>';
+    }
+    h += '<button type="button" class="hb-tog">' + (cal ? 'Hide the calendar' : 'Show the calendar') + '</button><button type="button" class="ns-remove hb-rm">Remove this habit</button></div>';
+    el.innerHTML = h;
+    el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.hb-x').addEventListener('click', close);
+    el.querySelectorAll('[data-hk]').forEach(b => b.addEventListener('click', () => { const k = b.dataset.hk; x.marks = x.marks || []; const j = x.marks.indexOf(k); j < 0 ? x.marks.push(k) : x.marks.splice(j, 1); save(); draw(); }));
+    el.querySelector('.hb-tog').addEventListener('click', () => { cal = !cal; draw(); });
+    el.querySelectorAll('[data-mo]').forEach(b => b.addEventListener('click', () => { mo.setMonth(mo.getMonth() + Number(b.dataset.mo)); draw(); }));
+    el.querySelector('.hb-rm').addEventListener('click', () => { const gone = state.habits.splice(i, 1)[0]; save(); close(); offerUndo('"' + gone.name + '"', () => { state.habits.splice(i, 0, gone); save(); if (after) after(); }); });
+  };
+  draw(); document.body.appendChild(el);
+}
 function wireHabits(box, redraw) {
+  box.querySelectorAll('[data-hopen]').forEach(b => b.addEventListener('click', () => habitSheet(Number(b.dataset.hopen), redraw)));
   box.querySelectorAll('[data-htick]').forEach(b => b.addEventListener('click', () => { const x = state.habits[Number(b.dataset.htick)], tk = todayKey();
     x.marks = x.marks || []; const i = x.marks.indexOf(tk); i < 0 ? x.marks.push(tk) : x.marks.splice(i, 1); save(); redraw(); }));
   box.querySelectorAll('[data-hadd]').forEach(b => b.addEventListener('click', () => { habitForm = true; redraw(); setTimeout(() => { const i = document.getElementById('hf-name'); if (i) i.focus(); }, 30); }));
