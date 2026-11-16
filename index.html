@@ -5501,7 +5501,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:08:36</footer>
+  <footer>Mr.O:09:55</footer>
 </div>
 
 <script>
@@ -6999,6 +6999,9 @@ function forestHtml() {
   return '<span class="fx-fr-h">Your forest \u00b7 ' + F.length + '</span><span class="fx-fr-row">' + F.slice(-24).map(x => '<i title="' + esc(x.name || '') + '">' + x.e + '</i>').join('') + '</span>';
 }
 
+// what the focus room says, one at a time, every 5 minutes: flow tips, abundance, motivation (100)
+const ROOM_LINES = [["Flow","Pick one thing. Only one. Do just that."],["Flow","Put your phone face down, out of reach."],["Flow","Close every tab you do not need right now."],["Flow","Name the very next step, then take it."],["Flow","Start with the easiest part to get moving."],["Flow","If your mind wanders, gently come back. No blame."],["Flow","Make the task a little hard, not too hard. That is where flow lives."],["Flow","Write down stray thoughts, then let them go."],["Flow","Breathe out slowly. A long breath out calms the body."],["Flow","Give this block a clear finish line."],["Flow","Work in silence, or one song on repeat."],["Flow","Sit up, feet flat, shoulders soft."],["Flow","Water nearby. Small sips keep you sharp."],["Flow","The first ten minutes are the hardest. Keep going."],["Flow","Notice when time disappears. That is flow."],["Flow","Turn the task into a game: how much can you finish?"],["Flow","One window. One task. One breath at a time."],["Flow","If you feel stuck, make it smaller."],["Flow","Say out loud what you are doing right now."],["Flow","Done is better than perfect in a first draft."],["Flow","Let the plant grow. Let the work grow with it."],["Flow","If you are tired, slow down. Do not stop."],["Flow","Close your eyes for three breaths, then begin again."],["Flow","Quiet the urge to check. It will still be there later."],["Flow","Focus on the process, not the result."],["Flow","Imagine how good it will feel to be done."],["Flow","You only need to do this hour well."],["Flow","Tidy the space in front of you. A clear desk helps a clear mind."],["Flow","Keep your goal for this block in front of you."],["Flow","When you finish a part, tick it. Small wins pull you forward."],["Flow","Hard moments pass. Stay with it for one more minute."],["Flow","Relax your jaw and your hands."],["Flow","If a worry shows up, write it in your brain dump."],["Flow","Light, air and water. Check all three."],["Abundance","There is enough time for what matters today."],["Abundance","Good things are already on their way to me."],["Abundance","I have more than I need to begin."],["Abundance","Money flows to me with ease and grace."],["Abundance","I am open to receiving good things."],["Abundance","My work creates value, and value comes back to me."],["Abundance","I am worthy of rest and of reward."],["Abundance","Every day I grow richer in mind, body and spirit."],["Abundance","I welcome new ideas and they welcome me."],["Abundance","I am calm, clear and well supplied."],["Abundance","What I need comes to me at the right time."],["Abundance","I give freely, and I receive freely."],["Abundance","My life is full, and still there is room for more."],["Abundance","I trust the timing of my life."],["Abundance","I am building wealth that lasts."],["Abundance","I attract kind people and good chances."],["Abundance","Love surrounds me and moves through me."],["Abundance","I am grateful for this moment and this breath."],["Abundance","I let go of lack. I choose plenty."],["Abundance","My body is strong and my mind is steady."],["Abundance","I deserve the good life I am creating."],["Abundance","Opportunities find me easily."],["Abundance","I am at peace with money. It is a friend."],["Abundance","My gifts are needed in the world."],["Abundance","I have all I need to do this well."],["Abundance","Abundance is my natural state."],["Abundance","Each step I take today adds up to something great."],["Abundance","I am rich in love, in health and in time."],["Abundance","I receive with an open heart."],["Abundance","Good news is coming. I am ready for it."],["Abundance","My future self thanks me for this hour."],["Abundance","I am safe, I am supported, I am enough."],["Abundance","Peace and plenty grow where I place my focus."],["Abundance","I bless what I have, and it multiplies."],["Motivation","You do not have to be fast. You have to keep going."],["Motivation","Small steps every day become big changes."],["Motivation","Discipline is choosing what you want most over what you want now."],["Motivation","You started. That was the hardest part."],["Motivation","Progress, not perfection."],["Motivation","One focused hour beats a whole distracted day."],["Motivation","The work you do today is a gift to tomorrow you."],["Motivation","Hard things get easier the more you do them."],["Motivation","You are allowed to be proud of small wins."],["Motivation","Show up. Even on the slow days."],["Motivation","Your dreams are built in quiet hours like this one."],["Motivation","Consistency is a superpower."],["Motivation","Rest if you must, but do not quit."],["Motivation","You are closer than you think."],["Motivation","Great things are made of small, boring steps."],["Motivation","Do it tired. Do it unsure. Just do it."],["Motivation","Every expert was once a beginner."],["Motivation","Focus is a muscle. You are training it now."],["Motivation","You can do hard things. You have before."],["Motivation","Be the person you want to become, one hour at a time."],["Motivation","Make today count. It will not come back."],["Motivation","Start where you are. Use what you have."],["Motivation","Slow progress is still progress."],["Motivation","Your future is built by what you do today."],["Motivation","Keep the promise you made to yourself."],["Motivation","Momentum loves a person who begins."],["Motivation","Courage is doing it anyway."],["Motivation","The best time was earlier. The next best time is now."],["Motivation","You are writing your story with this hour."],["Motivation","Finish what you started. You will thank yourself."],["Motivation","Little by little, a little becomes a lot."],["Motivation","Stay with it. Good work takes patience."]];
+let roomDeck = [];   // shuffled, so nothing repeats until all have shown
 const ROOM_ABUNDANCE = [
   'There is enough time for what matters today.',
   'Good things are already on their way to me.',
@@ -7128,9 +7131,10 @@ function roomText() {
   setTimeout(() => {
     if (!focus) return;
     const last = el.dataset.q;
-    const q = pick(ROOM_ABUNDANCE.filter(x => x !== last));
+    if (!roomDeck.length) { roomDeck = ROOM_LINES.slice(); for (let i = roomDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [roomDeck[i], roomDeck[j]] = [roomDeck[j], roomDeck[i]]; } }
+    const pickd = roomDeck.pop(), q = pickd[1];
     el.dataset.q = q;
-    el.innerHTML = '<small>Abundance</small>' + esc(q);
+    el.innerHTML = '<small>' + (pickd[0] === 'Flow' ? 'For flow' : pickd[0]) + '</small>' + esc(q); void last;
     el.classList.add('in');
   }, 400);
   focus.textN++; focus.textAt = Date.now();
@@ -7192,7 +7196,7 @@ function tickFocus() {
   const mix = (a, b2) => Math.round(a + (b2 - a) * k);
   el.style.backgroundColor = 'rgb(' + mix(13, 34) + ',' + mix(12, 23) + ',' + mix(13, 16) + ')';
 
-  if (now - focus.textAt >= 3 * 60000) roomText();
+  if (now - focus.textAt >= 5 * 60000) roomText();
   // a check-in is due: ask here, unless you said not now in the last 15 minutes
   const lastMood = state.moods.reduce((m, x) => Math.max(m, x.at), 0);
   if (stage < 5 && now - lastMood >= MOOD_EVERY && now - (focus.moodSnooze || 0) >= 15 * 60000 && now - focus.start >= 60000) roomMood();
