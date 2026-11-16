@@ -5449,6 +5449,26 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day .nowcard:not(.past) .nc-acts { flex-wrap: wrap !important; }
 #view-day .nowcard:not(.past) .nc-act:not(.nc-stuck) { flex: 1 1 40% !important; }
 #view-day .nowcard .nc-act.nc-stuck { flex: 1 1 100% !important; min-height: 36px !important; }
+
+/* add a block: one box and a short list */
+#addsheet .ab-at { margin: -8px 0 12px; font-size: 14px; color: var(--muted); }
+.abx { display: flex; gap: 8px; }
+.abx input { flex: 1; min-width: 0; min-height: 54px; padding: 0 16px; font: 17px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.abx input:focus { outline: none; border-color: var(--pink); box-shadow: 0 0 0 3px var(--pink-s); }
+.abx button { flex: none; min-height: 54px; padding: 0 18px; font: 600 16px var(--display); color: var(--paper); background: var(--ink); border: none; border-radius: 16px; cursor: pointer; }
+.abx-list { list-style: none; margin: 8px 0 0; padding: 4px 0; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.abx-list:empty { display: none; }
+.abx-list li + li { border-top: 1px solid var(--hair); }
+.abx-list button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 50px; padding: 0 14px; text-align: left; font: 500 16px var(--display); color: var(--ink); background: none; border: none; cursor: pointer; }
+.abx-list button:active { background: var(--pink-s); }
+.abx-list i { flex: none; width: 24px; text-align: center; font-style: normal; font-size: 18px; }
+.abx-list span { flex: 1; min-width: 0; }
+.abx-list small { flex: none; font-size: 12px; color: var(--muted); }
+.abx-more button { justify-content: center; color: var(--pink-d); font-size: 15px; }
+#addsheet .ls-list { display: flex !important; flex-wrap: wrap; gap: 8px; }
+#addsheet .ls-list .ls-row { width: auto !important; min-height: 42px !important; padding: 0 14px !important; border-radius: 21px !important; font-size: 15px !important; }
+#addsheet .ls-list .ls-row small, #addsheet .ls-list .ls-row i { display: none !important; }
+#addsheet .ls-list .ls-row b { font-size: 15px !important; }
 </style>
 </head>
 <body>
@@ -5715,7 +5735,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:12</footer>
+  <footer>Mr.O:20:40</footer>
 </div>
 
 <script>
@@ -8647,19 +8667,22 @@ function addBlockSheet(preset, insertAt) {
         [0, 1, 2].map(i => '<input type="text" class="ab-goal" maxlength="80" placeholder="' + ['Goal 1', 'Goal 2 (optional)', 'Goal 3 (optional)'][i] + '" aria-label="work goal ' + (i + 1) + '">').join('') +
         '<button type="button" class="wka-go ab-next">Next</button>';
     } else if (!pick) {
-      // suggested now: what you usually do around when this block would start, not already planned
-      const planned = new Set(day.blocks.filter(b => !b.done).map(b => (b.label || '').trim().toLowerCase())), labs = {};
-      for (let n = 1; n <= 30; n++) { const d0 = state.days[shiftKey(planKey(), -n)]; if (d0 && d0.blocks) d0.blocks.forEach(b => { const t = (b.label || '').trim(); if (t) labs[t.toLowerCase()] = t; }); }
-      const sug = Object.values(labs).filter(t => !planned.has(t.toLowerCase())).map(t => ({ t, u: usualStart(t) })).filter(x => x.u !== null && Math.abs(x.u - endOfDay) <= 75).sort((a, b) => Math.abs(a.u - endOfDay) - Math.abs(b.u - endOfDay)).slice(0, 3);
+      // one box. tap it for a short list of what you do most (suggested for this time first); type to filter
+      const planned = new Set(day.blocks.filter(b => !b.done).map(b => (b.label || '').trim().toLowerCase()));
       const rk = endOfDay < 11 * 60 ? 'am' : endOfDay >= 18 * 60 ? 'pm' : null;
-      html += '<h2>What is it?</h2>' +
-        '<div class="gs-add ab-type ab-type-top"><input type="text" maxlength="60" placeholder="Type it" aria-label="block name"><button type="button">Next</button></div>' +
-        (sug.length || rk ? '<p class="ab-sub">Suggested now \u00b7 ' + clock(endOfDay) + '</p><div class="ab-grid ab-sugs">' + (rk ? '<button type="button" class="ab-t ab-rt" data-rt="' + rk + '"><span>' + (rk === 'am' ? '\u2600\uFE0F' : '\u{1F319}') + '</span><b>' + (rk === 'am' ? 'Morning routine' : 'Evening routine') + '</b></button>' : '') +
-          sug.map(x => tile(icon(x.t), x.t, 'data-sug="' + esc(x.t) + '"')).join('') + '</div>' : '') +
-        '<p class="ab-sub">Routines</p><div class="ab-grid">' + [['am', '\u2600\uFE0F', 'Morning'], ['pm', '\u{1F319}', 'Evening']].map(([k, e, t]) => '<button type="button" class="ab-t ab-rt" data-rt="' + k + '"><span>' + e + '</span><b>' + t + (routineGet(k) ? '' : ' <small>make one</small>') + '</b></button>').join('') + '</div>' +
-        (top.length ? '<p class="ab-sub">Most used</p><div class="ab-grid">' + top.map((t, i) => tile(icon(t), t, 'data-top="' + i + '"')).join('') + '</div>' : '') +
-        (goals.length ? '<p class="ab-sub">Your goals</p><div class="ab-grid one">' + goals.map((g, i) => tile(g.e, g.t, 'data-g="' + i + '"')).join('') + '</div><p class="ab-sub">Everyday</p>' : '') +
-        '<div class="ab-grid">' + common.map((c, i) => tile(c[0], c[1], 'data-c="' + i + '"')).join('') + '</div>';
+      const pool = [], seenL = new Set(), push = it => { const k = it.t.toLowerCase(); if (seenL.has(k)) return; seenL.add(k); pool.push(it); };
+      if (rk) push({ t: rk === 'am' ? 'Morning routine' : 'Evening routine', e: rk === 'am' ? '\u2600\uFE0F' : '\u{1F319}', sub: routineGet(rk) ? 'routine' : 'make one', rt: rk });
+      Object.keys(tally).map(k => keepT[k]).map(t => ({ t, u: usualStart(t) })).filter(x => x.u !== null && Math.abs(x.u - endOfDay) <= 75 && !planned.has(x.t.toLowerCase()))
+        .sort((a, b) => Math.abs(a.u - endOfDay) - Math.abs(b.u - endOfDay)).slice(0, 3).forEach(x => push({ t: x.t, e: icon(x.t), sub: 'usual now' }));
+      top.forEach(t => push({ t, e: icon(t), sub: 'most used' }));
+      goals.forEach(g => push({ t: g.t, e: g.e, sub: 'goal', step: g.id }));
+      common.forEach(c => push({ t: c[1], e: c[0], mins: c[2], go: c[3] || null }));
+      if (!rk) push({ t: 'Morning routine', e: '\u2600\uFE0F', sub: routineGet('am') ? 'routine' : 'make one', rt: 'am' });
+      if (rk !== 'pm') push({ t: 'Evening routine', e: '\u{1F319}', sub: routineGet('pm') ? 'routine' : 'make one', rt: 'pm' });
+      el._pool = pool;
+      html += '<h2>Add a block</h2><p class="ab-at">Starts at ' + clock(endOfDay) + '</p>' +
+        '<div class="abx"><input type="text" id="abx-in" maxlength="60" autocomplete="off" placeholder="What is it?" aria-label="block name"><button type="button" id="abx-go">Next</button></div>' +
+        '<ul class="abx-list" id="abx-list"></ul>';
     } else {
       const usual = usualLength(pick.label) || pick.mins || null;
       let opts = [15, 30, 45, 60, 90, 120];
@@ -8670,7 +8693,7 @@ function addBlockSheet(preset, insertAt) {
           pick.sug = sl && sl.i < day.blocks.length ? sl : null; if (pick.where === undefined) pick.where = pick.sug ? 'usual' : 'end';
           return pick.sug ? '<p class="ab-sub">When</p><div class="ab-when"><button type="button" data-where="usual"' + (pick.where === 'usual' ? ' class="on"' : '') + '><b>' + clock(pick.sug.at) + '</b><small>your usual time</small></button><button type="button" data-where="end"' + (pick.where === 'end' ? ' class="on"' : '') + '><b>' + clock(endOfDay) + '</b><small>at the end</small></button></div>' : ''; })() +
         '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b class="ab-st">' + clock(pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + '</b> \u00b7 ends at <b class="ab-end">' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + (usual || 60)) + '</b></p>' +
-        '<button type="button" class="wka-go ab-add">Add</button><p class="ab-sub">Or tap one</p>' +
+        '<button type="button" class="wka-go ab-add">Add</button><p class="ab-sub">Quick lengths</p>' +
         '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + m) + '</small>' : '') + '</button>').join('') + '</div>';
     }
     html += '<button type="button" class="ls-cancel">Cancel</button></div>';
@@ -8689,14 +8712,35 @@ function addBlockSheet(preset, insertAt) {
     if (nx) nx.addEventListener('click', () => { const gl = [...el.querySelectorAll('.ab-goal')].map(i => i.value.trim()).filter(Boolean).slice(0, 3); pick = { label: 'Work', mins: 60, goals: gl }; draw(); });
     el.querySelectorAll('[data-top]').forEach(b => b.addEventListener('click', () => { const t = top[Number(b.dataset.top)]; pick = { label: t, mins: usualLength(t) || 60 }; draw(); }));
     el.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { pick = { label: mine[Number(b.dataset.u)].t }; draw(); }));
-    el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
     const abd = el.querySelector('.ab-dur');
+    if (!abd) el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
     if (abd) { let cur = usualLength(pick.label) || pick.mins || 60;
       const st0 = () => pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay;
-      durField(abd, cur, m => { cur = m; el.querySelector('.ab-end').textContent = clock(st0() + m); });
+      const dfx = durField(abd, cur, m => { cur = m; el.querySelector('.ab-end').textContent = clock(st0() + m); el.querySelectorAll('[data-m]').forEach(y => y.classList.toggle('on', Number(y.dataset.m) === m)); });
+      el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { cur = Number(b.dataset.m); dfx.set(cur); el.querySelector('.ab-end').textContent = clock(st0() + cur); el.querySelectorAll('[data-m]').forEach(y => y.classList.toggle('on', y === b)); }));
       el.querySelectorAll('[data-where]').forEach(x => x.addEventListener('click', () => { pick.where = x.dataset.where; draw(); }));
       el.querySelector('.ab-add').addEventListener('click', () => add(cur)); }
     const bk = el.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => { if (pick) pick = null; else step = null; draw(); });
+    const bx = el.querySelector('#abx-in');
+    if (bx) {
+      const list = el.querySelector('#abx-list'), P = el._pool || [];
+      const choose = it => { if (it.rt) { close(); routineSheet(it.rt); return; } if (it.go) { step = it.go; draw(); return; }
+        pick = { label: it.t, mins: it.mins || usualLength(it.t) || 60, ...(it.step ? { step: it.step } : {}) }; draw(); };
+      const paint = () => {
+        const q = bx.value.trim().toLowerCase();
+        const L = (q ? P.filter(x => x.t.toLowerCase().includes(q)) : P).slice(0, q ? 8 : 6);
+        list.innerHTML = (q && !P.some(x => x.t.toLowerCase() === q) ? '<li><button type="button" data-typed="1"><i>+</i><span>Add \u201c' + esc(bx.value.trim()) + '\u201d</span></button></li>' : '') +
+          L.map((x, n) => '<li><button type="button" data-pi="' + P.indexOf(x) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span>' + (x.sub ? '<small>' + x.sub + '</small>' : '') + '</button></li>').join('') +
+          (!q && P.length > 6 ? '<li class="abx-more"><button type="button" data-more="1">More\u2026</button></li>' : '');
+        list.querySelectorAll('[data-pi]').forEach(b => b.addEventListener('click', () => choose(P[Number(b.dataset.pi)])));
+        const ty = list.querySelector('[data-typed]'); if (ty) ty.addEventListener('click', go);
+        const mo = list.querySelector('[data-more]'); if (mo) mo.addEventListener('click', () => { list.innerHTML = P.map((x, n) => '<li><button type="button" data-pi="' + n + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span>' + (x.sub ? '<small>' + x.sub + '</small>' : '') + '</button></li>').join(''); list.querySelectorAll('[data-pi]').forEach(b => b.addEventListener('click', () => choose(P[Number(b.dataset.pi)]))); });
+      };
+      const go = () => { const t = bx.value.trim(); if (!t) { bx.focus(); return; } const m = P.find(x => x.t.toLowerCase() === t.toLowerCase()); if (m) return choose(m); pick = { label: cap(t) }; draw(); };
+      bx.addEventListener('input', paint); bx.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+      el.querySelector('#abx-go').addEventListener('click', go);
+      paint();
+    }
     const inp = el.querySelector('.ab-type input');
     if (inp) { const go = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; } pick = { label: t }; draw(); };
       el.querySelector('.ab-type button').addEventListener('click', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); }
