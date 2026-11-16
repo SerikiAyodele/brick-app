@@ -5422,6 +5422,30 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .ab-when small { font-size: 13px; color: var(--muted); }
 .ab-when button.on { background: var(--pink-s); border-color: var(--pink); }
 .dc-plus { color: var(--pink-d) !important; font-size: 18px !important; border-color: var(--pink) !important; background: var(--pink-s) !important; }
+
+/* add a block: minimal. small chips, type first */
+#addsheet .ab-type-top { margin: 0 0 6px; }
+#addsheet .ab-grid { display: flex !important; flex-wrap: wrap; gap: 8px !important; grid-template-columns: none !important; }
+#addsheet .ab-t { display: inline-flex !important; flex-direction: row !important; align-items: center; gap: 8px !important; width: auto !important; min-height: 44px !important; padding: 0 14px !important; border-radius: 22px !important; aspect-ratio: auto !important; }
+#addsheet .ab-t span { font-size: 18px !important; }
+#addsheet .ab-t b { font-size: 15px !important; font-weight: 500 !important; }
+#addsheet .ab-t b small { font-weight: 400; color: var(--pink-d); }
+#addsheet .ab-sugs .ab-t { background: var(--pink-s) !important; border-color: color-mix(in srgb, var(--pink) 40%, var(--hair)) !important; }
+#addsheet .ab-sub { margin: 16px 2px 8px !important; }
+
+/* plan, sporty: stats strip, athletic times and lengths, rose gold on the block you are on */
+#view-day .ds { display: grid; grid-template-columns: auto 1fr 1fr 1fr; align-items: center; gap: 10px; margin: 0 0 14px; padding: 12px 16px; border: 1px solid transparent; border-radius: 20px;
+  background: linear-gradient(color-mix(in srgb, var(--pink) 6%, var(--card)), color-mix(in srgb, var(--pink) 6%, var(--card))) padding-box, var(--gold, linear-gradient(135deg, #f7d3dc, #b97488)) border-box; }
+#view-day .ds > span { display: flex; flex-direction: column; min-width: 0; }
+#view-day .ds b { font-family: var(--sport, inherit); font-size: 22px; font-weight: 700; line-height: 1.1; color: var(--ink); white-space: nowrap; }
+#view-day .ds b i, #view-day .ds-ring em i { font-style: normal; font-size: 13px; font-weight: 600; color: var(--muted); }
+#view-day .ds small { font-size: 11px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); }
+#view-day .ds-ring { position: relative; width: 48px; height: 48px; }
+#view-day .ds-ring svg { width: 48px; height: 48px; }
+#view-day .ds-ring em { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; white-space: nowrap; font-style: normal; font-family: var(--sport, inherit); font-size: 14px; font-weight: 700; color: var(--ink); }
+#view-day .line .at, #view-day .line .at .endat, #view-day .how, #view-day .pl-len, #view-day .nowcard .nc-left, #view-day .total b { font-family: var(--sport, inherit) !important; letter-spacing: -.1px; }
+#view-day .line .at { font-weight: 600; }
+#view-day .how, #view-day .pl-len { font-weight: 700 !important; }
 </style>
 </head>
 <body>
@@ -5557,6 +5581,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     </div>
 
     <button type="button" class="pt-open" id="pt-open">&#x1F319; Plan tomorrow <span>&rsaquo;</span></button>
+    <div id="day-stats"></div>
     <div id="day-goal"></div>
     <div id="carry-slot"></div>
     <div id="dumpcarry-slot"></div>
@@ -5687,7 +5712,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:08</footer>
+  <footer>Mr.O:20:12</footer>
 </div>
 
 <script>
@@ -5746,7 +5771,7 @@ function aiPassSheet(wrong) {
 const KEY = 'paper.by.mia.v2';
 const OLD = 'paper.by.mia.v1';
 
-const blank = { habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
+const blank = { dayRoutines: {}, habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
                 penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [] };
 
@@ -5796,7 +5821,8 @@ function load() {
         habitsCleared: d.habitsCleared || 0,
         habitsOld: Array.isArray(d.habitsOld) ? d.habitsOld : [],
         dump: Array.isArray(d.dump) ? d.dump : [],
-        forest: Array.isArray(d.forest) ? d.forest : []
+        forest: Array.isArray(d.forest) ? d.forest : [],
+        dayRoutines: (d.dayRoutines && typeof d.dayRoutines === 'object') ? d.dayRoutines : {}
       };
     }
     const old = localStorage.getItem(OLD);
@@ -7660,7 +7686,7 @@ function lengthPicker(b, from, len) {
   let opts = [30, 60, 90, 120];
   if (usual && !opts.includes(usual)) opts = [usual, ...opts.filter(m => m !== 90)];
   const close = () => { el.remove(); customFor = null; renderDay(); };
-  const keep = m => { b.mins = Math.max(5, Math.min(1440, m)); save(); close(); };
+  const keep = m => { m = Math.max(5, Math.min(1440, m)); if (b.done && m > (Number(b.mins) || 60)) { b.done = false; b.early = false; } b.mins = m; save(); close(); };   // more time means not done yet
   let other = len;
   const draw = more => {
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
@@ -7764,6 +7790,19 @@ function renderDumpCarry() {
   box.querySelector('.dc-no').addEventListener('click', () => { day.noDump = true; day.dumpOpen = false; save(); renderDumpCarry(); });
   slot.appendChild(box);
 }
+/* plan, sporty: done, planned and left for the day you are looking at */
+function renderDayStats() {
+  const el = document.getElementById('day-stats'); if (!el) return;
+  const bs = typeof blocksOf === 'function' ? blocksOf(viewDay) : [];
+  if (!bs.length) { el.innerHTML = ''; return; }
+  const done = bs.filter(b => b.done).length, plan = bs.reduce((t, b) => t + (b.to - b.from), 0);
+  const isT = viewDay === planKey(), nowM = planMin(viewDay), endM = bs[bs.length - 1].to;
+  const left = isT ? Math.max(0, endM - Math.max(nowM, bs[0].from)) : viewDay > planKey() ? plan : 0;
+  const f = bs.length ? done / bs.length : 0;
+  el.innerHTML = '<div class="ds"><span class="ds-ring">' + ringSvg(f, '#e57a9c') + '<em>' + Math.round(f * 100) + '<i>%</i></em></span>' +
+    '<span><b>' + done + '<i>/' + bs.length + '</i></b><small>done</small></span><span><b>' + hrsShort(plan) + '</b><small>planned</small></span><span><b>' + hrsShort(left) + '</b><small>' + (isT ? 'left' : viewDay > planKey() ? 'to come' : 'left') + '</small></span></div>';
+}
+const hrsShort = m => { const h = Math.floor(m / 60), r = m % 60; return h ? h + 'h' + (r ? String(r).padStart(2, '0') : '') : r + 'm'; };
 function renderCarry() {
   const slot = document.getElementById('carry-slot');
   slot.innerHTML = '';
@@ -7977,6 +8016,7 @@ function renderDay() {
   renderDump();
   renderCarry();
   renderDumpCarry();
+  renderDayStats();
   const day = dayFor(viewDay);
   const d = fromKey(viewDay);
   const isToday = viewDay === planKey();
@@ -8505,6 +8545,37 @@ function renderDump() {
   if (keep.length !== L.length) { state.dump = keep; save(); }
 }
 
+function routineGet(kind) { const r = (state.dayRoutines || {})[kind]; return r && r.blocks && r.blocks.length ? r : (typeof routineFromHistory === 'function' ? routineFromHistory(kind) : null); }
+function routineSheet(kind) {
+  const old = document.getElementById('rtsheet'); if (old) old.remove();
+  const name = kind === 'am' ? 'Morning routine' : 'Evening routine', R = routineGet(kind);
+  let list = R ? R.blocks.map(b => ({ label: b.label, mins: Number(b.mins) || 30 })) : [];
+  const el = document.createElement('div'); el.id = 'rtsheet'; el.className = 'w3';
+  const LENS = [5, 10, 15, 20, 30, 45, 60, 90, 120];
+  const close = () => el.remove();
+  const draw = () => {
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ptm" role="dialog" aria-modal="true" aria-label="' + name + '"><span class="w3-grab"></span><button type="button" class="ns-x rt-x" aria-label="close">\u00d7</button>' +
+      '<h2>' + (kind === 'am' ? '\u2600\uFE0F ' : '\u{1F319} ') + name + '</h2><p class="cr-sub">' + (list.length ? hrsLabel(list.reduce((t, b) => t + b.mins, 0)) + ' \u00b7 ' + ((state.dayRoutines || {})[kind] ? 'yours' : 'learned from your days') : 'List what you usually do, once. brick remembers it.') + '</p>' +
+      (list.length ? '<ol class="ptm-list">' + list.map((b, i) => '<li><span>' + esc(b.label) + '</span><select data-len="' + i + '" aria-label="how long">' + LENS.concat(LENS.includes(b.mins) ? [] : [b.mins]).sort((p, q) => p - q).map(m => '<option value="' + m + '"' + (m === b.mins ? ' selected' : '') + '>' + minsLabel(m) + '</option>').join('') + '</select><button type="button" data-rm="' + i + '" aria-label="remove">\u00d7</button></li>').join('') + '</ol>' : '') +
+      '<div class="gs-add ptm-add"><input type="text" id="rt-in" maxlength="60" list="preset-names" placeholder="' + (kind === 'am' ? 'e.g. Pray, Gym, Breakfast' : 'e.g. Dinner, Read, Wind down') + '"><button type="button">Add</button></div>' +
+      (list.length ? '<button type="button" class="wka-go rt-add">Add to ' + (viewDay === planKey() ? 'today' : cap(FULL[fromKey(viewDay).getDay()])) + '</button><button type="button" class="ls-cancel ns-cancel rt-save">Save routine</button>' : '') + '</div>';
+    el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.rt-x').addEventListener('click', close);
+    el.querySelectorAll('[data-len]').forEach(x => x.addEventListener('change', () => { list[Number(x.dataset.len)].mins = Number(x.value); draw(); }));
+    el.querySelectorAll('[data-rm]').forEach(x => x.addEventListener('click', () => { list.splice(Number(x.dataset.rm), 1); draw(); }));
+    const inp = el.querySelector('#rt-in');
+    const addOne = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } v.split(',').map(x => x.trim()).filter(Boolean).forEach(t => { if (!list.some(b => b.label.toLowerCase() === t.toLowerCase())) list.push({ label: cap(t), mins: usualLength(t) || 30 }); }); draw(); el.querySelector('#rt-in').focus(); };
+    el.querySelector('.ptm-add button').addEventListener('click', addOne); inp.addEventListener('keydown', e => { if (e.key === 'Enter') addOne(); });
+    const keep = () => { state.dayRoutines = state.dayRoutines || {}; state.dayRoutines[kind] = { start: R && R.start ? R.start : (kind === 'am' ? '07:00' : '19:00'), blocks: list.map(b => ({ ...b })) }; save(); };
+    const sv = el.querySelector('.rt-save'); if (sv) sv.addEventListener('click', () => { keep(); sv.textContent = 'Saved \u2713'; });
+    const ad = el.querySelector('.rt-add'); if (ad) ad.addEventListener('click', () => {
+      keep(); const d = dayFor(viewDay); d.touched = true;
+      const add = list.map(b => ({ label: b.label, mins: b.mins, done: false }));
+      if (kind === 'am') { let first = d.blocks.findIndex(b => !b.done); if (first < 0) first = d.blocks.length; d.blocks.splice(first, 0, ...add); } else d.blocks.push(...add);
+      save(); close(); renderDay(); renderHabits();
+    });
+  };
+  draw(); document.body.appendChild(el);
+}
 function usualStart(label) {
   const nm = String(label || '').trim().toLowerCase(); if (!nm) return null;
   const tk = planKey(), at = [];
@@ -8573,11 +8644,19 @@ function addBlockSheet(preset, insertAt) {
         [0, 1, 2].map(i => '<input type="text" class="ab-goal" maxlength="80" placeholder="' + ['Goal 1', 'Goal 2 (optional)', 'Goal 3 (optional)'][i] + '" aria-label="work goal ' + (i + 1) + '">').join('') +
         '<button type="button" class="wka-go ab-next">Next</button>';
     } else if (!pick) {
+      // suggested now: what you usually do around when this block would start, not already planned
+      const planned = new Set(day.blocks.filter(b => !b.done).map(b => (b.label || '').trim().toLowerCase())), labs = {};
+      for (let n = 1; n <= 30; n++) { const d0 = state.days[shiftKey(planKey(), -n)]; if (d0 && d0.blocks) d0.blocks.forEach(b => { const t = (b.label || '').trim(); if (t) labs[t.toLowerCase()] = t; }); }
+      const sug = Object.values(labs).filter(t => !planned.has(t.toLowerCase())).map(t => ({ t, u: usualStart(t) })).filter(x => x.u !== null && Math.abs(x.u - endOfDay) <= 75).sort((a, b) => Math.abs(a.u - endOfDay) - Math.abs(b.u - endOfDay)).slice(0, 3);
+      const rk = endOfDay < 11 * 60 ? 'am' : endOfDay >= 18 * 60 ? 'pm' : null;
       html += '<h2>What is it?</h2>' +
+        '<div class="gs-add ab-type ab-type-top"><input type="text" maxlength="60" placeholder="Type it" aria-label="block name"><button type="button">Next</button></div>' +
+        (sug.length || rk ? '<p class="ab-sub">Suggested now \u00b7 ' + clock(endOfDay) + '</p><div class="ab-grid ab-sugs">' + (rk ? '<button type="button" class="ab-t ab-rt" data-rt="' + rk + '"><span>' + (rk === 'am' ? '\u2600\uFE0F' : '\u{1F319}') + '</span><b>' + (rk === 'am' ? 'Morning routine' : 'Evening routine') + '</b></button>' : '') +
+          sug.map(x => tile(icon(x.t), x.t, 'data-sug="' + esc(x.t) + '"')).join('') + '</div>' : '') +
+        '<p class="ab-sub">Routines</p><div class="ab-grid">' + [['am', '\u2600\uFE0F', 'Morning'], ['pm', '\u{1F319}', 'Evening']].map(([k, e, t]) => '<button type="button" class="ab-t ab-rt" data-rt="' + k + '"><span>' + e + '</span><b>' + t + (routineGet(k) ? '' : ' <small>make one</small>') + '</b></button>').join('') + '</div>' +
         (top.length ? '<p class="ab-sub">Most used</p><div class="ab-grid">' + top.map((t, i) => tile(icon(t), t, 'data-top="' + i + '"')).join('') + '</div>' : '') +
         (goals.length ? '<p class="ab-sub">Your goals</p><div class="ab-grid one">' + goals.map((g, i) => tile(g.e, g.t, 'data-g="' + i + '"')).join('') + '</div><p class="ab-sub">Everyday</p>' : '') +
-        '<div class="ab-grid">' + common.map((c, i) => tile(c[0], c[1], 'data-c="' + i + '"')).join('') + '</div>' +
-        '<div class="gs-add ab-type"><input type="text" maxlength="60" placeholder="Or type it" aria-label="block name"><button type="button">Next</button></div>';
+        '<div class="ab-grid">' + common.map((c, i) => tile(c[0], c[1], 'data-c="' + i + '"')).join('') + '</div>';
     } else {
       const usual = usualLength(pick.label) || pick.mins || null;
       let opts = [15, 30, 45, 60, 90, 120];
@@ -8595,6 +8674,8 @@ function addBlockSheet(preset, insertAt) {
     el.innerHTML = html;
     el.querySelector('.w3-back').addEventListener('click', close);
     el.querySelector('.ls-cancel').addEventListener('click', close);
+    el.querySelectorAll('[data-sug]').forEach(b => b.addEventListener('click', () => { pick = { label: b.dataset.sug, mins: usualLength(b.dataset.sug) || 60 }; draw(); }));
+    el.querySelectorAll('[data-rt]').forEach(b => b.addEventListener('click', () => { close(); routineSheet(b.dataset.rt); }));
     el.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => { const g = goals[Number(b.dataset.g)]; pick = { label: g.t, step: g.id }; draw(); }));
     el.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => { const c = common[Number(b.dataset.c)];
       if (c[3]) { step = c[3]; draw(); return; }
@@ -13805,7 +13886,7 @@ function planTomorrowSheet() {
   const tk = planKey(), tm = shiftKey(tk, 1), last = shiftKey(tm, -7), DN = k => cap(FULL[fromKey(k).getDay()]);
   const cur = state.days[tm];
   let plan = cur && cur.blocks ? cur.blocks.map(b => ({ ...b })) : [];
-  const am = routineFromHistory('am'), pm = routineFromHistory('pm');
+  const am = routineGet('am'), pm = routineGet('pm');
   let start = cur && cur.start ? cur.start : am ? am.start : '08:00';
   const used = new Set();
   const src = [
