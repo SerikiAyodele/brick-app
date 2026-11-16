@@ -5446,6 +5446,9 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day .line .at, #view-day .line .at .endat, #view-day .how, #view-day .pl-len, #view-day .nowcard .nc-left, #view-day .total b { font-family: var(--sport, inherit) !important; letter-spacing: -.1px; }
 #view-day .line .at { font-weight: 600; }
 #view-day .how, #view-day .pl-len { font-weight: 700 !important; }
+#view-day .nowcard:not(.past) .nc-acts { flex-wrap: wrap !important; }
+#view-day .nowcard:not(.past) .nc-act:not(.nc-stuck) { flex: 1 1 40% !important; }
+#view-day .nowcard .nc-act.nc-stuck { flex: 1 1 100% !important; min-height: 36px !important; }
 </style>
 </head>
 <body>
