@@ -5239,6 +5239,25 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .hb-quitbox:empty, .hb-quitbox:not(:has(*)) { display: none; }
 #view-home .hm-tip span { flex: 1; }
 #view-home .hm-tipx { flex: none; width: 32px; height: 32px; margin: -4px -6px -4px 0; font-size: 20px; line-height: 1; color: var(--muted); background: none; border: none; border-radius: 50%; cursor: pointer; }
+
+/* habits page, minimal: a plain row per habit, small streak, thin line, small week dots. nothing removed */
+#view-habits .hb-card { margin-top: 10px !important; padding: 14px 16px 12px !important; background: var(--card) !important; border: 1px solid var(--hair) !important; border-radius: 18px !important; box-shadow: none !important; }
+#view-habits .hb-card.done { background: var(--card) !important; }
+#view-habits .hb-top { gap: 12px !important; }
+#view-habits .hb-fire { width: auto !important; height: auto !important; min-width: 36px; padding: 0 !important; background: none !important; border: none !important; box-shadow: none !important; }
+#view-habits .hb-fire b { font-size: 20px !important; color: var(--pink-d); }
+#view-habits .hb-fire span { font-size: 11px !important; }
+#view-habits .hb-name b { font-size: 17px !important; font-weight: 600 !important; }
+#view-habits .hb-name small, #view-habits .hb-name em { font-size: 12.5px !important; color: var(--muted) !important; }
+#view-habits .hb-tick { width: 40px !important; height: 40px !important; font-size: 17px !important; border-width: 1.5px !important; border-color: var(--dash) !important; color: var(--muted) !important; }
+#view-habits .hb-card.done .hb-tick { color: #fff !important; background: var(--pink) !important; border-color: var(--pink) !important; }
+#view-habits .hb-bar { height: 3px !important; margin: 10px 0 0 !important; background: var(--slot) !important; }
+#view-habits .hb-bar u { background: var(--pink) !important; }
+#view-habits .hb-week { gap: 0 !important; margin-top: 10px !important; }
+#view-habits .hb-d { font-size: 11px !important; color: var(--muted) !important; }
+#view-habits .hb-d i { width: 10px !important; height: 10px !important; margin-bottom: 4px; background: var(--slot) !important; border: none !important; box-shadow: none !important; }
+#view-habits .hb-d.on i { background: var(--pink) !important; }
+#view-habits .hb-d.now { color: var(--ink) !important; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -5501,7 +5520,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:55</footer>
+  <footer>Mr.O:09:59</footer>
 </div>
 
 <script>
