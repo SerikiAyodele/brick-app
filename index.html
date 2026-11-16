@@ -5469,6 +5469,17 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #addsheet .ls-list .ls-row { width: auto !important; min-height: 42px !important; padding: 0 14px !important; border-radius: 21px !important; font-size: 15px !important; }
 #addsheet .ls-list .ls-row small, #addsheet .ls-list .ls-row i { display: none !important; }
 #addsheet .ls-list .ls-row b { font-size: 15px !important; }
+
+/* calm plan (edit49): fewer boxes, one clear next step */
+#view-day .addrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 6px; }
+#view-day .addrow .addblock { flex: 1; margin: 0 !important; }
+#view-day#view-day .addrow .ai-sug { flex: none; width: auto; min-height: 44px; margin: 0; padding: 0 16px; font: 500 15px var(--display); background: none; border: 1px solid color-mix(in srgb, var(--pink) 35%, var(--hair)); border-radius: 22px; }
+#view-day.sorting #day-stats, #view-day.emptyday #day-stats { display: none; }
+#view-day #day-undo:disabled { display: none; }
+#view-day.emptyday #block-list .empty { display: none; }
+#view-day.emptyday .start-row { margin-bottom: 4px; }
+#view-day .pl-rm { width: 32px; height: 32px; font-size: 18px; background: none; opacity: .55; }
+#view-day .pt-open[hidden] { display: none; }
 </style>
 </head>
 <body>
@@ -5619,10 +5630,12 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
     <datalist id="preset-names"></datalist>
 
-    <button class="ai-sug" id="sug-day" type="button">✨ Suggest tasks</button>
-    <button class="addblock" id="block-add" type="button">
-      <span class="plusbox">+</span> Add a block
-    </button>
+    <div class="addrow">
+      <button class="addblock" id="block-add" type="button">
+        <span class="plusbox">+</span> Add a block
+      </button>
+      <button class="ai-sug" id="sug-day" type="button">✨ Suggest</button>
+    </div>
 
     <div class="total" id="total"></div>
     <div id="dump-slot"></div>
@@ -6507,9 +6520,12 @@ function nowHHMM() {
   return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 }
 
+function dayStartFor() { try { const r = typeof routineGet === 'function' && routineGet('am'); if (r && r.start) return r.start; } catch {} return '08:00'; }
 function dayFor(k) {
-  // a day you have not planned yet starts from right now
-  if (!state.days[k]) state.days[k] = { start: nowHHMM(), blocks: [] };
+  // today starts from right now; a day ahead starts at your morning time
+  const d = state.days[k];
+  if (!d) state.days[k] = { start: k === planKey() ? nowHHMM() : dayStartFor(), blocks: [] };
+  else if (k > planKey() && !d.blocks.length && !d.touched && !d.planSnap) d.start = dayStartFor();   // repair an empty day ahead
   return state.days[k];
 }
 
@@ -6731,11 +6747,12 @@ const NS_GYM = () => { let W = []; try { W = routine().workouts.map(w => ['\u{1F
   return W.concat([['\u{1F3C3}', 'Cardio', 45], ['\u{1F9D8}', 'Yoga', 45], ['\u{1F3CA}', 'Swim', 45], ['\u{1F6B6}', 'Walk', 30], ['\u{1F6B4}', 'Cycling', 45], ['\u{1F3BE}', 'Tennis', 60], ['\u{1F483}', 'Dance', 45], ['\u{1F938}', 'Stretch', 15]]); };
 // take a block out of the day, with an undo
 function removeBlock(day, i) {
-  const gone = day.blocks[i], where = viewDay;
+  const gone = day.blocks[i], where = viewDay, before = day.blocks[i - 1];
   if (!gone) return;
   day.blocks.splice(i, 1);
   save(); renderDay(); renderHabits();
-  offerUndo('"' + (gone.label || 'a block') + '"', () => { dayFor(where).blocks.splice(i, 0, gone); save(); renderDay(); renderHabits(); });
+  offerUndo('"' + (gone.label || 'a block') + '"', () => { const L = dayFor(where).blocks; if (L.includes(gone)) return;
+    const j = before ? L.indexOf(before) : -1; L.splice(before ? (j < 0 ? Math.min(i, L.length) : j + 1) : 0, 0, gone); save(); renderDay(); renderHabits(); });
 }
 function openNameSheet(b) {
   const old = document.getElementById('namesheet'); if (old) old.remove();
@@ -7790,7 +7807,7 @@ function renderDumpCarry() {
   slot.innerHTML = '';
   const day = dayFor(viewDay), L = (state.dump || []).filter(x => !x.done);
   if (!L.length || day.noDump) return;
-  const planning = !day.blocks.length || day.carryOpen || viewDay > planKey() || day.dumpOpen;
+  const planning = !day.blocks.length || day.carryOpen || day.dumpOpen || (viewDay > planKey() && !day.planSnap);
   if (!planning) return;
   const name = dayWord();
   // one tap: an item goes straight onto the day (with undo); or all of them at once
@@ -7848,7 +7865,7 @@ function renderCarry() {
     ...(Array.isArray(b.goals) && b.goals.length ? { goals: b.goals.map(g => ({ text: g.text, done: false })) } : {}) });
   const bring = list => {
     for (const n of list) if (!got.includes(n)) { day.blocks.push(copy(items[n])); got.push(n); }
-    day.carryOpen = got.length < items.length; if (!day.carryOpen) day.noCarry = true;
+    day.carryOpen = items.some((_, n) => !got.includes(n)); if (!day.carryOpen) day.noCarry = true;
     save(); renderDay(); renderHabits();
   };
 
@@ -7882,6 +7899,7 @@ function renderCarry() {
 // finish planning: keep a copy of the plan (the first one), so the end of the
 // day can show what changed
 function finishPlan(day) {
+  day.carryOpen = false; day.dumpOpen = false;
   if (!day.planSnap) day.planSnap = { at: Date.now(), start: day.start, blocks: day.blocks.map(b => ({ label: b.label || '', mins: Number(b.mins) || 60 })) };
   sortingDay = false; customFor = null;
   save(); renderDay(); window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -7997,6 +8015,7 @@ function renderDayGoal() {
   const box = document.getElementById('day-goal');
   const day = dayFor(viewDay);
   const isToday = viewDay === planKey();
+  if (box.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return;   // you are typing
   box.innerHTML = '';
   if (day.goal && !dayGoalEditing) {
     box.innerHTML = '<div class="dg-card' + (day.goalDone ? ' done' : '') + '"><button type="button" class="dg-tick" aria-label="' + (day.goalDone ? 'not done yet' : 'done') + '">\u2713</button>' +
@@ -8022,7 +8041,7 @@ function renderDayGoal() {
   const uniq = [...new Set(ideas)].slice(0, 3);
 
   box.innerHTML = '<div class="dg-ask"><b>' + (dayGoalEditing ? 'Change this day\u2019s goal' : ahead ? 'One goal for ' + dayName + '?' : 'New day. What\u2019s your one goal today?') + '</b>' +
-    '<div class="dg-in"><input type="text" maxlength="100" placeholder="what makes today a win?"><button type="button" class="lf-btn main">Set</button></div>' +
+    '<div class="dg-in"><input type="text" maxlength="100" placeholder="' + (ahead ? 'what makes ' + dayName + ' a win?' : 'what makes today a win?') + '"><button type="button" class="lf-btn main">Set</button></div>' +
     (uniq.length ? '<div class="dg-ideas">' + uniq.map(t => '<button type="button" data-t="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>' : '') +
     '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : ahead ? 'Later' : 'Not today') + '</button></div>';
   const inp = box.querySelector('input');
@@ -8043,6 +8062,16 @@ function renderDay() {
   const day = dayFor(viewDay);
   const d = fromKey(viewDay);
   const isToday = viewDay === planKey();
+  { // calm plan: on an empty day one button fills it from your routine; on a planned today it plans tomorrow
+    document.getElementById('view-day').classList.toggle('emptyday', !day.blocks.length);
+    const pto = document.getElementById('pt-open');
+    if (pto) {
+      const empty = !day.blocks.length && viewDay >= planKey();
+      pto.hidden = !(empty || (isToday && !sortingDay));   // not while you are planning
+      if (empty) { pto.dataset.k = viewDay; pto.innerHTML = '&#x2728; Plan ' + (isToday ? 'today' : viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[d.getDay()])) + ' from your routine <span>&rsaquo;</span>'; }
+      else { delete pto.dataset.k; pto.innerHTML = '&#x1F319; Plan tomorrow <span>&rsaquo;</span>'; }
+    }
+  }
   if (sortingDay && sortingKey !== viewDay) sortingDay = false;   // planning is for the day you started it on
 
   document.getElementById('day-title').innerHTML =
@@ -8063,6 +8092,7 @@ function renderDay() {
   if (!daySnap || daySnap.k !== viewDay) { try { daySnap = snapNow(); } catch {} }
   updateUndo();
   blockList.innerHTML = '';
+  { const oc = document.getElementById('clockline'); if (oc) oc.remove(); }
 
   if (!day.blocks.length) {
     const e = document.createElement('div');
@@ -8417,7 +8447,7 @@ function renderDay() {
     card.append(p2, go, sum);
     blockList.appendChild(card);
   }
-  blockList.style.paddingBottom = sortingDay ? '72px' : '';
+  blockList.style.paddingBottom = sortingDay ? '16px' : '';
 
   const arr = document.createElement('button');
   arr.className = 'arrange' + (sortingDay ? ' on' : '');
@@ -8427,7 +8457,7 @@ function renderDay() {
     arr.className = 'lf-btn main pl-finish';
     const tip = document.createElement('p');
     tip.className = 'hint pl-tip';
-    tip.textContent = 'Hold a block and drag it. Or tap its number and type where it goes.';
+    tip.textContent = 'Hold and drag to move a block.';
     blockList.appendChild(tip);
   }
   arr.addEventListener('click', () => {
@@ -13929,8 +13959,8 @@ function routineFromHistory(kind) {
 
 /* plan tomorrow, in one screen: start from your routines, the same day last week,
    or today; set when the day starts; take out what you do not need; done */
-function planTomorrowSheet() {
-  const tk = planKey(), tm = shiftKey(tk, 1), last = shiftKey(tm, -7), DN = k => cap(FULL[fromKey(k).getDay()]);
+function planTomorrowSheet(target) {
+  const tk = planKey(), tm = target || shiftKey(tk, 1), last = shiftKey(tm, -7), DN = k => cap(FULL[fromKey(k).getDay()]);
   const cur = state.days[tm];
   let plan = cur && cur.blocks ? cur.blocks.map(b => ({ ...b })) : [];
   const am = routineGet('am'), pm = routineGet('pm');
@@ -13939,7 +13969,7 @@ function planTomorrowSheet() {
   const src = [
     am && ['am', '\u2600\uFE0F', 'Morning routine', am.blocks],
     (state.days[last] || {}).blocks && state.days[last].blocks.length && ['last', '\u{1F501}', 'Same as last ' + DN(last), state.days[last].blocks],
-    (state.days[tk] || {}).blocks && state.days[tk].blocks.length && ['today', '\u{1F4CB}', 'Same as today', state.days[tk].blocks],
+    tm !== tk && (state.days[tk] || {}).blocks && state.days[tk].blocks.length && ['today', '\u{1F4CB}', 'Same as today', state.days[tk].blocks],
     pm && ['pm', '\u{1F319}', 'Evening routine', pm.blocks],
     (state.dump || []).some(x => !x.done) && ['dump', '\u{1F9E0}', 'From your brain dump', (state.dump || []).filter(x => !x.done).map(x => ({ label: x.text, mins: 30 }))]
   ].filter(Boolean);
@@ -13949,7 +13979,7 @@ function planTomorrowSheet() {
   const draw = () => {
     let at = toMins(start);
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ptm" role="dialog" aria-modal="true" aria-label="Plan tomorrow"><span class="w3-grab"></span><button type="button" class="ns-x ptm-x" aria-label="close">\u00d7</button>' +
-      '<p class="wk2-step">' + DN(tm) + ' ' + fromKey(tm).getDate() + ' ' + cap(MONTHS[fromKey(tm).getMonth()].slice(0, 3)) + '</p><h2>Plan tomorrow</h2>' +
+      '<p class="wk2-step">' + DN(tm) + ' ' + fromKey(tm).getDate() + ' ' + cap(MONTHS[fromKey(tm).getMonth()].slice(0, 3)) + '</p><h2>' + (tm === tk ? 'Plan today' : tm === shiftKey(tk, 1) ? 'Plan tomorrow' : 'Plan ' + DN(tm)) + '</h2>' +
       (src.length ? '<p class="wk2-h">Start with</p><div class="ptm-src">' + src.map(([k, e, t, bs]) => '<button type="button" data-src="' + k + '"' + (used.has(k) ? ' class="on"' : '') + '><i>' + e + '</i><span><b>' + t + '</b><small>' + esc(bs.map(b => b.label).filter(Boolean).slice(0, 4).join(' \u00b7 ')) + '</small></span><em>' + (used.has(k) ? '\u2713' : '+') + '</em></button>').join('') + '</div>'
                   : '<p class="cr-sub">After a few days brick learns your usual mornings and evenings and offers them here.</p>') +
       '<div class="wk2-start ptm-start"><label for="pt-st">Day starts at</label><input type="time" id="pt-st" step="300" value="' + start + '"></div>' +
@@ -13970,7 +14000,7 @@ function planTomorrowSheet() {
     const st = el.querySelector('#pt-st');
     const upd = () => { if (!/^\d{2}:\d{2}/.test(st.value)) return; start = st.value.slice(0, 5); let m = toMins(start);
       el.querySelectorAll('.ptm-list li').forEach((li, i) => { const t = li.querySelector('time'); if (t) t.textContent = clock(m); m += Number((plan[i] || {}).mins) || 60; }); };
-    st.addEventListener('input', upd); st.addEventListener('change', upd); st.addEventListener('blur', () => { upd(); draw(); });
+    st.addEventListener('input', upd); st.addEventListener('change', upd); st.addEventListener('blur', upd);
     el.querySelectorAll('[data-len]').forEach(x => x.addEventListener('change', () => { plan[Number(x.dataset.len)].mins = Number(x.value); draw(); }));
     el.querySelectorAll('[data-rm]').forEach(x => x.addEventListener('click', () => { plan.splice(Number(x.dataset.rm), 1); draw(); }));
     const inp = el.querySelector('#pt-in');
@@ -13980,13 +14010,13 @@ function planTomorrowSheet() {
       draw(); el.querySelector('#pt-in').focus(); };
     el.querySelector('.ptm-add button').addEventListener('click', addOne); inp.addEventListener('keydown', e => { if (e.key === 'Enter') addOne(); });
     el.querySelector('.ptm-done').addEventListener('click', () => {
-      state.days[tm] = Object.assign(state.days[tm] || {}, { start, touched: true, blocks: plan.map(b => ({ ...b, done: false })) });
+      state.days[tm] = Object.assign(state.days[tm] || {}, { start, touched: true, blocks: plan.map(b => ({ done: false, ...b })) });
       save(); close(); viewDay = tm; if (typeof setPlanMode === 'function') setPlanMode('day'); show('day'); window.scrollTo(0, 0);
     });
   };
   draw(); document.body.appendChild(el);
 }
-document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#pt-open')) planTomorrowSheet(); });
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#pt-open')) { const b = e.target.closest('#pt-open'); planTomorrowSheet(b.dataset.k || undefined); } });
 function stuckSheet(task) {
   const old = document.getElementById('stsheet'); if (old) old.remove();
   const el = document.createElement('div'); el.id = 'stsheet'; el.className = 'w3';
