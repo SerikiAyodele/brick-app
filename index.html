@@ -14772,10 +14772,10 @@ let areaGoalsOpen = false;   // on an area page: false shows its cards, true sho
 // each area is a short list of cards, each a door: its pages, then Goals
 /* how food and your days affect your mood: each day gets a mood score from your check-ins,
    then days with a thing are compared with days without it (last 4 weeks) */
-const MOOD_SCORE = { good: 1, calm: 1, focused: 1, okay: .3, bored: -.4, tired: -.4, unfocused: -.4, stressed: -1, anxious: -1, low: -1, unmotivated: -1 };
+const ML_SCORE = { good: 1, calm: 1, focused: 1, okay: .3, bored: -.4, tired: -.4, unfocused: -.4, stressed: -1, anxious: -1, low: -1, unmotivated: -1 };
 function moodByDay(n) {
   const out = {}; const since = shiftKey(todayKey(), -n);
-  for (const m of state.moods || []) { const k = key(new Date(m.at)); if (k < since || MOOD_SCORE[m.mood] === undefined) continue; (out[k] = out[k] || []).push(MOOD_SCORE[m.mood]); }
+  for (const m of state.moods || []) { const k = key(new Date(m.at)); if (k < since || ML_SCORE[m.mood] === undefined) continue; (out[k] = out[k] || []).push(ML_SCORE[m.mood]); }
   for (const k in out) out[k] = out[k].reduce((a, b) => a + b, 0) / out[k].length;
   return out;
 }
