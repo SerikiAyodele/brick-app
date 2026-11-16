@@ -5556,7 +5556,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
       </div>
     </div>
 
-    <button type="button" class="pt-open" id="pt-open">\u{1F319} Plan tomorrow <span>\u203a</span></button>
+    <button type="button" class="pt-open" id="pt-open">&#x1F319; Plan tomorrow <span>&rsaquo;</span></button>
     <div id="day-goal"></div>
     <div id="carry-slot"></div>
     <div id="dumpcarry-slot"></div>
@@ -5605,7 +5605,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
         </div>
       </div>
     </div>
-    <button type="button" class="tw-dump" id="tw-dump">\u{1F9E0} Brain dump</button>
+    <button type="button" class="tw-dump" id="tw-dump">&#x1F9E0; Brain dump</button>
     <div id="idea-list"></div>
   </section>
 
@@ -5687,7 +5687,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:07</footer>
+  <footer>Mr.O:20:08</footer>
 </div>
 
 <script>
@@ -13812,7 +13812,8 @@ function planTomorrowSheet() {
     am && ['am', '\u2600\uFE0F', 'Morning routine', am.blocks],
     (state.days[last] || {}).blocks && state.days[last].blocks.length && ['last', '\u{1F501}', 'Same as last ' + DN(last), state.days[last].blocks],
     (state.days[tk] || {}).blocks && state.days[tk].blocks.length && ['today', '\u{1F4CB}', 'Same as today', state.days[tk].blocks],
-    pm && ['pm', '\u{1F319}', 'Evening routine', pm.blocks]
+    pm && ['pm', '\u{1F319}', 'Evening routine', pm.blocks],
+    (state.dump || []).some(x => !x.done) && ['dump', '\u{1F9E0}', 'From your brain dump', (state.dump || []).filter(x => !x.done).map(x => ({ label: x.text, mins: 30 }))]
   ].filter(Boolean);
   const el = document.createElement('div'); el.id = 'ptsheet'; el.className = 'w3';
   const LENS = [15, 30, 45, 60, 90, 120, 150, 180, 240];
@@ -13837,7 +13838,11 @@ function planTomorrowSheet() {
       const add = S[3].filter(x => (x.label || '').trim() && !have.has(x.label.trim().toLowerCase())).map(x => ({ label: x.label, mins: Number(x.mins) || 60, ...(x.step ? { step: x.step } : {}), ...(x.meeting ? { meeting: true } : {}) }));
       if (k === 'am') { plan = add.concat(plan); if (am) start = am.start; } else plan = plan.concat(add);
       used.add(k); draw(); }));
-    const st = el.querySelector('#pt-st'); st.addEventListener('change', () => { if (/^\d{2}:\d{2}/.test(st.value)) { start = st.value.slice(0, 5); draw(); } });
+    // the start time: update the times in place while the picker is open, redraw only after you leave it
+    const st = el.querySelector('#pt-st');
+    const upd = () => { if (!/^\d{2}:\d{2}/.test(st.value)) return; start = st.value.slice(0, 5); let m = toMins(start);
+      el.querySelectorAll('.ptm-list li').forEach((li, i) => { const t = li.querySelector('time'); if (t) t.textContent = clock(m); m += Number((plan[i] || {}).mins) || 60; }); };
+    st.addEventListener('input', upd); st.addEventListener('change', upd); st.addEventListener('blur', () => { upd(); draw(); });
     el.querySelectorAll('[data-len]').forEach(x => x.addEventListener('change', () => { plan[Number(x.dataset.len)].mins = Number(x.value); draw(); }));
     el.querySelectorAll('[data-rm]').forEach(x => x.addEventListener('click', () => { plan.splice(Number(x.dataset.rm), 1); draw(); }));
     const inp = el.querySelector('#pt-in');
