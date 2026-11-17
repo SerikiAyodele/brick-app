@@ -5633,6 +5633,19 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #emosheet .em-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 12px 0 14px; }
 #emosheet .em-grid button { aspect-ratio: 1; font-size: 26px; border: 1px solid var(--hair); border-radius: 14px; background: var(--card); cursor: pointer; }
 #emosheet .em-grid button.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 12%, var(--card)); }
+
+/* ===== a tick feels good: a burst of colour, a big check, a little buzz ===== */
+.tkb { position: fixed; z-index: 90; width: 0; height: 0; pointer-events: none; }
+.tkb i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--c); animation: tkfly .7s cubic-bezier(.15, .7, .3, 1) forwards; }
+.tkb i.sq { border-radius: 2px; width: 7px; height: 7px; }
+.tkb b { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; font: 700 26px system-ui; color: #fff; background: var(--pink); animation: tkpop .65s cubic-bezier(.3, 1.6, .5, 1) forwards; }
+.tkb u { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid var(--pink); animation: tkring .6s ease-out forwards; }
+@keyframes tkfly { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.3) rotate(200deg); opacity: 0; } }
+@keyframes tkpop { 0% { transform: scale(.2); opacity: 0; } 35% { transform: scale(1.15); opacity: 1; } 70% { transform: scale(1); opacity: 1; } 100% { transform: scale(.9); opacity: 0; } }
+@keyframes tkring { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(2.2); opacity: 0; } }
+.donefold.bump i { animation: tkpop2 .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes tkpop2 { 40% { transform: scale(1.45); } }
+@media (prefers-reduced-motion: reduce) { .tkb i, .tkb u { display: none; } }
 </style>
 </head>
 <body>
@@ -5908,7 +5921,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:08:17</footer>
+  <footer>Mr.O:09:12</footer>
 </div>
 
 <script>
@@ -7221,10 +7234,8 @@ function nowCard(day) {
           b.done = true; b.early = true;
           const h = habitNamed(b.label); if (h && !h.marks.includes(viewDay)) h.marks.push(viewDay);
           justTicked = w.i;
-          save(); renderDay(); renderHabits();
-          if (askMealAfter(b)) {}
-          else if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);
-          else setTimeout(() => afterBlock(day, day.blocks.indexOf(b), () => askMoodAfter(b)), 450);
+          const r0 = dn.getBoundingClientRect();
+          save(); renderDay(); renderHabits(); tickBurst(r0);
           return;
         }
         const t = document.querySelector('#block-list .line[data-i="' + w.i + '"] .tick'); if (t && !t.disabled) t.click();
@@ -8481,10 +8492,8 @@ function renderDay() {
           b.done = true; b.early = true;
           if (h && !h.marks.includes(viewDay)) h.marks.push(viewDay);
           justTicked = i;
-          save(); renderDay(); renderHabits();
-          if (askMealAfter(b)) {}
-          else if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);
-          else setTimeout(() => afterBlock(day, day.blocks.indexOf(b), () => askMoodAfter(b)), 450);
+          const r0 = tick.getBoundingClientRect();
+          save(); renderDay(); renderHabits(); tickBurst(r0);
         }, 650);
       });
       ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => tick.addEventListener(ev, stop));
@@ -8525,11 +8534,9 @@ function renderDay() {
         justTicked = i;               // so the render can animate it
       }
 
+      const r0 = tick.getBoundingClientRect();
       save(); renderDay(); renderHabits();
-      if (!b.done) return;
-      if (askMealAfter(b)) return;   // a meal block asks about the meal first
-      if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(viewDay), 450);   // that was the last one
-      else setTimeout(() => afterBlock(day, day.blocks.indexOf(b), () => askMoodAfter(b)), 450);
+      if (b.done) tickBurst(r0);      // no questions after a tick: a little celebration, then on you go
     });
 
     if (sortingDay) {
@@ -14214,13 +14221,30 @@ function timeUpSheet(day, i, end) {
   el.querySelector('.tu-done').addEventListener('click', () => {
     b.done = true;
     const h = habitNamed(b.label); if (h && !h.marks.includes(planKey())) h.marks.push(planKey());
-    save(); close(); redraw();
-    if (askMealAfter(b)) return;
-    if (day.blocks.every(x => x.done)) setTimeout(() => daySummary(planKey()), 450);
-    else setTimeout(() => afterBlock(day, day.blocks.indexOf(b), () => askMoodAfter(b)), 450);
+    save(); close(); redraw(); tickBurst(null);
   });
 }
 setInterval(checkTimeUp, 20000);
+// a tick feels good: colour bursts out of the circle, a big check pops, a small buzz
+function tickBurst(r) {
+  try {
+    const x = r ? r.left + r.width / 2 : innerWidth / 2, y = r ? r.top + r.height / 2 : innerHeight / 2;
+    const el = document.createElement('div'); el.className = 'tkb'; el.style.left = x + 'px'; el.style.top = y + 'px';
+    const C = ['var(--pink)', 'var(--gold-1)', '#f2c14e', '#5aa86a', '#e8708f', '#8fa2f5'];
+    let h = '<u></u><b>\u2713</b>';
+    for (let n = 0; n < 18; n++) { const a = (n / 18) * Math.PI * 2 + Math.random() * .4, d = 46 + Math.random() * 46;
+      h += '<i class="' + (n % 3 ? '' : 'sq') + '" style="--c:' + C[n % C.length] + ';--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d - 10).toFixed(0) + 'px;animation-delay:' + (Math.random() * 60).toFixed(0) + 'ms"></i>'; }
+    el.innerHTML = h; document.body.appendChild(el);
+    setTimeout(() => el.remove(), 900);
+    try { navigator.vibrate && navigator.vibrate([12, 40, 18]); } catch {}
+    const f = document.querySelector('#view-day .donefold'); if (f) { f.classList.remove('bump'); void f.offsetWidth; f.classList.add('bump'); }
+  } catch {}
+}
+// ticking a task inside a block gets the same burst
+document.addEventListener('click', e => {
+  const t = e.target && e.target.closest && e.target.closest('.gtick');
+  if (t && !t.disabled && !t.classList.contains('on') && !t.classList.contains('ghost')) tickBurst(t.getBoundingClientRect());
+}, true);
 document.addEventListener('input', e => { const w = e.target && e.target.closest && e.target.closest('.w3'); if (w) w.dataset.typed = '1'; }, true);
 document.addEventListener('click', e => {
   const t = e.target; if (!t || !t.classList || !t.classList.contains('w3-back')) return;
