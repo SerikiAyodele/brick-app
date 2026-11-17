@@ -5854,7 +5854,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:19</footer>
+  <footer>Mr.O:07:23</footer>
 </div>
 
 <script>
@@ -7389,8 +7389,9 @@ const leafPath = (x, y, dx, dy) => {
 };
 
 // 0 seed · 1 sprout · 2 leaves · 3 more leaves · 4 bud · 5 in bloom
-function plantSVG(stage, was, plant, pot) {
+function plantSVG(stage, was, plant, pot, form) {
   plant = plant || ROOM_PLANTS[0]; pot = pot || ROOM_POTS[0];
+  if (form) return plantShaped(stage, was, plant, pot, form);
   const g = n => (n > was ? ' class="grow"' : '');
   const stem = (y1, y2) => '<path d="M20 ' + y1 + ' V' + y2 + '" stroke="url(#flS)" stroke-width="1.6" stroke-linecap="round"/>';
   const p = [];
@@ -7404,6 +7405,50 @@ function plantSVG(stage, was, plant, pot) {
   // each drawing gets its own shading names, so two on one page do not mix colours
   const uid = 'fl' + (++plantSVG.n || (plantSVG.n = 1)) + '_';
   return ('<svg viewBox="0 0 40 50" aria-hidden="true">' + flowerDefs(plant) + '<g class="sway">' + p.join('') + '</g>' + potSVG(pot) + '</svg>')
+    .replace(/(url\(#|id=")fl/g, '$1' + uid);
+}
+
+// every focus session grows its own shape: how it leans and curves, how many
+// leaves and where, thin or sturdy, sometimes a bush with extra small flowers
+function plantShaped(stage, was, plant, pot, form) {
+  let a = form >>> 0;
+  const rnd = () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const r = (lo, hi) => lo + rnd() * (hi - lo);
+  const H = r(21, 27), lean = r(-4.5, 4.5), bend = r(-7, 7), sw = r(1.2, 2.1).toFixed(2);
+  const bush = rnd() < .38, nLeaf = 3 + Math.floor(rnd() * 5);
+  const P = t => { const u = 1 - t; return [u * u * 20 + 2 * u * t * (20 + bend) + t * t * (20 + lean), u * u * 36 + 2 * u * t * (36 - H / 2) + t * t * (36 - H)]; };
+  const seg = (t0, t1) => { let d = ''; for (let i = 0; i <= 8; i++) { const q = P(t0 + (t1 - t0) * i / 8); d += (i ? ' L' : 'M') + q[0].toFixed(2) + ' ' + q[1].toFixed(2); } return '<path d="' + d + '" stroke="url(#flS)" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'; };
+  const g = n => (n > was ? ' class="grow"' : '');
+  const leaves = [];
+  let side = rnd() < .5 ? -1 : 1;
+  for (let i = 0; i < nLeaf; i++) {
+    const t = .14 + (.74 * (i + r(.1, .9))) / nLeaf, len = r(4.5, 9.5) * (1.1 - t * .45), ang = r(.25, 1);
+    leaves.push({ t, dx: side * len * Math.cos(ang), dy: -len * Math.sin(ang) });
+    if (rnd() < .8) side = -side;
+  }
+  const kids = bush ? [0, 1].slice(0, rnd() < .5 ? 1 : 2).map(j => { const t = r(.18, .4), q = P(t), sd = j ? -1 : (rnd() < .5 ? -1 : 1), L = r(8, 12);
+    return { q, end: [q[0] + sd * L * .7, q[1] - L], c: [q[0] + sd * L * .55, q[1] - L * .25] }; }) : [];
+  const out = [];
+  if (stage === 0) out.push('<ellipse cx="20" cy="35.6" rx="1.8" ry="1.2" fill="#a0784f"/><ellipse cx="19.6" cy="35.2" rx=".6" ry=".35" fill="#fff" opacity=".4"/>');
+  const upto = [0, .3, .55, .8, 1, 1];
+  for (let st = 1; st <= Math.min(stage, 4); st++) {
+    const t0 = upto[st - 1], t1 = upto[st];
+    let h = t1 > t0 ? seg(t0, t1) : '';
+    leaves.filter(l => l.t > t0 && l.t <= t1).forEach(l => { const q = P(l.t); h += leafPath(+q[0].toFixed(2), +q[1].toFixed(2), +l.dx.toFixed(2), +l.dy.toFixed(2)); });
+    if (st === 3) kids.forEach(k => { h += '<path d="M' + k.q[0].toFixed(2) + ' ' + k.q[1].toFixed(2) + ' Q' + k.c[0].toFixed(2) + ' ' + k.c[1].toFixed(2) + ' ' + k.end[0].toFixed(2) + ' ' + k.end[1].toFixed(2) + '" stroke="url(#flS)" stroke-width="' + (sw * .75).toFixed(2) + '" stroke-linecap="round" fill="none"/>' +
+      leafPath(+k.c[0].toFixed(2), +k.c[1].toFixed(2), (k.end[0] > k.q[0] ? 4 : -4), -2.5); });
+    out.push('<g' + g(st) + '>' + h + '</g>');
+  }
+  if (stage >= 4) {
+    const top = P(1), head = plant.crop
+      ? '<text x="20" y="' + (stage === 5 ? 15 : 13) + '" font-size="' + (stage === 5 ? 12 : 7) + '" text-anchor="middle" dominant-baseline="middle">' + plant.crop + '</text>'
+      : plantTop(plant, stage);
+    let h = '<g transform="translate(' + (top[0] - 20).toFixed(2) + ' ' + (top[1] - 11.5).toFixed(2) + ')">' + head + '</g>';
+    if (stage === 5 && !plant.crop) kids.forEach(k => { h += '<g transform="translate(' + k.end[0].toFixed(2) + ' ' + k.end[1].toFixed(2) + ') scale(.55) translate(-20 -11.5)">' + plantTop(plant, 5) + '</g>'; });
+    out.push('<g' + (stage > was ? ' class="' + (stage === 5 ? 'bloom' : 'grow') + '"' : '') + '>' + h + '</g>');
+  }
+  const uid = 'fl' + (++plantSVG.n || (plantSVG.n = 1)) + '_';
+  return ('<svg viewBox="0 0 40 50" aria-hidden="true">' + flowerDefs(plant) + '<g class="sway" style="animation-duration:' + r(3, 5.5).toFixed(1) + 's">' + out.join('') + '</g>' + potSVG(pot) + '</svg>')
     .replace(/(url\(#|id=")fl/g, '$1' + uid);
 }
 
@@ -7555,7 +7600,7 @@ function startRoom(b, end) {
   const plant = pickRoomPlant();
   // the pot changes at one or two random points on the way
   const changes = new Set([1, 2, 3, 4].sort(() => Math.random() - .5).slice(0, 1 + Math.floor(Math.random() * 2)));
-  focus = { b, end, start: Date.now(), stage: -1, timer: null, plant, pot: pick(ROOM_POTS), changes,
+  focus = { b, end, start: Date.now(), stage: -1, timer: null, plant, pot: pick(ROOM_POTS), form: 1 + Math.floor(Math.random() * 2e9), changes,
             textAt: 0, textN: 0, wxAt: 0, zoo: null };
 
   const el = document.getElementById('focus');
@@ -7680,7 +7725,7 @@ function tickFocus() {
     if (focus.stage >= 0 && focus.changes.has(stage)) {
       focus.pot = pick(ROOM_POTS.filter(p => p !== focus.pot));    // a new pot along the way
     }
-    el.querySelector('.fx-plant').innerHTML = plantSVG(stage, focus.stage < 0 ? stage : focus.stage, focus.plant, focus.pot);
+    el.querySelector('.fx-plant').innerHTML = plantSVG(stage, focus.stage < 0 ? stage : focus.stage, focus.plant, focus.pot, focus.form);
     if (focus.plant.steps && stage < 5) el.querySelector('.fx-growing').textContent = focus.plant.name + ' \u00b7 ' + focus.plant.steps[stage];
     focus.stage = stage;
   }
