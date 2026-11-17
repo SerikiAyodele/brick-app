@@ -5546,6 +5546,39 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day#view-day .donefold span { font-size: 13px; }
 #view-day#view-day .nowcard .nc-ring, #view-day#view-day .nowcard svg { max-width: 150px; }
 
+
+/* ===== time boxes: hours and min typed straight in ===== */
+.df2 { display: flex; flex-wrap: wrap; gap: 10px; }
+.df2 label { flex: 1 1 0; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 0 16px; min-height: 60px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.df2 label:focus-within { border-color: var(--pink); box-shadow: 0 0 0 3px var(--pink-s); }
+.df2 input { flex: 1; min-width: 0; width: 100%; padding: 0; font: 700 26px var(--sport, var(--display)); color: var(--ink); background: none; border: 0; outline: none; }
+.df2 input::placeholder { color: var(--muted); }
+.df2 span { font: 500 14px var(--display); color: var(--muted); }
+.df2-sg { flex: 1 1 100%; display: flex; gap: 2px; padding: 3px; background: var(--slot); border-radius: 14px; }
+.df2-sg button { flex: 1; min-height: 38px; font: 600 14px var(--display); color: var(--muted); background: none; border: 0; border-radius: 11px; cursor: pointer; }
+.df2-sg button.on { color: var(--ink); background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+#lensheet .ls-dd { margin: 0 0 4px; }
+#lensheet .ls-hint { margin: 2px 0 10px; font-size: 13px; color: var(--muted); }
+#lensheet .ls-end { margin: 14px 0 6px; font-size: 15px; color: var(--muted); }
+#lensheet .ls-end b { font-family: var(--sport, inherit); font-size: 20px; color: var(--ink); }
+#lensheet .ls-end i { font-style: normal; font-size: 13px; }
+
+/* ===== PLAN, less noise: no stats strip; the Now card is one slim row ===== */
+#view-day#view-day #day-stats { display: none !important; }
+#view-day#view-day .nowcard:not(.past) { grid-template-columns: 58px 1fr !important; column-gap: 14px !important; padding: 12px 14px !important; margin-bottom: 12px !important; border-radius: 16px !important; background: var(--card) !important; border: 1px solid var(--hair) !important; border-left: 3px solid var(--pink) !important; box-shadow: none !important; }
+#view-day#view-day .nowcard:not(.past) .nc-ring { width: 58px !important; height: 58px !important; }
+#view-day#view-day .nowcard:not(.past) .nc-track, #view-day#view-day .nowcard:not(.past) .nc-arc { stroke-width: 5 !important; }
+#view-day#view-day .nowcard:not(.past) .nc-left { font-size: 13px !important; font-weight: 700; }
+#view-day#view-day .nowcard:not(.past) .nc-unit { display: none !important; }
+#view-day#view-day .nowcard:not(.past) .nc-tag { font-size: 10px !important; letter-spacing: 1.4px; margin: 0 !important; }
+#view-day#view-day .nowcard:not(.past) .nc-tag i { display: none !important; }
+#view-day#view-day .nowcard:not(.past) .nc-name { font-size: 18px !important; line-height: 1.25 !important; margin: 0 !important; }
+#view-day#view-day .nowcard:not(.past) .nc-in, #view-day#view-day .nowcard:not(.past) .nc-next { font-size: 13px !important; color: var(--muted) !important; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+#view-day#view-day .nowcard:not(.past) .nc-next::before { display: none !important; }
+#view-day#view-day .nowcard:not(.past) .nc-acts { margin-top: 10px !important; gap: 6px !important; flex-wrap: nowrap !important; }
+#view-day#view-day .nowcard:not(.past) .nc-act { flex: 1 1 0 !important; min-height: 34px !important; padding: 0 8px !important; font-size: 13px !important; font-weight: 600; border-radius: 17px !important; text-decoration: none !important; color: var(--ink) !important; background: none !important; border: 1px solid var(--hair) !important; }
+#view-day#view-day .nowcard:not(.past) .nc-act.grow { color: var(--paper) !important; background: var(--ink) !important; border-color: var(--ink) !important; }
+#view-day#view-day .nowcard:not(.past) .nc-act.nc-stuck { color: var(--muted) !important; }
 </style>
 </head>
 <body>
@@ -5821,7 +5854,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:07</footer>
+  <footer>Mr.O:07:19</footer>
 </div>
 
 <script>
@@ -7836,9 +7869,9 @@ function lengthPicker(b, from, len) {
   const draw = more => {
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
       '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2>' +
-      (more ? '' : '<div class="ls-df"></div><p class="ls-from ls-end">' + clock(from) + ' to ' + clock(from + len) + '</p><button type="button" class="wka-go ls-save">Save</button>') +
-      (more ? '' : '<p class="ab-sub">Add time</p><div class="ls-add">' + [5, 10, 15, 30, 60].map(d => '<button type="button" data-add="' + d + '">+' + (d === 60 ? '1h' : d) + '</button>').join('') + '</div>' +
-        '<p class="ab-sub">Take time off</p><div class="ls-add minus">' + [5, 10, 15, 30].map(d => '<button type="button" data-add="-' + d + '"' + (len - d < 5 ? ' disabled' : '') + '>\u2212' + d + '</button>').join('') + '</div><p class="ab-sub">Or set it</p>') +
+      (more ? '' : '<p class="ab-sub">Length</p><div class="ls-df"></div>' +
+        '<p class="ab-sub">Add or take off</p><div class="ls-dd"></div><p class="ls-hint">Type a \u2212 in front, or tap Take off, to take time away.</p>' +
+        '<p class="ls-from ls-end"></p><button type="button" class="wka-go ls-save">Save</button><p class="ab-sub" hidden>Or set it</p>') +
       (more
         ? '<div class="ls-step"><button type="button" data-o="-15" aria-label="15 minutes less">\u2212</button><div><b>' + minsLabel(other) + '</b><small>ends ' + clock(from + other) + '</small></div><button type="button" data-o="15" aria-label="15 minutes more">+</button></div>' +
           '<button type="button" class="wka-go ls-set">Set ' + minsLabel(other) + '</button><button type="button" class="ls-back">Back</button>'
@@ -7852,11 +7885,13 @@ function lengthPicker(b, from, len) {
     el.querySelectorAll('[data-m]').forEach(x => x.addEventListener('click', () => keep(Number(x.dataset.m))));
     // the length itself, typed; + and - change it, Save applies it
     const dfBox = el.querySelector('.ls-df');
-    if (dfBox) { let typed = len; const endP = el.querySelector('.ls-end');
-      const paintEnd = () => { endP.textContent = clock(from) + ' to ' + clock(from + typed); el.querySelectorAll('.ls-add.minus [data-add]').forEach(x => { x.disabled = typed + Number(x.dataset.add) < 5; }); };
-      const df = durField(dfBox, len, m => { typed = m; paintEnd(); });
-      el.querySelectorAll('[data-add]').forEach(x => x.addEventListener('click', () => { typed = Math.max(5, Math.min(1440, typed + Number(x.dataset.add))); df.set(typed); paintEnd(); }));
-      el.querySelector('.ls-save').addEventListener('click', () => keep(typed)); }
+    if (dfBox) { let typed = len, delta = 0; const endP = el.querySelector('.ls-end');
+      const result = () => Math.max(5, Math.min(1440, typed + delta));
+      const paintEnd = () => { const r = result(); endP.innerHTML = '<b>' + minsLabel(r) + '</b> \u00b7 ' + clock(from) + ' to ' + clock(from + r) + (typed + delta < 5 ? ' <i>(5 min is the least)</i>' : ''); };
+      durField(dfBox, len, m => { typed = m; paintEnd(); });
+      durField(el.querySelector('.ls-dd'), 0, m => { delta = m; paintEnd(); }, { signed: true });
+      paintEnd();
+      el.querySelector('.ls-save').addEventListener('click', () => keep(result())); }
     const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
     el.querySelectorAll('[data-o]').forEach(x => x.addEventListener('click', () => { other = Math.max(15, Math.min(720, other + Number(x.dataset.o))); draw(true); }));
     const st = el.querySelector('.ls-set'); if (st) st.addEventListener('click', () => keep(other));
@@ -14030,6 +14065,13 @@ function timeUpSheet(day, i, end) {
   });
 }
 setInterval(checkTimeUp, 20000);
+document.addEventListener('input', e => { const w = e.target && e.target.closest && e.target.closest('.w3'); if (w) w.dataset.typed = '1'; }, true);
+document.addEventListener('click', e => {
+  const t = e.target; if (!t || !t.classList || !t.classList.contains('w3-back')) return;
+  const w = t.closest('.w3'), a = document.activeElement;
+  const typing = a && /^(INPUT|TEXTAREA)$/.test(a.tagName) && w && w.contains(a);
+  if (w && (typing || w.dataset.typed)) { e.stopPropagation(); e.stopImmediatePropagation(); if (a && a.blur) a.blur(); }
+}, true);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) setTimeout(checkTimeUp, 800); });
 /* after a block: did you do anything else? then a small transition into the next one */
 function transitionFor(b, next) {
@@ -16777,16 +16819,36 @@ function renderWeek() {
 // 90 -> "1h 30m", 60 -> "1 hour", 30 -> "30 min"
 const hrsLabel = m => { const h = Math.floor(m / 60), r = m % 60; return h ? (h + (h === 1 && !r ? ' hour' : 'h') + (r ? ' ' + r + 'm' : '')) : r + ' min'; };
 // how long, typed: a number and min or hours. calls back with minutes, never redraws (keeps the keyboard up)
-function durField(root, mins, onChange) {
-  let unit = mins >= 60 && mins % 30 === 0 ? 'h' : 'min';
-  const val = () => unit === 'h' ? String(+(mins / 60).toFixed(2)) : String(mins);
-  root.innerHTML = '<div class="df"><input type="number" inputmode="decimal" min="0" step="any" aria-label="how long"><div class="df-u"><button type="button" data-u="min">min</button><button type="button" data-u="h">hours</button></div></div>';
-  const inp = root.querySelector('input'), bs = root.querySelectorAll('[data-u]');
-  const paint = () => { inp.value = val(); bs.forEach(b => b.classList.toggle('on', b.dataset.u === unit)); };
-  inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!(v > 0)) return; mins = Math.max(5, Math.min(1440, Math.round(unit === 'h' ? v * 60 : v))); onChange(mins); });
-  bs.forEach(b => b.addEventListener('click', () => { unit = b.dataset.u; paint(); }));
-  paint();
-  return { set(m) { mins = m; unit = m >= 60 && m % 30 === 0 ? 'h' : 'min'; paint(); } };
+function durField(root, mins, onChange, opt) {
+  // two boxes, hours and min. what you type stays as you typed it.
+  // opt.signed: a change, not a length. a - in front (or Take off) takes time away.
+  opt = opt || {};
+  const signed = !!opt.signed;
+  root.innerHTML = '<div class="df2">' + (signed ? '<div class="df2-sg"><button type="button" data-sg="1" class="on">Add</button><button type="button" data-sg="-1">Take off</button></div>' : '') +
+    '<label><input type="text" inputmode="' + (signed ? 'text' : 'numeric') + '" autocomplete="off" data-p="h" aria-label="hours"><span>hours</span></label>' +
+    '<label><input type="text" inputmode="' + (signed ? 'text' : 'numeric') + '" autocomplete="off" data-p="m" aria-label="minutes"><span>min</span></label></div>';
+  const H = root.querySelector('[data-p=h]'), M = root.querySelector('[data-p=m]');
+  let sign = 1;
+  const num = v => { v = String(v || '').replace(',', '.').trim(); const neg = /^[-\u2212\u2013]/.test(v); const n = parseFloat(v.replace(/^[-\u2212\u2013+]/, '')); return { n: n > 0 ? n : 0, neg }; };
+  const read = () => {
+    const h = num(H.value), m = num(M.value);
+    const total = Math.round(h.n * 60 + m.n);
+    const neg = signed && (h.neg || m.neg || sign < 0);
+    return neg ? -total : total;
+  };
+  const fire = () => {
+    const t = read();
+    if (signed) { onChange(t); return; }
+    if (t > 0) onChange(Math.max(5, Math.min(1440, t)));
+  };
+  const paint = m => {
+    if (signed && !m) { H.value = ''; M.value = ''; return; }
+    const a = Math.abs(m); H.value = String(Math.floor(a / 60)); M.value = String(a % 60);
+  };
+  [H, M].forEach(x => { x.addEventListener('input', fire); x.addEventListener('focus', () => { try { x.select(); } catch {} }); });
+  root.querySelectorAll('[data-sg]').forEach(b => b.addEventListener('click', () => { sign = Number(b.dataset.sg); root.querySelectorAll('[data-sg]').forEach(y => y.classList.toggle('on', y === b)); fire(); }));
+  paint(mins);
+  return { set(m) { paint(m); }, get: read };
 }
 function weekAddSheet(day0, days, preset, after) {
   // two calm steps: 1 what (type it or tap a tile), 2 when (start, how long, which days)
