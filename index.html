@@ -5760,7 +5760,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:06:38</footer>
+  <footer>Mr.O:06:43</footer>
 </div>
 
 <script>
@@ -13788,7 +13788,8 @@ const sleepOn = k => {
   const m = (state.sleep || []).find(x => x.k === k) || null;
   const p = planSleep(k);
   if (!p) return m;
-  return Object.assign({ k, q: 0 }, m || {}, p, { fromPlan: true });
+  if (m && m.bed && m.wake) return m;                     // what you logged is what happened
+  return Object.assign({ k, q: 0 }, m || {}, p, { fromPlan: true });   // nothing logged: the plan fills in
 };
 function sleepMins(e) { if (!e) return null; let m = toMins(e.wake) - toMins(e.bed); if (m <= 0) m += 1440; return m; }
 let sleepEditing = false;
