@@ -5480,6 +5480,18 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day.emptyday .start-row { margin-bottom: 4px; }
 #view-day .pl-rm { width: 32px; height: 32px; font-size: 18px; background: none; opacity: .55; }
 #view-day .pt-open[hidden] { display: none; }
+
+/* notes from earlier brain dumps, and extra to dos in a work block */
+.bd-notes li span { color: var(--ink); }
+.bd-ndel { flex: none; width: 36px; height: 36px; font-size: 20px; color: var(--muted); background: none; border: none; cursor: pointer; }
+.nx { margin-top: 16px; }
+.nx-row { display: flex; align-items: center; gap: 12px; min-height: 48px; border-top: 1px solid var(--hair); }
+.nx-row span { flex: 1; min-width: 0; font-size: 16px; }
+.nx-row span.dn { color: var(--muted); text-decoration: line-through; }
+.nx-pick { display: block; margin-top: 12px; }
+.nx-pick span { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+.nx-pick select { width: 100%; min-height: 50px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+.nx-why { margin: 6px 2px 0; font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -5748,7 +5760,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:40</footer>
+  <footer>Mr.O:06:38</footer>
 </div>
 
 <script>
@@ -6293,6 +6305,22 @@ function rolloverBox(b, field, lo) {
   box.querySelector('.ro-skip').addEventListener('click', () => { lo.items.forEach(g => { g.rolled = true; }); save(); paintListSheet(); });
   return box;
 }
+// extra things to do in a work block, picked from your notes. they do not count toward the 2 tasks
+function notesBox(b) {
+  movePastDump();
+  b.extras = b.extras || [];
+  const box = document.createElement('div'); box.className = 'nx';
+  const N = (state.dumpNotes || []).filter(x => !x.gone && !b.extras.some(e => e.id === x.id));
+  box.innerHTML = (b.extras.length ? '<p class="ro-h">Also to do</p>' + b.extras.map((e, i) => '<div class="nx-row"><button type="button" class="bd-tick' + (e.done ? ' on' : '') + '" data-xt="' + i + '" aria-label="done">' + (e.done ? '\u2713' : '') + '</button><span' + (e.done ? ' class="dn"' : '') + '>' + esc(e.text) + '</span><button type="button" class="bd-ndel" data-xr="' + i + '" aria-label="remove">\u00d7</button></div>').join('') : '') +
+    (N.length ? '<label class="nx-pick"><span>From your notes</span><select aria-label="add from your notes"><option value="">Add a note to do\u2026</option>' + N.map(x => '<option value="' + x.id + '">' + esc(x.text) + '</option>').join('') + '</select></label><p class="nx-why">These do not count toward your 2 tasks.</p>' : '');
+  box.querySelectorAll('[data-xt]').forEach(x => x.addEventListener('click', () => { const e = b.extras[Number(x.dataset.xt)]; e.done = !e.done;
+    const n = (state.dumpNotes || []).find(y => y.id === e.id); if (n) n.gone = e.done;   // done here, done in your notes
+    save(); paintListSheet(); }));
+  box.querySelectorAll('[data-xr]').forEach(x => x.addEventListener('click', () => { b.extras.splice(Number(x.dataset.xr), 1); save(); paintListSheet(); }));
+  const sel = box.querySelector('select');
+  if (sel) sel.addEventListener('change', () => { const n = (state.dumpNotes || []).find(y => y.id === sel.value); if (!n) return; b.extras.push({ id: n.id, text: n.text, done: false }); save(); paintListSheet(); });
+  return box;
+}
 function openListSheet(b, field, from) {
   listSheet = { b, field, from };
   // an empty list opens straight into typing, once, when the panel opens
@@ -6316,6 +6344,7 @@ function paintListSheet() {
   el.querySelector('h2').textContent = b.label || 'block';
   if (field !== 'agenda') { const lo = leftoverTasks(b); if (lo) el.querySelector('.ls-body').appendChild(rolloverBox(b, field, lo)); }
   el.querySelector('.ls-body').appendChild(goalList(b, field, from));
+  if (field === 'goals') el.querySelector('.ls-body').appendChild(notesBox(b));
   const close = () => { listSheet = null; goalEdit = null; todoEdit = null; el.remove(); renderDay(); };
   el.querySelector('.w3-back').addEventListener('click', close);
   el.querySelector('.ls-done').addEventListener('click', close);
@@ -8570,19 +8599,34 @@ document.getElementById('block-add').addEventListener('click', () => addBlockShe
 /* ---- brain dump ----
    things that come up during the day: type, tick, or plan it as a block.
    not-done items stay until ticked; done ones show until the day ends. */
-let dumpOpenDone = false;
+let dumpOpenDone = false, dumpNotesOpen = false;
+// a new day: brain dump items still open from an earlier day become plain notes
+function movePastDump() {
+  const L = state.dump || (state.dump = []), t = todayKey();
+  const old = L.filter(x => !x.done && key(new Date(x.at)) < t);
+  if (!old.length) return;
+  state.dumpNotes = state.dumpNotes || [];
+  old.forEach(x => state.dumpNotes.push({ id: x.id, text: x.text, at: x.at }));
+  state.dump = L.filter(x => !old.includes(x));
+  save();
+}
 let dumpDraft = '';   // what you are typing, kept across redraws
 function renderDump() {
   const slot = document.getElementById('dump-slot');
   if (!slot) return;
   if (viewDay !== planKey()) { slot.innerHTML = ''; return; }
-  const L = state.dump || (state.dump = []), t = todayKey();
+  const t = todayKey();
+  movePastDump();
+  const L = state.dump || (state.dump = []);
+  const N = (state.dumpNotes || []).filter(x => !x.gone);
   const open = L.filter(x => !x.done), doneToday = L.filter(x => x.done && key(new Date(x.doneAt || x.at)) === t);
   slot.innerHTML = '<section class="bd"><div class="bd-h"><b>Brain dump</b><small>' + (open.length ? open.length + ' to do' : 'things that come up') + '</small></div>' +
     '<div class="bd-add"><input type="text" maxlength="140" placeholder="Something came up?" aria-label="add to brain dump"><button type="button" aria-label="add">+</button></div>' +
     (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
     (doneToday.length ? '<button type="button" class="bd-done">' + (dumpOpenDone ? 'Hide' : 'Show') + ' ' + doneToday.length + ' done</button>' +
       (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
+    (N.length ? '<button type="button" class="bd-done bd-nt">' + (dumpNotesOpen ? 'Hide' : 'Notes from earlier \u00b7') + ' ' + N.length + '</button>' +
+      (dumpNotesOpen ? '<ul class="bd-list bd-notes">' + N.map(x => '<li><span>' + esc(x.text) + '</span><button type="button" class="bd-ndel" data-nd="' + x.id + '" aria-label="delete note">\u00d7</button></li>').join('') + '</ul>' : '') : '') +
     '</section>';
   const inp = slot.querySelector('.bd-add input');
   inp.value = dumpDraft;
@@ -8592,7 +8636,9 @@ function renderDump() {
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   slot.querySelectorAll('[data-dt]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dt); if (!x) return; x.done = !x.done; x.doneAt = Date.now(); save(); renderDump(); }));
   slot.querySelectorAll('[data-dp]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dp); if (!x) return; x.done = true; x.doneAt = Date.now(); x.planned = true; save(); renderDump(); addBlockSheet(x.text); }));
-  const dd = slot.querySelector('.bd-done'); if (dd) dd.addEventListener('click', () => { dumpOpenDone = !dumpOpenDone; renderDump(); });
+  const dd = slot.querySelector('.bd-done:not(.bd-nt)'); if (dd) dd.addEventListener('click', () => { dumpOpenDone = !dumpOpenDone; renderDump(); });
+  const nt = slot.querySelector('.bd-nt'); if (nt) nt.addEventListener('click', () => { dumpNotesOpen = !dumpNotesOpen; renderDump(); });
+  slot.querySelectorAll('[data-nd]').forEach(b => b.addEventListener('click', () => { const x = (state.dumpNotes || []).find(y => y.id === b.dataset.nd); if (x) { x.gone = true; save(); renderDump(); } }));
   // tidy: done items from before today drop off
   const keep = L.filter(x => !x.done || key(new Date(x.doneAt || x.at)) === t);
   if (keep.length !== L.length) { state.dump = keep; save(); }
