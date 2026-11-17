@@ -5492,6 +5492,8 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .nx-pick span { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
 .nx-pick select { width: 100%; min-height: 50px; padding: 0 14px; font: 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
 .nx-why { margin: 6px 2px 0; font-size: 13px; color: var(--muted); }
+
+.ns-tonote { display: block; width: 100%; min-height: 50px; margin-top: 14px; font: 600 16px var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--dash); border-radius: 25px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -5760,7 +5762,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:06:47</footer>
+  <footer>Mr.O:06:58</footer>
 </div>
 
 <script>
@@ -6821,10 +6823,18 @@ function openNameSheet(b) {
           (mine.length ? '<p class="ns-sub">Your usual</p>' + mine.map(x => row('↻', x.t, minsLabel(Number(x.mins) || 60))).join('') : '') +
         '</div>';
     }
-    el.innerHTML = html + (step || wasEmpty ? '' : '<button type="button" class="ns-remove">Remove this block</button>') + '<button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
+    el.innerHTML = html + (step || wasEmpty ? '' : '<button type="button" class="ns-tonote">Turn into a note</button><button type="button" class="ns-remove">Remove this block</button>') + '<button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
     el.querySelector('.w3-back').addEventListener('click', close);
     el.querySelector('.ns-x').addEventListener('click', close);
     el.querySelector('.ns-cancel').addEventListener('click', close);
+    const tn = el.querySelector('.ns-tonote');
+    if (tn) tn.addEventListener('click', () => {
+      const d = dayFor(viewDay), i = d.blocks.indexOf(b), where = viewDay; el.remove(); if (i < 0) return renderDay();
+      const note = { id: Date.now().toString(36), text: (b.label || '').trim(), at: Date.now() };
+      state.dumpNotes = state.dumpNotes || []; state.dumpNotes.push(note); d.blocks.splice(i, 1);
+      save(); renderDay(); renderHabits();
+      offerUndo('note "' + note.text + '"', () => { note.gone = true; dayFor(where).blocks.splice(i, 0, b); save(); renderDay(); renderHabits(); });
+    });
     const rmb = el.querySelector('.ns-remove');
     if (rmb) rmb.addEventListener('click', () => { const d = dayFor(viewDay), i = d.blocks.indexOf(b); el.remove(); if (i >= 0) removeBlock(d, i); else renderDay(); });
     const back = el.querySelector('.ns-back'); if (back) back.addEventListener('click', () => draw(null));
@@ -6879,7 +6889,7 @@ function openNameSheet(b) {
       '<div class="nss-rows"><button type="button" class="nss-r" data-s="len"><span>How long</span><b>' + minsLabel(len) + '</b><i>\u203a</i></button>' +
       (f ? '<button type="button" class="nss-r" data-s="tasks"><span>' + (f === 'agenda' ? 'Agenda' : 'Tasks') + '</span><b>' + (T.length ? T.filter(x => x.done).length + ' of ' + T.length : 'none yet') + '</b><i>\u203a</i></button>' : '') +
       '<button type="button" class="nss-r" data-s="kind"><span>Change what it is</span><b></b><i>\u203a</i></button></div>' +
-      '<button type="button" class="ns-remove">Remove this block</button><button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
+      '<button type="button" class="ns-tonote">Turn into a note</button><button type="button" class="ns-remove">Remove this block</button><button type="button" class="ls-cancel ns-cancel">Cancel</button></div>';
     const inp = el.querySelector('.ns-in'); inp.value = b.label || '';
     const go = () => { const v = inp.value.trim(); if (v) set(v); else close(); };
     el.querySelector('.ns-ok').addEventListener('click', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
@@ -6888,6 +6898,13 @@ function openNameSheet(b) {
     const tb = el.querySelector('[data-s=tasks]'); if (tb) tb.addEventListener('click', () => { el.remove(); openListSheet(b, f, from); });
     el.querySelector('[data-s=kind]').addEventListener('click', () => draw(null));
     el.querySelector('.ns-remove').addEventListener('click', () => { el.remove(); if (i >= 0) removeBlock(d, i); else renderDay(); });
+    el.querySelector('.ns-tonote').addEventListener('click', () => {
+      el.remove(); if (i < 0) return renderDay();
+      const where = viewDay, note = { id: Date.now().toString(36), text: (b.label || '').trim(), at: Date.now() };
+      state.dumpNotes = state.dumpNotes || []; state.dumpNotes.push(note); d.blocks.splice(i, 1);
+      save(); renderDay(); renderHabits();
+      offerUndo('note "' + note.text + '"', () => { note.gone = true; dayFor(where).blocks.splice(i, 0, b); save(); renderDay(); renderHabits(); });
+    });
   };
   if (!wasEmpty) { simple(); return; }
   draw(null);
@@ -8724,6 +8741,7 @@ function addBlockSheet(preset, insertAt) {
     if (pick.workout) b.workout = pick.workout;
     if (pick.goals && pick.goals.length) b.goals = pick.goals.map(t => ({ text: t, done: false }));
     const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
+    if (pick.note) { const n = (state.dumpNotes || []).find(y => y.id === pick.note); if (n) n.gone = true; }   // a note that became a block
     day.touched = true;
     if (!Number.isInteger(insertAt) && pick.sug && pick.where === 'usual') insertAt = pick.sug.i;   // your usual time
     if (Number.isInteger(insertAt) && insertAt >= 0 && insertAt <= day.blocks.length) day.blocks.splice(insertAt, 0, b); else day.blocks.push(b);
@@ -8748,6 +8766,7 @@ function addBlockSheet(preset, insertAt) {
       const rk = endOfDay < 11 * 60 ? 'am' : endOfDay >= 18 * 60 ? 'pm' : null;
       const pool = [], seenL = new Set(), push = it => { const k = it.t.toLowerCase(); if (seenL.has(k)) return; seenL.add(k); pool.push(it); };
       if (rk) push({ t: rk === 'am' ? 'Morning routine' : 'Evening routine', e: rk === 'am' ? '\u2600\uFE0F' : '\u{1F319}', sub: routineGet(rk) ? 'routine' : 'make one', rt: rk });
+      (state.dumpNotes || []).filter(n => !n.gone).slice(-3).reverse().forEach(n => push({ t: n.text, e: '\u{1F4DD}', sub: 'note', note: n.id }));
       Object.keys(tally).map(k => keepT[k]).map(t => ({ t, u: usualStart(t) })).filter(x => x.u !== null && Math.abs(x.u - endOfDay) <= 75 && !planned.has(x.t.toLowerCase()))
         .sort((a, b) => Math.abs(a.u - endOfDay) - Math.abs(b.u - endOfDay)).slice(0, 3).forEach(x => push({ t: x.t, e: icon(x.t), sub: 'usual now' }));
       top.forEach(t => push({ t, e: icon(t), sub: 'most used' }));
@@ -8801,7 +8820,7 @@ function addBlockSheet(preset, insertAt) {
     if (bx) {
       const list = el.querySelector('#abx-list'), P = el._pool || [];
       const choose = it => { if (it.rt) { close(); routineSheet(it.rt); return; } if (it.go) { step = it.go; draw(); return; }
-        pick = { label: it.t, mins: it.mins || usualLength(it.t) || 60, ...(it.step ? { step: it.step } : {}) }; draw(); };
+        pick = { label: it.t, mins: it.mins || usualLength(it.t) || 60, ...(it.step ? { step: it.step } : {}), ...(it.note ? { note: it.note } : {}) }; draw(); };
       const paint = () => {
         const q = bx.value.trim().toLowerCase();
         const L = (q ? P.filter(x => x.t.toLowerCase().includes(q)) : P).slice(0, q ? 8 : 6);
@@ -16717,6 +16736,7 @@ function weekAddSheet(day0, days, preset, after) {
         (S.length ? '<button type="button" class="wk2-gbtn" aria-expanded="false"><span><i>\u{1F3AF}</i>From your goals</span><s>' + S.length + ' <b>\u25BE</b></s></button>' +
           '<div class="wk2-glist" hidden>' + AREAS.map(a => { const xs = S.filter(x => x.a === a.k); return xs.length ? '<div class="wk2-gg" style="--c:' + a.c + '"><small>' + a.name + '</small>' +
             xs.map(x => '<button type="button" data-g="' + esc(x.t) + '"><i>' + a.e + '</i><span>' + esc(x.t) + '</span><s>\u203a</s></button>').join('') + '</div>' : ''; }).join('') + '</div>' : '') +
+        (() => { const N = (state.dumpNotes || []).filter(n => !n.gone); return N.length ? '<p class="wk2-h">From your notes</p><div class="wk2-tiles">' + N.slice(-6).reverse().map(n => '<button type="button" data-t="' + esc(n.text) + '" data-mm="30"><i>\u{1F4DD}</i><span>' + esc(n.text) + '</span></button>').join('') + '</div>' : ''; })() +
         '<p class="wk2-h">Everyday</p><div class="wk2-tiles">' + COMMON.map(([e, t, m]) => '<button type="button" data-t="' + t + '" data-mm="' + m + '"><i>' + e + '</i><span>' + t + '</span></button>').join('') + '</div>';
     } else {
       const LENS = [30, 60, 90, 120]; if (!LENS.includes(mins)) { LENS.push(mins); LENS.sort((a, b) => a - b); }
@@ -16778,6 +16798,7 @@ function weekAddSheet(day0, days, preset, after) {
         const sid = preset && preset.step ? preset.step : gst ? gst.id : null;
         state.days[k].blocks.push(sid ? { label, mins, step: sid } : { label, mins });
       }
+      (state.dumpNotes || []).forEach(n => { if (!n.gone && n.text.toLowerCase() === label.toLowerCase()) n.gone = true; });   // a note that became a block
       save(); close();
       if (after) after([...pick]); else renderWeek();
     });
