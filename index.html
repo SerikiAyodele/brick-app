@@ -5622,6 +5622,17 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day#view-day#view-day .addrow .addblock { font-weight: 600; font-size: 15px; }
 #view-day#view-day#view-day .nowcard .nc-name, #view-day#view-day#view-day .datebar .big { font-family: "Inter", system-ui, -apple-system, sans-serif !important; }
 #view-day#view-day#view-day #block-list .line .tick:disabled { opacity: 1 !important; border-color: color-mix(in srgb, var(--ink) 22%, transparent) !important; }
+
+/* ===== Plan: an emoji for every block, like Structured. tap it to choose another ===== */
+#view-day#view-day#view-day #block-list .line { grid-template-columns: 30px 38px 1fr auto auto auto !important; grid-template-areas: "tick emo mid chip how bin" "tick emo at chip how bin" !important; }
+#view-day#view-day#view-day #block-list .line .bemo { grid-area: emo; width: 38px; height: 38px; padding: 0; display: grid; place-items: center; font-size: 20px; line-height: 1; border: 0; border-radius: 12px; background: color-mix(in srgb, var(--pink) 10%, var(--card)); cursor: pointer; }
+#view-day#view-day#view-day #block-list .line.ticked .bemo { opacity: .45; }
+#view-day#view-day#view-day #block-list .line.ticked .tick, #view-day#view-day#view-day #block-list .line .tick.on { background: var(--pink) !important; border-color: var(--pink) !important; color: #fff !important; }
+#view-day#view-day#view-day #block-list .line.ticked .what { color: var(--muted) !important; text-decoration: line-through; }
+#view-day .nc-name .nc-emo { margin-right: 8px; font-size: .9em; }
+#emosheet .em-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 12px 0 14px; }
+#emosheet .em-grid button { aspect-ratio: 1; font-size: 26px; border: 1px solid var(--hair); border-radius: 14px; background: var(--card); cursor: pointer; }
+#emosheet .em-grid button.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 12%, var(--card)); }
 </style>
 </head>
 <body>
@@ -5897,7 +5908,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:43</footer>
+  <footer>Mr.O:08:17</footer>
 </div>
 
 <script>
@@ -7236,7 +7247,7 @@ function nowCard(day) {
       frac = (now - cur.a) / (cur.z - cur.a);
       card.className = 'nowcard live';
       $('.nc-tagtext').textContent = 'Now';
-      $('.nc-name').textContent = cur.b.label || 'unnamed block';
+      $('.nc-name').innerHTML = '<span class="nc-emo">' + blockEmoji(cur.b) + '</span>' + esc(cur.b.label || 'unnamed block');
       $('.nc-left').textContent = fmtLeft(cur.z - now);
       $('.nc-unit').textContent = 'left';
       $('.nc-in').textContent = clock(cur.from) + ' to ' + clock(cur.from + (Number(cur.b.mins) || 60));
@@ -7247,7 +7258,7 @@ function nowCard(day) {
       frac = 0;
       card.className = 'nowcard waiting';
       $('.nc-tagtext').textContent = 'Starts soon';
-      $('.nc-name').textContent = first.b.label || 'unnamed block';
+      $('.nc-name').innerHTML = '<span class="nc-emo">' + blockEmoji(first.b) + '</span>' + esc(first.b.label || 'unnamed block');
       $('.nc-left').textContent = fmtLeft(first.a - now);
       $('.nc-unit').textContent = 'to go';
       $('.nc-in').textContent = 'starts at ' + clock(first.from);
@@ -7541,6 +7552,37 @@ const ROOM_TREES = [
     'White blossoms open, sweet and light.', 'Green fruits turn bright yellow.', 'Your lemon tree brightens your forest.'] }
 ];
 const FLOWER_EMOJI = { rose: '\u{1F339}', peony: '\u{1F338}', sunflower: '\u{1F33B}', lotus: '\u{1FAB7}', hibiscus: '\u{1F33A}', tulip: '\u{1F337}', lily: '\u{1F490}', blossom: '\u{1F338}', lavender: '\u{1F490}' };
+// an emoji for a block: the one you picked, or a good guess from its name
+const BLOCK_EMOJI = [[/sleep|bed|nap/, '\u{1F634}'], [/wake|morning routine/, '\u2600\uFE0F'], [/breakfast/, '\u{1F95E}'], [/lunch/, '\u{1F957}'], [/dinner|supper/, '\u{1F35D}'], [/eat|meal|snack|food|cook/, '\u{1F37D}\uFE0F'],
+  [/coffee|tea/, '\u2615'], [/gym|workout|lift|glute|upper|lower|leg|strength/, '\u{1F3CB}\uFE0F'], [/run|jog|cardio/, '\u{1F3C3}\u200D\u2640\uFE0F'], [/walk/, '\u{1F6B6}\u200D\u2640\uFE0F'], [/yoga|stretch|pilates/, '\u{1F9D8}\u200D\u2640\uFE0F'], [/swim/, '\u{1F3CA}\u200D\u2640\uFE0F'],
+  [/shower|bath|skin|hair|nails|self ?care|get ready/, '\u{1F6C1}'], [/meet|sync|call|1:1|standup|stand-up|interview/, '\u{1F465}'], [/email|inbox|admin|slack/, '\u{1F4E8}'], [/deep|focus|code|deploy|build|debug|devops|terraform|kube/, '\u{1F4BB}'],
+  [/work|project|report|task/, '\u{1F4BC}'], [/read|book/, '\u{1F4D6}'], [/study|learn|course|class|revise/, '\u{1F4DA}'], [/write|journal|blog/, '\u270D\uFE0F'], [/plan|review|reflect/, '\u{1F5D3}\uFE0F'], [/pray|church|mosque|bible|quran/, '\u{1F64F}'],
+  [/meditat|breath/, '\u{1F9D8}'], [/clean|tidy|laundry|chores|wash/, '\u{1F9F9}'], [/shop|grocer|market/, '\u{1F6D2}'], [/drive|commute|travel|uber|train|bus/, '\u{1F697}'], [/friend|date|family|mum|mom|dad|love|social/, '\u{1F49E}'],
+  [/movie|film|tv|netflix|show/, '\u{1F3AC}'], [/music|piano|guitar|sing/, '\u{1F3B5}'], [/game/, '\u{1F3AE}'], [/rest|break|relax|chill/, '\u{1F6CB}\uFE0F'], [/money|budget|finance|bank|bills/, '\u{1F4B0}'], [/doctor|dentist|health|therapy/, '\u{1FA7A}'],
+  [/content|post|instagram|tiktok|film|photo/, '\u{1F4F8}'], [/design|draw|art|paint/, '\u{1F3A8}'], [/zart|business|client|sales/, '\u{1F4C8}']];
+const EMOJI_CHOICES = ['\u{1F4BB}', '\u{1F4BC}', '\u{1F465}', '\u{1F4E8}', '\u{1F4DA}', '\u{1F4D6}', '\u270D\uFE0F', '\u{1F5D3}\uFE0F', '\u{1F3CB}\uFE0F', '\u{1F3C3}\u200D\u2640\uFE0F', '\u{1F6B6}\u200D\u2640\uFE0F', '\u{1F9D8}\u200D\u2640\uFE0F',
+  '\u{1F95E}', '\u{1F957}', '\u{1F35D}', '\u2615', '\u{1F634}', '\u{1F6C1}', '\u{1F9F9}', '\u{1F6D2}', '\u{1F697}', '\u{1F49E}', '\u{1F3AC}', '\u{1F3B5}', '\u{1F6CB}\uFE0F', '\u{1F4B0}', '\u{1FA7A}', '\u{1F4F8}', '\u{1F3A8}', '\u{1F4C8}', '\u{1F64F}', '\u2728', '\u{1F3AF}', '\u{1F338}', '\u{1F48E}', '\u{1F525}'];
+function blockEmoji(b) {
+  if (b && b.emoji) return b.emoji;
+  const l = String((b && b.label) || '').toLowerCase();
+  if (b && b.meeting) return '\u{1F465}';
+  if (b && b.workout) return '\u{1F3CB}\uFE0F';
+  for (const [re, e] of BLOCK_EMOJI) if (re.test(l)) return e;
+  return '\u2728';
+}
+function emojiSheet(b) {
+  const old = document.getElementById('emosheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'emosheet'; el.className = 'w3';
+  const cur = blockEmoji(b);
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet" role="dialog" aria-modal="true" aria-label="Pick an emoji"><span class="w3-grab"></span>' +
+    '<h2>' + esc((b.label || 'This block').trim()) + '</h2><div class="em-grid">' + EMOJI_CHOICES.map(e => '<button type="button" data-e="' + e + '"' + (e === cur ? ' class="on"' : '') + '>' + e + '</button>').join('') + '</div>' +
+    (b.emoji ? '<button type="button" class="ls-cancel em-auto">Let brick choose</button>' : '') + '<button type="button" class="ls-cancel em-x">Cancel</button></div>';
+  document.body.appendChild(el);
+  const close = () => el.remove();
+  el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.em-x').addEventListener('click', close);
+  const au = el.querySelector('.em-auto'); if (au) au.addEventListener('click', () => { delete b.emoji; save(); close(); renderDay(); });
+  el.querySelectorAll('[data-e]').forEach(x => x.addEventListener('click', () => { b.emoji = x.dataset.e; save(); close(); renderDay(); }));
+}
 const plantEmoji = p => p.crop || FLOWER_EMOJI[p.k] || '\u{1F33F}';
 function pickRoomPlant() {
   const all = ROOM_PLANTS.concat(ROOM_CROPS, ROOM_TREES);
@@ -8620,7 +8662,10 @@ function renderDay() {
       });
     });
 
-    row.append(when, tick, mid);
+    const emo = document.createElement('button'); emo.type = 'button'; emo.className = 'bemo'; emo.textContent = blockEmoji(b);
+    emo.setAttribute('aria-label', 'emoji for ' + (b.label || 'this block') + ', tap to change');
+    emo.addEventListener('click', () => emojiSheet(b));
+    row.append(when, tick, emo, mid);
     // every row keeps the same slot, so ?, + and 1/3 all line up in one column
     const slot = document.createElement('span');
     slot.className = 'chipslot';
