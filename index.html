@@ -5760,7 +5760,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:06:43</footer>
+  <footer>Mr.O:06:47</footer>
 </div>
 
 <script>
@@ -13764,6 +13764,15 @@ function renderHomeNudge(box) {
    one entry per morning: when you went to bed, when you woke, how it felt.
    kept under the date you woke up. */
 const SLEEP_FEEL = [['\u{1F62B}', 'awful'], ['\u{1F615}', 'poor'], ['\u{1F610}', 'okay'], ['\u{1F642}', 'good'], ['\u{1F634}', 'great']];
+// how the night felt: what you rated it, or else your first mood check-in that morning. never a made up "okay"
+function sleepFeel(e) {
+  if (!e) return null;
+  if (e.q) return SLEEP_FEEL[e.q - 1];
+  const k = e.k || todayKey();
+  const m = (state.moods || []).filter(x => key(new Date(x.at)) === k && new Date(x.at).getHours() < 13).sort((a, b) => a.at - b.at)[0];
+  if (m) { const M = MOODS.find(x => x.k === m.mood); return [M ? M.e : '\u{1F642}', m.feel || m.mood]; }
+  return ['\u{1F319}', 'how did it feel?'];
+}
 // the night that ends on morning k, from your plan: a "Sleep" block in the
 // day before (or early in day k). bed is when it starts, wake is when it ends.
 const SLEEP_RE = /^\s*(sleep|bed|bedtime|go to bed|night sleep)\b/i;
@@ -13800,7 +13809,7 @@ function renderSleepCard(box) {
   const card = document.createElement('div');
   card.className = 'sl-card';
   if (e && !sleepEditing) {
-    const m = sleepMins(e), f = SLEEP_FEEL[(e.q || 3) - 1];
+    const m = sleepMins(e), f = sleepFeel(e);
     card.innerHTML = '<button type="button" class="sl-done"><span>' + f[0] + '</span><b>Slept ' + dur(m) + '</b><small>' + clock(toMins(e.bed)) + ' to ' + clock(toMins(e.wake)) + ' · ' + f[1] + '</small></button>';
     card.querySelector('button').addEventListener('click', () => { sleepEditing = true; renderHome(); });
     box.appendChild(card); return;
@@ -14188,14 +14197,14 @@ function sleepSheet(body, close, editing) {
   // the last 7 nights, newest first, as small bars against 9 hours
   const week = []; for (let i = 0; i < 7; i++) { const kk = shiftKey(k, -i); week.push({ kk, e: sleepOn(kk) }); }
   const hist = '<ol class="sp-week">' + week.map(({ kk, e: x }) => {
-    const m = sleepMins(x), f = x ? SLEEP_FEEL[(x.q || 3) - 1] : null;
+    const m = sleepMins(x), f = x ? sleepFeel(x) : null;
     return '<li><span>' + (kk === k ? 'Today' : cap(FULL[fromKey(kk).getDay()].slice(0, 3))) + '</span>' +
       '<div class="sp-bar"><div class="sp-fill' + (m && m >= 420 ? ' ok' : '') + '" style="width:' + (m ? Math.min(100, m / 540 * 100) : 0) + '%"></div></div>' +
       '<b>' + (m ? dur(m) : '–') + '</b><em>' + (f ? f[0] : '') + '</em></li>';
   }).join('') + '</ol>';
 
   if (e && !editing) {
-    const f = SLEEP_FEEL[(e.q || 3) - 1];
+    const f = sleepFeel(e);
     body.innerHTML = '<div class="sp-top"><span class="sp-moon">\u{1F319}</span><div><small>Last night</small><b>' + dur(sleepMins(e)) + '</b>' +
         '<span>' + clock(toMins(e.bed)) + ' → ' + clock(toMins(e.wake)) + ' · ' + f[0] + ' ' + f[1] + '</span></div></div>' +
       hist +
@@ -15714,7 +15723,7 @@ function daySummary(k) {
     agenda ? ['Agenda points', agendaDone + ' of ' + agenda] : null,
     md ? ['Mood', md.e + ' mostly ' + md.k] : null,
     food.length ? ['Food', food.length + ' logged' + (meals.length ? ' · protein in ' + protein + ' of ' + meals.length : '')] : null,
-    sleepOn(k) ? ['Sleep', dur(sleepMins(sleepOn(k))) + ' \u00b7 ' + SLEEP_FEEL[(sleepOn(k).q || 3) - 1][1]] : null,
+    sleepOn(k) ? ['Sleep', dur(sleepMins(sleepOn(k))) + ' \u00b7 ' + sleepFeel(sleepOn(k))[1]] : null,
     state.habits.length ? ['Habits', habitsDone + ' of ' + state.habits.length] : null
   ].filter(Boolean);
 
