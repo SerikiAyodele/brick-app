@@ -5910,6 +5910,8 @@ html.kb-open .qn .ns-cancel { display: none; }
 .cut .cut-r button { min-height: 32px; padding: 0 10px; font: 600 13px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; }
 .cut .cut-r .cut-rm { color: #d9628a; }
 .cut .cut-r em { font-style: normal; font: 600 13px "Inter", system-ui, sans-serif; color: #d9628a; }
+
+#dump-slot .bd-why { display: block; margin-top: 2px; font: 400 12px "Inter", system-ui, sans-serif; color: #d9628a; }
 </style>
 </head>
 <body>
@@ -6190,7 +6192,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:11:32</footer>
+  <footer>Mr.O:11:43</footer>
 </div>
 
 <script>
@@ -9254,7 +9256,7 @@ function renderDump() {
   const open = L.filter(x => !x.done), doneToday = L.filter(x => x.done && key(new Date(x.doneAt || x.at)) === t);
   slot.innerHTML = '<section class="bd"><div class="bd-h"><b>To do</b><small>' + (open.length ? open.length + ' open' : 'not in the plan yet') + '</small></div>' +
     '<div class="bd-add"><input type="text" maxlength="140" placeholder="Add a to do" aria-label="add a to do"><button type="button" aria-label="add">+</button></div>' +
-    (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
+    (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + (x.why ? '<small class="bd-why">' + esc(x.why) + '</small>' : '') + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
     (doneToday.length ? '<button type="button" class="bd-done">' + (dumpOpenDone ? 'Hide' : 'Show') + ' ' + doneToday.length + ' done</button>' +
       (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
     (N.length ? '<button type="button" class="bd-done bd-nt">' + (dumpNotesOpen ? 'Hide' : 'Notes from earlier \u00b7') + ' ' + N.length + '</button>' +
@@ -9484,7 +9486,7 @@ function addBlockSheet(preset, insertAt) {
     const fromTodo = planFromTodo; planFromTodo = false;
     if (!fromTodo && day.end && viewDay === planKey() && planEndOf(day) + mins > endLimit(day)) {
       // past your end time: it waits in To do, with Plan it for later
-      const L = state.dump || (state.dump = []), item = { id: Date.now().toString(36), text: (pick.label || 'Block') + (pick.title ? ': ' + pick.title : ''), mins, done: false, at: Date.now() };
+      const L = state.dump || (state.dump = []), item = { id: Date.now().toString(36), text: (pick.label || 'Block') + (pick.title ? ': ' + pick.title : ''), mins, done: false, at: Date.now(), why: 'Moved here: it ran past your end time (' + clock(endLimit(day)) + ')' };
       L.push(item); save(); close(); renderDay(); renderHabits();
       offerUndo('=Past your end time, so it went to To do', () => { const j = L.indexOf(item); if (j > -1) L.splice(j, 1); day.blocks.push(b); save(); renderDay(); });
       return;
