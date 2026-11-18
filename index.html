@@ -6282,7 +6282,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:38</footer>
+  <footer>Mr.O:12:47</footer>
 </div>
 
 <script>
@@ -17597,10 +17597,19 @@ function chatContext() {
       const gs = (areaGoals(a.k) || []).map(g => g.text).filter(Boolean);
       if (gs.length) out.push(a.name + ' goals: ' + gs.join('; '));
     }
-    const blocks = ((state.days[todayKey()] || {}).blocks || []).map(b => b.label).filter(Boolean);
-    if (blocks.length) out.push('Today\'s plan: ' + blocks.join(', '));
+    // today's plan with times, titles, tasks and what is done, so Claude knows the day
+    const day = state.days[planKey()] || {}, bs = day.blocks || [];
+    if (bs.length) {
+      let at = toMins(day.start);
+      out.push('Today\'s plan (start ' + clock(at) + (day.end ? ', end ' + clock(toMins(day.end)) : '') + '):');
+      bs.forEach(b => { const m = Number(b.mins) || 60, from = at; at += m;
+        const tasks = (b.goals || []).map(g => g.text + (g.done ? ' (done)' : '')).join('; ');
+        out.push('- ' + clock(from) + ' to ' + clock(at) + ' ' + (b.label || 'Block') + (b.title ? ' (' + b.title + ')' : '') + (b.done ? ' [done]' : '') + (tasks ? ' tasks: ' + tasks : '')); });
+    }
+    const td = (state.dump || []).filter(x => !x.done).map(x => x.text);
+    if (td.length) out.push('To do (not planned): ' + td.slice(0, 15).join('; '));
   } catch {}
-  return out.join('\n').slice(0, 3000);
+  return out.join('\n').slice(0, 5000);
 }
 
 function renderChat() {
