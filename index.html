@@ -5646,6 +5646,30 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .donefold.bump i { animation: tkpop2 .5s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes tkpop2 { 40% { transform: scale(1.45); } }
 @media (prefers-reduced-motion: reduce) { .tkb i, .tkb u { display: none; } }
+
+/* plan: quiet labels for the parts of the day */
+#view-day .dpart { display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: color-mix(in srgb, var(--pink-d) 70%, var(--muted)); }
+#view-day .dpart::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, color-mix(in srgb, var(--pink) 35%, transparent), transparent); }
+#view-day .dpart:first-child { margin-top: 0; }
+/* suggested routines for tomorrow */
+.tms { margin: 0 0 16px; padding: 16px; border: 1px solid transparent; border-radius: 20px; background: linear-gradient(color-mix(in srgb, var(--pink) 6%, var(--card)), color-mix(in srgb, var(--pink) 6%, var(--card))) padding-box, var(--gold, linear-gradient(135deg, #f7d3dc, #b97488)) border-box; }
+.tms-h b { display: block; font-family: var(--serif, inherit); font-size: 22px; font-weight: 600; }
+.tms-h small { font-size: 13px; color: var(--muted); }
+.tms-part { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hair); }
+.tms-ph { display: flex; align-items: center; justify-content: space-between; }
+.tms-ph b { font-size: 16px; font-weight: 600; }
+.tms-ph button { min-height: 38px; padding: 0 18px; font: 600 14px var(--display); color: #fff; background: var(--pink); border: none; border-radius: 19px; cursor: pointer; }
+.tms ol { list-style: none; margin: 8px 0 0; padding: 0; }
+.tms li { display: flex; justify-content: space-between; gap: 10px; min-height: 34px; align-items: center; font-size: 15px; }
+.tms li small { color: var(--muted); font-size: 13px; }
+.tms-why { margin: 6px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+.tms-no { display: block; min-height: 40px; margin: 8px 0 -6px; padding: 0; font: 500 14px var(--display); color: var(--muted); background: none; border: none; text-decoration: underline; cursor: pointer; }
+#view-day .line.plan-row .pl-len { flex: none !important; width: auto !important; min-width: 0 !important; max-width: 96px; padding: 0 12px !important; }
+#view-day .line.plan-row .pl-name { flex: 1 1 auto !important; min-width: 0; }
+/* planning rows: their own simple line (the block grid squeezed the name) */
+#view-day#view-day#view-day #block-list .line.plan-row { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; gap: 8px !important; grid-template-areas: none !important; grid-template-columns: none !important; }
+#view-day#view-day#view-day #block-list .line.plan-row > .at { flex: none !important; width: 70px !important; font-size: 13px; }
+#view-day#view-day#view-day #block-list .line.plan-row > .pl-name { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
 </style>
 </head>
 <body>
@@ -5921,7 +5945,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:12</footer>
+  <footer>Mr.O:06:47</footer>
 </div>
 
 <script>
@@ -8361,6 +8385,7 @@ function renderDay() {
   renderDayGoal();
   renderDump();
   renderCarry();
+  renderTomorrowSuggest();
   renderDumpCarry();
   renderDayStats();
   const day = dayFor(viewDay);
@@ -8421,10 +8446,14 @@ function renderDay() {
   const sheet = document.createElement('div');
   sheet.className = 'sheet' + (compactDay && !sortingDay ? ' compact' : '');
 
+  let partShown = null;   // morning, afternoon, night: a quiet label where each starts
   day.blocks.forEach((b, i) => {
     const len  = Number(b.mins) || 60;   // guard against anything odd in saved data
     const from = at;
     at = at + len;
+    const partOf = m => { m = ((m % 1440) + 1440) % 1440; return m >= 240 && m < 720 ? 'Morning' : m >= 720 && m < 1080 ? 'Afternoon' : 'Night'; };
+    const showPart = () => { const pt = partOf(from); if (pt !== partShown) { partShown = pt; const lab = document.createElement('div'); lab.className = 'dpart'; lab.textContent = pt; sheet.appendChild(lab); } };
+    if (!(!sortingDay && b.done && i < firstOpen && firstOpen > 0 && !dayShowDone)) showPart();
 
     // finished blocks fold into one line, so the page shows what is left
     if (!sortingDay && b.done && i < firstOpen && firstOpen > 0) {
@@ -8918,6 +8947,74 @@ function renderDump() {
   if (keep.length !== L.length) { state.dump = keep; save(); }
 }
 
+/* tomorrow's routines, suggested from the day before: what helped, what did not.
+   rules you can read, not a black box. shows when you plan tomorrow (or any day ahead). */
+function suggestRoutines(prevK, target) {
+  const d = state.days[prevK], am = [], pm = [];
+  // each item carries its own reason, so the reasons always match the list
+  const add = (L, b, why) => { const x = L.find(y => y.label.toLowerCase() === b.label.toLowerCase()); if (x) { if (why && !x.why) x.why = why; return; } L.push({ ...b, why: why || '' }); };
+  const blocks = d && d.blocks ? (() => { let at = toMins(d.start); return d.blocks.map(b => { const len = Number(b.mins) || 60, f = at; at += len; return { label: (b.label || '').trim(), from: f, len, done: b.done }; }); })() : [];
+  const moods = (state.moods || []).filter(m => key(new Date(m.at)) === prevK).sort((a, b) => a.at - b.at);
+  const food = (state.food || []).filter(f => key(new Date(f.at)) === prevK).sort((a, b) => a.at - b.at);
+  const after = re => moods.find(m => re.test(m.after || '') && ['good', 'calm', 'focused'].includes(m.mood));
+  const hm = at => { const x = new Date(at); return x.getHours() * 60 + x.getMinutes(); };
+  // morning, from yesterday
+  const goal = d && (typeof d.goal === 'string' ? d.goal : d.goal && d.goal.text);
+  if (goal && !blocks.some(b => b.label.toLowerCase().includes(goal.toLowerCase().split(' ')[0]))) add(am, { label: 'Focus: ' + goal, mins: 60 }, 'Yesterday’s goal had no block. Do it first, while you are fresh.');
+  else if (moods.filter(m => m.mood === 'okay' || m.mood === 'unfocused').length >= 3) add(am, { label: 'Hardest task first', mins: 25 }, 'Work felt flat most of the day. Start with the hard thing for 25 minutes.');
+  const first = food.find(f => !entryKinds(f).includes('cannabis'));
+  if (first && hm(first.at) > 660) add(am, { label: 'Breakfast', mins: 20 }, 'You first ate at ' + clock(hm(first.at)) + '. Eat earlier.');
+  const walk = after(/walk/i); if (walk) add(am, { label: 'Walk', mins: 25 }, 'You felt ' + (walk.feel || walk.mood) + ' after your walk.');
+  // night, from yesterday
+  const awake = blocks.find(b => /unable to sleep|can.?t sleep|awake|no sleep/i.test(b.label));
+  const sleepB = blocks.find(b => /^sleep/i.test(b.label));
+  const screens = blocks.filter(b => b.from >= 1200 && /movie|tiktok|phone|netflix|youtube|instagram|brick|tv|scroll/i.test(b.label));
+  if (screens.length) add(pm, { label: 'Screens off', mins: 5 }, 'Screens were on at ' + clock(screens[0].from) + '. Off by 9:30pm.');
+  if (awake || (sleepB && sleepB.len < 420)) {
+    add(pm, { label: 'Warm shower', mins: 20 });
+    add(pm, { label: 'Read a paper book', mins: 20 }, awake ? 'You lay awake ' + hrsLabel(awake.len) + '. If it happens again, get up after 20 minutes and read somewhere dim.' : 'You slept ' + hrsLabel(sleepB.len) + '. Aim for 7 or more.');
+    add(pm, { label: 'Lights out', mins: 5 });
+  }
+  const read = after(/read/i); if (read && !pm.some(b => /read/i.test(b.label))) add(pm, { label: 'Read', mins: 20 }, 'You felt ' + (read.feel || read.mood) + ' after reading.');
+  else if (read) { const r = pm.find(b => /read/i.test(b.label)); r.why = (r.why ? r.why + ' ' : '') + 'You felt ' + (read.feel || read.mood) + ' after reading last night.'; }
+  const late = food.filter(f => entryKinds(f).includes('cannabis') && hm(f.at) >= 960);
+  const note = late.length ? 'Your last edible was ' + clock(hm(late[late.length - 1].at)) + '. Cutting down can make sleep rough for a week or two. It passes.' : '';
+  // then what you already do (not commutes or work), to fill up to 4
+  const base = kind => { const r = routineGet(kind); return r ? r.blocks.filter(b => !/commute|work|meeting|gym|glutes|quads|upper body|drive|travel/i.test(b.label)).map(b => ({ label: b.label, mins: Number(b.mins) || 30 })) : []; };
+  base('am').forEach(b => { if (am.length < 4) add(am, b, ''); });
+  base('pm').forEach(b => { if (pm.length < 4) add(pm, b, ''); });
+  const A = am.slice(0, 4), P = pm.slice(0, 4);
+  A.sort((x, y) => /^focus|hardest/i.test(x.label) - /^focus|hardest/i.test(y.label));   // body first, then the work that matters
+  const order = ['walk', 'shower', 'pray', 'breakfast'];
+  A.sort((x, y) => { const f = b => /^focus|hardest/i.test(b.label) ? 9 : (order.indexOf(b.label.toLowerCase()) + 1 || 5); return f(x) - f(y); });
+  return { am: A, pm: P, why: { am: A.map(b => b.why).filter(Boolean), pm: P.map(b => b.why).filter(Boolean).concat(note ? [note] : []) } };
+}
+function renderTomorrowSuggest() {
+  let slot = document.getElementById('tmsug-slot');
+  if (!slot) { const c = document.getElementById('carry-slot'); if (!c) return; slot = document.createElement('div'); slot.id = 'tmsug-slot'; c.parentNode.insertBefore(slot, c); }
+  slot.innerHTML = '';
+  if (viewDay <= planKey()) return;
+  const day = dayFor(viewDay);
+  if (day.noSuggest) return;
+  const S = suggestRoutines(shiftKey(viewDay, -1), viewDay);
+  const has = lab => day.blocks.some(b => (b.label || '').toLowerCase() === lab.toLowerCase());
+  const amL = S.am.filter(b => !has(b.label)), pmL = S.pm.filter(b => !has(b.label));
+  if (!amL.length && !pmL.length) return;
+  const part = (kind, L, W) => !L.length ? '' : '<div class="tms-part"><div class="tms-ph"><b>' + (kind === 'am' ? '\u2600\uFE0F Morning' : '\u{1F319} Night') + '</b><button type="button" data-tms="' + kind + '">Add</button></div>' +
+    '<ol>' + L.map(b => '<li><span>' + esc(b.label) + '</span><small>' + minsLabel(b.mins) + '</small></li>').join('') + '</ol>' +
+    (W.length ? '<p class="tms-why">' + W.map(esc).join(' ') + '</p>' : '') + '</div>';
+  const box = document.createElement('div'); box.className = 'tms';
+  box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>from how yesterday went</small></div>' +
+    part('am', amL, S.why.am) + part('pm', pmL, S.why.pm) + '<button type="button" class="tms-no">Not now</button>';
+  box.querySelectorAll('[data-tms]').forEach(btn => btn.addEventListener('click', () => {
+    const kind = btn.dataset.tms, L = (kind === 'am' ? amL : pmL).map(b => ({ label: b.label, mins: b.mins }));
+    if (kind === 'am') day.blocks.unshift(...L); else day.blocks.push(...L);
+    day.touched = true; save(); renderDay(); renderHabits();
+    offerUndo(kind === 'am' ? 'morning routine' : 'night routine', () => { L.forEach(b => { const i = day.blocks.indexOf(b); if (i >= 0) day.blocks.splice(i, 1); }); save(); renderDay(); });
+  }));
+  box.querySelector('.tms-no').addEventListener('click', () => { day.noSuggest = true; save(); renderTomorrowSuggest(); });
+  slot.appendChild(box);
+}
 function routineGet(kind) { const r = (state.dayRoutines || {})[kind]; return r && r.blocks && r.blocks.length ? r : (typeof routineFromHistory === 'function' ? routineFromHistory(kind) : null); }
 function routineSheet(kind) {
   const old = document.getElementById('rtsheet'); if (old) old.remove();
