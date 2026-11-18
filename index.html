@@ -6493,7 +6493,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:43</footer>
+  <footer>Mr.O:20:48</footer>
 </div>
 
 <script>
@@ -9954,8 +9954,20 @@ function planFromSetup(k, o) {
   const blocks = [...before.map(x => ({ label: x.label, mins: x.mins })), ...mid, ...after.map(x => ({ label: x.label, mins: x.mins }))];
   const span = ((o.end - o.start) + 1440) % 1440 || 1440, used = blocks.reduce((t, b) => t + b.mins, 0) + o.sleep;
   if (span - used >= 15) { const at = before.length + mid.length; blocks.splice(at, 0, { label: 'Free time', mins: Math.round((span - used) / 5) * 5 }); }
+  // too long? trim until it fits the end time: leisure, then breaks, then extras, then meals, then work. sleep stays
+  let over = used - span; const trimmed = [];
+  const cut = (test, floor, why) => { if (over <= 0) return; for (const b of blocks.slice().reverse()) { if (over <= 0) break; if (!test(b)) continue; const can = b.mins - floor; if (can <= 0) continue; const c = Math.min(can, Math.ceil(over / 5) * 5); b.mins -= c; over -= c; if (!trimmed.includes(why)) trimmed.push(why); } };
+  const leisure = b => /movie|tv|netflix|youtube|game|scroll|social|tiktok|instagram|free time|chill/i.test(b.label);
+  const meal = b => /breakfast|lunch|dinner|meal|eat/i.test(b.label);
+  cut(leisure, 0, 'leisure');
+  blocks.forEach(b => { if (leisure(b) && b.mins > 0 && b.mins < 15) { over -= 0; b.mins = 0; } });   // a few minutes of a movie is not worth it
+  cut(b => /^break$/i.test(b.label), 5, 'breaks');
+  cut(b => !isWork(b) && !meal(b) && !/^break$/i.test(b.label) && !leisure(b) && !/^sleep/i.test(b.label), 5, 'extras');
+  cut(meal, 15, 'meals');
+  cut(b => isWork(b), 30, 'work');
+  for (let n = blocks.length - 1; n >= 0; n--) if (blocks[n].mins <= 0) blocks.splice(n, 1);
   if (o.sleep) blocks.push({ label: 'Sleep', mins: Math.round(o.sleep / 5) * 5 });
-  return { start: hhmm(o.start), end: hhmm(o.end), blocks, over: Math.max(0, used - span) };
+  return { start: hhmm(o.start), end: hhmm(o.end), blocks, over: Math.max(0, over), trimmed };
 }
 function planForMePage(k, opt) {
   if (!opt) return suggestSetupPage(k);
@@ -9974,8 +9986,8 @@ function planForMePage(k, opt) {
   }
   const el = bigPage(k === planKey() ? 'Suggest my day' : 'Plan for me', name + ' \u00b7 ' + how);
   el.querySelector('.bpg-body').innerHTML = planDayRows(P.start, P.blocks) +
-    (P.over ? '<p class="bpg-note bpg-warn">This runs ' + dur(P.over) + ' past your end time. Try fewer work hours, or cut something after.</p>' : '') +
-    (day.blocks.length ? '<p class="bpg-note">This replaces the ' + day.blocks.length + ' blocks there now. Undo works.</p>' : '') +
+    (P.over ? '<p class="bpg-note bpg-warn">Even trimmed, this runs ' + dur(P.over) + ' past your end time. Try less sleep or work.</p>' : (P.trimmed || []).length ? '<p class="bpg-note">Fits your end time. Shortened: ' + P.trimmed.join(', ') + '.</p>' : '') +
+    (day.blocks.length ? '<p class="bpg-note">This replaces the ' + (day.blocks.length === 1 ? 'block' : day.blocks.length + ' blocks') + ' there now. Undo works.</p>' : '') +
     '<div class="bpg-btns"><button type="button" class="wka-go bpg-use">Use this plan</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
   el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
   el.querySelector('.bpg-use').addEventListener('click', () => {
