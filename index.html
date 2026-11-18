@@ -6038,6 +6038,32 @@ html.kb-open .qn .ns-cancel { display: none; }
 .ch-ops .po-day li.rm b { text-decoration: line-through; color: var(--muted); }
 .ch-ops .po-day li.rm em { color: #d9628a; }
 .ch-ops .po-btn { display: flex; gap: 8px; }
+
+/* meals in the plan */
+#fuel[hidden] { display: none; }
+#fuel { margin: 0 0 14px; }
+#fuel .fu-row { display: flex; gap: 8px; }
+#fuel .fu { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px 10px; text-align: center; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
+#fuel .fu-c { position: relative; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+#fuel .fu-c i { font-style: normal; font-size: 22px; }
+#fuel .fu-c b { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 18px; height: 18px; font-size: 11px; color: #fff; background: #5aa86a; border: 2px solid var(--card); border-radius: 50%; }
+#fuel strong { font: 600 13px "Inter", system-ui, sans-serif; }
+#fuel small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 11px "Inter", system-ui, sans-serif; color: var(--muted); }
+#fuel .fu-ate .fu-c { background: color-mix(in srgb, #5aa86a 18%, transparent); }
+#fuel .fu-ate small { color: #5aa86a; }
+#fuel .fu-soon { opacity: .6; }
+#fuel .fu-now { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 10%, var(--card)); }
+#fuel .fu-now .fu-c::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--pink); animation: fuping 2.4s ease-out infinite; }
+#fuel .fu-now small { color: var(--pink); font-weight: 600; }
+#fuel .fu-miss { border-color: color-mix(in srgb, #f29ab5 55%, var(--hair)); background: color-mix(in srgb, #f29ab5 12%, var(--card)); }
+#fuel .fu-miss .fu-c { background: color-mix(in srgb, #f29ab5 22%, transparent); }
+#fuel .fu-miss .fu-c::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px dashed #f29ab5; animation: fuspin 12s linear infinite; }
+#fuel .fu-miss small { color: #d9628a; white-space: normal; line-height: 1.25; }
+@keyframes fuping { 0% { transform: scale(.9); opacity: .9; } 100% { transform: scale(1.35); opacity: 0; } }
+@keyframes fuspin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { #fuel .fu-c::after { animation: none !important; } }
+#fuel .fu-snk { margin: 8px 2px 0; font-size: 12px; color: var(--muted); }
+#day-cal .dc-food { position: absolute; left: -54px; z-index: 3; transform: translateY(-50%); padding: 2px 6px; font: 500 10px "Inter", system-ui, sans-serif; color: #fff; background: #5aa86a; border-radius: 8px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -6193,6 +6219,7 @@ html.kb-open .qn .ns-cancel { display: none; }
       <div class="md-seg dv-seg" id="dv-seg"><button type="button" class="md-seg-b" data-dv="list" aria-label="list">&#x2630;</button><button type="button" class="md-seg-b" data-dv="cal" aria-label="calendar">&#x25A6;</button></div>
     </div>
     <div id="overrun" hidden></div>
+    <div id="fuel" hidden></div>
 
     <div id="block-list"></div>
     <div id="day-cal" hidden></div>
@@ -6318,7 +6345,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:54</footer>
+  <footer>Mr.O:12:57</footer>
 </div>
 
 <script>
@@ -15025,6 +15052,34 @@ setInterval(checkTimeUp, 20000);
 /* ---- an optional end time for the day: if the plan runs past it, a calm note and help to cut ---- */
 // an end before the start means after midnight (start 6:30am, end 5:30am = next morning)
 function endLimit(day) { const e = toMins(day.end), st = toMins(day.start); return e <= st ? e + 1440 : e; }
+/* ---- meals in the plan: breakfast, lunch and dinner, from what you log ----
+   eaten shows what and when; in its window it glows; past its window with nothing, a soft pink nudge */
+const FUEL_WIN = { b: [360, 660, 'Breakfast', '\u{1F95E}'], l: [720, 930, 'Lunch', '\u{1F957}'], d: [1080, 1290, 'Dinner', '\u{1F35D}'] };
+function mealsToday() {
+  const t = planKey(), out = { b: [], l: [], d: [], s: [] };
+  for (const f of (state.food || [])) {
+    if (key(new Date(f.at)) !== t || isDrink(f)) continue;
+    const m = new Date(f.at).getHours() * 60 + new Date(f.at).getMinutes();
+    let k = ['b', 'l', 'd'].includes(f.meal) ? f.meal : null;
+    if (!k) for (const [kk, w] of Object.entries(FUEL_WIN)) if (m >= w[0] - 60 && m <= w[1] + 60) k = kk;
+    (out[k] || out.s).push(f);
+  }
+  return out;
+}
+function renderFuel() {
+  const box = document.getElementById('fuel'); if (!box) return;
+  if (viewDay !== planKey() || sortingDay) { box.hidden = true; return; }
+  const M = mealsToday(), now = new Date(), nm = now.getHours() * 60 + now.getMinutes();
+  box.hidden = false;
+  box.innerHTML = '<div class="fu-row">' + Object.entries(FUEL_WIN).map(([k, w]) => {
+    const got = M[k], last = got[got.length - 1];
+    const st = got.length ? 'ate' : nm < w[0] ? 'soon' : nm <= w[1] ? 'now' : 'miss';
+    const sub = st === 'ate' ? esc(String(last.what).slice(0, 18)) + ' \u00b7 ' + clockOf(last.at) : st === 'now' ? 'time to eat' : st === 'miss' ? 'not yet, eat something?' : 'from ' + clock(w[0]);
+    return '<button type="button" class="fu fu-' + st + '" data-fu="' + k + '"><span class="fu-c"><i>' + w[3] + '</i>' + (st === 'ate' ? '<b>\u2713</b>' : '') + '</span><strong>' + w[2] + '</strong><small>' + sub + '</small></button>';
+  }).join('') + '</div>' + (M.s.length ? '<p class="fu-snk">+ ' + M.s.length + ' snack' + (M.s.length > 1 ? 's' : '') + ': ' + esc(M.s.map(f => f.what).join(', ').slice(0, 60)) + '</p>' : '');
+  box.querySelectorAll('[data-fu]').forEach(b => b.addEventListener('click', () => foodSheet()));
+}
+setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); } catch {} }, 60000);
 function planEndOf(day) { return (day.blocks || []).reduce((t, b) => t + (Number(b.mins) || 60), toMins(day.start)); }
 function renderOverrun() {
   const box = document.getElementById('overrun'), ei = document.getElementById('endat'); if (!box) return;
@@ -15213,6 +15268,7 @@ function renderDayCal() {
       '<button type="button" class="dc-body" data-co="' + w.i + '"><b>' + blockEmoji(w.b) + ' ' + esc(w.b.label || 'Block') + ((w.b.title || '').trim() ? ' <i class="dc-title">\u00b7 ' + esc(w.b.title.trim()) + '</i>' : '') + '</b><small>' + clock(w.from) + ' to ' + clock(w.to) + '</small></button></div>';
   });
   h = h.replace(/class="dc-grid" style="height:(\d+)px"/, (m, v) => 'class="dc-grid" style="height:' + Math.max(Number(v), floor) + 'px"');
+  if (isToday) { const M = mealsToday(); [...M.b, ...M.l, ...M.d, ...M.s].forEach(f => { const fm = new Date(f.at).getHours() * 60 + new Date(f.at).getMinutes(); if (fm >= h0 * 60 && fm <= h1 * 60) h += '<div class="dc-food" style="top:' + y(fm) + 'px">\u{1F37D}\uFE0F ' + esc(String(f.what).slice(0, 16)) + '</div>'; }); }
   if (isToday && nowM >= h0 * 60 && nowM <= h1 * 60) h += '<div class="dc-now" style="top:' + y(nowM) + 'px"></div>';
   box.innerHTML = h + '</div>';
   box.querySelectorAll('[data-ct]').forEach(btn => btn.addEventListener('click', () => {
@@ -15234,7 +15290,7 @@ function renderDayCal() {
 }
 {
   const baseRender = renderDay;
-  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } return r; };
+  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } try { renderFuel(); } catch (e) { console.error(e); } return r; };
   const ei = document.getElementById('endat');
   if (ei) ei.addEventListener('change', () => { const d = dayFor(viewDay); if (ei.value) d.end = ei.value; else delete d.end; save(); renderDay(); });
   document.querySelectorAll('#dv-seg [data-dv]').forEach(b => b.addEventListener('click', () => {
@@ -15452,7 +15508,7 @@ function foodSheet() {
     '<p class="fd-done" id="fd-done" hidden></p></div>';
   document.body.appendChild(el);
   const inp = el.querySelector('#fd-in');
-  const close = () => { el.remove(); renderHome(); };
+  const close = () => { el.remove(); renderHome(); try { renderDay(); } catch {} };
   const log = what => {
     what = String(what || '').trim(); if (!what) { inp.focus(); return; }
     const id = Date.now() + '';
