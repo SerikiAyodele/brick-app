@@ -6129,6 +6129,14 @@ html.kb-open .qn .ns-cancel { display: none; }
 /* TODAY: no blue line, just a quiet label */
 #view-home#view-home#view-home .hm-sec { color: var(--muted) !important; }
 #view-home#view-home#view-home .hm-sec::before, #view-home#view-home#view-home .hm-sec::after { display: none !important; }
+
+/* the tick celebration, cuter: a sticker, a word, hearts and stars */
+.tkb i { left: -7px !important; top: -9px !important; width: auto !important; height: auto !important; border-radius: 0 !important; background: none !important; font: 700 15px system-ui, sans-serif; font-style: normal; color: var(--c); }
+.tkb b { left: -30px !important; top: -30px !important; width: 60px !important; height: 60px !important; font: 400 34px system-ui, sans-serif !important; background: var(--card) !important; box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--pink) 70%, transparent), 0 0 0 3px color-mix(in srgb, var(--pink) 35%, transparent) !important; animation: tkpop3 1.1s cubic-bezier(.3, 1.6, .5, 1) forwards !important; }
+.tkb em { position: absolute; left: 0; top: -66px; transform: translateX(-50%); padding: 5px 12px; white-space: nowrap; font: 700 13px "Inter", system-ui, sans-serif; font-style: normal; color: #fff; background: var(--pink); border-radius: 999px; box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--pink) 80%, transparent); animation: tkword 1.2s ease-out forwards; }
+.tkb u { border-color: color-mix(in srgb, var(--pink) 60%, transparent) !important; }
+@keyframes tkpop3 { 0% { transform: scale(.2) rotate(-20deg); opacity: 0; } 30% { transform: scale(1.12) rotate(6deg); opacity: 1; } 55% { transform: scale(.96) rotate(-3deg); } 80% { transform: scale(1) rotate(0); opacity: 1; } 100% { transform: scale(.85); opacity: 0; } }
+@keyframes tkword { 0% { transform: translate(-50%, 10px) scale(.6); opacity: 0; } 25% { transform: translate(-50%, 0) scale(1.05); opacity: 1; } 75% { transform: translate(-50%, -6px) scale(1); opacity: 1; } 100% { transform: translate(-50%, -16px); opacity: 0; } }
 </style>
 </head>
 <body>
@@ -6410,7 +6418,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:15:43</footer>
+  <footer>Mr.O:16:35</footer>
 </div>
 
 <script>
@@ -15382,11 +15390,14 @@ function tickBurst(r) {
     const x = r ? r.left + r.width / 2 : innerWidth / 2, y = r ? r.top + r.height / 2 : innerHeight / 2;
     const el = document.createElement('div'); el.className = 'tkb'; el.style.left = x + 'px'; el.style.top = y + 'px';
     const C = ['var(--pink)', 'var(--gold-1)', '#f2c14e', '#5aa86a', '#e8708f', '#8fa2f5'];
-    let h = '<u></u><b>\u2713</b>';
-    for (let n = 0; n < 18; n++) { const a = (n / 18) * Math.PI * 2 + Math.random() * .4, d = 46 + Math.random() * 46;
-      h += '<i class="' + (n % 3 ? '' : 'sq') + '" style="--c:' + C[n % C.length] + ';--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d - 10).toFixed(0) + 'px;animation-delay:' + (Math.random() * 60).toFixed(0) + 'ms"></i>'; }
+    // cute: a happy sticker pops up with a word, hearts and stars fly out
+    const ST = ['\u{1F389}', '\u2728', '\u{1F496}', '\u{1F338}', '\u2B50', '\u{1F31F}', '\u{1F973}', '\u{1F98B}'], W = ['Nice!', 'Yay!', 'Done!', 'Go you!', 'Lovely!', 'One down!'];
+    let h = '<u></u><b>' + ST[Math.floor(Math.random() * ST.length)] + '</b><em>' + W[Math.floor(Math.random() * W.length)] + '</em>';
+    const SH = ['\u2665', '\u2605', '\u2726', '\u25CF'];
+    for (let n = 0; n < 14; n++) { const a = (n / 14) * Math.PI * 2 + Math.random() * .4, d = 44 + Math.random() * 44;
+      h += '<i style="--c:' + C[n % C.length] + ';--dx:' + (Math.cos(a) * d).toFixed(0) + 'px;--dy:' + (Math.sin(a) * d - 14).toFixed(0) + 'px;animation-delay:' + (Math.random() * 80).toFixed(0) + 'ms">' + SH[n % SH.length] + '</i>'; }
     el.innerHTML = h; document.body.appendChild(el);
-    setTimeout(() => el.remove(), 900);
+    setTimeout(() => el.remove(), 1300);
     try { navigator.vibrate && navigator.vibrate([12, 40, 18]); } catch {}
     const f = document.querySelector('#view-day .donefold'); if (f) { f.classList.remove('bump'); void f.offsetWidth; f.classList.add('bump'); }
   } catch {}
