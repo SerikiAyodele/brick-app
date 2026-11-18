@@ -6064,6 +6064,10 @@ html.kb-open .qn .ns-cancel { display: none; }
 @media (prefers-reduced-motion: reduce) { #fuel .fu-c::after { animation: none !important; } }
 #fuel .fu-snk { margin: 8px 2px 0; font-size: 12px; color: var(--muted); }
 #day-cal .dc-food { position: absolute; left: -54px; z-index: 3; transform: translateY(-50%); padding: 2px 6px; font: 500 10px "Inter", system-ui, sans-serif; color: #fff; background: #5aa86a; border-radius: 8px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; pointer-events: none; }
+
+#view-day #block-list .line .ml { display: block; margin-top: 2px; padding: 0; font: 500 12px "Inter", system-ui, sans-serif; text-align: left; background: none; border: 0; cursor: pointer; }
+#view-day #block-list .line .ml.ate { color: #5aa86a; }
+#view-day #block-list .line .ml.miss { color: #d9628a; }
 </style>
 </head>
 <body>
@@ -6345,7 +6349,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:57</footer>
+  <footer>Mr.O:13:02</footer>
 </div>
 
 <script>
@@ -15067,17 +15071,22 @@ function mealsToday() {
   return out;
 }
 function renderFuel() {
-  const box = document.getElementById('fuel'); if (!box) return;
-  if (viewDay !== planKey() || sortingDay) { box.hidden = true; return; }
-  const M = mealsToday(), now = new Date(), nm = now.getHours() * 60 + now.getMinutes();
-  box.hidden = false;
-  box.innerHTML = '<div class="fu-row">' + Object.entries(FUEL_WIN).map(([k, w]) => {
-    const got = M[k], last = got[got.length - 1];
-    const st = got.length ? 'ate' : nm < w[0] ? 'soon' : nm <= w[1] ? 'now' : 'miss';
-    const sub = st === 'ate' ? esc(String(last.what).slice(0, 18)) + ' \u00b7 ' + clockOf(last.at) : st === 'now' ? 'time to eat' : st === 'miss' ? 'not yet, eat something?' : 'from ' + clock(w[0]);
-    return '<button type="button" class="fu fu-' + st + '" data-fu="' + k + '"><span class="fu-c"><i>' + w[3] + '</i>' + (st === 'ate' ? '<b>\u2713</b>' : '') + '</span><strong>' + w[2] + '</strong><small>' + sub + '</small></button>';
-  }).join('') + '</div>' + (M.s.length ? '<p class="fu-snk">+ ' + M.s.length + ' snack' + (M.s.length > 1 ? 's' : '') + ': ' + esc(M.s.map(f => f.what).join(', ').slice(0, 60)) + '</p>' : '');
-  box.querySelectorAll('[data-fu]').forEach(b => b.addEventListener('click', () => foodSheet()));
+  // minimal: no strip. the Breakfast, Lunch and Dinner blocks in the list say what you ate, or a soft nudge
+  const box = document.getElementById('fuel'); if (box) box.hidden = true;
+  if (viewDay !== planKey() || sortingDay) return;
+  const M = mealsToday(), day = state.days[planKey()]; if (!day) return;
+  let at = toMins(day.start); const nm = new Date().getHours() * 60 + new Date().getMinutes();
+  day.blocks.forEach((b, i) => { const len = Number(b.mins) || 60, from = at; at += len;
+    const l = (b.label || '').toLowerCase(), k = b.meal && FUEL_WIN[b.meal] ? b.meal : /breakfast/.test(l) ? 'b' : /lunch/.test(l) ? 'l' : /dinner|supper/.test(l) ? 'd' : null;
+    if (!k) return;
+    const row = document.querySelector('#block-list .line[data-i="' + i + '"] .mid'); if (!row || row.querySelector('.ml')) return;
+    const got = M[k], last = got[got.length - 1], s2 = document.createElement('button'); s2.type = 'button';
+    if (last) { s2.className = 'ml ate'; s2.textContent = '\u2713 ' + String(last.what).slice(0, 24) + ' \u00b7 ' + clockOf(last.at); }
+    else if (nm >= from + len) { s2.className = 'ml miss'; s2.textContent = 'not eaten yet, log it'; }
+    else return;
+    s2.addEventListener('click', e => { e.stopPropagation(); foodSheet(); });
+    row.appendChild(s2);
+  });
 }
 setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); } catch {} }, 60000);
 function planEndOf(day) { return (day.blocks || []).reduce((t, b) => t + (Number(b.mins) || 60), toMins(day.start)); }
