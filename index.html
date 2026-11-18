@@ -5745,6 +5745,25 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .dc-ev.tiny .dc-body b { font-size: 12px; }
 .dc-now { position: absolute; left: -6px; right: 0; height: 0; border-top: 2px solid #ea4335; z-index: 2; pointer-events: none; }
 .dc-now::before { content: ""; position: absolute; left: -5px; top: -6px; width: 10px; height: 10px; border-radius: 50%; background: #ea4335; }
+
+/* ===== Calendar view, Google Calendar look (Mia's screenshot, 2026-11-18) ===== */
+#day-cal .dc-head { display: flex; flex-direction: column; align-items: center; width: 46px; margin: 0 0 10px; }
+#day-cal .dc-head small { font: 600 12px "Inter", system-ui, sans-serif; letter-spacing: .5px; color: var(--pink); }
+#day-cal .dc-head b { display: grid; place-items: center; width: 40px; height: 40px; margin-top: 2px; border-radius: 50%; font: 500 20px "Inter", system-ui, sans-serif; color: var(--ink); }
+#day-cal .dc-head b.on { color: #0b1a3a; background: #a8c7fa; }
+#day-cal .dc-grid { margin-left: 56px; border-left: 1px solid var(--hair); }
+#day-cal .dc-hr span { left: -58px; width: 48px; font: 500 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+#day-cal .dc-hr::before { content: ""; position: absolute; left: -8px; width: 8px; top: 0; border-top: 1px solid var(--hair); }
+#day-cal .dc-ev { left: 3px; right: 2px; gap: 6px; padding: 5px 8px; border: 0; border-radius: 6px; background: var(--ec) !important; box-shadow: none !important; color: #1b1b1f; }
+#day-cal .dc-ev.live { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ec) !important; }
+#day-cal .dc-ev.done { opacity: .45; }
+#day-cal .dc-body { color: #1b1b1f; }
+#day-cal .dc-body b { font: 600 15px "Inter", system-ui, sans-serif; color: #1b1b1f; }
+#day-cal .dc-body small { font: 400 13px "Inter", system-ui, sans-serif; color: rgba(20, 20, 25, .75); }
+#day-cal .dc-tick { width: 20px; height: 20px; border: 1.6px solid rgba(20, 20, 25, .55); background: rgba(255, 255, 255, .35); }
+#day-cal .dc-ev.done .dc-tick { color: #fff; background: rgba(20, 20, 25, .7); border-color: transparent; }
+#day-cal .dc-now { left: 0; border-top: 2px solid var(--ink); }
+#day-cal .dc-now::before { left: -6px; top: -6px; background: var(--ink); }
 </style>
 </head>
 <body>
@@ -6022,7 +6041,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:08:43</footer>
+  <footer>Mr.O:08:47</footer>
 </div>
 
 <script>
@@ -14468,7 +14487,19 @@ setInterval(checkTimeUp, 20000);
    still there underneath, so ticking works the same way. */
 const DV_KEY = KEY + '.dayview';
 let dayView = 'list'; try { dayView = localStorage.getItem(DV_KEY) || 'list'; } catch {}
-const CAL_H = 64;   // pixels per hour
+const CAL_H = 58;   // pixels per hour
+// colours like Google Calendar: one per kind of block
+function calColor(b) {
+  const l = String((b && b.label) || '').toLowerCase();
+  if (b && b.meeting || /meet|sync|call|1:1|standup|stand-up|review|interview/.test(l)) return '#e6c35c';
+  if (b && b.workout || /gym|workout|run|walk|yoga|swim|pilates|stretch|train/.test(l)) return '#c07f8c';
+  if (/breakfast|lunch|dinner|eat|meal|snack|cook/.test(l)) return '#86b48d';
+  if (/sleep|nap|rest|break|relax|wind ?down/.test(l)) return '#8f97c4';
+  if (/shower|bath|skin|hair|self ?care|get ready|pray|meditat/.test(l)) return '#c9a0d6';
+  if (/deep|focus|code|work|deploy|build|admin|email|project|study|read|write/.test(l)) return '#7f97b8';
+  return '#8fa6cc';
+}
+const calHour = hr => { const h = hr % 24; return (h % 12 || 12) + ' ' + (h < 12 ? 'AM' : 'PM'); };
 function renderDayCal() {
   const box = document.getElementById('day-cal'), list = document.getElementById('block-list'), seg = document.getElementById('dv-seg');
   if (!box || !list) return;
@@ -14483,12 +14514,14 @@ function renderDayCal() {
   const h0 = Math.max(0, Math.floor(W[0].from / 60)), h1 = Math.max(h0 + 1, Math.ceil(W[W.length - 1].to / 60));
   const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes(), isToday = viewDay === planKey();
   const y = m => (m - h0 * 60) / 60 * CAL_H;
-  let h = '<div class="dc-grid" style="height:' + ((h1 - h0) * CAL_H) + 'px">';
-  for (let hr = h0; hr <= h1; hr++) h += '<div class="dc-hr" style="top:' + ((hr - h0) * CAL_H) + 'px"><span>' + clock((hr % 24) * 60).replace(':00', '') + '</span></div>';
+  const dd = fromKey(viewDay);
+  let h = '<div class="dc-head"><small>' + FULL[dd.getDay()].slice(0, 3).toUpperCase() + '</small><b' + (isToday ? ' class="on"' : '') + '>' + dd.getDate() + '</b></div>' +
+    '<div class="dc-grid" style="height:' + ((h1 - h0) * CAL_H) + 'px">';
+  for (let hr = h0; hr <= h1; hr++) h += '<div class="dc-hr" style="top:' + ((hr - h0) * CAL_H) + 'px"><span>' + calHour(hr) + '</span></div>';
   W.forEach(w => {
     const top = y(w.from), ht = Math.max(24, y(w.to) - top - 3), live = isToday && !w.b.done && nowM >= w.from && nowM < w.to;
     const sz = ht < 40 ? ' tiny' : ht < 64 ? ' small' : '';
-    h += '<div class="dc-ev' + sz + (w.b.done ? ' done' : '') + (live ? ' live' : '') + '" style="top:' + top + 'px;height:' + ht + 'px" data-ci="' + w.i + '">' +
+    h += '<div class="dc-ev' + sz + (w.b.done ? ' done' : '') + (live ? ' live' : '') + '" style="top:' + top + 'px;height:' + ht + 'px;--ec:' + calColor(w.b) + '" data-ci="' + w.i + '">' +
       '<button type="button" class="dc-tick" data-ct="' + w.i + '" aria-label="' + (w.b.done ? 'not done' : 'done') + '">\u2713</button>' +
       '<button type="button" class="dc-body" data-co="' + w.i + '"><b>' + blockEmoji(w.b) + ' ' + esc(w.b.label || 'Block') + '</b><small>' + clock(w.from) + ' \u2013 ' + clock(w.to) + '</small></button></div>';
   });
