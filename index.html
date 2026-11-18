@@ -6439,7 +6439,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:46</footer>
+  <footer>Mr.O:16:51</footer>
 </div>
 
 <script>
@@ -7054,7 +7054,7 @@ function goalPickBox(b) {
   box.innerHTML = '<p class="wgp-h">From your goals</p><div class="wgp-list">' + S.slice(0, 8).map((x, i) => '<button type="button" data-gp="' + i + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span><b>+</b></button>').join('') + '</div>';
   box.querySelectorAll('[data-gp]').forEach(btn => btn.addEventListener('click', () => {
     const x = S[Number(btn.dataset.gp)]; if (!x || (b.goals || []).length >= MAX_GOALS) return;
-    b.goals = b.goals || []; const ng = { text: x.t, done: false }; b.goals.push(ng); if (!b.step) b.step = x.id;
+    b.goals = b.goals || []; const ng = { text: x.t, done: false }; try { for (const a of AREAS) for (const wg of areaGoals(a.k)) if (wg.text === x.t && (wg.actions || []).length) ng.todos = wg.actions.slice(0, MAX_TODOS).map(t => ({ text: t, done: false })); } catch {} b.goals.push(ng); if (!b.step) b.step = x.id;
     todoEdit = { g: ng, n: 0 }; save(); paintListSheet();
   }));
   return box;
@@ -8376,6 +8376,12 @@ function flowNow() {
   const G = (focus && focus.b.goals) || [];
   const gi = G.findIndex(g => !g.done), g = G[gi];
   if (!g) return { g: null };
+  if (!(g.todos || []).length && !g.stepsLooked) {
+    // a task that is one of your weekly goals: its steps become the steps here
+    g.stepsLooked = true;
+    try { for (const a of AREAS) for (const wg of areaGoals(a.k)) if ((wg.text || '').trim().toLowerCase() === (g.text || '').trim().toLowerCase() && (wg.actions || []).length) g.todos = wg.actions.slice(0, MAX_TODOS).map(t => ({ text: t, done: false })); } catch {}
+    save();
+  }
   const T = g.todos || [], ti = T.findIndex(t => !t.done);
   return { g, gi, T, ti, step: ti >= 0 ? T[ti] : null, next: ti >= 0 ? T.slice(ti + 1).find(t => !t.done) : null, nextTask: G.slice(gi + 1).find(x => !x.done) };
 }
@@ -15140,11 +15146,10 @@ function checkTimeUp() {
   if (document.getElementById('tusheet') || document.querySelector('.w3') || document.body.classList.contains('focusing')) return;
   const k = planKey(), day = state.days[k];
   if (!day || !day.blocks || !day.blocks.length) return;
-  const i = day.blocks.findIndex(b => !b.done);
+  // the block whose time just ran out (by the clock), even if an earlier one is not ticked yet
+  const nowM = planMin(k); let at = toMins(day.start), i = -1, end = 0;
+  day.blocks.forEach((x, n) => { const e = at + (Number(x.mins) || 60); if (!x.done && nowM >= e && nowM <= e + 180) { i = n; end = e; } at = e; });
   if (i < 0) return;
-  let at = toMins(day.start); for (let n = 0; n < i; n++) at += Number(day.blocks[n].mins) || 60;
-  const b = day.blocks[i], end = at + (Number(b.mins) || 60), nowM = planMin(k);
-  if (nowM < end || nowM > end + 180) return;          // not over yet, or long gone (the plan page handles that)
   const id = k + ':' + i + ':' + end;
   if (timeUpAsked[id] && Date.now() < timeUpAsked[id]) return;
   timeUpAsked[id] = Date.now() + 10 * 60000;
@@ -15157,14 +15162,14 @@ function timeUpSheet(day, i, end) {
     '<div class="tu-hero"><span class="tu-st">' + blockEmoji(b) + '<i>\u23F0</i></span><p class="tu-k">Time\u2019s up!</p><h2>' + esc(((b.title || '').trim() ? b.title.trim() : (b.label || '').trim()) || 'This block') + '</h2><p class="tu-s">Ended at ' + clock(end) + (next ? ' \u00b7 next: ' + esc(next.label || 'a block') : '') + '</p></div>' +
     '<button type="button" class="wka-go tu-done">I\u2019m done \u2713</button>' +
     '<p class="wk2-h">Need a bit more?</p><div class="tu-df"></div><div class="tu-more">' + [[5, '+5 min'], [10, '+10 min'], [15, '+15 min']].map(([m, t]) => '<button type="button" data-tm="' + m + '">' + t + '</button>').join('') + '</div>' +
-    '<button type="button" class="tu-add">Add <b>15 min</b></button>' +
+    '<button type="button" class="tu-add">Add <b>10 min</b></button>' +
     '<button type="button" class="ls-cancel ns-cancel tu-later">Ask me in 10 minutes</button></div>';
   document.body.appendChild(el);
   const close = () => el.remove();
   const redraw = () => { if (document.body.dataset.view === 'day') renderDay(); if (document.body.dataset.view === 'home') renderHome(); renderHabits(); };
   el.querySelector('.w3-back').addEventListener('click', close);
   el.querySelector('.tu-later').addEventListener('click', close);
-  let more = 15;
+  let more = 10;
   const addB = el.querySelector('.tu-add b');
   const df = durField(el.querySelector('.tu-df'), more, m => { more = m; addB.textContent = hrsLabel(m); });
   el.querySelectorAll('[data-tm]').forEach(x => x.addEventListener('click', () => { more = Number(x.dataset.tm); df.set(more); addB.textContent = hrsLabel(more); }));
