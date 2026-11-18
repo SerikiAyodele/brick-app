@@ -5707,6 +5707,9 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
 /* Plan: the top card only shows while a block is running (it holds Done, Focus, Stuck). before the day starts or after it ends, no card */
 #view-day#view-day#view-day .nowcard.waiting, #view-day#view-day#view-day .nowcard.over { display: none !important; }
+
+/* Plan: no Now card at all (Mia, 2026-11-18). tick with the circles; Focus and Stuck live on Home */
+#view-day#view-day#view-day .nowcard { display: none !important; }
 </style>
 </head>
 <body>
@@ -5982,7 +5985,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:08:31</footer>
+  <footer>Mr.O:08:35</footer>
 </div>
 
 <script>
