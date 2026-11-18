@@ -5770,6 +5770,16 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #day-cal .dc-ev.live { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ec), 0 10px 22px -8px rgba(0,0,0,.5) !important; }
 #day-cal .dc-ev.done { box-shadow: none !important; }
 #day-cal .dc-grid { margin-top: 6px; }
+
+/* end times everywhere: the list shows start to end, the calendar shows it even on short blocks */
+#view-day#view-day#view-day #block-list .line .at .endat { display: inline !important; font: inherit !important; color: inherit !important; margin: 0 !important; padding: 0 !important; }
+#view-day#view-day#view-day#view-day #block-list .line .at .endat::before { content: "\2013" !important; display: inline !important; position: static !important; width: auto !important; height: auto !important; margin: 0 5px !important; background: none !important; border: 0 !important; color: inherit !important; }
+#day-cal .dc-ev.small small { display: block !important; }
+#day-cal .dc-ev.small .dc-body b { font-size: 14px; }
+#day-cal .dc-ev.small .dc-body small { margin-top: 0; font-size: 12px; }
+#day-cal .dc-ev.tiny .dc-body { display: flex; align-items: baseline; gap: 8px; }
+#day-cal .dc-ev.tiny .dc-body b { flex: 0 1 auto; }
+#day-cal .dc-ev.tiny small { display: block !important; flex: none; margin: 0; font-size: 11px; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -6047,7 +6057,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:19</footer>
+  <footer>Mr.O:09:31</footer>
 </div>
 
 <script>
@@ -14529,7 +14539,7 @@ function renderDayCal() {
   let floor = -1e9;   // short blocks get a readable height, so the next one starts below it, never on top
   W.forEach(w => {
     const top = Math.max(y(w.from), floor), ht = Math.max(26, y(w.to) - top - 6), live = isToday && !w.b.done && nowM >= w.from && nowM < w.to;
-    const sz = ht < 34 ? ' tiny' : ht < 58 ? ' small' : '';
+    const sz = ht < 56 ? ' tiny' : ht < 66 ? ' small' : '';
     floor = top + ht + 6;
     h += '<div class="dc-ev' + sz + (w.b.done ? ' done' : '') + (live ? ' live' : '') + '" style="top:' + top + 'px;height:' + ht + 'px;--ec:' + calColor(w.b) + '" data-ci="' + w.i + '">' +
       '<button type="button" class="dc-tick" data-ct="' + w.i + '" aria-label="' + (w.b.done ? 'not done' : 'done') + '">\u2713</button>' +
