@@ -6525,7 +6525,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:59</footer>
+  <footer>Mr.O:21:00</footer>
 </div>
 
 <script>
@@ -9991,7 +9991,7 @@ function planFromSetup(k, o) {
   // must haves with no time: in the day, wherever they fit (with the midday things)
   (o.musts || []).forEach(m => { const ex = items.find(x => x.label.toLowerCase() === m.label.toLowerCase()); if (ex) ex.mins = m.mins; else items.push({ label: m.label, mins: m.mins, i: -2 }); });
   const fw = src.findIndex(isWork), lw = src.length - 1 - [...src].reverse().findIndex(isWork);
-  const before = fw < 0 ? items.filter(x => x.i < src.length / 2) : items.filter(x => x.i < fw);
+  const before = fw < 0 ? items.filter(x => x.i >= 0 && x.i < src.length / 2) : items.filter(x => x.i >= 0 && x.i < fw);
   const after = fw < 0 ? items.filter(x => x.i >= src.length / 2) : items.filter(x => x.i > lw);
   const middle = items.filter(x => x.i === -2 || (fw >= 0 && x.i > fw && x.i < lw));
   const day = dayFor(k), g = day.goal || ((state.days[prevK] || {}).goal); const gt = g && (typeof g === 'string' ? g : g.text);
