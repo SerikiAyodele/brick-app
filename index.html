@@ -5846,6 +5846,10 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 /* sheets ride above the keyboard */
 html.kb-open .w3-sheet { bottom: var(--kb, 0px) !important; max-height: calc(100% - var(--kb, 0px) - 12px) !important; overflow-y: auto; padding-bottom: 14px !important; }
 html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
+
+#view-day #total .wk-sum { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; font: 500 14px "Inter", system-ui, sans-serif; color: var(--muted); background: color-mix(in srgb, var(--pink) 10%, var(--card)); border-radius: 999px; }
+#view-day #total .wk-sum b { color: var(--ink); font-weight: 700; }
+#view-day #total .wk-sum i { font-style: normal; }
 </style>
 </head>
 <body>
@@ -6123,7 +6127,7 @@ html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:31</footer>
+  <footer>Mr.O:10:39</footer>
 </div>
 
 <script>
@@ -9089,7 +9093,9 @@ function renderDay() {
 
   const mins = at - toMins(day.start);
   const total = document.getElementById('total');
-  total.textContent = '';   // only gone and left are shown (the line below)
+  // work today: all work blocks added up, and how much of it is done
+  { const W = day.blocks.filter(b => outcomeField(b.label) === 'goals'), wm = W.reduce((t, b) => t + (Number(b.mins) || 60), 0), wd = W.filter(b => b.done).reduce((t, b) => t + (Number(b.mins) || 60), 0);
+    total.innerHTML = wm ? '<span class="wk-sum"><i>\u{1F4BC}</i><b>' + dur(wm) + '</b> of work today' + (wd ? ' \u00b7 <b>' + dur(wd) + '</b> done' : '') + '</span>' : ''; }
 
   // where you are inside the plan, right now
   const old = document.getElementById('clockline');
