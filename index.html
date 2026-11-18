@@ -5864,6 +5864,11 @@ html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
 .ab-chips .ls-row.on { border-color: var(--pink) !important; background: color-mix(in srgb, var(--pink) 14%, var(--card)) !important; }
 .wka .wk2-ends, .w3-sheet .wk2-ends { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
 .w3-sheet .ab-add { margin-top: 4px; }
+
+/* with the keyboard up: the sheet fits in the space left, the list scrolls inside it */
+html.kb-open .w3-sheet { max-height: calc(var(--vvh, 60vh) - 12px) !important; }
+html.kb-open .qn .qn-dd { max-height: calc(var(--vvh, 60vh) - 230px) !important; min-height: 96px; }
+html.kb-open .qn .ns-cancel { display: none; }
 </style>
 </head>
 <body>
@@ -6141,7 +6146,7 @@ html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:54</footer>
+  <footer>Mr.O:10:57</footer>
 </div>
 
 <script>
@@ -14659,7 +14664,7 @@ setInterval(checkTimeUp, 20000);
 // the keyboard: sheets sit on top of it, so what you type is always in view
 if (window.visualViewport) {
   const kb = () => { const vv = window.visualViewport, h = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
-    document.documentElement.style.setProperty('--kb', h + 'px'); document.documentElement.classList.toggle('kb-open', h > 80); };
+    document.documentElement.style.setProperty('--kb', h + 'px'); document.documentElement.style.setProperty('--vvh', Math.round(vv.height) + 'px'); document.documentElement.classList.toggle('kb-open', h > 80); };
   visualViewport.addEventListener('resize', kb); visualViewport.addEventListener('scroll', kb); kb();
 }
 /* ---- Plan, Calendar view: the day as an hour grid, like Google Calendar ----
