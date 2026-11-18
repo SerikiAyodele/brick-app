@@ -5945,6 +5945,15 @@ html.kb-open .qn .ns-cancel { display: none; }
 .ptd .ptd-list button:last-child { border-bottom: 0; }
 .ptd .ptd-list span { flex: 1; min-width: 0; }
 .ptd .ptd-list i { font-style: normal; color: var(--muted); font-size: 20px; }
+
+/* List / Calendar: a small quiet switch on the right */
+#view-day#view-day#view-day .dv-seg { display: flex; width: max-content; margin: 2px 0 10px auto; padding: 2px; gap: 0; background: none; border: 1px solid var(--hair); border-radius: 10px; box-shadow: none; }
+#view-day#view-day#view-day .dv-seg[hidden] { display: none; }
+#view-day#view-day#view-day .dv-seg .md-seg-b { flex: none; min-height: 26px; padding: 0 12px; font: 500 12px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; border-radius: 8px; box-shadow: none; }
+#view-day#view-day#view-day .dv-seg .md-seg-b.on { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+/* Focus on the work block you are on */
+#view-day#view-day#view-day #block-list .line .chipslot:has(.fbtn) { width: auto !important; gap: 6px; }
+#view-day #block-list .line .fbtn { min-height: 30px; padding: 0 12px; font: 600 12px "Inter", system-ui, sans-serif; color: var(--paper); background: var(--pink); border: 0; border-radius: 15px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -6225,7 +6234,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:25</footer>
+  <footer>Mr.O:12:27</footer>
 </div>
 
 <script>
@@ -9081,6 +9090,13 @@ function renderDay() {
     // every row keeps the same slot, so ?, + and 1/3 all line up in one column
     const slot = document.createElement('span');
     slot.className = 'chipslot';
+    // the work block you are on (or next up): a Focus button opens the focus room
+    if (field === 'goals' && !b.done && viewDay === planKey() && i === firstOpen) {
+      const fb = document.createElement('button'); fb.type = 'button'; fb.className = 'fbtn'; fb.textContent = 'Focus';
+      fb.setAttribute('aria-label', 'open the focus room for ' + (b.label || 'this block'));
+      fb.addEventListener('click', e => { e.stopPropagation(); openFocus(b, from, len); });
+      slot.appendChild(fb);
+    }
     if (chip) slot.appendChild(chip);
     row.appendChild(slot);
     row.append(how, bin);
