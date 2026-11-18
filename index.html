@@ -5924,6 +5924,17 @@ html.kb-open .qn .ns-cancel { display: none; }
 #listsheet .goals:not(.agenda) .ag-more { margin-top: 4px; font-size: 13px; color: var(--muted); }
 #listsheet .goals:not(.agenda) > .gmore { display: block; width: 100%; margin: 12px 0 0; min-height: 52px; padding: 0 14px; text-align: left; font: 500 15px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 1.5px dashed var(--hair); border-radius: 16px; }
 #listsheet .goals:not(.agenda) > .goal .gtick { flex: none; }
+
+#listsheet .wgp { margin: 16px 0 4px; }
+#listsheet .wgp-h { margin: 0 0 6px; font: 600 11px "Inter", system-ui, sans-serif; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); }
+#listsheet .wgp-list { display: flex; flex-direction: column; border: 1px solid var(--hair); border-radius: 14px; overflow: hidden; }
+#listsheet .wgp-list button { display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; text-align: left; font: 500 15px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 0; border-bottom: 1px solid var(--hair); cursor: pointer; }
+#listsheet .wgp-list button:last-child { border-bottom: 0; }
+#listsheet .wgp-list i { font-style: normal; }
+#listsheet .wgp-list span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#listsheet .wgp-list b { color: var(--pink); font-size: 18px; }
+
+#view-day #block-list .line .addlist.flag, #view-day #block-list .line .addlist:not(.has) { color: var(--pink) !important; border-color: color-mix(in srgb, var(--pink) 55%, transparent) !important; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -6204,7 +6215,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:05</footer>
+  <footer>Mr.O:12:11</footer>
 </div>
 
 <script>
@@ -6744,10 +6755,12 @@ function rolloverBox(b, field, lo) {
   box.innerHTML = '<p class="ro-h">Not done in ' + esc(lo.src.label || 'your last block') + ', ' + when + '</p>' +
     lo.items.map((g, i) => '<button type="button" class="ro-i" data-ro="' + i + '"><span>+</span>' + esc(g.text) + '</button>').join('') +
     '<div class="ro-acts"><button type="button" class="ro-all">Bring ' + (lo.items.length > 1 ? 'all ' + lo.items.length : 'it') + ' over</button><button type="button" class="ro-skip">Leave ' + (lo.items.length > 1 ? 'them' : 'it') + '</button></div>';
-  const take = list => { b[field] = b[field] || []; list.forEach(g => { if (!b[field].some(x => x.text === g.text && !x.done)) b[field].push({ text: g.text, done: false }); g.rolled = true; }); save(); paintListSheet(); };
+  const settle = list => { const T = new Set(list.map(g => (g.text || '').trim().toLowerCase()));
+    for (let n = 0; n <= 8; n++) for (const x of ((state.days[shiftKey(planKey(), -n)] || {}).blocks || [])) for (const g of (x.goals || [])) if (!g.done && T.has((g.text || '').trim().toLowerCase())) g.rolled = true; };
+  const take = list => { b[field] = b[field] || []; list.forEach(g => { if (!b[field].some(x => x.text === g.text && !x.done)) b[field].push({ text: g.text, done: false, rolledIn: true }); }); settle(list); save(); paintListSheet(); };
   box.querySelectorAll('[data-ro]').forEach(x => x.addEventListener('click', () => take([lo.items[Number(x.dataset.ro)]])));
   box.querySelector('.ro-all').addEventListener('click', () => take(lo.items));
-  box.querySelector('.ro-skip').addEventListener('click', () => { lo.items.forEach(g => { g.rolled = true; }); save(); paintListSheet(); });
+  box.querySelector('.ro-skip').addEventListener('click', () => { settle(lo.items); save(); paintListSheet(); });
   return box;
 }
 // extra things to do in a work block, picked from your notes. they do not count toward the 2 tasks
@@ -6773,6 +6786,22 @@ function openListSheet(b, field, from) {
   paintListSheet();
 }
 
+// work tasks: pick one of this week's goals (or its steps) as a task
+function goalPickBox(b) {
+  const L = b.goals || [];
+  if (L.length >= MAX_GOALS) return null;
+  const have = new Set(L.map(g => (g.text || '').trim().toLowerCase()));
+  const S = goalSteps().filter(x => !have.has(x.t.trim().toLowerCase()));
+  if (!S.length) return null;
+  const box = document.createElement('div'); box.className = 'wgp';
+  box.innerHTML = '<p class="wgp-h">From your goals</p><div class="wgp-list">' + S.slice(0, 8).map((x, i) => '<button type="button" data-gp="' + i + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span><b>+</b></button>').join('') + '</div>';
+  box.querySelectorAll('[data-gp]').forEach(btn => btn.addEventListener('click', () => {
+    const x = S[Number(btn.dataset.gp)]; if (!x || (b.goals || []).length >= MAX_GOALS) return;
+    b.goals = b.goals || []; const ng = { text: x.t, done: false }; b.goals.push(ng); if (!b.step) b.step = x.id;
+    todoEdit = { g: ng, n: 0 }; save(); paintListSheet();
+  }));
+  return box;
+}
 function paintListSheet() {
   const old = document.getElementById('listsheet');
   if (!listSheet) { if (old) old.remove(); return; }
@@ -6796,6 +6825,7 @@ function paintListSheet() {
   }
   if (field !== 'agenda') { const lo = leftoverTasks(b); if (lo) el.querySelector('.ls-body').appendChild(rolloverBox(b, field, lo)); }
   el.querySelector('.ls-body').appendChild(goalList(b, field, from));
+  if (field === 'goals') { const gp = goalPickBox(b); if (gp) el.querySelector('.ls-body').appendChild(gp); }
   if (field === 'goals') el.querySelector('.ls-body').appendChild(notesBox(b));
   const close = () => { listSheet = null; goalEdit = null; todoEdit = null; el.remove(); renderDay(); };
   el.querySelector('.w3-back').addEventListener('click', close);
@@ -6817,7 +6847,7 @@ function todoList(g) {
     const txt = document.createElement('textarea');
     txt.className = 'gtext';
     txt.rows = 1; txt.maxLength = 120;
-    txt.placeholder = 'a to-do';
+    txt.placeholder = 'next step';
     txt.value = t ? t.text : '';
     txt.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); txt.blur(); } });
     txt.addEventListener('blur', () => {
@@ -6914,7 +6944,7 @@ function goalList(b, field, from) {
       const v = txt.value.trim();
       if (g && !v) L.splice(L.indexOf(g), 1);          // cleared, so drop it
       else if (g) g.text = v;
-      else if (v && L.length < K.max) L.push({ text: v, done: false });
+      else if (v && L.length < K.max) { L.push({ text: v, done: false }); if (field === 'goals') setTimeout(() => { todoEdit = { g: L[L.length - 1], n: 0 }; renderDay(); }, 0); }
       goalEdit = null;
       save(); renderDay();
     });
@@ -8989,7 +9019,7 @@ function renderDay() {
       // work with no outcome is unclear work: flag it until it says what it will finish
       const unclear = field === 'goals' && !L.length && !b.done;
       chip.className = 'addlist' + (L.length ? ' has' : '') + (unclear ? ' flag' : '');
-      chip.textContent = L.length ? L.filter(x => x.done).length + '/' + L.length : unclear ? '?' : '+';
+      chip.textContent = L.length ? L.filter(x => x.done).length + '/' + L.length : '+';
       if (unclear) chip.setAttribute('aria-label', 'no outcome yet, tap to add what you will finish');
       chip.setAttribute('aria-label', (field === 'agenda' ? 'agenda' : 'goals') + (L.length ? ', ' + L.length + ' points' : ', add some'));
       chip.addEventListener('click', () => openListSheet(b, field, from));
