@@ -5869,6 +5869,18 @@ html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
 html.kb-open .w3-sheet { max-height: calc(var(--vvh, 60vh) - 12px) !important; }
 html.kb-open .qn .qn-dd { max-height: calc(var(--vvh, 60vh) - 230px) !important; min-height: 96px; }
 html.kb-open .qn .ns-cancel { display: none; }
+
+/* Best order: a quiet link under the list, and its sheet */
+#view-day .viewtools .best-order { color: var(--muted) !important; font-weight: 500 !important; }
+.bo .bo-why { margin: 0 0 12px; font-size: 15px; line-height: 1.4; color: var(--muted); }
+.bo .bo-list { list-style: none; margin: 0 0 16px; padding: 0; border: 1px solid var(--hair); border-radius: 14px; max-height: 46vh; overflow-y: auto; }
+.bo .bo-list li { display: flex !important; align-items: center; gap: 10px; min-height: 44px !important; height: auto !important; margin: 0 !important; padding: 0 14px !important; border-bottom: 1px solid var(--hair); }
+.bo .bo-list li:last-child { border-bottom: 0; }
+.bo .bo-t { width: 64px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--muted); }
+.bo .bo-list i { font-style: normal; }
+.bo .bo-list b { flex: 1; min-width: 0; font: 600 15px "Inter", system-ui, sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bo .bo-list small { font-weight: 500; color: var(--pink); }
+.bo .bo-note { margin: 10px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
 </style>
 </head>
 <body>
@@ -6146,7 +6158,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:57</footer>
+  <footer>Mr.O:11:12</footer>
 </div>
 
 <script>
@@ -9094,6 +9106,11 @@ function renderDay() {
 
     arr.textContent = 'Reorder';      // always a way in: reorder, then Finish plan
     // no Reorder button: hold a block and drag it to move it
+    if (day.blocks.filter(x => !x.done).length >= 3) {
+      const bo = document.createElement('button'); bo.className = 'arrange best-order'; bo.type = 'button'; bo.textContent = '\u2728 Best order';
+      bo.addEventListener('click', () => bestOrderSheet(day));
+      tools.append(bo);
+    }
     // alarms: a web app can't set iPhone alarms, so hand the times to a Shortcut that can
     const ups = upcomingStarts(day);
     if (viewDay === planKey() && ups.length) {
@@ -14661,6 +14678,66 @@ function timeUpSheet(day, i, end) {
   });
 }
 setInterval(checkTimeUp, 20000);
+/* ---- Best order: Claude reorders what is left of the day for the most focus ----
+   done blocks stay put; meetings keep their place. you see the new order first. */
+function bestOrderRules(L) {
+  // when Claude can't be reached: hard focus work early, meetings stay, admin and easy things later, breaks between
+  const score = b => { const l = (b.label || '').toLowerCase();
+    if (/deep|focus|code|write|study|build|project|zart|work/.test(l)) return 1;
+    if (/gym|workout|run|walk/.test(l)) return 2;
+    if (/break|rest|nap|shower|tea|coffee/.test(l)) return 3;
+    if (/admin|email|inbox|call|errand|clean|chores/.test(l)) return 4;
+    return 3; };
+  const fixed = L.map((x, n) => isFixedBlock(x.b) ? n : -1).filter(n => n >= 0);
+  const move = L.filter(x => !isFixedBlock(x.b)).sort((a, c) => score(a.b) - score(c.b));
+  const out = []; let k = 0;
+  for (let n = 0; n < L.length; n++) out.push(fixed.includes(n) ? L[n] : move[k++]);
+  return { order: out, why: 'Hard focus work first while your mind is fresh, easy tasks later.' };
+}
+function isFixedBlock(b) { const l = (b.label || '').toLowerCase(); return !!b.meeting || /meet|sync|standup|stand up|call|1:1|interview|all hands|lunch|breakfast|dinner|sleep|bed/.test(l); }
+async function bestOrderSheet(day) {
+  const old = document.getElementById('bosheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'bosheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet bo" role="dialog" aria-modal="true" aria-label="Best order"><span class="w3-grab"></span><p class="wk2-step">\u2728 Best order</p><h2>Finding the best order\u2026</h2><div class="bo-body"></div></div>';
+  document.body.appendChild(el);
+  const close = () => el.remove();
+  el.querySelector('.w3-back').addEventListener('click', close);
+  const first = day.blocks.findIndex(b => !b.done), from = first < 0 ? day.blocks.length : first;
+  const L = day.blocks.slice(from).map((b, n) => ({ b, n }));
+  let at0 = toMins(day.start); for (let i = 0; i < from; i++) at0 += Number(day.blocks[i].mins) || 60;
+  let res = null;
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 25000);
+    const list = L.map((x, i) => (i + 1) + '. ' + (x.b.label || 'Block') + (x.b.title ? ' (' + x.b.title + ')' : '') + ', ' + (Number(x.b.mins) || 60) + ' min' + (isFixedBlock(x.b) ? ', FIXED' : '')).join('\n');
+    const ask = 'Reorder these blocks of my day for the most productivity (energy, focus, breaks between hard work). The day continues from ' + clock(at0) + '. Blocks marked FIXED must keep their number position. ' +
+      'Reply with exactly two lines and nothing else.\nORDER: the numbers in the new order, comma separated\nWHY: one short sentence\n\n' + list;
+    const r = await aiFetch('/api/chat', { messages: [{ role: 'user', content: ask }] }, ctl.signal);
+    if (r.ok) {
+      const j = await r.json(), t = String(j.reply || '');
+      const m = t.match(/ORDER:\s*([\d,\s]+)/i), w = t.match(/WHY:\s*(.+)/i);
+      if (m) { const nums = m[1].split(',').map(x => parseInt(x, 10) - 1).filter(x => x >= 0 && x < L.length);
+        if (nums.length === L.length && new Set(nums).size === L.length) res = { order: nums.map(i => L[i]), why: w ? w[1].trim() : '', ai: true }; }
+    }
+  } catch {}
+  if (!res) res = bestOrderRules(L);
+  if (!el.isConnected) return;
+  const same = res.order.every((x, i) => x === L[i]);
+  let at = at0;
+  el.querySelector('h2').textContent = same ? 'Your order is already good' : 'A better order';
+  el.querySelector('.bo-body').innerHTML = (res.why ? '<p class="bo-why">' + esc(res.why) + '</p>' : '') +
+    '<ol class="bo-list">' + res.order.map(x => { const m = Number(x.b.mins) || 60, s0 = at; at += m;
+      return '<li><span class="bo-t">' + clock(s0) + '</span><i>' + blockEmoji(x.b) + '</i><b>' + esc(x.b.label || 'Block') + (x.b.title ? ' <small>' + esc(x.b.title) + '</small>' : '') + '</b></li>'; }).join('') + '</ol>' +
+    (same ? '<button type="button" class="wka-go bo-no">OK</button>' : '<button type="button" class="wka-go bo-yes">Use this order</button><button type="button" class="ls-cancel bo-no">Keep mine</button>') +
+    (res.ai ? '' : '<p class="bo-note">Claude could not be reached, so this uses simple rules.</p>');
+  el.querySelector('.bo-no').addEventListener('click', close);
+  const y = el.querySelector('.bo-yes');
+  if (y) y.addEventListener('click', () => {
+    const before = day.blocks.slice();
+    day.blocks.splice(from, L.length, ...res.order.map(x => x.b));
+    save(); close(); renderDay();
+    offerUndo('the new order', () => { day.blocks.splice(0, day.blocks.length, ...before); save(); renderDay(); });
+  });
+}
 // the keyboard: sheets sit on top of it, so what you type is always in view
 if (window.visualViewport) {
   const kb = () => { const vv = window.visualViewport, h = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
