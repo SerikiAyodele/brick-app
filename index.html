@@ -5670,6 +5670,8 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day#view-day#view-day #block-list .line.plan-row { display: flex !important; flex-wrap: nowrap !important; align-items: center !important; gap: 8px !important; grid-template-areas: none !important; grid-template-columns: none !important; }
 #view-day#view-day#view-day #block-list .line.plan-row > .at { flex: none !important; width: 70px !important; font-size: 13px; }
 #view-day#view-day#view-day #block-list .line.plan-row > .pl-name { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
+/* plan: Week is hidden for now */
+#plan-seg { display: none !important; }
 </style>
 </head>
 <body>
@@ -5945,7 +5947,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:06:47</footer>
+  <footer>Mr.O:06:55</footer>
 </div>
 
 <script>
@@ -16933,7 +16935,7 @@ async function suggestSheet(mode) {
    and "copy a day" to reuse a plan. blocks run one after another from the
    day's start time, so the calendar works out each block's time the same way. */
 let planMode = 'day';
-try { planMode = localStorage.getItem(KEY + '.planmode') === 'week' ? 'week' : 'day'; } catch {}
+planMode = 'day';   // Week is hidden for now (Mia's choice); the code stays
 let weekOf = null;   // the Monday of the week on show
 let weekLook = 'list';
 const wlOpen = new Set();   // past days you unfolded   // list (days down the page) or cal (time grid)
