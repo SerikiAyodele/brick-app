@@ -5780,6 +5780,15 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #day-cal .dc-ev.tiny .dc-body { display: flex; align-items: baseline; gap: 8px; }
 #day-cal .dc-ev.tiny .dc-body b { flex: 0 1 auto; }
 #day-cal .dc-ev.tiny small { display: block !important; flex: none; margin: 0; font-size: 11px; white-space: nowrap; }
+
+/* work blocks: an optional title next to the name */
+#view-day #block-list .line .mid { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; }
+#view-day #block-list .line .btitle { font: 500 14px "Inter", system-ui, sans-serif; color: var(--pink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.ab-title { display: block; width: 100%; margin: 4px 0 6px; }
+.ls-title { display: block; margin: 0 0 14px; }
+.ls-title span { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+.ls-title input { width: 100%; min-height: 46px; padding: 0 14px; font: 500 16px inherit; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; }
+#day-cal .dc-title { font-style: normal; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -6057,7 +6066,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:31</footer>
+  <footer>Mr.O:10:01</footer>
 </div>
 
 <script>
@@ -6640,6 +6649,13 @@ function paintListSheet() {
     '<button type="button" class="ls-x" aria-label="close">\u00d7</button></div><div class="ls-body"></div>' +
     '<button type="button" class="lf-btn main ls-done">Done</button></div>';
   el.querySelector('h2').textContent = b.label || 'block';
+  if (field === 'goals') {
+    const tw = document.createElement('label'); tw.className = 'ls-title';
+    tw.innerHTML = '<span>Title (optional)</span><input type="text" maxlength="60" placeholder="e.g. Zart campaign">';
+    const ti = tw.querySelector('input'); ti.value = b.title || '';
+    ti.addEventListener('input', () => { const v = ti.value.trim(); if (v) b.title = v; else delete b.title; save(); });
+    el.querySelector('.ls-body').appendChild(tw);
+  }
   if (field !== 'agenda') { const lo = leftoverTasks(b); if (lo) el.querySelector('.ls-body').appendChild(rolloverBox(b, field, lo)); }
   el.querySelector('.ls-body').appendChild(goalList(b, field, from));
   if (field === 'goals') el.querySelector('.ls-body').appendChild(notesBox(b));
@@ -8746,6 +8762,7 @@ function renderDay() {
     what.addEventListener('click', () => openNameSheet(b));
     if (focusNew === i) { focusNew = null; setTimeout(() => openNameSheet(b), 60); }    // a new block asks straight away
     mid.appendChild(what);
+    if ((b.title || '').trim()) { const tt = document.createElement('span'); tt.className = 'btitle'; tt.textContent = b.title.trim(); mid.appendChild(tt); }
 
     if (h) {
       const isa = document.createElement('span');
@@ -9270,6 +9287,7 @@ function addBlockSheet(preset, insertAt) {
     if (pick.step) b.step = pick.step;
     if (pick.workout) b.workout = pick.workout;
     if (pick.goals && pick.goals.length) b.goals = pick.goals.map(t => ({ text: t, done: false }));
+    if (pick.title) b.title = pick.title;
     const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
     if (pick.note) { const n = (state.dumpNotes || []).find(y => y.id === pick.note); if (n) n.gone = true; }   // a note that became a block
     day.touched = true;
@@ -9287,8 +9305,10 @@ function addBlockSheet(preset, insertAt) {
       html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>Workout</b></div><h2>What are you training?</h2>' +
         '<div class="ab-grid">' + gymTypes().map((g, i) => tile(g[0], g[1], 'data-w="' + i + '"')).join('') + '</div>';
     } else if (!pick && step === 'work') {
-      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>Work</b></div><h2>What will you get done?</h2><p class="ab-note">Up to 3 goals for this block.</p>' +
-        [0, 1, 2].map(i => '<input type="text" class="ab-goal" maxlength="80" placeholder="' + ['Goal 1', 'Goal 2 (optional)', 'Goal 3 (optional)'][i] + '" aria-label="work goal ' + (i + 1) + '">').join('') +
+      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>Work</b></div><h2>What will you get done?</h2>' +
+        '<input type="text" class="ab-title" maxlength="60" placeholder="Title (optional), e.g. Zart campaign" aria-label="title for this work block">' +
+        '<p class="ab-note">Up to 2 tasks for this block.</p>' +
+        [0, 1].map(i => '<input type="text" class="ab-goal" maxlength="80" placeholder="' + ['Task 1', 'Task 2 (optional)'][i] + '" aria-label="work task ' + (i + 1) + '">').join('') +
         '<button type="button" class="wka-go ab-next">Next</button>';
     } else if (!pick) {
       // one box. tap it for a short list of what you do most (suggested for this time first); type to filter
@@ -9334,7 +9354,7 @@ function addBlockSheet(preset, insertAt) {
     el.querySelectorAll('[data-r]').forEach(b => b.addEventListener('click', () => { const [gi, i] = b.dataset.r.split(':').map(Number), r = REST[gi][1][i]; pick = { label: r[1], mins: r[2] }; draw(); }));
     el.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', () => { const g = gymTypes()[Number(b.dataset.w)]; pick = { label: g[1], mins: g[2], workout: g[3] || null }; draw(); }));
     const nx = el.querySelector('.ab-next');
-    if (nx) nx.addEventListener('click', () => { const gl = [...el.querySelectorAll('.ab-goal')].map(i => i.value.trim()).filter(Boolean).slice(0, 3); pick = { label: 'Work', mins: 60, goals: gl }; draw(); });
+    if (nx) nx.addEventListener('click', () => { const gl = [...el.querySelectorAll('.ab-goal')].map(i => i.value.trim()).filter(Boolean).slice(0, MAX_GOALS), tt = ((el.querySelector('.ab-title') || {}).value || '').trim(); pick = { label: 'Work', mins: 60, goals: gl, ...(tt ? { title: tt } : {}) }; draw(); });
     el.querySelectorAll('[data-top]').forEach(b => b.addEventListener('click', () => { const t = top[Number(b.dataset.top)]; pick = { label: t, mins: usualLength(t) || 60 }; draw(); }));
     el.querySelectorAll('[data-u]').forEach(b => b.addEventListener('click', () => { pick = { label: mine[Number(b.dataset.u)].t }; draw(); }));
     const abd = el.querySelector('.ab-dur');
@@ -14543,7 +14563,7 @@ function renderDayCal() {
     floor = top + ht + 6;
     h += '<div class="dc-ev' + sz + (w.b.done ? ' done' : '') + (live ? ' live' : '') + '" style="top:' + top + 'px;height:' + ht + 'px;--ec:' + calColor(w.b) + '" data-ci="' + w.i + '">' +
       '<button type="button" class="dc-tick" data-ct="' + w.i + '" aria-label="' + (w.b.done ? 'not done' : 'done') + '">\u2713</button>' +
-      '<button type="button" class="dc-body" data-co="' + w.i + '"><b>' + blockEmoji(w.b) + ' ' + esc(w.b.label || 'Block') + '</b><small>' + clock(w.from) + ' \u2013 ' + clock(w.to) + '</small></button></div>';
+      '<button type="button" class="dc-body" data-co="' + w.i + '"><b>' + blockEmoji(w.b) + ' ' + esc(w.b.label || 'Block') + ((w.b.title || '').trim() ? ' <i class="dc-title">\u00b7 ' + esc(w.b.title.trim()) + '</i>' : '') + '</b><small>' + clock(w.from) + ' \u2013 ' + clock(w.to) + '</small></button></div>';
   });
   h = h.replace(/class="dc-grid" style="height:(\d+)px"/, (m, v) => 'class="dc-grid" style="height:' + Math.max(Number(v), floor) + 'px"');
   if (isToday && nowM >= h0 * 60 && nowM <= h1 * 60) h += '<div class="dc-now" style="top:' + y(nowM) + 'px"></div>';
