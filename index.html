@@ -5935,6 +5935,16 @@ html.kb-open .qn .ns-cancel { display: none; }
 #listsheet .wgp-list b { color: var(--pink); font-size: 18px; }
 
 #view-day #block-list .line .addlist.flag, #view-day #block-list .line .addlist:not(.has) { color: var(--pink) !important; border-color: color-mix(in srgb, var(--pink) 55%, transparent) !important; font-weight: 700; }
+
+.ptd .ptd-o { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; margin: 0 0 8px; padding: 0 14px; text-align: left; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; cursor: pointer; }
+.ptd .ptd-o i { font-style: normal; font-size: 20px; }
+.ptd .ptd-o b, .ptd .ptd-list b { display: block; font: 600 16px "Inter", system-ui, sans-serif; }
+.ptd .ptd-o small, .ptd .ptd-list small { display: block; font-size: 12px; color: var(--muted); }
+.ptd .ptd-list { margin: 0 0 12px; border: 1px solid var(--hair); border-radius: 14px; overflow: hidden; }
+.ptd .ptd-list button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 6px 14px; text-align: left; color: var(--ink); background: none; border: 0; border-bottom: 1px solid var(--hair); cursor: pointer; }
+.ptd .ptd-list button:last-child { border-bottom: 0; }
+.ptd .ptd-list span { flex: 1; min-width: 0; }
+.ptd .ptd-list i { font-style: normal; color: var(--muted); font-size: 20px; }
 </style>
 </head>
 <body>
@@ -6215,7 +6225,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:17</footer>
+  <footer>Mr.O:12:19</footer>
 </div>
 
 <script>
@@ -9287,6 +9297,43 @@ function movePastDump() {
   save();
 }
 let dumpDraft = '';   // what you are typing, kept across redraws
+// Plan it: book its own time, or put it inside a work block you already have
+function planTodoSheet(x) {
+  const old = document.getElementById('ptdsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'ptdsheet'; el.className = 'w3';
+  const day = dayFor(planKey());
+  let at = toMins(day.start);
+  const W = day.blocks.map((b, i) => { const w = { b, i, from: at }; at += Number(b.mins) || 60; return w; }).filter(w => !w.b.done && outcomeField(w.b.label) === 'goals');
+  const used = () => { x.done = true; x.doneAt = Date.now(); x.planned = true; };
+  const close = () => el.remove();
+  const step1 = () => {
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ptd" role="dialog" aria-modal="true" aria-label="Plan it"><span class="w3-grab"></span>' +
+      '<p class="wk2-step">Plan it</p><h2>' + esc(x.text) + '</h2>' +
+      '<button type="button" class="ptd-o" data-o="book"><i>\u{1F552}</i><span><b>Book a time</b><small>its own block in the plan</small></span></button>' +
+      (W.length ? '<button type="button" class="ptd-o" data-o="work"><i>\u{1F4BC}</i><span><b>Add to a work block</b><small>' + W.length + ' work block' + (W.length > 1 ? 's' : '') + ' today</small></span></button>' : '') +
+      '<button type="button" class="ls-cancel ptd-x">Cancel</button></div>';
+    el.querySelector('.w3-back').addEventListener('click', close);
+    el.querySelector('.ptd-x').addEventListener('click', close);
+    el.querySelector('[data-o=book]').addEventListener('click', () => { used(); save(); close(); renderDump(); planFromTodo = true; addBlockSheet(x.text); });
+    const w = el.querySelector('[data-o=work]'); if (w) w.addEventListener('click', step2);
+  };
+  const step2 = () => {
+    el.querySelector('.w3-sheet').innerHTML = '<span class="w3-grab"></span><p class="wk2-step">Which work block?</p><h2>' + esc(x.text) + '</h2>' +
+      '<div class="ptd-list">' + W.map((w, n) => '<button type="button" data-w="' + n + '"><span><b>' + esc((w.b.title || '').trim() || w.b.label || 'Work') + '</b><small>' + clock(w.from) + ' \u00b7 ' + minsLabel(Number(w.b.mins) || 60) + ((w.b.goals || []).length ? ' \u00b7 ' + w.b.goals.length + ' task' + (w.b.goals.length > 1 ? 's' : '') : '') + '</small></span><i>\u203a</i></button>').join('') + '</div>' +
+      '<button type="button" class="ls-cancel ptd-back">Back</button>';
+    el.querySelector('.ptd-back').addEventListener('click', step1);
+    el.querySelectorAll('[data-w]').forEach(btn => btn.addEventListener('click', () => {
+      const b = W[Number(btn.dataset.w)].b;
+      b.goals = b.goals || [];
+      if (b.goals.length < MAX_GOALS) b.goals.push({ text: x.text, done: false });
+      else { b.extras = b.extras || []; b.extras.push({ id: x.id, text: x.text, done: false }); }   // 2 tasks already: it goes in as an extra to do
+      used(); save(); close(); renderDay();
+      offerUndo('=Added to ' + ((b.title || '').trim() || b.label || 'Work'), () => { b.goals = b.goals.filter(g => g.text !== x.text); if (b.extras) b.extras = b.extras.filter(e => e.id !== x.id); x.done = false; x.planned = false; save(); renderDay(); });
+    }));
+  };
+  document.body.appendChild(el);
+  step1();
+}
 function renderDump() {
   const slot = document.getElementById('dump-slot');
   if (!slot) return;
@@ -9311,7 +9358,7 @@ function renderDump() {
   slot.querySelector('.bd-add button').addEventListener('click', add);
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   slot.querySelectorAll('[data-dt]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dt); if (!x) return; x.done = !x.done; x.doneAt = Date.now(); save(); renderDump(); }));
-  slot.querySelectorAll('[data-dp]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dp); if (!x) return; x.done = true; x.doneAt = Date.now(); x.planned = true; save(); renderDump(); planFromTodo = true; addBlockSheet(x.text); }));
+  slot.querySelectorAll('[data-dp]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dp); if (!x) return; planTodoSheet(x); }));
   const dd = slot.querySelector('.bd-done:not(.bd-nt)'); if (dd) dd.addEventListener('click', () => { dumpOpenDone = !dumpOpenDone; renderDump(); });
   const nt = slot.querySelector('.bd-nt'); if (nt) nt.addEventListener('click', () => { dumpNotesOpen = !dumpNotesOpen; renderDump(); });
   slot.querySelectorAll('[data-nd]').forEach(b => b.addEventListener('click', () => { const x = (state.dumpNotes || []).find(y => y.id === b.dataset.nd); if (x) { x.gone = true; save(); renderDump(); } }));
