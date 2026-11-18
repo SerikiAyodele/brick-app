@@ -6282,7 +6282,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:35</footer>
+  <footer>Mr.O:12:36</footer>
 </div>
 
 <script>
@@ -6769,7 +6769,7 @@ function isAgendaBlock(label) {
 // work that should have a clear outcome: what will be finished by the end
 function isWorkBlock(label) {
   const t = label || '';
-  return !isAgendaBlock(t) && /\b(work|deep work|study|studying|project|code|coding|write|writing|build|building|design|report|deck|research|read|reading|book)\b/i.test(t);
+  return !isAgendaBlock(t) && /\b(work|deep work|study|studying|project|code|coding|write|writing|build|building|design|report|deck|research)\b/i.test(t);   // reading is not work: no tasks, no +
 }
 const outcomeField = label => (isFocusBlock(label) || isWorkBlock(label)) ? 'goals' : isAgendaBlock(label) ? 'agenda' : null;
 
