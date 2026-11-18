@@ -6193,6 +6193,13 @@ html.kb-open .qn .ns-cancel { display: none; }
 .dg-ask .dg-dd button[hidden] { display: none; }
 .dg-ask .dg-dd i { font-style: normal; }
 .empty-sug { display: block; margin: 10px auto 0; min-height: 40px; padding: 0 18px; font: 600 14px "Inter", system-ui, sans-serif; color: var(--pink); background: none; border: 1px solid color-mix(in srgb, var(--pink) 45%, var(--hair)); border-radius: 20px; cursor: pointer; }
+
+.sg-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 4px; border-bottom: 1px solid var(--hair); }
+.sg-f label { font: 600 16px "Inter", system-ui, sans-serif; }
+.sg-f label small { display: block; margin-top: 2px; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+.sg-f input { width: 130px; min-height: 44px; padding: 0 12px; font: 600 17px "Inter", system-ui, sans-serif; text-align: center; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; }
+.bpg-note { margin-top: 14px; }
+.bpg-warn { color: #d9628a; }
 </style>
 </head>
 <body>
@@ -6474,7 +6481,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:37</footer>
+  <footer>Mr.O:20:41</footer>
 </div>
 
 <script>
@@ -9890,10 +9897,60 @@ function planDayRows(start, blocks) {
   let at = toMins(start);
   return '<ol class="bpg-day">' + blocks.map(b => { const m = Number(b.mins) || 60, f = at; at += m; return '<li><span>' + clock(f) + '</span><i>' + blockEmoji(b) + '</i><b>' + esc(b.label) + '</b><em>' + minsLabel(m) + '</em></li>'; }).join('') + '</ol>';
 }
-function planForMePage(k) {
+// suggest my day, step 1: start (from when the day before ended), end, work hours, sleep hours
+function suggestSetupPage(k) {
+  const prevK = shiftKey(k, -1), prev = state.days[prevK], day = dayFor(k);
+  const prevEnd = prev && prev.blocks && prev.blocks.length ? (prev.end ? toMins(prev.end) : planEndOf(prev)) % 1440 : toMins(day.start);
+  const startM = k === planKey() && day.blocks.some(b => b.done) ? toMins(day.start) : prevEnd;
+  const pw = prev && prev.blocks ? prev.blocks.filter(b => outcomeField(b.label) === 'goals').reduce((t, b) => t + (Number(b.mins) || 60), 0) : 0;
+  const ps = prev && prev.blocks ? (prev.blocks.find(b => /^sleep/i.test(b.label || '')) || {}).mins : 0;
+  const workH = pw ? Math.round(pw / 30) / 2 : 6, sleepH = ps ? Math.round(ps / 30) / 2 : 8;
+  const endM = day.end ? toMins(day.end) : (startM + 24 * 60) % 1440;
+  const el = bigPage(k === planKey() ? 'Suggest my day' : 'Plan for me', cap(FULL[fromKey(k).getDay()]) + ' \u00b7 a few things first');
+  el.querySelector('.bpg-body').innerHTML =
+    '<div class="sg-f"><label>Start<small>when ' + (prev && prev.blocks && prev.blocks.length ? 'the day before ended' : 'you start') + '</small></label><input type="time" class="sg-st" step="300" value="' + hhmm(startM) + '"></div>' +
+    '<div class="sg-f"><label>End<small>when this day ends</small></label><input type="time" class="sg-en" step="300" value="' + hhmm(endM) + '"></div>' +
+    '<div class="sg-f"><label>Work<small>hours of work</small></label><input type="number" class="sg-w" inputmode="decimal" min="0" max="16" step="0.5" value="' + workH + '"></div>' +
+    '<div class="sg-f"><label>Sleep<small>hours of sleep, at the end</small></label><input type="number" class="sg-s" inputmode="decimal" min="0" max="12" step="0.5" value="' + sleepH + '"></div>' +
+    '<p class="bpg-note">Everything from ' + (prev && prev.blocks && prev.blocks.length ? 'the day before' : 'your usual days') + ' comes too, like reading and meditation.</p>' +
+    '<div class="bpg-btns"><button type="button" class="wka-go sg-go">Make my day</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
+  el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
+  el.querySelector('.sg-go').addEventListener('click', () => {
+    const v = c => el.querySelector(c).value;
+    const opt = { start: toMins(v('.sg-st')), end: toMins(v('.sg-en')), work: Math.max(0, Number(v('.sg-w')) || 0) * 60, sleep: Math.max(0, Number(v('.sg-s')) || 0) * 60 };
+    el.remove(); planForMePage(k, opt);
+  });
+}
+// suggest my day, step 2: the day before's items, your work hours in 90 min blocks with breaks, free time, sleep at the end
+function planFromSetup(k, o) {
+  const prevK = shiftKey(k, -1);
+  let src = (state.days[prevK] || {}).blocks || [];
+  if (!src.length) { const H = planFromHistory(k); src = H ? H.blocks : []; }
+  const isWork = b => outcomeField(b.label) === 'goals', isSleep = b => /^sleep|^nap$/i.test(b.label || ''), isFree = b => /^free time$/i.test(b.label || '');
+  const seen = new Set(), items = [];
+  src.forEach((b, i) => { const l = (b.label || '').trim(); if (!l || isWork(b) || isSleep(b) || isFree(b) || seen.has(l.toLowerCase())) return; seen.add(l.toLowerCase()); items.push({ label: l, mins: Number(b.mins) || 30, i }); });
+  const fw = src.findIndex(isWork), lw = src.length - 1 - [...src].reverse().findIndex(isWork);
+  const before = fw < 0 ? items.filter(x => x.i < src.length / 2) : items.filter(x => x.i < fw);
+  const after = fw < 0 ? items.filter(x => x.i >= src.length / 2) : items.filter(x => x.i > lw);
+  const middle = fw < 0 ? [] : items.filter(x => x.i > fw && x.i < lw);
+  const day = dayFor(k), g = day.goal || ((state.days[prevK] || {}).goal); const gt = g && (typeof g === 'string' ? g : g.text);
+  const work = []; let left = Math.round(o.work / 5) * 5, first = true;
+  while (left > 0) { const m = Math.min(90, left); work.push({ label: first && gt ? 'Focus: ' + gt : first ? 'Deep work' : 'Work', mins: m }); first = false; left -= m; }
+  const mid = [];
+  work.forEach((w, n) => { mid.push(w); if (n < work.length - 1) { const x = middle.shift(); mid.push(x ? { label: x.label, mins: x.mins } : { label: 'Break', mins: 15 }); } });
+  middle.forEach(x => mid.push({ label: x.label, mins: x.mins }));
+  const blocks = [...before.map(x => ({ label: x.label, mins: x.mins })), ...mid, ...after.map(x => ({ label: x.label, mins: x.mins }))];
+  const span = ((o.end - o.start) + 1440) % 1440 || 1440, used = blocks.reduce((t, b) => t + b.mins, 0) + o.sleep;
+  if (span - used >= 15) { const at = before.length + mid.length; blocks.splice(at, 0, { label: 'Free time', mins: Math.round((span - used) / 5) * 5 }); }
+  if (o.sleep) blocks.push({ label: 'Sleep', mins: Math.round(o.sleep / 5) * 5 });
+  return { start: hhmm(o.start), end: hhmm(o.end), blocks, over: Math.max(0, used - span) };
+}
+function planForMePage(k, opt) {
+  if (!opt) return suggestSetupPage(k);
   const day = dayFor(k), name = cap(FULL[fromKey(k).getDay()]);
-  let P = planFromHistory(k), how;
-  if (P) how = 'From ' + P.how;
+  let P = planFromSetup(k, opt), how = 'From the day before, ' + hrsLabel(opt.work) + ' work, ' + hrsLabel(opt.sleep) + ' sleep';
+  if (P.blocks.length) {}
+  else if ((P = planFromHistory(k))) how = 'From ' + P.how;
   else { const snap = { start: day.start, blocks: day.blocks }; planForMe(k); P = { start: day.start, blocks: day.blocks.map(b => ({ ...b })) }; day.start = snap.start; day.blocks = snap.blocks; how = 'Not enough history yet, so from your routines'; }
   if (k === planKey() && day.blocks.some(b => b.done)) {
     // today: what you have done stays; the rest of the day comes from your usual, from now on
@@ -9905,12 +9962,13 @@ function planForMePage(k) {
   }
   const el = bigPage(k === planKey() ? 'Suggest my day' : 'Plan for me', name + ' \u00b7 ' + how);
   el.querySelector('.bpg-body').innerHTML = planDayRows(P.start, P.blocks) +
+    (P.over ? '<p class="bpg-note bpg-warn">This runs ' + dur(P.over) + ' past your end time. Try fewer work hours, or cut something after.</p>' : '') +
     (day.blocks.length ? '<p class="bpg-note">This replaces the ' + day.blocks.length + ' blocks there now. Undo works.</p>' : '') +
     '<div class="bpg-btns"><button type="button" class="wka-go bpg-use">Use this plan</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
   el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
   el.querySelector('.bpg-use').addEventListener('click', () => {
     const old = { start: day.start, blocks: day.blocks };
-    day.start = P.start; day.blocks = P.blocks.map(b => b.done ? b : ({ label: b.label, mins: b.mins })); day.touched = true; day.noSuggest = true;
+    day.start = P.start; if (P.end) day.end = P.end; day.blocks = P.blocks.map(b => b.done ? b : ({ label: b.label, mins: b.mins })); day.touched = true; day.noSuggest = true;
     save(); el.remove(); const ps = document.getElementById('paksheet'); if (ps) ps.remove(); renderDay(); renderHabits(); window.scrollTo(0, 0);
     offerUndo('=Planned ' + name, () => { day.start = old.start; day.blocks = old.blocks; day.noSuggest = false; save(); renderDay(); });
   });
