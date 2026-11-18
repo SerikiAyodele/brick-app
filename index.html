@@ -6225,7 +6225,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:24</footer>
+  <footer>Mr.O:12:25</footer>
 </div>
 
 <script>
@@ -9288,12 +9288,11 @@ document.getElementById('block-add').addEventListener('click', () => addBlockShe
 let dumpOpenDone = false, dumpNotesOpen = false;
 // a new day: brain dump items still open from an earlier day become plain notes
 function movePastDump() {
-  const L = state.dump || (state.dump = []), t = todayKey();
-  const old = L.filter(x => !x.done && key(new Date(x.at)) < t);
-  if (!old.length) return;
-  state.dumpNotes = state.dumpNotes || [];
-  old.forEach(x => state.dumpNotes.push({ id: x.id, text: x.text, at: x.at }));
-  state.dump = L.filter(x => !old.includes(x));
+  // to dos carry over: open ones stay in To do until ticked or planned. notes (from earlier, or a block turned into a note) join To do too
+  const L = state.dump || (state.dump = []);
+  const N = (state.dumpNotes || []).filter(n => !n.gone && (n.text || '').trim());
+  if (!N.length) return;
+  N.forEach(n => { if (!L.some(x => x.id === n.id || (!x.done && x.text === n.text))) L.push({ id: n.id, text: n.text, done: false, at: n.at || Date.now() }); n.gone = true; });
   save();
 }
 let dumpDraft = '';   // what you are typing, kept across redraws
