@@ -5764,6 +5764,12 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #day-cal .dc-ev.done .dc-tick { color: #fff; background: rgba(20, 20, 25, .7); border-color: transparent; }
 #day-cal .dc-now { left: 0; border-top: 2px solid var(--ink); }
 #day-cal .dc-now::before { left: -6px; top: -6px; background: var(--ink); }
+
+/* calendar: more room between blocks, and a little depth */
+#day-cal .dc-ev { left: 6px; right: 4px; padding: 7px 10px; border-radius: 10px; box-shadow: 0 1px 0 rgba(255,255,255,.25) inset, 0 6px 14px -6px rgba(0,0,0,.45), 0 2px 4px rgba(0,0,0,.18) !important; }
+#day-cal .dc-ev.live { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--ec), 0 10px 22px -8px rgba(0,0,0,.5) !important; }
+#day-cal .dc-ev.done { box-shadow: none !important; }
+#day-cal .dc-grid { margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -6041,7 +6047,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:18</footer>
+  <footer>Mr.O:09:19</footer>
 </div>
 
 <script>
@@ -14512,7 +14518,7 @@ function renderDayCal() {
   let at = toMins(day.start);
   const W = day.blocks.map((b, i) => { const len = Number(b.mins) || 60, w = { b, i, from: at, to: at + len }; at += len; return w; });
   // zoom so the shortest block still has room for its name, like pinching in Google Calendar
-  const CAL_H = Math.round(Math.max(58, Math.min(140, 26 * 60 / Math.max(1, Math.min(...W.map(w => w.to - w.from))))));
+  const CAL_H = Math.round(Math.max(72, Math.min(160, 34 * 60 / Math.max(1, Math.min(...W.map(w => w.to - w.from))))));
   const h0 = Math.max(0, Math.floor(W[0].from / 60)), h1 = Math.max(h0 + 1, Math.ceil(W[W.length - 1].to / 60));
   const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes(), isToday = viewDay === planKey();
   const y = m => (m - h0 * 60) / 60 * CAL_H;
@@ -14522,9 +14528,9 @@ function renderDayCal() {
   for (let hr = h0; hr <= h1; hr++) h += '<div class="dc-hr" style="top:' + ((hr - h0) * CAL_H) + 'px"><span>' + calHour(hr) + '</span></div>';
   let floor = -1e9;   // short blocks get a readable height, so the next one starts below it, never on top
   W.forEach(w => {
-    const top = Math.max(y(w.from), floor), ht = Math.max(22, y(w.to) - top - 2), live = isToday && !w.b.done && nowM >= w.from && nowM < w.to;
+    const top = Math.max(y(w.from), floor), ht = Math.max(26, y(w.to) - top - 6), live = isToday && !w.b.done && nowM >= w.from && nowM < w.to;
     const sz = ht < 34 ? ' tiny' : ht < 58 ? ' small' : '';
-    floor = top + ht + 2;
+    floor = top + ht + 6;
     h += '<div class="dc-ev' + sz + (w.b.done ? ' done' : '') + (live ? ' live' : '') + '" style="top:' + top + 'px;height:' + ht + 'px;--ec:' + calColor(w.b) + '" data-ci="' + w.i + '">' +
       '<button type="button" class="dc-tick" data-ct="' + w.i + '" aria-label="' + (w.b.done ? 'not done' : 'done') + '">\u2713</button>' +
       '<button type="button" class="dc-body" data-co="' + w.i + '"><b>' + blockEmoji(w.b) + ' ' + esc(w.b.label || 'Block') + '</b><small>' + clock(w.from) + ' \u2013 ' + clock(w.to) + '</small></button></div>';
