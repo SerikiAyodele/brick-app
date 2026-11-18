@@ -6069,7 +6069,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:04</footer>
+  <footer>Mr.O:10:06</footer>
 </div>
 
 <script>
@@ -8588,7 +8588,7 @@ function renderDay() {
   const growing = [];
 
   const sheet = document.createElement('div');
-  sheet.className = 'sheet' + (compactDay && !sortingDay ? ' compact' : '');
+  sheet.className = 'sheet';   // compact is gone: Calendar shows the whole day at a glance
 
   let partShown = null;   // morning, afternoon, night: a quiet label where each starts
   day.blocks.forEach((b, i) => {
@@ -8967,7 +8967,7 @@ function renderDay() {
     });
 
     arr.textContent = 'Reorder';      // always a way in: reorder, then Finish plan
-    tools.append(arr, squash);
+    tools.append(arr);
     // alarms: a web app can't set iPhone alarms, so hand the times to a Shortcut that can
     const ups = upcomingStarts(day);
     if (viewDay === planKey() && ups.length) {
