@@ -5842,6 +5842,10 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .qn .qn-r:last-child { border-bottom: 0; }
 .qn .qn-r .qn-pick { flex: 1; min-width: 0; min-height: 46px; padding: 0 14px; text-align: left; font: 500 16px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 0; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qn .qn-r .qn-rm { flex: none; width: 44px; min-height: 46px; font-size: 18px; color: var(--muted); background: none; border: 0; cursor: pointer; }
+
+/* sheets ride above the keyboard */
+html.kb-open .w3-sheet { bottom: var(--kb, 0px) !important; max-height: calc(100% - var(--kb, 0px) - 12px) !important; overflow-y: auto; padding-bottom: 14px !important; }
+html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
 </style>
 </head>
 <body>
@@ -6119,7 +6123,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:26</footer>
+  <footer>Mr.O:10:31</footer>
 </div>
 
 <script>
@@ -14632,6 +14636,12 @@ function timeUpSheet(day, i, end) {
   });
 }
 setInterval(checkTimeUp, 20000);
+// the keyboard: sheets sit on top of it, so what you type is always in view
+if (window.visualViewport) {
+  const kb = () => { const vv = window.visualViewport, h = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+    document.documentElement.style.setProperty('--kb', h + 'px'); document.documentElement.classList.toggle('kb-open', h > 80); };
+  visualViewport.addEventListener('resize', kb); visualViewport.addEventListener('scroll', kb); kb();
+}
 /* ---- Plan, Calendar view: the day as an hour grid, like Google Calendar ----
    blocks sit at their times, sized by length; a line shows now. the list is
    still there underneath, so ticking works the same way. */
