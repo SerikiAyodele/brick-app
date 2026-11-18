@@ -5789,6 +5789,9 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .ls-title span { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
 .ls-title input { width: 100%; min-height: 46px; padding: 0 14px; font: 500 16px inherit; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; }
 #day-cal .dc-title { font-style: normal; font-weight: 500; }
+
+#view-day #block-list .line .btitle { padding: 0; background: none; border: 0; cursor: pointer; text-align: left; }
+#view-day #block-list .line .btitle.empty { font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -6066,7 +6069,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:01</footer>
+  <footer>Mr.O:10:04</footer>
 </div>
 
 <script>
@@ -8762,7 +8765,14 @@ function renderDay() {
     what.addEventListener('click', () => openNameSheet(b));
     if (focusNew === i) { focusNew = null; setTimeout(() => openNameSheet(b), 60); }    // a new block asks straight away
     mid.appendChild(what);
-    if ((b.title || '').trim()) { const tt = document.createElement('span'); tt.className = 'btitle'; tt.textContent = b.title.trim(); mid.appendChild(tt); }
+    if ((b.title || '').trim() || (!b.done && outcomeField(b.label) === 'goals')) {
+      // work blocks: the title shows here; tap it (or + title) to set or change it
+      const tt = document.createElement('button'); tt.type = 'button';
+      tt.className = 'btitle' + ((b.title || '').trim() ? '' : ' empty');
+      tt.textContent = (b.title || '').trim() || '+ title';
+      tt.addEventListener('click', e => { e.stopPropagation(); openListSheet(b, 'goals', from); setTimeout(() => { const i = document.querySelector('#listsheet .ls-title input'); if (i) i.focus(); }, 80); });
+      mid.appendChild(tt);
+    }
 
     if (h) {
       const isa = document.createElement('span');
