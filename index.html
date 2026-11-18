@@ -6119,7 +6119,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:21</footer>
+  <footer>Mr.O:10:26</footer>
 </div>
 
 <script>
@@ -9442,7 +9442,8 @@ function addBlockSheet(preset, insertAt) {
       let opts = [15, 30, 45, 60, 90, 120];
       if (usual && !opts.includes(usual)) opts = [usual, ...opts];
       opts.sort((a, b) => (b === usual) - (a === usual));
-      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div><h2>How long?</h2>' +
+      html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div>' +
+        (outcomeField(pick.label) === 'goals' ? '<input type="text" class="ab-goal ab-title2" maxlength="60" placeholder="Title (optional), e.g. Zart campaign" aria-label="title">' : '') + '<h2>How long?</h2>' +
         (() => { const u = Number.isInteger(insertAt) ? null : usualStart(pick.label), sl = u === null ? null : slotFor(day.blocks, day.start, u);
           pick.sug = sl && sl.i < day.blocks.length ? sl : null; if (pick.where === undefined) pick.where = pick.sug ? 'usual' : 'end';
           return pick.sug ? '<p class="ab-sub">When</p><div class="ab-when"><button type="button" data-where="usual"' + (pick.where === 'usual' ? ' class="on"' : '') + '><b>' + clock(pick.sug.at) + '</b><small>your usual time</small></button><button type="button" data-where="end"' + (pick.where === 'end' ? ' class="on"' : '') + '><b>' + clock(endOfDay) + '</b><small>at the end</small></button></div>' : ''; })() +
@@ -9482,6 +9483,7 @@ function addBlockSheet(preset, insertAt) {
         pick = { label: it.t, mins: it.mins || usualLength(it.t) || 60, ...(it.step ? { step: it.step } : {}), ...(it.note ? { note: it.note } : {}) }; draw(); };
       const paint = () => {
         const q = bx.value.trim().toLowerCase();
+        if (!q) { list.innerHTML = ''; return; }   // type first; suggestions come as you type
         const L = (q ? P.filter(x => x.t.toLowerCase().includes(q)) : P).slice(0, q ? 8 : 6);
         list.innerHTML = (q && !P.some(x => x.t.toLowerCase() === q) ? '<li><button type="button" data-typed="1"><i>+</i><span>Add \u201c' + esc(bx.value.trim()) + '\u201d</span></button></li>' : '') +
           L.map((x, n) => '<li><button type="button" data-pi="' + P.indexOf(x) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span>' + (x.sub ? '<small>' + x.sub + '</small>' : '') + '</button></li>').join('') +
@@ -9494,7 +9496,10 @@ function addBlockSheet(preset, insertAt) {
       bx.addEventListener('input', paint); bx.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
       el.querySelector('#abx-go').addEventListener('click', go);
       paint();
+      setTimeout(() => bx.focus(), 80);
     }
+    const t2 = el.querySelector('.ab-title2');
+    if (t2) { t2.value = pick.title || ''; t2.addEventListener('input', () => { const v = t2.value.trim(); if (v) pick.title = v; else delete pick.title; }); }
     const inp = el.querySelector('.ab-type input');
     if (inp) { const go = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; } pick = { label: t }; draw(); };
       el.querySelector('.ab-type button').addEventListener('click', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); }
