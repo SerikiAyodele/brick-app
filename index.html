@@ -15023,7 +15023,7 @@ function renderGoals() {
       const gs = areaGoals(a.k);
       body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct);
         if (goalEditing === a.k + ':' + gi) return '<div class="gl-edit"><input type="text" class="gl-in" maxlength="100" data-gein="' + a.k + ':' + gi + '" aria-label="edit goal"><div class="gl-ebtns"><button type="button" data-gesave="' + a.k + ':' + gi + '">Save</button><button type="button" data-gecancel="1">Cancel</button><button type="button" class="rm" data-germ="' + a.k + ':' + gi + '">Remove</button></div></div>';
-        return '<div class="gl-rowwrap"><button type="button" class="gl-edbtn" data-ged="' + a.k + ':' + gi + '" aria-label="edit ' + esc(g.text) + '">Edit</button><button type="button" class="gl-row" data-wk="' + a.k + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button></div>' +
+        return '<div class="gl-rowwrap"><button type="button" class="gl-edbtn" data-ged="' + a.k + ':' + gi + '" aria-label="edit ' + esc(g.text) + '">Edit</button><button type="button" class="gl-row" data-wkt="' + a.k + ':' + gi + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button></div>' +
         ((g.actions || []).length ? '<p class="gl-sl' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') +
         '<div class="gl-btns"><button type="button" data-gls="' + a.k + ':' + gi + '">' + ((g.actions || []).length ? 'Edit steps' : '+ Add steps') + '</button><button type="button" data-glsug="' + a.k + ':' + gi + '">\u2728 Suggest steps</button></div>'; }).join('') +
         (gs.length < MAX_LIFE_GOALS && (weekGoalCount() < MAX_WEEK_ALL || !gs.length) ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
@@ -15058,6 +15058,13 @@ function renderGoals() {
     const i = box.querySelector('[data-gein]'); if (i) { const [ak, gi] = goalEditing.split(':'); i.value = areaGoals(ak)[Number(gi)].text; i.focus(); }
   });
   on('[data-gecancel]', () => { goalEditing = null; renderGoals(); });
+  // tap a week goal to tick it off for this week (tap again to undo)
+  on('[data-wkt]', el => {
+    const [ak, gi] = el.dataset.wkt.split(':'), g = areaGoals(ak)[Number(gi)]; if (!g) return;
+    const wk = mondayOf(planKey()), r0 = (el.querySelector('.gl-chk') || el).getBoundingClientRect();
+    if (g.doneWk === wk) delete g.doneWk; else { g.doneWk = wk; if (typeof tickBurst === 'function') tickBurst(r0); }
+    save(); renderGoals(); if (typeof renderHome === 'function') try { renderHome(); } catch {}
+  });
   on('[data-gesave]', el => {
     const [ak, gi] = el.dataset.gesave.split(':'), g = areaGoals(ak)[Number(gi)], t = box.querySelector('[data-gein]').value.trim();
     if (g && t && t !== g.text) { g.text = t; g.own = true; save(); goalEditUsed(); }
@@ -15364,6 +15371,7 @@ function measureScore(id, ks) {
 
 // a goal you tick yourself each day: how many of these days you ticked it
 function goalScore(g, ks) {
+  if (g && g.doneWk && ks && ks.some(k => mondayOf(k) === g.doneWk)) return { v: 1, target: 1, pct: 100 };   // you ticked it off for this week
   if (g.m === 'dyn' && g.dyn) return dynScore(g.dyn, ks);
   if (g.m === 'custom') {
     const v = ks.filter(k => (g.days || []).includes(k) || stepDoneOn(g, k)).length;
@@ -16895,7 +16903,7 @@ function goalSteps() {
 }
 function stepDoneOn(g, k) {
   const id = g.setAt, names = [g.text, ...(g.actions || [])].map(x => String(x || '').trim().toLowerCase());
-  return ((state.days[k] || {}).blocks || []).some(b => b.done && (b.step === id || names.includes((b.label || '').trim().toLowerCase())));
+  return ((state.days[k] || {}).blocks || []).some(b => b.done && ((id && b.step === id) || names.includes((b.label || '').trim().toLowerCase())));
 }
 // steps for a goal: a list with a box to add more
 const MAX_STEPS = 6;
