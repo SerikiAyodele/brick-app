@@ -6192,7 +6192,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:11:43</footer>
+  <footer>Mr.O:11:45</footer>
 </div>
 
 <script>
@@ -9256,7 +9256,7 @@ function renderDump() {
   const open = L.filter(x => !x.done), doneToday = L.filter(x => x.done && key(new Date(x.doneAt || x.at)) === t);
   slot.innerHTML = '<section class="bd"><div class="bd-h"><b>To do</b><small>' + (open.length ? open.length + ' open' : 'not in the plan yet') + '</small></div>' +
     '<div class="bd-add"><input type="text" maxlength="140" placeholder="Add a to do" aria-label="add a to do"><button type="button" aria-label="add">+</button></div>' +
-    (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + (x.why ? '<small class="bd-why">' + esc(x.why) + '</small>' : '') + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
+    (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
     (doneToday.length ? '<button type="button" class="bd-done">' + (dumpOpenDone ? 'Hide' : 'Show') + ' ' + doneToday.length + ' done</button>' +
       (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
     (N.length ? '<button type="button" class="bd-done bd-nt">' + (dumpNotesOpen ? 'Hide' : 'Notes from earlier \u00b7') + ' ' + N.length + '</button>' +
