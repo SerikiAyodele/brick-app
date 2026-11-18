@@ -5697,6 +5697,13 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day .start-row { padding: 0 !important; margin: 12px 0 10px !important; border: none !important; background: none !important; }
 #view-day .start-row label { font-size: 11px !important; font-weight: 700 !important; letter-spacing: 1.5px; text-transform: uppercase; }
 #view-day .start-row input { min-height: 36px !important; padding: 0 12px !important; font-size: 16px !important; font-weight: 700 !important; background: var(--slot) !important; border: none !important; border-radius: 18px !important; }
+
+/* ===== Plan: no "Plan my day" card (Reorder below the list does it); Plan tomorrow sits quietly at the bottom ===== */
+#view-day#view-day#view-day .pl-start { display: none !important; }
+#view-day#view-day#view-day .pt-open { justify-content: center !important; margin: 22px 0 0 !important; font-size: 13px !important; font-weight: 500 !important; color: var(--muted) !important; background: none !important; border: 0 !important; }
+#view-day#view-day#view-day .pt-open span { color: var(--muted) !important; }
+#view-day#view-day .totop { margin-top: 6px !important; }
+.ag-full { color: var(--muted) !important; cursor: default; }
 </style>
 </head>
 <body>
@@ -5838,7 +5845,6 @@ body[data-view="day"] footer { margin-top: 12px !important; }
       </div>
     </div>
 
-    <button type="button" class="pt-open" id="pt-open">&#x1F319; Plan tomorrow <span>&rsaquo;</span></button>
     <div id="day-stats"></div>
     <div id="day-goal"></div>
     <div id="carry-slot"></div>
@@ -5863,6 +5869,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
     <div class="total" id="total"></div>
     <div id="dump-slot"></div>
+    <button type="button" class="pt-open" id="pt-open">&#x1F319; Plan tomorrow <span>&rsaquo;</span></button>
     <button type="button" class="totop" id="day-top">↑ Back to top</button>
   </section>
 
@@ -5972,7 +5979,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:14</footer>
+  <footer>Mr.O:07:43</footer>
 </div>
 
 <script>
@@ -6449,6 +6456,7 @@ const PRESETS = [
 
 // "FB" or "focus block" gets up to two goals
 const MAX_GOALS = 2;
+const MAX_TODOS = 10;   // steps under one work task
 
 // meetings, dates, calls and the like get an agenda instead of goals
 function isAgendaBlock(label) {
@@ -6584,8 +6592,8 @@ function todoList(g) {
       const v = txt.value.trim();
       if (t && !v) T.splice(T.indexOf(t), 1);
       else if (t) t.text = v;
-      else if (v) T.push({ text: v, done: false });
-      todoEdit = (v && !t) ? { g, n: T.length } : null;    // after adding one, open the next
+      else if (v && T.length < MAX_TODOS) T.push({ text: v, done: false });
+      todoEdit = (v && !t && T.length < MAX_TODOS) ? { g, n: T.length } : null;    // after adding one, open the next, up to 10
       if (!v && !t) todoEdit = null;
       save(); renderDay();
     });
@@ -6625,11 +6633,16 @@ function todoList(g) {
     dot.className = 'ag-tick ghost';
     row.append(dot, editor(null, T.length));
     box.appendChild(row);
+  } else if (T.length >= MAX_TODOS) {
+    const full = document.createElement('span');
+    full.className = 'ag-more ag-full';
+    full.textContent = MAX_TODOS + ' steps, the most';
+    box.appendChild(full);
   } else {
     const more = document.createElement('button');
     more.type = 'button';
     more.className = 'ag-more';
-    more.textContent = T.length ? '+ to-do' : '+ break it down';
+    more.textContent = T.length ? '+ step (' + T.length + '/' + MAX_TODOS + ')' : '+ add steps';
     more.addEventListener('click', () => { todoEdit = { g, n: T.length }; renderDay(); });
     box.appendChild(more);
   }
@@ -6725,7 +6738,7 @@ function goalList(b, field, from) {
     }
     row.append(tick, body);
     wrap.appendChild(row);
-    if (field === 'agenda') wrap.appendChild(todoList(g));
+    if (field === 'agenda' || field === 'goals') wrap.appendChild(todoList(g));
   });
 
   const n = L.length;
