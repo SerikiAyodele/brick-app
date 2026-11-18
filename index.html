@@ -5836,6 +5836,12 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 .qn .qn-h { margin: 0 0 6px; font: 600 11px "Inter", system-ui, sans-serif; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
 .qn .qn-list button { min-height: 48px; padding: 0 14px; text-align: left; font: 500 16px "Inter", system-ui, sans-serif; color: var(--ink); background: var(--card); border: 0; border-bottom: 1px solid var(--hair); cursor: pointer; }
 .qn .qn-list button:last-child { border-bottom: 0; }
+
+.qn .qn-dd { max-height: 42vh; overflow-y: auto; border: 1px solid var(--hair); border-radius: 14px; background: var(--card); }
+.qn .qn-r { display: flex; align-items: center; border-bottom: 1px solid var(--hair); }
+.qn .qn-r:last-child { border-bottom: 0; }
+.qn .qn-r .qn-pick { flex: 1; min-width: 0; min-height: 46px; padding: 0 14px; text-align: left; font: 500 16px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 0; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qn .qn-r .qn-rm { flex: none; width: 44px; min-height: 46px; font-size: 18px; color: var(--muted); background: none; border: 0; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -6113,7 +6119,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:18</footer>
+  <footer>Mr.O:10:21</footer>
 </div>
 
 <script>
@@ -7150,20 +7156,19 @@ function removeBlock(day, i) {
     const j = before ? L.indexOf(before) : -1; L.splice(before ? (j < 0 ? Math.min(i, L.length) : j + 1) : 0, 0, gone); save(); renderDay(); renderHabits(); });
 }
 // tap a named block: just its name bar (a work block: its title), with your most used ones to pick from
-function freqNames(isWork) {
-  const tally = {}, keep = {};
-  for (let i = 0; i <= 60; i++) for (const b of ((state.days[shiftKey(planKey(), -i)] || {}).blocks || [])) {
-    if (isWork && outcomeField(b.label) !== 'goals') continue;
-    const t = ((isWork ? b.title : b.label) || '').trim(); if (!t) continue;
-    const k = t.toLowerCase(); tally[k] = (tally[k] || 0) + 1; keep[k] = keep[k] || t;
+function freqNames() {
+  // every name and title you have used (any block), A to Z, minus the ones you removed
+  const hide = new Set((state.nameHide || []).map(x => x.toLowerCase())), keep = {};
+  for (const k of Object.keys(state.days || {})) for (const b of (state.days[k].blocks || [])) {
+    for (const t0 of [b.title, b.label]) { const t = (t0 || '').trim(); if (!t || hide.has(t.toLowerCase())) continue; keep[t.toLowerCase()] = keep[t.toLowerCase()] || t; }
   }
-  return Object.keys(tally).sort((a, c) => tally[c] - tally[a]).map(k => keep[k]);
+  return Object.values(keep).sort((a, c) => a.localeCompare(c, undefined, { sensitivity: 'base' }));
 }
 function quickNameSheet(b) {
   const old = document.getElementById('namesheet'); if (old) old.remove();
   const el = document.createElement('div'); el.id = 'namesheet'; el.className = 'w3';
   const isWork = outcomeField(b.label) === 'goals', cur = ((isWork ? b.title : b.label) || '').trim();
-  const all = freqNames(isWork);
+  let all = freqNames();
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet qn" role="dialog" aria-modal="true" aria-label="name"><span class="w3-grab"></span>' +
     '<p class="wk2-step">' + (isWork ? esc(b.label) + ' \u00b7 title' : 'Name') + '</p>' +
     '<div class="qn-bar"><input type="text" class="qn-in" maxlength="60" autocomplete="off" placeholder="' + (isWork ? 'What is this work about?' : 'Name this block') + '"><button type="button" class="qn-ok">Save</button></div>' +
@@ -7173,19 +7178,27 @@ function quickNameSheet(b) {
   inp.value = cur;
   const close = () => { el.remove(); renderDay(); };
   const put = v => { v = (v || '').trim(); if (isWork) { if (v) b.title = v; else delete b.title; } else if (v) b.label = v; save(); close(); renderHabits(); };
+  // the drop down: opens when you tap to type, A to Z, x takes a name out of it for good
+  let open = false, typed = false;
   const paint = () => {
-    const q = inp.value.trim().toLowerCase();
-    const L = all.filter(t => t.toLowerCase() !== q && (!q || t.toLowerCase().includes(q))).slice(0, 8);
-    list.innerHTML = L.length ? '<p class="qn-h">' + (q ? 'Matches' : 'Your most used') + '</p>' + L.map(t => '<button type="button" data-q="' + esc(t) + '">' + esc(t) + '</button>').join('') : '';
+    if (!open) { list.innerHTML = ''; return; }
+    const q = typed ? inp.value.trim().toLowerCase() : '', now = cur.toLowerCase();
+    const L = all.filter(t => t.toLowerCase() !== now && (!q || t.toLowerCase().includes(q)));
+    list.innerHTML = L.length ? '<div class="qn-dd">' + L.map(t => '<div class="qn-r"><button type="button" class="qn-pick" data-q="' + esc(t) + '">' + esc(t) + '</button><button type="button" class="qn-rm" data-rm="' + esc(t) + '" aria-label="stop suggesting ' + esc(t) + '">\u00d7</button></div>').join('') + '</div>' : '';
+    list.querySelectorAll('[data-q]').forEach(x => x.addEventListener('mousedown', e => e.preventDefault()));
     list.querySelectorAll('[data-q]').forEach(x => x.addEventListener('click', () => put(x.dataset.q)));
+    list.querySelectorAll('[data-rm]').forEach(x => { x.addEventListener('mousedown', e => e.preventDefault()); x.addEventListener('click', () => {
+      state.nameHide = state.nameHide || []; if (!state.nameHide.includes(x.dataset.rm)) state.nameHide.push(x.dataset.rm);
+      save(); all = freqNames(); paint(); inp.focus(); }); });
   };
-  inp.addEventListener('input', paint);
+  inp.addEventListener('focus', () => { open = true; paint(); });
+  inp.addEventListener('click', () => { open = true; paint(); });
+  inp.addEventListener('input', () => { open = true; typed = true; paint(); });
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') put(inp.value); });
   el.querySelector('.qn-ok').addEventListener('click', () => put(inp.value));
   el.querySelector('.w3-back').addEventListener('click', close);
   el.querySelector('.qn-x').addEventListener('click', close);
   paint();
-  setTimeout(() => { inp.focus(); try { inp.select(); } catch {} }, 60);
 }
 function openNameSheet(b) {
   if ((b.label || '').trim()) return quickNameSheet(b);   // a named block: no "what is it" list, just the name bar
