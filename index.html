@@ -6436,7 +6436,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:41</footer>
+  <footer>Mr.O:16:42</footer>
 </div>
 
 <script>
@@ -15120,7 +15120,7 @@ function timeUpSheet(day, i, end) {
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet tu" role="dialog" aria-modal="true" aria-label="Time is up"><span class="w3-grab"></span>' +
     '<div class="tu-hero"><span class="tu-st">' + blockEmoji(b) + '<i>\u23F0</i></span><p class="tu-k">Time\u2019s up!</p><h2>' + esc(((b.title || '').trim() ? b.title.trim() : (b.label || '').trim()) || 'This block') + '</h2><p class="tu-s">Ended at ' + clock(end) + (next ? ' \u00b7 next: ' + esc(next.label || 'a block') : '') + '</p></div>' +
     '<button type="button" class="wka-go tu-done">I\u2019m done \u2713</button>' +
-    '<p class="wk2-h">Need a bit more?</p><div class="tu-df"></div><div class="tu-more">' + [[15, '+15 min'], [30, '+30 min'], [60, '+1 hour']].map(([m, t]) => '<button type="button" data-tm="' + m + '">' + t + '</button>').join('') + '</div>' +
+    '<p class="wk2-h">Need a bit more?</p><div class="tu-df"></div><div class="tu-more">' + [[5, '+5 min'], [10, '+10 min'], [15, '+15 min']].map(([m, t]) => '<button type="button" data-tm="' + m + '">' + t + '</button>').join('') + '</div>' +
     '<button type="button" class="tu-add">Add <b>15 min</b></button>' +
     '<button type="button" class="ls-cancel ns-cancel tu-later">Ask me in 10 minutes</button></div>';
   document.body.appendChild(el);
