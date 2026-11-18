@@ -6155,6 +6155,9 @@ html.kb-open .qn .ns-cancel { display: none; }
 #tusheet .tu-more button { flex: 1; min-height: 40px; border-radius: 20px; }
 #tusheet .tu-add { width: 100%; margin-top: 10px; min-height: 46px; border-radius: 23px; }
 #tusheet .tu-later { margin-top: 6px; background: none !important; color: var(--muted) !important; font-size: 14px; }
+
+.cloud-restore { display: block; width: 100%; margin: 0 0 14px; padding: 14px 16px; text-align: left; font: 400 13px "Inter", system-ui, sans-serif; color: var(--muted); background: color-mix(in srgb, var(--pink) 10%, var(--card)); border: 1px solid color-mix(in srgb, var(--pink) 35%, var(--hair)); border-radius: 16px; cursor: pointer; }
+.cloud-restore b { display: block; margin-bottom: 2px; font: 700 15px "Inter", system-ui, sans-serif; color: var(--ink); }
 </style>
 </head>
 <body>
@@ -6436,7 +6439,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:42</footer>
+  <footer>Mr.O:16:46</footer>
 </div>
 
 <script>
@@ -6483,7 +6486,7 @@ function aiPassSheet(wrong) {
     '<div class="gs-add"><input type="password" autocomplete="current-password" aria-label="AI passcode"><button type="button">Save</button></div></div>';
   document.body.appendChild(el);
   const inp = el.querySelector('input');
-  const ok = () => { const v = inp.value.trim(); if (!v) return; try { localStorage.setItem(AI_PASS_KEY, v); } catch {} el.remove(); };
+  const ok = () => { const v = inp.value.trim(); if (!v) return; try { localStorage.setItem(AI_PASS_KEY, v); } catch {} el.remove(); setTimeout(cloudPull, 50); };
   el.querySelector('.w3-back').addEventListener('click', () => el.remove());
   el.querySelector('.gs-add button').addEventListener('click', ok);
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
@@ -6565,7 +6568,40 @@ function load() {
 
 function save() {
   try { recordDay(); } catch {}   // undo history for the day page
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {}
+  try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(KEY + '.at', String(Date.now())); } catch {}
+  try { cloudSoon(); } catch {}
+}
+/* ---- cloud backup: your data, saved to brick's Cloudflare (locked with your AI passcode) ----
+   every change is sent a few seconds later. a new install gets it all back once the passcode is typed. */
+let cloudTimer = null, cloudState = '';
+const cloudPass = () => { try { return localStorage.getItem(AI_PASS_KEY) || ''; } catch { return ''; } };
+const localAt = () => { try { return Number(localStorage.getItem(KEY + '.at')) || 0; } catch { return 0; } };
+function cloudSoon() { if (!cloudPass()) return; clearTimeout(cloudTimer); cloudTimer = setTimeout(cloudPush, 4000); }
+async function cloudPush() {
+  const pass = cloudPass(); if (!pass) return;
+  try {
+    const at = localAt() || Date.now();
+    const r = await fetch(AI_URL + '/api/sync/put', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Brick-Pass': pass }, body: JSON.stringify({ at, data: JSON.stringify(state) }) });
+    if (r.status === 409) { const o = await r.json(); cloudAdopt(o); return; }   // another device saved later: take that copy
+    cloudState = r.ok ? 'saved ' + clockOf(Date.now()) : 'not saved';
+  } catch { cloudState = 'offline'; }
+}
+function cloudAdopt(o) {
+  if (!o || typeof o.data !== 'string') return;
+  try { JSON.parse(o.data); } catch { return; }
+  try { localStorage.setItem(KEY, o.data); localStorage.setItem(KEY + '.at', String(o.at)); } catch { return; }
+  if (!sessionStorage.getItem('brick.adopted')) { sessionStorage.setItem('brick.adopted', '1'); location.reload(); }
+}
+async function cloudPull() {
+  const pass = cloudPass(); if (!pass) return;
+  try {
+    const r = await fetch(AI_URL + '/api/sync/get', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Brick-Pass': pass }, body: '{}' });
+    if (r.status === 401) { try { localStorage.removeItem(AI_PASS_KEY); } catch {} aiPassSheet(true); return; }
+    if (!r.ok) return;
+    const o = await r.json();
+    if (o && o.data && o.at > localAt()) cloudAdopt(o);     // the cloud copy is newer: use it
+    else cloudPush();                                       // this phone is newer (or the cloud is empty): send it
+  } catch {}
 }
 
 /* =========== dates =========== */
@@ -15140,6 +15176,16 @@ function timeUpSheet(day, i, end) {
   });
 }
 setInterval(checkTimeUp, 20000);
+// cloud backup: check on open and when you come back to the app; a fresh install asks for the passcode to restore
+setTimeout(() => {
+  if (cloudPass()) cloudPull();
+  else if (!Object.keys(state.days || {}).length && !/localhost|127\.0\.0\.1/.test(location.hostname)) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cloud-restore'; b.innerHTML = '\u2601\uFE0F <b>Restore your brick</b> type your passcode to bring your data back';
+    b.addEventListener('click', () => { b.remove(); aiPassSheet(); });
+    const v = document.getElementById('view-home'); if (v) v.prepend(b);
+  }
+}, 1500);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && cloudPass()) cloudPull(); });
 /* ---- an optional end time for the day: if the plan runs past it, a calm note and help to cut ---- */
 // an end before the start means after midnight (start 6:30am, end 5:30am = next morning)
 function endLimit(day) { const e = toMins(day.end), st = toMins(day.start); return e <= st ? e + 1440 : e; }
