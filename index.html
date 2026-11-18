@@ -6137,6 +6137,24 @@ html.kb-open .qn .ns-cancel { display: none; }
 .tkb u { border-color: color-mix(in srgb, var(--pink) 60%, transparent) !important; }
 @keyframes tkpop3 { 0% { transform: scale(.2) rotate(-20deg); opacity: 0; } 30% { transform: scale(1.12) rotate(6deg); opacity: 1; } 55% { transform: scale(.96) rotate(-3deg); } 80% { transform: scale(1) rotate(0); opacity: 1; } 100% { transform: scale(.85); opacity: 0; } }
 @keyframes tkword { 0% { transform: translate(-50%, 10px) scale(.6); opacity: 0; } 25% { transform: translate(-50%, 0) scale(1.05); opacity: 1; } 75% { transform: translate(-50%, -6px) scale(1); opacity: 1; } 100% { transform: translate(-50%, -16px); opacity: 0; } }
+
+/* time is up, cuter */
+#tusheet .tu { text-align: center; }
+#tusheet .tu-hero { padding: 6px 0 4px; }
+#tusheet .tu-st { position: relative; display: inline-grid; place-items: center; width: 74px; height: 74px; font-size: 38px; border-radius: 24px; background: color-mix(in srgb, var(--pink) 14%, var(--card)); box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--pink) 70%, transparent); animation: tuwig 1.6s ease-in-out infinite; }
+#tusheet .tu-st i { position: absolute; right: -8px; top: -8px; font-style: normal; font-size: 22px; animation: turing 1.2s ease-in-out infinite; }
+@keyframes tuwig { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg) scale(1.03); } }
+@keyframes turing { 0%, 100% { transform: rotate(0); } 20% { transform: rotate(-18deg); } 40% { transform: rotate(16deg); } 60% { transform: rotate(-10deg); } 80% { transform: rotate(6deg); } }
+@media (prefers-reduced-motion: reduce) { #tusheet .tu-st, #tusheet .tu-st i { animation: none; } }
+#tusheet .tu-k { margin: 14px 0 0; font: 700 12px "Inter", system-ui, sans-serif; letter-spacing: 1.6px; text-transform: uppercase; color: var(--pink); }
+#tusheet .tu h2 { text-align: center !important; margin: 4px 0 2px; font: 700 24px "Inter", system-ui, sans-serif; letter-spacing: -.4px; }
+#tusheet .tu-s { margin: 0 0 16px; font-size: 13px; color: var(--muted); }
+#tusheet .tu-done { width: 100%; min-height: 54px; border-radius: 27px; font-size: 17px; background: var(--pink) !important; color: #fff !important; box-shadow: 0 10px 22px -12px color-mix(in srgb, var(--pink) 80%, transparent); }
+#tusheet .wk2-h { margin: 18px 0 8px; text-align: left; }
+#tusheet .tu-more { display: flex; gap: 8px; justify-content: center; }
+#tusheet .tu-more button { flex: 1; min-height: 40px; border-radius: 20px; }
+#tusheet .tu-add { width: 100%; margin-top: 10px; min-height: 46px; border-radius: 23px; }
+#tusheet .tu-later { margin-top: 6px; background: none !important; color: var(--muted) !important; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -6418,7 +6436,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:35</footer>
+  <footer>Mr.O:16:41</footer>
 </div>
 
 <script>
@@ -15100,9 +15118,9 @@ function timeUpSheet(day, i, end) {
   const b = day.blocks[i], next = day.blocks[i + 1];
   const el = document.createElement('div'); el.id = 'tusheet'; el.className = 'w3';
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet tu" role="dialog" aria-modal="true" aria-label="Time is up"><span class="w3-grab"></span>' +
-    '<p class="wk2-step">Time is up</p><h2>' + esc((b.label || '').trim() || 'This block') + '</h2><p class="cr-sub">It ended at ' + clock(end) + (next ? '. Next: ' + esc(next.label || 'a block') + '.' : '.') + '</p>' +
-    '<button type="button" class="wka-go tu-done">Done \u2713</button>' +
-    '<p class="wk2-h">Need more time?</p><div class="tu-df"></div><div class="tu-more">' + [[15, '+15 min'], [30, '+30 min'], [60, '+1 hour']].map(([m, t]) => '<button type="button" data-tm="' + m + '">' + t + '</button>').join('') + '</div>' +
+    '<div class="tu-hero"><span class="tu-st">' + blockEmoji(b) + '<i>\u23F0</i></span><p class="tu-k">Time\u2019s up!</p><h2>' + esc(((b.title || '').trim() ? b.title.trim() : (b.label || '').trim()) || 'This block') + '</h2><p class="tu-s">Ended at ' + clock(end) + (next ? ' \u00b7 next: ' + esc(next.label || 'a block') : '') + '</p></div>' +
+    '<button type="button" class="wka-go tu-done">I\u2019m done \u2713</button>' +
+    '<p class="wk2-h">Need a bit more?</p><div class="tu-df"></div><div class="tu-more">' + [[15, '+15 min'], [30, '+30 min'], [60, '+1 hour']].map(([m, t]) => '<button type="button" data-tm="' + m + '">' + t + '</button>').join('') + '</div>' +
     '<button type="button" class="tu-add">Add <b>15 min</b></button>' +
     '<button type="button" class="ls-cancel ns-cancel tu-later">Ask me in 10 minutes</button></div>';
   document.body.appendChild(el);
