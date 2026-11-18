@@ -6108,7 +6108,7 @@ html.kb-open .qn .ns-cancel { display: none; }
         </div>
       </div>
     </div>
-    <button type="button" class="tw-dump" id="tw-dump">&#x1F9E0; Brain dump</button>
+    <button type="button" class="tw-dump" id="tw-dump">&#x1F4DD; To do</button>
     <div id="idea-list"></div>
   </section>
 
@@ -6190,7 +6190,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:11:27</footer>
+  <footer>Mr.O:11:32</footer>
 </div>
 
 <script>
@@ -7961,9 +7961,9 @@ function dumpSheet() {
   const el = document.createElement('div'); el.id = 'bdsheet'; el.className = 'w3 fr-w3';
   const draw = () => {
     const open = L.filter(x => !x.done);
-    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet fr" role="dialog" aria-modal="true" aria-label="Brain dump"><span class="w3-grab"></span><button type="button" class="ns-x fr-x" aria-label="close">\u00d7</button>' +
-      '<h2>Brain dump</h2><p class="cr-sub">Get it out of your head. It waits on your Plan page.</p>' +
-      '<div class="gs-add"><input type="text" maxlength="140" placeholder="Something came up?" aria-label="add to brain dump"><button type="button">Add</button></div>' +
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet fr" role="dialog" aria-modal="true" aria-label="To do"><span class="w3-grab"></span><button type="button" class="ns-x fr-x" aria-label="close">\u00d7</button>' +
+      '<h2>To do</h2><p class="cr-sub">Get it out of your head. It waits on your Plan page.</p>' +
+      '<div class="gs-add"><input type="text" maxlength="140" placeholder="Add a to do" aria-label="add a to do"><button type="button">Add</button></div>' +
       (open.length ? '<ul class="bd-list fr-bd">' + open.slice(-8).reverse().map(x => '<li><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') + '</div>';
     const inp = el.querySelector('input');
     const add = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } L.push({ id: Date.now().toString(36), text: v, done: false, at: Date.now() }); save(); draw(); el.querySelector('input').focus(); };
@@ -8065,7 +8065,7 @@ function startRoom(b, end) {
   el.querySelector('.fx-growing').textContent = plant.steps ? plant.name + ' \u00b7 ' + plant.steps[0] : 'Growing ' + plant.name + ' \u00b7 ' + plant.sub;
   const fr = el.querySelector('.fx-forest'); if (fr) { fr.innerHTML = forestHtml(); fr.classList.remove('new'); }
   if (!el.querySelector('.fx-dump')) {
-    const db = document.createElement('button'); db.type = 'button'; db.className = 'fx-dump'; db.textContent = 'Brain dump';
+    const db = document.createElement('button'); db.type = 'button'; db.className = 'fx-dump'; db.textContent = 'To do';
     db.addEventListener('click', dumpSheet);
     const tb = el.querySelector('.fx-topbtns') || el.querySelector('.fx-top'); tb.insertBefore(db, tb.firstChild);
   }
@@ -9252,8 +9252,8 @@ function renderDump() {
   const L = state.dump || (state.dump = []);
   const N = (state.dumpNotes || []).filter(x => !x.gone);
   const open = L.filter(x => !x.done), doneToday = L.filter(x => x.done && key(new Date(x.doneAt || x.at)) === t);
-  slot.innerHTML = '<section class="bd"><div class="bd-h"><b>Brain dump</b><small>' + (open.length ? open.length + ' to do' : 'things that come up') + '</small></div>' +
-    '<div class="bd-add"><input type="text" maxlength="140" placeholder="Something came up?" aria-label="add to brain dump"><button type="button" aria-label="add">+</button></div>' +
+  slot.innerHTML = '<section class="bd"><div class="bd-h"><b>To do</b><small>' + (open.length ? open.length + ' open' : 'not in the plan yet') + '</small></div>' +
+    '<div class="bd-add"><input type="text" maxlength="140" placeholder="Add a to do" aria-label="add a to do"><button type="button" aria-label="add">+</button></div>' +
     (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
     (doneToday.length ? '<button type="button" class="bd-done">' + (dumpOpenDone ? 'Hide' : 'Show') + ' ' + doneToday.length + ' done</button>' +
       (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
@@ -9267,7 +9267,7 @@ function renderDump() {
   slot.querySelector('.bd-add button').addEventListener('click', add);
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   slot.querySelectorAll('[data-dt]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dt); if (!x) return; x.done = !x.done; x.doneAt = Date.now(); save(); renderDump(); }));
-  slot.querySelectorAll('[data-dp]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dp); if (!x) return; x.done = true; x.doneAt = Date.now(); x.planned = true; save(); renderDump(); addBlockSheet(x.text); }));
+  slot.querySelectorAll('[data-dp]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dp); if (!x) return; x.done = true; x.doneAt = Date.now(); x.planned = true; save(); renderDump(); planFromTodo = true; addBlockSheet(x.text); }));
   const dd = slot.querySelector('.bd-done:not(.bd-nt)'); if (dd) dd.addEventListener('click', () => { dumpOpenDone = !dumpOpenDone; renderDump(); });
   const nt = slot.querySelector('.bd-nt'); if (nt) nt.addEventListener('click', () => { dumpNotesOpen = !dumpNotesOpen; renderDump(); });
   slot.querySelectorAll('[data-nd]').forEach(b => b.addEventListener('click', () => { const x = (state.dumpNotes || []).find(y => y.id === b.dataset.nd); if (x) { x.gone = true; save(); renderDump(); } }));
@@ -9440,6 +9440,7 @@ function slotFor(blocks, start, u) {
   for (let i = 0; i < blocks.length; i++) { if (i >= first && m >= u - 10) return { i, at: m }; m += Number(blocks[i].mins) || 60; }
   return { i: blocks.length, at: m };
 }
+let planFromTodo = false;   // a to do you chose to plan goes in even past the end time
 function addBlockSheet(preset, insertAt) {
   const old = document.getElementById('addsheet'); if (old) old.remove();
   const el = document.createElement('div');
@@ -9480,6 +9481,14 @@ function addBlockSheet(preset, insertAt) {
     const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
     if (pick.note) { const n = (state.dumpNotes || []).find(y => y.id === pick.note); if (n) n.gone = true; }   // a note that became a block
     day.touched = true;
+    const fromTodo = planFromTodo; planFromTodo = false;
+    if (!fromTodo && day.end && viewDay === planKey() && planEndOf(day) + mins > endLimit(day)) {
+      // past your end time: it waits in To do, with Plan it for later
+      const L = state.dump || (state.dump = []), item = { id: Date.now().toString(36), text: (pick.label || 'Block') + (pick.title ? ': ' + pick.title : ''), mins, done: false, at: Date.now() };
+      L.push(item); save(); close(); renderDay(); renderHabits();
+      offerUndo('=Past your end time, so it went to To do', () => { const j = L.indexOf(item); if (j > -1) L.splice(j, 1); day.blocks.push(b); save(); renderDay(); });
+      return;
+    }
     if (!Number.isInteger(insertAt)) { if (pick.sug && pick.where === 'usual') insertAt = pick.sug.i; else if (pick.where === 'pick' && Number.isFinite(pick.at)) insertAt = slotFor(day.blocks, day.start, pick.at).i; }
     if (Number.isInteger(insertAt) && insertAt >= 0 && insertAt <= day.blocks.length) day.blocks.splice(insertAt, 0, b); else day.blocks.push(b);
     save(); close(); renderDay(); renderHabits();
@@ -13047,7 +13056,7 @@ function renderUndo() {
   bar.className = 'undo';
 
   const txt = document.createElement('span');
-  txt.textContent = 'removed ' + undoItem.label;
+  txt.textContent = String(undoItem.label).startsWith('=') ? String(undoItem.label).slice(1) : 'removed ' + undoItem.label;
 
   const btn = document.createElement('button');
   btn.type = 'button';
@@ -14793,7 +14802,7 @@ async function cutSuggest(day) {
     cuts.forEach(c => { const len = Number(c.x.b.mins) || 60; if (c.m >= len) rm.add(c.x.b); else c.x.b.mins = Math.max(5, len - c.m); });
     day.blocks = day.blocks.filter(b => !rm.has(b));
     save(); close();
-    offerUndo('the cuts', () => { before.forEach(x => { x.b.mins = x.mins; }); day.blocks = list; save(); renderDay(); });
+    offerUndo('=Time cut', () => { before.forEach(x => { x.b.mins = x.mins; }); day.blocks = list; save(); renderDay(); });
   });
 }
 /* ---- Best order: Claude reorders what is left of the day for the most focus ----
@@ -14853,7 +14862,7 @@ async function bestOrderSheet(day) {
     const before = day.blocks.slice();
     day.blocks.splice(from, L.length, ...res.order.map(x => x.b));
     save(); close(); renderDay();
-    offerUndo('the new order', () => { day.blocks.splice(0, day.blocks.length, ...before); save(); renderDay(); });
+    offerUndo('=New order set', () => { day.blocks.splice(0, day.blocks.length, ...before); save(); renderDay(); });
   });
 }
 // the keyboard: sheets sit on top of it, so what you type is always in view
