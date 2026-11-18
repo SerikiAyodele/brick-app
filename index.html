@@ -6190,7 +6190,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:11:18</footer>
+  <footer>Mr.O:11:27</footer>
 </div>
 
 <script>
@@ -14720,13 +14720,15 @@ function timeUpSheet(day, i, end) {
 }
 setInterval(checkTimeUp, 20000);
 /* ---- an optional end time for the day: if the plan runs past it, a calm note and help to cut ---- */
+// an end before the start means after midnight (start 6:30am, end 5:30am = next morning)
+function endLimit(day) { const e = toMins(day.end), st = toMins(day.start); return e <= st ? e + 1440 : e; }
 function planEndOf(day) { return (day.blocks || []).reduce((t, b) => t + (Number(b.mins) || 60), toMins(day.start)); }
 function renderOverrun() {
   const box = document.getElementById('overrun'), ei = document.getElementById('endat'); if (!box) return;
   const day = state.days[viewDay];
   if (ei && document.activeElement !== ei) ei.value = day && day.end ? day.end : '';
   if (!day || !day.end || !day.blocks || !day.blocks.length || sortingDay) { box.hidden = true; box.innerHTML = ''; return; }
-  const over = planEndOf(day) - toMins(day.end);
+  const over = planEndOf(day) - endLimit(day);
   if (over <= 0) { box.hidden = true; box.innerHTML = ''; return; }
   box.hidden = false;
   box.innerHTML = '<p>Your plan runs <b>' + dur(over) + '</b> past ' + clock(toMins(day.end)) + '.</p><div><button type="button" data-ov="pick">Choose where to cut</button><button type="button" data-ov="ai">\u2728 Suggest</button></div>';
@@ -14739,7 +14741,7 @@ function cutSheet(day) {
   document.body.appendChild(el);
   const close = () => { el.remove(); renderDay(); };
   const draw = () => {
-    const over = planEndOf(day) - toMins(day.end);
+    const over = planEndOf(day) - endLimit(day);
     const open = day.blocks.map((b, i) => ({ b, i })).filter(x => !x.b.done);
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet cut" role="dialog" aria-modal="true" aria-label="Where to cut"><span class="w3-grab"></span>' +
       '<p class="wk2-step">' + (over > 0 ? dur(over) + ' to cut' : 'It fits now \u2713') + '</p><h2>Where should time come from?</h2>' +
@@ -14760,7 +14762,7 @@ async function cutSuggest(day) {
   document.body.appendChild(el);
   const close = () => { el.remove(); renderDay(); };
   el.querySelector('.w3-back').addEventListener('click', () => el.remove());
-  const over = planEndOf(day) - toMins(day.end);
+  const over = planEndOf(day) - endLimit(day);
   const open = day.blocks.map((b, i) => ({ b, i })).filter(x => !x.b.done);
   let cuts = null, why = '';
   try {
