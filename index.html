@@ -5988,6 +5988,20 @@ html.kb-open .qn .ns-cancel { display: none; }
 #focus .fl-ask button { min-width: 70px; font: 600 14px "Inter", system-ui, sans-serif; color: #111; background: #fff; border: 0; border-radius: 12px; }
 #focus .fl-ask small { display: block; margin-top: 6px; font-size: 12px; color: #6b6f86; }
 #focus.flow.flow-plant .fx-stage { cursor: pointer; }
+
+#focus .fl-upmore { display: flex; gap: 8px; margin-top: 14px; }
+#focus .fl-upmore button { min-height: 40px; padding: 0 14px; font: 500 14px "Inter", system-ui, sans-serif; color: #c9cdf5; background: none; border: 1px solid #ffffff22; border-radius: 20px; cursor: pointer; }
+
+/* one line: start to end, undo, list or calendar */
+#view-day#view-day#view-day .start-row { display: flex !important; flex-wrap: nowrap !important; align-items: center; gap: 6px !important; margin: 0 0 14px !important; }
+#view-day#view-day#view-day .start-row label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#view-day .start-row input::-webkit-calendar-picker-indicator { display: none; }
+#view-day#view-day#view-day .start-row .se-to { font-size: 13px; color: var(--muted); }
+#view-day#view-day#view-day .start-row input { flex: 0 1 112px; width: 112px !important; min-width: 0 !important; max-width: 118px !important; height: 36px !important; min-height: 36px !important; padding: 0 8px !important; font: 600 15px "Inter", system-ui, sans-serif !important; text-align: center; border: 1px solid var(--hair) !important; border-radius: 18px !important; background: none !important; }
+#view-day#view-day#view-day .start-row .undobtn { flex: none; width: 34px; min-width: 34px !important; height: 34px; min-height: 34px !important; margin-left: auto; padding: 0 !important; font-size: 17px !important; color: var(--muted) !important; background: none !important; border: 0 !important; }
+#view-day#view-day#view-day .start-row .undobtn:disabled { opacity: .3; }
+#view-day#view-day#view-day .start-row .dv-seg { flex: none; margin: 0 !important; }
+#view-day#view-day#view-day .start-row .dv-seg .md-seg-b { min-height: 28px; padding: 0 9px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -6137,13 +6151,13 @@ html.kb-open .qn .ns-cancel { display: none; }
     <div class="start-row">
       <label for="start">Start at</label>
       <input id="start" type="time" step="300" aria-label="what time the day starts">
-      <label for="endat" class="end-l">End</label>
+      <span class="se-to" aria-hidden="true">to</span><label for="endat" class="end-l">End</label>
       <input id="endat" type="time" step="300" aria-label="what time the day should end (optional)">
-      <button class="undobtn" id="day-undo" type="button" disabled>Undo</button>
+      <button class="undobtn" id="day-undo" type="button" disabled aria-label="undo">&#x21B6;</button>
+      <div class="md-seg dv-seg" id="dv-seg"><button type="button" class="md-seg-b" data-dv="list" aria-label="list">&#x2630;</button><button type="button" class="md-seg-b" data-dv="cal" aria-label="calendar">&#x25A6;</button></div>
     </div>
     <div id="overrun" hidden></div>
 
-    <div class="md-seg dv-seg" id="dv-seg"><button type="button" class="md-seg-b" data-dv="list">List</button><button type="button" class="md-seg-b" data-dv="cal">Calendar</button></div>
     <div id="block-list"></div>
     <div id="day-cal" hidden></div>
 
@@ -6268,7 +6282,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:32</footer>
+  <footer>Mr.O:12:35</footer>
 </div>
 
 <script>
@@ -8214,6 +8228,17 @@ function flowDraw() {
   fl.querySelector('[data-fl=rain]').addEventListener('click', () => { flowSound(!flowAudio); flowDraw(); });
   fl.querySelector('[data-fl=plant]').addEventListener('click', () => { document.getElementById('focus').classList.add('flow-plant'); });
   if (n.g && !n.step && n.g.done === false && (b.goals || []).every(g => g.done)) {}
+  if (Date.now() >= focus.end && !focus.upKeep) {
+    // time is up: a soft chime, then three calm choices
+    if (!focus.upRang) { focus.upRang = true; flowChime(); try { navigator.vibrate && navigator.vibrate([30, 80, 30]); } catch {} }
+    fl.querySelector('.fl-mid').innerHTML = '<p class="fl-k">Time is up</p><p class="fl-step"></p><button type="button" class="fl-go fl-updone">Done \u2713</button><div class="fl-upmore"><button type="button" data-up="15">+15 min</button><button type="button" data-up="30">+30 min</button><button type="button" data-up="keep">Keep going</button></div>';
+    fl.querySelector('.fl-step').textContent = (b.title || '').trim() || b.label || 'This block';
+    fl.querySelector('.fl-updone').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); b.done = true; const h = habitNamed(b.label); if (h && !h.marks.includes(planKey())) h.marks.push(planKey()); save(); tickBurst(r); setTimeout(() => document.getElementById('focus-close').click(), 500); });
+    fl.querySelectorAll('[data-up]').forEach(x => x.addEventListener('click', () => { const v = x.dataset.up;
+      if (v === 'keep') focus.upKeep = true; else { const m = Number(v); focus.end = Date.now() + m * 60000; b.mins = (Number(b.mins) || 60) + m; focus.upRang = false; save(); }
+      flowDraw(); }));
+    return;
+  }
   if (!n.g && (b.goals || []).length && (b.goals || []).every(g => g.done)) {
     fl.querySelector('.fl-mid').innerHTML = '<p class="fl-k">All done</p><p class="fl-step">Well played \u{1F3C6}</p><button type="button" class="fl-go fl-back">Back to my plan</button>';
     fl.querySelector('.fl-back').addEventListener('click', () => document.getElementById('focus-close').click());
@@ -8231,6 +8256,15 @@ function flowAsk(title, put, hint) {
   fl.appendChild(a); setTimeout(() => inp.focus(), 40);
 }
 setInterval(() => { const room = document.getElementById('focus'); if (focus && room && !room.hidden && room.classList.contains('flow') && !room.querySelector('.fl-ask') && !room.querySelector('.fl-in')) flowDraw(); }, 30000);
+// check for the end every few seconds, so the chime comes on time
+setInterval(() => { const room = document.getElementById('focus'); if (focus && room && !room.hidden && room.classList.contains('flow') && Date.now() >= focus.end && !focus.upRang && !focus.upKeep) flowDraw(); }, 3000);
+function flowChime() {
+  try { const ctx = new (window.AudioContext || window.webkitAudioContext)(), t = ctx.currentTime;
+    [[523.25, 0], [659.25, .35], [783.99, .7]].forEach(([f, d]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0, t + d); g.gain.linearRampToValueAtTime(.25, t + d + .05); g.gain.exponentialRampToValueAtTime(.001, t + d + 1.6);
+      o.connect(g); g.connect(ctx.destination); o.start(t + d); o.stop(t + d + 1.7); });
+    setTimeout(() => ctx.close(), 3000); } catch {}
+}
 function startRoom(b, end) {
   const plant = pickRoomPlant();
   // the pot changes at one or two random points on the way
