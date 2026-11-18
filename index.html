@@ -6158,6 +6158,31 @@ html.kb-open .qn .ns-cancel { display: none; }
 
 .cloud-restore { display: block; width: 100%; margin: 0 0 14px; padding: 14px 16px; text-align: left; font: 400 13px "Inter", system-ui, sans-serif; color: var(--muted); background: color-mix(in srgb, var(--pink) 10%, var(--card)); border: 1px solid color-mix(in srgb, var(--pink) 35%, var(--hair)); border-radius: 16px; cursor: pointer; }
 .cloud-restore b { display: block; margin-bottom: 2px; font: 700 15px "Inter", system-ui, sans-serif; color: var(--ink); }
+
+/* pages: full screen, slide in */
+.bpg { position: fixed; inset: 0; z-index: 70; display: flex; flex-direction: column; padding: calc(16px + env(safe-area-inset-top, 0px)) 18px calc(20px + env(safe-area-inset-bottom, 0px)); background: var(--paper); overflow-y: auto; transform: translateX(100%); transition: transform .28s ease; font-family: "Inter", system-ui, sans-serif; }
+.bpg.in { transform: none; }
+.bpg-top { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.bpg-back { flex: none; width: 40px; height: 40px; font-size: 20px; color: var(--ink); background: none; border: 1px solid var(--hair); border-radius: 50%; cursor: pointer; }
+.bpg-top h2 { text-transform: none !important; margin: 0; font: 700 24px "Inter", system-ui, sans-serif; letter-spacing: -.4px; }
+.bpg-top small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+.bpg-card { display: flex; align-items: center; gap: 14px; width: 100%; margin: 0 0 12px; padding: 18px 16px; text-align: left; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 20px; cursor: pointer; }
+.bpg-card i { flex: none; display: grid; place-items: center; width: 46px; height: 46px; font-style: normal; font-size: 22px; border-radius: 14px; background: color-mix(in srgb, var(--pink) 12%, transparent); }
+.bpg-card span { flex: 1; min-width: 0; }
+.bpg-card b { display: block; font: 700 17px "Inter", system-ui, sans-serif; }
+.bpg-card small { display: block; margin-top: 3px; font-size: 13px; line-height: 1.35; color: var(--muted); }
+.bpg-card em { font-style: normal; font-size: 22px; color: var(--muted); }
+.bpg-day { list-style: none; margin: 0 0 14px; padding: 0; border: 1px solid var(--hair); border-radius: 16px; overflow: hidden; }
+.bpg-day li { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 14px; border-bottom: 1px solid var(--hair); }
+.bpg-day li:last-child { border-bottom: 0; }
+.bpg-day span { width: 64px; flex: none; font-size: 12px; color: var(--muted); }
+.bpg-day i { font-style: normal; font-size: 18px; }
+.bpg-day b { flex: 1; min-width: 0; font: 600 15px "Inter", system-ui, sans-serif; }
+.bpg-day b small { display: block; margin-top: 2px; font-weight: 400; font-size: 12px; line-height: 1.35; color: var(--muted); }
+.bpg-day em { font-style: normal; font-size: 13px; color: var(--muted); }
+.bpg-note { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+.bpg-btns { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 8px; }
+#view-day .tms .tms-card { margin: 8px 0 0; padding: 12px 14px; }
 </style>
 </head>
 <body>
@@ -6439,7 +6464,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:51</footer>
+  <footer>Mr.O:20:32</footer>
 </div>
 
 <script>
@@ -9806,21 +9831,67 @@ function planForMe(k) {
   day.start = hhmm(wake); day.blocks = out.map(b => ({ label: b.label, mins: b.mins })); day.touched = true;
   return old;
 }
-function planAskSheet(k) {
-  const day = dayFor(k);
-  const el = document.createElement('div'); el.id = 'paksheet'; el.className = 'w3';
-  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet pak" role="dialog" aria-modal="true" aria-label="Plan tomorrow"><span class="w3-grab"></span>' +
-    '<p class="wk2-step">' + cap(FULL[fromKey(k).getDay()]) + '</p><h2>How do you want to plan it?</h2>' +
-    '<button type="button" class="pak-b pak-me"><b>Plan for me</b><small>A full day, wake to bed, from how yesterday went' + (day.blocks.length ? '. It replaces what is there now.' : '.') + '</small></button>' +
-    '<button type="button" class="pak-b pak-self"><b>I\u2019ll plan it myself</b><small>With suggestions for the morning and night.</small></button></div>';
-  document.body.appendChild(el);
-  const close = () => el.remove();
-  el.querySelector('.w3-back').addEventListener('click', close);
-  el.querySelector('.pak-self').addEventListener('click', close);
-  el.querySelector('.pak-me').addEventListener('click', () => {
-    const old = planForMe(k); day.noSuggest = true; save(); close(); renderDay(); renderHabits(); window.scrollTo(0, 0);
-    offerUndo('the plan for ' + cap(FULL[fromKey(k).getDay()]), () => { day.start = old.start; day.blocks = old.blocks; day.noSuggest = false; save(); renderDay(); });
+// plan for me, from your history: the blocks you usually have on this kind of day, at their usual times and lengths
+function planFromHistory(k) {
+  const wd = fromKey(k).getDay(), days = [];
+  for (let n = 1; n <= 28; n++) { const kk = shiftKey(k, -n), d = state.days[kk]; if (d && d.blocks && d.blocks.length >= 3) days.push({ kk, d, same: fromKey(kk).getDay() === wd, wk: [0, 6].includes(fromKey(kk).getDay()) === [0, 6].includes(wd) }); }
+  const pool = days.filter(x => x.same).length >= 2 ? days.filter(x => x.same) : days.filter(x => x.wk).length >= 3 ? days.filter(x => x.wk) : days;
+  if (pool.length < 2) return null;
+  const T = {}, starts = [];
+  pool.forEach(({ d }) => { let at = toMins(d.start); starts.push(at); const seen = new Set();
+    d.blocks.forEach(b => { const l = (b.label || '').trim(), m = Number(b.mins) || 60; if (!l) { at += m; return; } const key2 = l.toLowerCase();
+      if (!seen.has(key2)) { seen.add(key2); (T[key2] = T[key2] || { l, at: [], len: [], n: 0 }).n++; T[key2].at.push(at); T[key2].len.push(m); } at += m; }); });
+  const med = a => { const x = a.slice().sort((p, q) => p - q); return x[Math.floor(x.length / 2)]; };
+  const keep = Object.values(T).filter(t => t.n / pool.length >= .4).map(t => ({ label: t.l, at: med(t.at), mins: Math.round(med(t.len) / 5) * 5 || 30 })).sort((a, b) => a.at - b.at);
+  if (keep.length < 3) return null;
+  const day = dayFor(k), g = day.goal || ((state.days[shiftKey(k, -1)] || {}).goal); const gt = g && (typeof g === 'string' ? g : g.text);
+  // keep each block at its usual time: a gap of 15 min or more becomes Free time, an overlap trims the block before
+  const blocks = []; let cur = keep[0].at;
+  keep.forEach((b, i) => { if (b.at - cur >= 15) blocks.push({ label: 'Free time', mins: Math.round((b.at - cur) / 5) * 5 }); else if (b.at < cur && blocks.length) { const last = blocks[blocks.length - 1]; last.mins = Math.max(10, last.mins - (cur - b.at)); }
+    blocks.push({ label: b.label, mins: b.mins }); cur = Math.max(cur, b.at) + b.mins; });
+  if (gt && !blocks.some(b => b.label.toLowerCase().includes(gt.toLowerCase().split(' ')[0]))) {
+    const wi = blocks.findIndex(b => outcomeField(b.label) === 'goals'); blocks.splice(wi >= 0 ? wi : Math.min(3, blocks.length), 0, { label: 'Focus: ' + gt, mins: 60 });
+  }
+  return { start: hhmm(Math.round(keep[0].at / 5) * 5), blocks, n: pool.length, how: pool === days ? 'your last ' + pool.length + ' days' : pool[0].same ? 'your last ' + pool.length + ' ' + cap(FULL[wd]) + 's' : 'your last ' + pool.length + ' similar days' };
+}
+// a page (full screen), not a list in a sheet
+function bigPage(title, sub) {
+  const old = document.getElementById('bigpage'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'bigpage'; el.className = 'bpg';
+  el.innerHTML = '<div class="bpg-top"><button type="button" class="bpg-back" aria-label="back">\u2190</button><div><h2></h2><small></small></div></div><div class="bpg-body"></div>';
+  el.querySelector('h2').textContent = title; el.querySelector('small').textContent = sub || '';
+  el.querySelector('.bpg-back').addEventListener('click', () => el.remove());
+  document.body.appendChild(el); requestAnimationFrame(() => el.classList.add('in'));
+  return el;
+}
+function planDayRows(start, blocks) {
+  let at = toMins(start);
+  return '<ol class="bpg-day">' + blocks.map(b => { const m = Number(b.mins) || 60, f = at; at += m; return '<li><span>' + clock(f) + '</span><i>' + blockEmoji(b) + '</i><b>' + esc(b.label) + '</b><em>' + minsLabel(m) + '</em></li>'; }).join('') + '</ol>';
+}
+function planForMePage(k) {
+  const day = dayFor(k), name = cap(FULL[fromKey(k).getDay()]);
+  let P = planFromHistory(k), how;
+  if (P) how = 'From ' + P.how;
+  else { const snap = { start: day.start, blocks: day.blocks }; planForMe(k); P = { start: day.start, blocks: day.blocks.map(b => ({ ...b })) }; day.start = snap.start; day.blocks = snap.blocks; how = 'Not enough history yet, so from your routines'; }
+  const el = bigPage('Plan for me', name + ' \u00b7 ' + how);
+  el.querySelector('.bpg-body').innerHTML = planDayRows(P.start, P.blocks) +
+    (day.blocks.length ? '<p class="bpg-note">This replaces the ' + day.blocks.length + ' blocks there now. Undo works.</p>' : '') +
+    '<div class="bpg-btns"><button type="button" class="wka-go bpg-use">Use this plan</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
+  el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
+  el.querySelector('.bpg-use').addEventListener('click', () => {
+    const old = { start: day.start, blocks: day.blocks };
+    day.start = P.start; day.blocks = P.blocks.map(b => ({ label: b.label, mins: b.mins })); day.touched = true; day.noSuggest = true;
+    save(); el.remove(); const ps = document.getElementById('paksheet'); if (ps) ps.remove(); renderDay(); renderHabits(); window.scrollTo(0, 0);
+    offerUndo('=Planned ' + name, () => { day.start = old.start; day.blocks = old.blocks; day.noSuggest = false; save(); renderDay(); });
   });
+}
+function planAskSheet(k) {
+  const el = bigPage('Plan ' + cap(FULL[fromKey(k).getDay()]), 'How do you want to plan it?'); el.id = 'paksheet';
+  el.querySelector('.bpg-body').innerHTML =
+    '<button type="button" class="bpg-card pak-me"><i>\u2728</i><span><b>Plan for me</b><small>Built from your past plans: what you usually do, when, and for how long</small></span><em>\u203a</em></button>' +
+    '<button type="button" class="bpg-card pak-self"><i>\u270D\uFE0F</i><span><b>I\u2019ll plan it myself</b><small>With morning and night ideas</small></span><em>\u203a</em></button>';
+  el.querySelector('.pak-self').addEventListener('click', () => el.remove());
+  el.querySelector('.pak-me').addEventListener('click', () => planForMePage(k));
 }
 function renderTomorrowSuggest() {
   let slot = document.getElementById('tmsug-slot');
@@ -9834,14 +9905,22 @@ function renderTomorrowSuggest() {
   const has = lab => day.blocks.some(b => (b.label || '').toLowerCase() === lab.toLowerCase());
   const amL = S.am.filter(b => !has(b.label)), pmL = S.pm.filter(b => !has(b.label));
   if (!amL.length && !pmL.length) return;
-  const part = (kind, L, W) => !L.length ? '' : '<div class="tms-part"><div class="tms-ph"><b>' + (kind === 'am' ? '\u2600\uFE0F Morning' : '\u{1F319} Night') + '</b><button type="button" data-tms="' + kind + '">Add</button></div>' +
-    '<ol>' + L.map(b => '<li><span>' + esc(b.label) + '</span><small>' + minsLabel(b.mins) + '</small></li>').join('') + '</ol>' +
-    (W.length ? '<p class="tms-why">' + W.map(esc).join(' ') + '</p>' : '') + '</div>';
+  const part = (kind, L) => !L.length ? '' : '<button type="button" class="bpg-card tms-card" data-tmo="' + kind + '"><i>' + (kind === 'am' ? '\u2600\uFE0F' : '\u{1F319}') + '</i><span><b>' + (kind === 'am' ? 'Morning' : 'Night') + ' ideas</b><small>' + L.length + ' suggestion' + (L.length > 1 ? 's' : '') + ', from how yesterday went</small></span><em>\u203a</em></button>';
   const box = document.createElement('div'); box.className = 'tms';
   box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>from how yesterday went</small></div>' +
-    part('am', amL, S.why.am) + part('pm', pmL, S.why.pm) + '<button type="button" class="tms-no">Not now</button>';
-  box.querySelectorAll('[data-tms]').forEach(btn => btn.addEventListener('click', () => {
-    const kind = btn.dataset.tms, L = (kind === 'am' ? amL : pmL).map(b => ({ label: b.label, mins: b.mins }));
+    part('am', amL) + part('pm', pmL) + '<button type="button" class="tms-no">Not now</button>';
+  box.querySelectorAll('[data-tmo]').forEach(btn => btn.addEventListener('click', () => {
+    const kind = btn.dataset.tmo, L = kind === 'am' ? amL : pmL, W = kind === 'am' ? S.why.am : S.why.pm;
+    const pg = bigPage((kind === 'am' ? '\u2600\uFE0F Morning' : '\u{1F319} Night') + ' ideas', 'For ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])));
+    pg.querySelector('.bpg-body').innerHTML = '<ol class="bpg-day">' + L.map(b => '<li><i>' + blockEmoji(b) + '</i><b>' + esc(b.label) + (b.why ? '<small>' + esc(b.why) + '</small>' : '') + '</b><em>' + minsLabel(b.mins) + '</em></li>').join('') + '</ol>' +
+      (W.length && !L.some(b => b.why) ? '<p class="bpg-note">' + W.map(esc).join(' ') + '</p>' : '') +
+      '<div class="bpg-btns"><button type="button" class="wka-go" data-tms="' + kind + '">Add to the ' + (kind === 'am' ? 'morning' : 'night') + '</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
+    pg.querySelector('.bpg-no').addEventListener('click', () => pg.remove());
+    pg.querySelector('[data-tms]').addEventListener('click', () => { pg.remove(); const t = box.querySelector('[data-tms-run="' + kind + '"]'); if (t) t.click(); });
+  }));
+  box.insertAdjacentHTML('beforeend', '<button type="button" hidden data-tms-run="am"></button><button type="button" hidden data-tms-run="pm"></button>');
+  box.querySelectorAll('[data-tms-run]').forEach(btn => btn.addEventListener('click', () => {
+    const kind = btn.dataset.tmsRun, L = (kind === 'am' ? amL : pmL).map(b => ({ label: b.label, mins: b.mins }));
     if (kind === 'am') day.blocks.unshift(...L); else day.blocks.push(...L);
     day.touched = true; save(); renderDay(); renderHabits();
     offerUndo(kind === 'am' ? 'morning routine' : 'night routine', () => { L.forEach(b => { const i = day.blocks.indexOf(b); if (i >= 0) day.blocks.splice(i, 1); }); save(); renderDay(); });
