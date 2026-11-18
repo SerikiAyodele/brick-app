@@ -6192,6 +6192,7 @@ html.kb-open .qn .ns-cancel { display: none; }
 .dg-ask .dg-dd button:last-child { border-bottom: 0; }
 .dg-ask .dg-dd button[hidden] { display: none; }
 .dg-ask .dg-dd i { font-style: normal; }
+.empty-sug { display: block; margin: 10px auto 0; min-height: 40px; padding: 0 18px; font: 600 14px "Inter", system-ui, sans-serif; color: var(--pink); background: none; border: 1px solid color-mix(in srgb, var(--pink) 45%, var(--hair)); border-radius: 20px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -6473,7 +6474,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:34</footer>
+  <footer>Mr.O:20:37</footer>
 </div>
 
 <script>
@@ -9202,6 +9203,8 @@ function renderDay() {
     e.className = 'empty';
     e.textContent = 'nothing planned';
     blockList.appendChild(e);
+    { const sd = document.createElement('button'); sd.type = 'button'; sd.className = 'empty-sug'; sd.textContent = '\u2728 Suggest my whole day';
+      sd.addEventListener('click', () => planForMePage(viewDay)); blockList.appendChild(sd); }
     document.getElementById('total').textContent = '';
     document.getElementById('block-add').hidden = false;
     sortingDay = !day.planSnap && viewDay >= planKey();   // a new day opens straight into planning
@@ -9598,6 +9601,8 @@ function renderDay() {
 
     arr.textContent = 'Reorder';      // always a way in: reorder, then Finish plan
     // no Reorder button: hold a block and drag it to move it
+    { const sd = document.createElement('button'); sd.className = 'arrange best-order'; sd.type = 'button'; sd.textContent = '\u2728 Suggest my day';
+      sd.addEventListener('click', () => planForMePage(viewDay)); tools.append(sd); }
     if (day.blocks.filter(x => !x.done).length >= 3) {
       const bo = document.createElement('button'); bo.className = 'arrange best-order'; bo.type = 'button'; bo.textContent = '\u2728 Best order';
       bo.addEventListener('click', () => bestOrderSheet(day));
@@ -9890,14 +9895,22 @@ function planForMePage(k) {
   let P = planFromHistory(k), how;
   if (P) how = 'From ' + P.how;
   else { const snap = { start: day.start, blocks: day.blocks }; planForMe(k); P = { start: day.start, blocks: day.blocks.map(b => ({ ...b })) }; day.start = snap.start; day.blocks = snap.blocks; how = 'Not enough history yet, so from your routines'; }
-  const el = bigPage('Plan for me', name + ' \u00b7 ' + how);
+  if (k === planKey() && day.blocks.some(b => b.done)) {
+    // today: what you have done stays; the rest of the day comes from your usual, from now on
+    const nowM = planMin(k), doneB = day.blocks.filter(b => b.done); let at = toMins(P.start); const rest = [];
+    P.blocks.forEach(b => { const m = Number(b.mins) || 60; if (at >= nowM - 10 && b.label !== 'Free time') rest.push(b); at += m; });
+    const doneEnd = doneB.reduce((t, b) => t + (Number(b.mins) || 60), toMins(day.start));
+    P = { start: day.start, blocks: [...doneB.map(b => ({ ...b })), ...(nowM - doneEnd >= 15 ? [{ label: 'Free time', mins: Math.round((nowM - doneEnd) / 5) * 5 }] : []), ...rest] };
+    how += ', the rest of today';
+  }
+  const el = bigPage(k === planKey() ? 'Suggest my day' : 'Plan for me', name + ' \u00b7 ' + how);
   el.querySelector('.bpg-body').innerHTML = planDayRows(P.start, P.blocks) +
     (day.blocks.length ? '<p class="bpg-note">This replaces the ' + day.blocks.length + ' blocks there now. Undo works.</p>' : '') +
     '<div class="bpg-btns"><button type="button" class="wka-go bpg-use">Use this plan</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
   el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
   el.querySelector('.bpg-use').addEventListener('click', () => {
     const old = { start: day.start, blocks: day.blocks };
-    day.start = P.start; day.blocks = P.blocks.map(b => ({ label: b.label, mins: b.mins })); day.touched = true; day.noSuggest = true;
+    day.start = P.start; day.blocks = P.blocks.map(b => b.done ? b : ({ label: b.label, mins: b.mins })); day.touched = true; day.noSuggest = true;
     save(); el.remove(); const ps = document.getElementById('paksheet'); if (ps) ps.remove(); renderDay(); renderHabits(); window.scrollTo(0, 0);
     offerUndo('=Planned ' + name, () => { day.start = old.start; day.blocks = old.blocks; day.noSuggest = false; save(); renderDay(); });
   });
