@@ -5850,6 +5850,20 @@ html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
 #view-day #total .wk-sum { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; font: 500 14px "Inter", system-ui, sans-serif; color: var(--muted); background: color-mix(in srgb, var(--pink) 10%, var(--card)); border-radius: 999px; }
 #view-day #total .wk-sum b { color: var(--ink); font-weight: 700; }
 #view-day #total .wk-sum i { font-style: normal; }
+
+/* How long (add a block), cleaner: when as two slim choices, the length boxes, quick lengths as chips, Add at the bottom */
+.ab-when { display: flex; gap: 8px; margin-bottom: 14px; }
+.ab-when button { flex: 1; min-height: 0 !important; padding: 10px 12px !important; border-radius: 14px !important; text-align: left; }
+.ab-when button b { font-size: 17px !important; }
+.ab-when button small { font-size: 12px !important; }
+#addsheet .ls-list.ab-chips, .ab-chips { display: flex !important; flex-direction: row !important; align-items: center !important; flex-wrap: wrap; gap: 8px; margin: 12px 0 18px !important; border: 0 !important; }
+.ab-chips .ls-row { flex: 0 0 auto; display: inline-flex !important; align-items: center; gap: 6px; width: auto !important; min-height: 40px !important; padding: 0 16px !important; border: 1px solid var(--hair) !important; border-radius: 999px !important; background: var(--card) !important; }
+.ab-chips .ls-row b { font-size: 15px !important; }
+.ab-chips .ls-row i { font-style: normal; font-size: 11px; color: var(--pink); }
+.ab-chips .ls-row small { display: none !important; }
+.ab-chips .ls-row.on { border-color: var(--pink) !important; background: color-mix(in srgb, var(--pink) 14%, var(--card)) !important; }
+.wka .wk2-ends, .w3-sheet .wk2-ends { margin: 10px 0 0; font-size: 14px; color: var(--muted); }
+.w3-sheet .ab-add { margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -6127,7 +6141,7 @@ html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:49</footer>
+  <footer>Mr.O:10:54</footer>
 </div>
 
 <script>
@@ -9458,8 +9472,8 @@ function addBlockSheet(preset, insertAt) {
           pick.sug = sl && sl.i < day.blocks.length ? sl : null; if (pick.where === undefined) pick.where = pick.sug ? 'usual' : 'end';
           return pick.sug ? '<p class="ab-sub">When</p><div class="ab-when"><button type="button" data-where="usual"' + (pick.where === 'usual' ? ' class="on"' : '') + '><b>' + clock(pick.sug.at) + '</b><small>your usual time</small></button><button type="button" data-where="end"' + (pick.where === 'end' ? ' class="on"' : '') + '><b>' + clock(endOfDay) + '</b><small>at the end</small></button></div>' : ''; })() +
         '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b class="ab-st">' + clock(pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + '</b> \u00b7 ends at <b class="ab-end">' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + (usual || 60)) + '</b></p>' +
-        '<button type="button" class="wka-go ab-add">Add</button><p class="ab-sub">Quick lengths</p>' +
-        '<div class="ls-list">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + m) + '</small>' : '') + '</button>').join('') + '</div>';
+        '<div class="ls-list ab-chips">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + m) + '</small>' : '') + '</button>').join('') + '</div>' +
+        '<button type="button" class="wka-go ab-add">Add</button>';
     }
     html += '<button type="button" class="ls-cancel">Cancel</button></div>';
     el.innerHTML = html;
