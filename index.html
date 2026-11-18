@@ -6119,6 +6119,16 @@ html.kb-open .qn .ns-cancel { display: none; }
 #view-home#view-home#view-home .hm-now .hm-prog > span:not(.hm-bar) { display: none !important; }
 #view-home#view-home#view-home .hm-now .hm-bar { display: block !important; height: 4px !important; border-radius: 2px !important; background: color-mix(in srgb, var(--ink) 8%, transparent) !important; overflow: hidden; }
 #view-home#view-home#view-home .hm-now .hm-bar u { display: block; height: 100%; background: var(--pink) !important; border-radius: 2px; }
+
+/* the big 4: an icon badge in each area's colour; the name in its colour too */
+#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-ae { display: grid !important; place-items: center; position: static !important; transform: none !important; top: auto !important; left: auto !important; width: 38px !important; height: 38px !important; margin: 0 0 8px !important; border-radius: 12px !important; box-shadow: none !important; border: 0 !important; outline: 0 !important; font-size: 0 !important; color: var(--c) !important; background: color-mix(in srgb, var(--c) 16%, transparent) !important; }
+#view-home#view-home#view-home .hm-area .hm-ae svg { width: 22px; height: 22px; }
+#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-an { color: var(--c) !important; }
+#view-home#view-home#view-home .hm-area .hm-an::before { display: none !important; }
+#view-home#view-home#view-home .hm-area .hm-abar u { background: var(--c) !important; }
+/* TODAY: no blue line, just a quiet label */
+#view-home#view-home#view-home .hm-sec { color: var(--muted) !important; }
+#view-home#view-home#view-home .hm-sec::before, #view-home#view-home#view-home .hm-sec::after { display: none !important; }
 </style>
 </head>
 <body>
@@ -6400,7 +6410,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:15:39</footer>
+  <footer>Mr.O:15:43</footer>
 </div>
 
 <script>
@@ -15714,7 +15724,22 @@ function renderHomePulse() {
   const cheer = done === bs.length ? 'All done. Rest well.' : done === 0 ? 'Start small, the first one counts.' : done / bs.length >= .5 ? 'Over halfway, keep it up.' : 'Good start, keep going.';
   el.innerHTML = '<p>' + icon + ' <b>' + done + ' of ' + bs.length + '</b> done' + (wl ? ' \u00b7 <b>' + dur(wl) + '</b> of work left' : '') + '</p><i><u style="width:' + Math.round(tot ? dm / tot * 100 : 0) + '%"></u></i><small>' + cheer + '</small>';
 }
+// the big 4 get their own icons, in their own colour
+const AREA_ICON = {
+  health: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/><path d="M4 12h4l2-3 3 6 2-3h5"/>',
+  wealth: '<path d="M4 18l5-5 4 3 7-8"/><path d="M15 8h5v5"/>',
+  love: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  self: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M18 16l.8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8z"/>'
+};
+function homeAreaIcons() {
+  document.querySelectorAll('#view-home .hm-area[data-open]').forEach(a => {
+    const k = a.dataset.open, e = a.querySelector('.hm-ae'); if (!e || !AREA_ICON[k] || e.dataset.ic) return;
+    e.dataset.ic = '1';
+    e.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + AREA_ICON[k] + '</svg>';
+  });
+}
 function renderHome() {
+  setTimeout(() => { try { homeAreaIcons(); } catch {} }, 0);
   areaGoalsOpen = false;
   renderQuote();
   renderHomeNow();
