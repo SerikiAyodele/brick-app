@@ -5672,6 +5672,13 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day#view-day#view-day #block-list .line.plan-row > .pl-name { flex: 1 1 auto !important; min-width: 0 !important; width: auto !important; }
 /* plan: Week is hidden for now */
 #plan-seg { display: none !important; }
+
+.pak h2 { margin: 2px 0 16px; font-family: var(--serif, inherit); font-size: 26px; font-weight: 600; }
+.pak-b { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-top: 10px; padding: 16px 18px; text-align: left; font-family: var(--display); color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 18px; cursor: pointer; }
+.pak-b b { font-size: 18px; font-weight: 700; }
+.pak-b small { font-size: 14px; color: var(--muted); line-height: 1.4; }
+.pak-me { color: #fff; background: var(--ink); border-color: var(--ink); }
+.pak-me small { color: rgba(255,255,255,.75); }
 </style>
 </head>
 <body>
@@ -5947,7 +5954,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:06:55</footer>
+  <footer>Mr.O:07:04</footer>
 </div>
 
 <script>
@@ -8991,12 +8998,63 @@ function suggestRoutines(prevK, target) {
   A.sort((x, y) => { const f = b => /^focus|hardest/i.test(b.label) ? 9 : (order.indexOf(b.label.toLowerCase()) + 1 || 5); return f(x) - f(y); });
   return { am: A, pm: P, why: { am: A.map(b => b.why).filter(Boolean), pm: P.map(b => b.why).filter(Boolean).concat(note ? [note] : []) } };
 }
+/* plan for me: a whole day, wake to bed, from your routines, goal, work, gym day and sleep */
+function planForMe(k) {
+  const prevK = shiftKey(k, -1), prev = state.days[prevK], day = dayFor(k);
+  const round5 = m => Math.round(m / 5) * 5;
+  let wake = prev && prev.start ? toMins(prev.start) : 420; if (wake < 300 || wake > 600) wake = 420; wake = round5(wake);
+  const bed = (wake - 480 + 1440) % 1440;                       // 8 hours before you wake
+  const S = suggestRoutines(prevK, k), out = [], push = (label, mins) => { if (mins >= 5) out.push({ label, mins: round5(mins) }); };
+  let at = wake;
+  const add = (label, mins) => { push(label, mins); at += round5(mins); };
+  // morning routine
+  const am = S.am.filter(b => !/^focus|hardest/i.test(b.label)); (am.length ? am : [{ label: 'Walk', mins: 25 }, { label: 'Shower', mins: 20 }, { label: 'Breakfast', mins: 20 }]).forEach(b => add(b.label, b.mins));
+  // your goal first, then work in 90 minute blocks with breaks, lunch around 1pm, work again to 5pm
+  const g = day.goal || (prev && prev.goal); const gt = g && (typeof g === 'string' ? g : g.text);
+  add(gt ? 'Focus: ' + gt : 'Deep work', 90);
+  while (at + 90 <= 780) { add('Break', 15); add('Work', Math.min(90, 780 - at)); }
+  if (at < 750) add('Work', 780 - at);
+  add('Lunch', 45);
+  while (at + 30 <= 1020) { add('Work', Math.min(90, 1020 - at)); if (at + 45 <= 1020) add('Break', 15); }
+  // gym if your plan has a session that day, else a walk
+  const w = (() => { try { return routine().workouts.find(x => (x.days || []).includes(fromKey(k).getDay())); } catch { return null; } })();
+  const commute = prev && prev.blocks && prev.blocks.some(b => /gym commute/i.test(b.label || ''));
+  if (w) { if (commute) add('Gym commute', 40); add(cap(w.title), 75); if (commute) add('Home commute', 35); } else add('Walk', 30);
+  add('Dinner', 45);
+  // night routine, ending at bedtime; free time in between
+  const pm = S.pm.length ? S.pm : [{ label: 'Screens off', mins: 5 }, { label: 'Warm shower', mins: 20 }, { label: 'Read a paper book', mins: 20 }];
+  const pmMins = pm.reduce((t, b) => t + round5(b.mins), 0), bedAbs = bed < wake ? bed + 1440 : bed;
+  if (bedAbs - pmMins - at >= 15) add('Free time', bedAbs - pmMins - at);
+  pm.forEach(b => add(b.label, b.mins));
+  push('Sleep', (wake + 1440) - at);
+  for (let i = out.length - 1; i > 0; i--) if (out[i].label === out[i - 1].label) { out[i - 1].mins += out[i].mins; out.splice(i, 1); }   // two Work blocks in a row become one
+  const old = { start: day.start, blocks: day.blocks };
+  day.start = hhmm(wake); day.blocks = out.map(b => ({ label: b.label, mins: b.mins })); day.touched = true;
+  return old;
+}
+function planAskSheet(k) {
+  const day = dayFor(k);
+  const el = document.createElement('div'); el.id = 'paksheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet pak" role="dialog" aria-modal="true" aria-label="Plan tomorrow"><span class="w3-grab"></span>' +
+    '<p class="wk2-step">' + cap(FULL[fromKey(k).getDay()]) + '</p><h2>How do you want to plan it?</h2>' +
+    '<button type="button" class="pak-b pak-me"><b>Plan for me</b><small>A full day, wake to bed, from how yesterday went' + (day.blocks.length ? '. It replaces what is there now.' : '.') + '</small></button>' +
+    '<button type="button" class="pak-b pak-self"><b>I\u2019ll plan it myself</b><small>With suggestions for the morning and night.</small></button></div>';
+  document.body.appendChild(el);
+  const close = () => el.remove();
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('.pak-self').addEventListener('click', close);
+  el.querySelector('.pak-me').addEventListener('click', () => {
+    const old = planForMe(k); day.noSuggest = true; save(); close(); renderDay(); renderHabits(); window.scrollTo(0, 0);
+    offerUndo('the plan for ' + cap(FULL[fromKey(k).getDay()]), () => { day.start = old.start; day.blocks = old.blocks; day.noSuggest = false; save(); renderDay(); });
+  });
+}
 function renderTomorrowSuggest() {
   let slot = document.getElementById('tmsug-slot');
   if (!slot) { const c = document.getElementById('carry-slot'); if (!c) return; slot = document.createElement('div'); slot.id = 'tmsug-slot'; c.parentNode.insertBefore(slot, c); }
   slot.innerHTML = '';
   if (viewDay <= planKey()) return;
   const day = dayFor(viewDay);
+  if (!day.askedPlan && viewDay === shiftKey(planKey(), 1) && !document.getElementById('paksheet')) { day.askedPlan = true; save(); setTimeout(() => planAskSheet(viewDay), 250); }
   if (day.noSuggest) return;
   const S = suggestRoutines(shiftKey(viewDay, -1), viewDay);
   const has = lab => day.blocks.some(b => (b.label || '').toLowerCase() === lab.toLowerCase());
