@@ -6068,6 +6068,25 @@ html.kb-open .qn .ns-cancel { display: none; }
 #view-day #block-list .line .ml { display: block; margin-top: 2px; padding: 0; font: 500 12px "Inter", system-ui, sans-serif; text-align: left; background: none; border: 0; cursor: pointer; }
 #view-day #block-list .line .ml.ate { color: #5aa86a; }
 #view-day #block-list .line .ml.miss { color: #d9628a; }
+
+/* meal sub item under its block */
+#view-day #block-list .msub { display: flex; align-items: center; gap: 10px; width: calc(100% - 80px); margin: -4px 0 8px 80px; padding: 8px 12px; text-align: left; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; cursor: pointer; }
+#view-day #block-list .msub .ms-c { position: relative; flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+#view-day #block-list .msub .ms-c i { font-style: normal; font-size: 16px; }
+#view-day #block-list .msub .ms-c b { position: absolute; right: -3px; bottom: -3px; display: grid; place-items: center; width: 15px; height: 15px; font-size: 9px; color: #fff; background: #5aa86a; border: 2px solid var(--card); border-radius: 50%; }
+#view-day #block-list .msub .ms-t { flex: 1; min-width: 0; }
+#view-day #block-list .msub strong { display: block; font: 600 14px "Inter", system-ui, sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#view-day #block-list .msub small { display: block; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+#view-day #block-list .msub em { font-style: normal; font: 600 12px "Inter", system-ui, sans-serif; padding: 6px 12px; border-radius: 14px; color: var(--paper); background: var(--ink); }
+#view-day #block-list .msub.ms-ate .ms-c { background: color-mix(in srgb, #5aa86a 18%, transparent); }
+#view-day #block-list .msub.ms-ate small { color: #5aa86a; }
+#view-day #block-list .msub.ms-now { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 8%, var(--card)); }
+#view-day #block-list .msub.ms-now .ms-c::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--pink); animation: fuping 2.4s ease-out infinite; }
+#view-day #block-list .msub.ms-miss { border-color: color-mix(in srgb, #f29ab5 55%, var(--hair)); background: color-mix(in srgb, #f29ab5 10%, var(--card)); }
+#view-day #block-list .msub.ms-miss .ms-c { background: color-mix(in srgb, #f29ab5 22%, transparent); }
+#view-day #block-list .msub.ms-miss .ms-c::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px dashed #f29ab5; animation: fuspin 12s linear infinite; }
+#view-day #block-list .msub.ms-miss small { color: #d9628a; }
+#view-day #block-list .msub.ms-miss em { background: #d9628a; color: #fff; }
 </style>
 </head>
 <body>
@@ -6349,7 +6368,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:13:02</footer>
+  <footer>Mr.O:13:05</footer>
 </div>
 
 <script>
@@ -15079,13 +15098,17 @@ function renderFuel() {
   day.blocks.forEach((b, i) => { const len = Number(b.mins) || 60, from = at; at += len;
     const l = (b.label || '').toLowerCase(), k = b.meal && FUEL_WIN[b.meal] ? b.meal : /breakfast/.test(l) ? 'b' : /lunch/.test(l) ? 'l' : /dinner|supper/.test(l) ? 'd' : null;
     if (!k) return;
-    const row = document.querySelector('#block-list .line[data-i="' + i + '"] .mid'); if (!row || row.querySelector('.ml')) return;
-    const got = M[k], last = got[got.length - 1], s2 = document.createElement('button'); s2.type = 'button';
-    if (last) { s2.className = 'ml ate'; s2.textContent = '\u2713 ' + String(last.what).slice(0, 24) + ' \u00b7 ' + clockOf(last.at); }
-    else if (nm >= from + len) { s2.className = 'ml miss'; s2.textContent = 'not eaten yet, log it'; }
-    else return;
-    s2.addEventListener('click', e => { e.stopPropagation(); foodSheet(); });
-    row.appendChild(s2);
+    const line = document.querySelector('#block-list .line[data-i="' + i + '"]'); if (!line || (line.nextElementSibling && line.nextElementSibling.classList.contains('msub'))) return;
+    // a sub item under the meal block: eaten (ticked circle) or not yet (soft pink dashed ring), or time to eat (a glow)
+    const got = M[k], last = got[got.length - 1];
+    const st = last ? 'ate' : nm >= from + len ? 'miss' : nm >= from ? 'now' : null;
+    if (!st || b.done && !last && st !== 'miss') return;
+    const sub = document.createElement('button'); sub.type = 'button'; sub.className = 'msub ms-' + st;
+    sub.innerHTML = '<span class="ms-c"><i>' + (last ? '\u{1F37D}\uFE0F' : FUEL_WIN[k][3]) + '</i>' + (st === 'ate' ? '<b>\u2713</b>' : '') + '</span><span class="ms-t"><strong></strong><small></small></span>' + (st === 'ate' ? '' : '<em>Log</em>');
+    sub.querySelector('strong').textContent = last ? String(last.what).slice(0, 28) : st === 'now' ? 'Time to eat' : 'Not eaten yet';
+    sub.querySelector('small').textContent = last ? 'eaten at ' + clockOf(last.at) : st === 'now' ? 'log it when you eat' : 'eat something?';
+    sub.addEventListener('click', e => { e.stopPropagation(); foodSheet(); });
+    line.after(sub);
   });
 }
 setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); } catch {} }, 60000);
