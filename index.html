@@ -6011,6 +6011,33 @@ html.kb-open .qn .ns-cancel { display: none; }
 .ch-ops button { min-height: 36px; padding: 0 16px; font: 600 14px "Inter", system-ui, sans-serif; border-radius: 18px; cursor: pointer; }
 .ch-ops .ch-apply { color: var(--paper); background: var(--ink); border: 0; }
 .ch-ops .ch-skip { color: var(--muted); background: none; border: 1px solid var(--hair); }
+
+/* chat plan card: edit, preview, approve or deny */
+.ch-ops { max-width: 100% !important; width: 100%; }
+.ch-ops.done p { margin: 0; color: var(--muted); }
+.ch-ops .po-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.ch-ops .po { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 8px 10px; border: 1px solid var(--hair); border-radius: 12px; font-size: 14px; }
+.ch-ops .po.off span { text-decoration: line-through; color: var(--muted); }
+.ch-ops .po input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--pink); }
+.ch-ops .po span { flex: 1 1 140px; min-width: 0; }
+.ch-ops .po-l { flex: 1 1 120px; min-width: 0; min-height: 34px; padding: 0 10px; font: 500 16px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 1px solid var(--hair); border-radius: 10px; }
+.ch-ops .po-m { width: 64px; min-height: 34px; padding: 0 8px; font: 600 16px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 1px solid var(--hair); border-radius: 10px; }
+.ch-ops .po small { font-size: 12px; color: var(--muted); }
+.ch-ops .po-day { list-style: none; margin: 0 0 12px; padding: 0; border: 1px solid var(--hair); border-radius: 12px; overflow: hidden; }
+.ch-ops .po-day li { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 10px; border-bottom: 1px solid var(--hair); font-size: 13px; }
+.ch-ops .po-day li:last-child { border-bottom: 0; }
+.ch-ops .po-day span { width: 62px; color: var(--muted); font-size: 12px; }
+.ch-ops .po-day i { font-style: normal; }
+.ch-ops .po-day b { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-ops .po-day b small { font-weight: 500; color: var(--pink); }
+.ch-ops .po-day em { font-style: normal; font-size: 12px; color: var(--muted); }
+.ch-ops .po-day li.dn { opacity: .45; }
+.ch-ops .po-day li.nw { background: color-mix(in srgb, #5aa86a 16%, transparent); }
+.ch-ops .po-day li.nw em, .ch-ops .po-day li.nw b { color: #5aa86a; }
+.ch-ops .po-day li.ch { background: color-mix(in srgb, var(--pink) 12%, transparent); }
+.ch-ops .po-day li.rm b { text-decoration: line-through; color: var(--muted); }
+.ch-ops .po-day li.rm em { color: #d9628a; }
+.ch-ops .po-btn { display: flex; gap: 8px; }
 </style>
 </head>
 <body>
@@ -6291,7 +6318,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:48</footer>
+  <footer>Mr.O:12:54</footer>
 </div>
 
 <script>
@@ -17615,7 +17642,45 @@ function planOpText(o) {
     default: return 'Unknown change';
   }
 }
+function planOpsResult(ops) {
+  // the day as it would be after these changes; nothing is saved. each block knows if it is new, changed or removed
+  const src = dayFor(planKey()), day = { start: src.start, blocks: src.blocks.map(b => ({ ...b, _src: b })) }, gone = [];
+  const ref = n => day.blocks[(Number(n) || 0) - 1];
+  const R = ops.filter(o => !o.off).map(o => ({ o, b: o.n ? ref(o.n) : null }));
+  R.forEach(({ o, b }) => { if (!b) return;
+    if (o.op === 'length') { b.mins = Math.max(5, Math.min(720, Number(o.mins) || b.mins)); b._chg = true; }
+    if (o.op === 'rename' && o.label) { b.label = String(o.label).slice(0, 60); b._chg = true; }
+    if (o.op === 'title') { if (o.title) b.title = String(o.title).slice(0, 60); else delete b.title; b._chg = true; } });
+  R.forEach(({ o }) => { if (o.op === 'start' && /^\d{1,2}:\d{2}$/.test(o.at || '')) day.start = hhmm(toMins(o.at)); });
+  R.forEach(({ o, b }) => { if (o.op === 'remove' && b) { const i = day.blocks.indexOf(b); if (i > -1) { day.blocks.splice(i, 1); gone.push(b); } } });
+  R.forEach(({ o, b }) => { if (o.op === 'move' && b) { const i = day.blocks.indexOf(b); if (i > -1) { day.blocks.splice(i, 1); day.blocks.splice(Math.max(0, Math.min(day.blocks.length, (Number(o.to) || 1) - 1)), 0, b); b._chg = true; } } });
+  R.forEach(({ o }) => { if (o.op !== 'add' || !o.label) return;
+    const nb = { label: String(o.label).slice(0, 60), mins: Math.max(5, Math.min(720, Number(o.mins) || 30)), done: false, _new: true };
+    if (o.at && /^\d{1,2}:\d{2}$/.test(o.at)) day.blocks.splice(slotFor(day.blocks, day.start, toMins(o.at)).i, 0, nb); else day.blocks.push(nb); });
+  return { start: day.start, blocks: day.blocks, gone };
+}
 function applyPlanOps(ops) {
+  const day = dayFor(planKey()), before = { start: day.start, blocks: day.blocks.map(b => ({ ...b })) };
+  const res = planOpsResult(ops);
+  day.start = res.start;
+  day.blocks = res.blocks.map(b => { const o = b._src ? Object.assign(b._src, b) : b; delete o._src; delete o._new; delete o._chg; return o; });
+  day.touched = true; save(); renderDay(); try { renderHome(); } catch {}
+  offerUndo('=Plan changed', () => { day.start = before.start; day.blocks = before.blocks; save(); renderDay(); });
+}
+function planOpsPreview(m, mi) {
+  // the card in chat: each change can be switched off or edited, and the day below shows the result
+  const res = planOpsResult(m.ops);
+  let at = toMins(res.start);
+  const rows = res.blocks.map(b => { const mins = Number(b.mins) || 60, f = at; at += mins;
+    return '<li class="' + (b._new ? 'nw' : b._chg ? 'ch' : '') + (b.done ? ' dn' : '') + '"><span>' + clock(f) + '</span><i>' + blockEmoji(b) + '</i><b>' + esc(b.label || 'Block') + (b.title ? ' <small>' + esc(b.title) + '</small>' : '') + '</b><em>' + minsLabel(mins) + '</em></li>'; }).join('') +
+    res.gone.map(b => '<li class="rm"><span></span><i>' + blockEmoji(b) + '</i><b>' + esc(b.label || 'Block') + '</b><em>removed</em></li>').join('');
+  const ed = m.ops.map((o, oi) => '<label class="po' + (o.off ? ' off' : '') + '"><input type="checkbox" data-pt="' + mi + ':' + oi + '"' + (o.off ? '' : ' checked') + '><span>' + esc(planOpText(o)) + '</span>' +
+    (o.op === 'add' ? '<input class="po-l" data-pl="' + mi + ':' + oi + '" value="' + esc(o.label || '') + '" aria-label="name">' : '') +
+    (o.op === 'add' || o.op === 'length' ? '<input class="po-m" type="number" inputmode="numeric" data-pm="' + mi + ':' + oi + '" value="' + (Number(o.mins) || 30) + '" aria-label="minutes"><small>min</small>' : '') + '</label>').join('');
+  return '<div class="ch-ops" data-ci="' + mi + '"><p>Change your plan?</p><div class="po-list">' + ed + '</div><ol class="po-day">' + rows + '</ol>' +
+    '<div class="po-btn"><button type="button" class="ch-apply" data-ap="' + mi + '">Approve</button><button type="button" class="ch-skip" data-sk="' + mi + '">Deny</button></div></div>';
+}
+function _oldApplyPlanOps(ops) {
   const day = dayFor(planKey()), before = { start: day.start, blocks: day.blocks.map(b => ({ ...b })) };
   const ref = n => day.blocks[(Number(n) || 0) - 1];
   const R = ops.map(o => ({ o, b: o.n ? ref(o.n) : null }));
@@ -17661,14 +17726,19 @@ function renderChat() {
   if (!chatMsgs.length) h = '<div class="ch-empty">Ask Claude anything. It can see your goals and today\'s plan, so you can ask things like <b>what should I focus on today?</b></div>';
   chatMsgs.forEach((m, mi) => {
     h += '<div class="ch-msg ' + (m.role === 'user' ? 'me' : 'ai') + '">' + esc(m.content) + '</div>';
-    if (m.ops) h += '<div class="ch-ops"><p>' + (m.opsDone === 'applied' ? 'Applied to your plan \u2713' : m.opsDone === 'skipped' ? 'Not applied' : 'Change your plan?') + '</p><ul>' + m.ops.map(o => '<li>' + esc(planOpText(o)) + '</li>').join('') + '</ul>' +
-      (m.opsDone ? '' : '<div><button type="button" class="ch-apply" data-ap="' + mi + '">Apply</button><button type="button" class="ch-skip" data-sk="' + mi + '">Not now</button></div>') + '</div>';
+    if (m.ops) h += m.opsDone ? '<div class="ch-ops done"><p>' + (m.opsDone === 'applied' ? 'Approved, your plan changed \u2713' : 'Denied, nothing changed') + '</p></div>' : planOpsPreview(m, mi);
   });
   if (chatBusy) h += '<div class="ch-msg ai wait">Thinking\u2026</div>';
   if (chatErr) h += '<div class="ch-msg err">' + esc(chatErr) + '</div>';
   log.innerHTML = h;
   log.querySelectorAll('[data-ap]').forEach(b => b.addEventListener('click', () => { const m = chatMsgs[Number(b.dataset.ap)]; if (!m || !m.ops) return; applyPlanOps(m.ops); m.opsDone = 'applied'; chatSave(); renderChat(); }));
   log.querySelectorAll('[data-sk]').forEach(b => b.addEventListener('click', () => { const m = chatMsgs[Number(b.dataset.sk)]; if (!m) return; m.opsDone = 'skipped'; chatSave(); renderChat(); }));
+  // edit a suggested change: switch it off, rename, or change minutes. the day preview updates
+  const opAt = v => { const [a, c] = v.split(':').map(Number); return chatMsgs[a] && chatMsgs[a].ops && chatMsgs[a].ops[c]; };
+  const repaint = el => { const card = el.closest('.ch-ops'), mi = Number(card.dataset.ci), tmp = document.createElement('div'); tmp.innerHTML = planOpsPreview(chatMsgs[mi], mi); card.querySelector('.po-day').replaceWith(tmp.querySelector('.po-day')); chatSave(); };
+  log.querySelectorAll('[data-pt]').forEach(x => x.addEventListener('change', () => { const o = opAt(x.dataset.pt); if (!o) return; if (x.checked) delete o.off; else o.off = true; x.closest('.po').classList.toggle('off', !x.checked); repaint(x); }));
+  log.querySelectorAll('[data-pl]').forEach(x => x.addEventListener('input', () => { const o = opAt(x.dataset.pl); if (!o) return; o.label = x.value; repaint(x); }));
+  log.querySelectorAll('[data-pm]').forEach(x => x.addEventListener('input', () => { const o = opAt(x.dataset.pm); if (!o) return; const v = parseInt(x.value, 10); if (v > 0) { o.mins = v; repaint(x); } }));
   document.getElementById('chat-clear').hidden = !chatMsgs.length || chatBusy;
   chatSendState();
 }
