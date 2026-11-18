@@ -5792,6 +5792,25 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
 #view-day #block-list .line .btitle { padding: 0; background: none; border: 0; cursor: pointer; text-align: left; }
 #view-day #block-list .line .btitle.empty { font-size: 13px; color: var(--muted); }
+
+/* Plan: no Suggest, no Reorder (hold and drag), no "planned" line */
+#view-day#view-day #sug-day { display: none !important; }
+#view-day#view-day #total:empty { display: none !important; }
+#view-day#view-day .viewtools:empty { display: none !important; }
+/* work title: same line as the name */
+#view-day #block-list .line .what .btitle { margin-left: 6px; font: 500 14px "Inter", system-ui, sans-serif; color: var(--pink); }
+.ns-ttl { margin-top: 8px; }
+/* today's one goal, v2: a soft card, the goal big, the tick on the right */
+#view-day#view-day#view-day .dg-card.dg2 { display: flex; align-items: center; gap: 14px; margin: 4px 0 16px !important; padding: 16px 16px !important; border: 1px solid color-mix(in srgb, var(--pink) 28%, var(--hair)) !important; border-radius: 20px !important;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 14%, var(--card)), color-mix(in srgb, var(--gold-1) 6%, var(--card))) !important; box-shadow: 0 8px 20px -14px color-mix(in srgb, var(--pink) 60%, transparent) !important; }
+#view-day#view-day#view-day .dg-card.dg2 .dg-ico { flex: none; display: grid; place-items: center; width: 44px; height: 44px; font-size: 24px !important; line-height: 1 !important; border-radius: 14px; background: var(--card); }
+#view-day .dg-card.dg2 > div { flex: 1; min-width: 0; }
+#view-day .dg-card.dg2 > div > span { display: block; font: 600 11px "Inter", system-ui, sans-serif !important; letter-spacing: 1.4px; text-transform: uppercase; color: var(--pink) !important; }
+#view-day .dg-card.dg2 b { display: block; margin-top: 3px; font: 700 18px "Inter", system-ui, sans-serif !important; line-height: 1.3; color: var(--ink); }
+#view-day .dg-card.dg2 .dg-edit { margin-top: 4px; padding: 0; font: 500 12px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; text-decoration: underline; cursor: pointer; }
+#view-day#view-day .dg-card.dg2 .dg-tick { flex: none; width: 36px !important; height: 36px !important; margin: 0 !important; display: grid; place-items: center; font-size: 16px; color: transparent; background: var(--card); border: 2px solid var(--pink) !important; border-radius: 50%; cursor: pointer; }
+#view-day#view-day .dg-card.dg2.done .dg-tick { color: #fff; background: var(--pink); }
+#view-day .dg-card.dg2.done b { text-decoration: none; color: var(--ink); opacity: .7; }
 </style>
 </head>
 <body>
@@ -6069,7 +6088,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:06</footer>
+  <footer>Mr.O:10:12</footer>
 </div>
 
 <script>
@@ -7168,6 +7187,15 @@ function openNameSheet(b) {
     }
     if (step !== 'rest' && step !== 'gym') {
       inp.value = b.label || '';
+      // a work block: its optional title, right here
+      if (!wasEmpty && outcomeField(b.label) === 'goals') {
+        const tw = document.createElement('div'); tw.className = 'ns-type ns-ttl';
+        tw.innerHTML = '<input type="text" class="ns-in ns-title" maxlength="60" placeholder="Title (optional), e.g. Zart campaign" aria-label="title">';
+        const ti = tw.querySelector('input'); ti.value = b.title || '';
+        ti.addEventListener('input', () => { const v = ti.value.trim(); if (v) b.title = v; else delete b.title; save(); });
+        ti.addEventListener('keydown', e => { if (e.key === 'Enter') { el.remove(); renderDay(); } });
+        el.querySelector('.ns-type').after(tw);
+      }
       const go = () => { const v = inp.value.trim(); if (v) set(v); else close(); };
       el.querySelector('.ns-ok').addEventListener('click', go);
       inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
@@ -8483,10 +8511,11 @@ function renderDayGoal() {
   if (box.contains(document.activeElement) && document.activeElement.tagName === 'INPUT') return;   // you are typing
   box.innerHTML = '';
   if (day.goal && !dayGoalEditing) {
-    box.innerHTML = '<div class="dg-card' + (day.goalDone ? ' done' : '') + '"><button type="button" class="dg-tick" aria-label="' + (day.goalDone ? 'not done yet' : 'done') + '">\u2713</button>' +
-      '<div><span>' + (isToday ? 'Today\u2019s one goal' : viewDay === shiftKey(planKey(), 1) ? 'Tomorrow\u2019s one goal' : 'One goal') + '</span><b></b></div><button type="button" class="dg-edit">Edit</button></div>';
+    box.innerHTML = '<div class="dg-card dg2' + (day.goalDone ? ' done' : '') + '"><span class="dg-ico">' + (day.goalDone ? '\u{1F3C6}' : '\u{1F3AF}') + '</span>' +
+      '<div><span>' + (day.goalDone ? 'Done. Well played' : isToday ? 'Today\u2019s one goal' : viewDay === shiftKey(planKey(), 1) ? 'Tomorrow\u2019s one goal' : 'One goal') + '</span><b></b><button type="button" class="dg-edit">Change</button></div>' +
+      '<button type="button" class="dg-tick" aria-label="' + (day.goalDone ? 'not done yet' : 'done') + '">\u2713</button></div>';
     box.querySelector('b').textContent = day.goal;
-    box.querySelector('.dg-tick').addEventListener('click', () => { day.goalDone = !day.goalDone; save(); renderDayGoal(); });
+    box.querySelector('.dg-tick').addEventListener('click', e => { const r0 = e.currentTarget.getBoundingClientRect(); day.goalDone = !day.goalDone; save(); renderDayGoal(); if (day.goalDone && typeof tickBurst === 'function') tickBurst(r0); });
     box.querySelector('.dg-edit').addEventListener('click', () => { dayGoalEditing = true; renderDayGoal(); });
     return;
   }
@@ -8765,14 +8794,7 @@ function renderDay() {
     what.addEventListener('click', () => openNameSheet(b));
     if (focusNew === i) { focusNew = null; setTimeout(() => openNameSheet(b), 60); }    // a new block asks straight away
     mid.appendChild(what);
-    if ((b.title || '').trim() || (!b.done && outcomeField(b.label) === 'goals')) {
-      // work blocks: the title shows here; tap it (or + title) to set or change it
-      const tt = document.createElement('button'); tt.type = 'button';
-      tt.className = 'btitle' + ((b.title || '').trim() ? '' : ' empty');
-      tt.textContent = (b.title || '').trim() || '+ title';
-      tt.addEventListener('click', e => { e.stopPropagation(); openListSheet(b, 'goals', from); setTimeout(() => { const i = document.querySelector('#listsheet .ls-title input'); if (i) i.focus(); }, 80); });
-      mid.appendChild(tt);
-    }
+    if ((b.title || '').trim()) { const tt = document.createElement('span'); tt.className = 'btitle'; tt.textContent = '\u00b7 ' + b.title.trim(); what.appendChild(tt); }   // work title, on the same line
 
     if (h) {
       const isa = document.createElement('span');
@@ -8967,7 +8989,7 @@ function renderDay() {
     });
 
     arr.textContent = 'Reorder';      // always a way in: reorder, then Finish plan
-    tools.append(arr);
+    // no Reorder button: hold a block and drag it to move it
     // alarms: a web app can't set iPhone alarms, so hand the times to a Shortcut that can
     const ups = upcomingStarts(day);
     if (viewDay === planKey() && ups.length) {
@@ -8986,7 +9008,7 @@ function renderDay() {
 
   const mins = at - toMins(day.start);
   const total = document.getElementById('total');
-  total.textContent = dur(mins) + ' planned · ends ' + clock(at);
+  total.textContent = '';   // only gone and left are shown (the line below)
 
   // where you are inside the plan, right now
   const old = document.getElementById('clockline');
