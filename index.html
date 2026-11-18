@@ -5773,7 +5773,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
 /* end times everywhere: the list shows start to end, the calendar shows it even on short blocks */
 #view-day#view-day#view-day #block-list .line .at .endat { display: inline !important; font: inherit !important; color: inherit !important; margin: 0 !important; padding: 0 !important; }
-#view-day#view-day#view-day#view-day #block-list .line .at .endat::before { content: "\2013" !important; display: inline !important; position: static !important; width: auto !important; height: auto !important; margin: 0 5px !important; background: none !important; border: 0 !important; color: inherit !important; }
+#view-day#view-day#view-day#view-day #block-list .line .at .endat::before { content: "to" !important; display: inline !important; position: static !important; width: auto !important; height: auto !important; margin: 0 5px !important; background: none !important; border: 0 !important; color: inherit !important; }
 #day-cal .dc-ev.small small { display: block !important; }
 #day-cal .dc-ev.small .dc-body b { font-size: 14px; }
 #day-cal .dc-ev.small .dc-body small { margin-top: 0; font-size: 12px; }
@@ -6127,7 +6127,7 @@ html.kb-open .w3 { position: fixed; top: 0; height: 100%; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:39</footer>
+  <footer>Mr.O:10:49</footer>
 </div>
 
 <script>
@@ -14693,7 +14693,7 @@ function renderDayCal() {
     floor = top + ht + 6;
     h += '<div class="dc-ev' + sz + (w.b.done ? ' done' : '') + (live ? ' live' : '') + '" style="top:' + top + 'px;height:' + ht + 'px;--ec:' + calColor(w.b) + '" data-ci="' + w.i + '">' +
       '<button type="button" class="dc-tick" data-ct="' + w.i + '" aria-label="' + (w.b.done ? 'not done' : 'done') + '">\u2713</button>' +
-      '<button type="button" class="dc-body" data-co="' + w.i + '"><b>' + blockEmoji(w.b) + ' ' + esc(w.b.label || 'Block') + ((w.b.title || '').trim() ? ' <i class="dc-title">\u00b7 ' + esc(w.b.title.trim()) + '</i>' : '') + '</b><small>' + clock(w.from) + ' \u2013 ' + clock(w.to) + '</small></button></div>';
+      '<button type="button" class="dc-body" data-co="' + w.i + '"><b>' + blockEmoji(w.b) + ' ' + esc(w.b.label || 'Block') + ((w.b.title || '').trim() ? ' <i class="dc-title">\u00b7 ' + esc(w.b.title.trim()) + '</i>' : '') + '</b><small>' + clock(w.from) + ' to ' + clock(w.to) + '</small></button></div>';
   });
   h = h.replace(/class="dc-grid" style="height:(\d+)px"/, (m, v) => 'class="dc-grid" style="height:' + Math.max(Number(v), floor) + 'px"');
   if (isToday && nowM >= h0 * 60 && nowM <= h1 * 60) h += '<div class="dc-now" style="top:' + y(nowM) + 'px"></div>';
