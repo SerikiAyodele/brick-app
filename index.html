@@ -5912,6 +5912,18 @@ html.kb-open .qn .ns-cancel { display: none; }
 .cut .cut-r em { font-style: normal; font: 600 13px "Inter", system-ui, sans-serif; color: #d9628a; }
 
 #dump-slot .bd-why { display: block; margin-top: 2px; font: 400 12px "Inter", system-ui, sans-serif; color: #d9628a; }
+
+/* work tasks sheet: each task a card (Task 1, Task 2), its steps inside, + second task as a dashed card */
+#listsheet .goals:not(.agenda) { counter-reset: wt; }
+#listsheet .goals:not(.agenda) > .goal { counter-increment: wt; position: relative; display: flex; align-items: center; gap: 12px; margin: 12px 0 0; padding: 26px 14px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 16px; }
+#listsheet .goals:not(.agenda) > .goal::before { content: "Task " counter(wt); position: absolute; left: 14px; top: 8px; font: 600 10px "Inter", system-ui, sans-serif; letter-spacing: 1.3px; text-transform: uppercase; color: var(--pink); }
+#listsheet .goals:not(.agenda) > .goal:has(+ .ag-todos) { border-bottom: 0; border-radius: 16px 16px 0 0; padding-bottom: 6px; }
+#listsheet .goals:not(.agenda) > .goal + .ag-todos { margin: 0; padding: 0 14px 12px 50px; background: var(--card); border: 1px solid var(--hair); border-top: 0; border-radius: 0 0 16px 16px; }
+#listsheet .goals:not(.agenda) .gview { font: 600 17px "Inter", system-ui, sans-serif; }
+#listsheet .goals:not(.agenda) .ag-todos .gview { font: 400 15px "Inter", system-ui, sans-serif; }
+#listsheet .goals:not(.agenda) .ag-more { margin-top: 4px; font-size: 13px; color: var(--muted); }
+#listsheet .goals:not(.agenda) > .gmore { display: block; width: 100%; margin: 12px 0 0; min-height: 52px; padding: 0 14px; text-align: left; font: 500 15px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 1.5px dashed var(--hair); border-radius: 16px; }
+#listsheet .goals:not(.agenda) > .goal .gtick { flex: none; }
 </style>
 </head>
 <body>
@@ -6192,7 +6204,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:11:45</footer>
+  <footer>Mr.O:11:52</footer>
 </div>
 
 <script>
@@ -6771,7 +6783,7 @@ function paintListSheet() {
   el.id = 'listsheet';
   el.className = 'w3' + (old ? ' still' : '');
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls-sheet" role="dialog" aria-modal="true">' +
-    '<span class="w3-grab"></span><div class="ls-head"><div><small>' + (field === 'agenda' ? 'Outcome' : 'Tasks') + '</small><h2></h2></div>' +
+    '<span class="w3-grab"></span><div class="ls-head"><div><small>' + (field === 'agenda' ? 'Outcome' : 'Tasks \u00b7 2 max') + '</small><h2></h2></div>' +
     '<button type="button" class="ls-x" aria-label="close">\u00d7</button></div><div class="ls-body"></div>' +
     '<button type="button" class="lf-btn main ls-done">Done</button></div>';
   el.querySelector('h2').textContent = b.label || 'block';
