@@ -5881,6 +5881,13 @@ html.kb-open .qn .ns-cancel { display: none; }
 .bo .bo-list b { flex: 1; min-width: 0; font: 600 15px "Inter", system-ui, sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bo .bo-list small { font-weight: 500; color: var(--pink); }
 .bo .bo-note { margin: 10px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+
+/* When: choose a time (a time wheel), at the end (default), or your usual */
+.ab-when .ab-pick { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border: 1px solid var(--hair); border-radius: 14px; background: var(--card); cursor: pointer; }
+.ab-when .ab-pick small { font-size: 12px; color: var(--muted); }
+.ab-when .ab-pick input { width: 100%; min-height: 28px; padding: 0; font: 600 17px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 0; }
+.ab-when .ab-pick.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 12%, var(--card)); }
+.ab-when button small { display: block; }
 </style>
 </head>
 <body>
@@ -6158,7 +6165,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:11:12</footer>
+  <footer>Mr.O:11:14</footer>
 </div>
 
 <script>
@@ -9437,6 +9444,8 @@ function addBlockSheet(preset, insertAt) {
   const mine = usualLabels(2).filter(x => !common.some(c => c[1].toLowerCase() === x.t.toLowerCase()) && !goals.some(g => g.t.toLowerCase() === x.t.toLowerCase()));
   let pick = preset ? { label: preset } : null;
   const close = () => el.remove();
+  // where the new block goes: a time you choose, the end of the day (default), or your usual time
+  const abStart = () => pick.where === 'usual' && pick.sug ? pick.sug.at : pick.where === 'pick' && Number.isFinite(pick.at) ? slotFor(day.blocks, day.start, pick.at).at : endOfDay;
   const add = mins => {
     const b = { label: pick.label, mins, done: false };
     if (pick.step) b.step = pick.step;
@@ -9446,7 +9455,7 @@ function addBlockSheet(preset, insertAt) {
     const ms = MEAL_SLOTS.find(x => x[1] === pick.label); if (ms) b.meal = ms[0];
     if (pick.note) { const n = (state.dumpNotes || []).find(y => y.id === pick.note); if (n) n.gone = true; }   // a note that became a block
     day.touched = true;
-    if (!Number.isInteger(insertAt) && pick.sug && pick.where === 'usual') insertAt = pick.sug.i;   // your usual time
+    if (!Number.isInteger(insertAt)) { if (pick.sug && pick.where === 'usual') insertAt = pick.sug.i; else if (pick.where === 'pick' && Number.isFinite(pick.at)) insertAt = slotFor(day.blocks, day.start, pick.at).i; }
     if (Number.isInteger(insertAt) && insertAt >= 0 && insertAt <= day.blocks.length) day.blocks.splice(insertAt, 0, b); else day.blocks.push(b);
     save(); close(); renderDay(); renderHabits();
   };
@@ -9491,10 +9500,14 @@ function addBlockSheet(preset, insertAt) {
       html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div>' +
         (outcomeField(pick.label) === 'goals' ? '<input type="text" class="ab-goal ab-title2" maxlength="60" placeholder="Title (optional), e.g. Zart campaign" aria-label="title">' : '') + '<h2>How long?</h2>' +
         (() => { const u = Number.isInteger(insertAt) ? null : usualStart(pick.label), sl = u === null ? null : slotFor(day.blocks, day.start, u);
-          pick.sug = sl && sl.i < day.blocks.length ? sl : null; if (pick.where === undefined) pick.where = pick.sug ? 'usual' : 'end';
-          return pick.sug ? '<p class="ab-sub">When</p><div class="ab-when"><button type="button" data-where="usual"' + (pick.where === 'usual' ? ' class="on"' : '') + '><b>' + clock(pick.sug.at) + '</b><small>your usual time</small></button><button type="button" data-where="end"' + (pick.where === 'end' ? ' class="on"' : '') + '><b>' + clock(endOfDay) + '</b><small>at the end</small></button></div>' : ''; })() +
-        '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b class="ab-st">' + clock(pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + '</b> \u00b7 ends at <b class="ab-end">' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + (usual || 60)) + '</b></p>' +
-        '<div class="ls-list ab-chips">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock((pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay) + m) + '</small>' : '') + '</button>').join('') + '</div>' +
+          pick.sug = sl && sl.i < day.blocks.length ? sl : null; if (pick.where === undefined) pick.where = 'end';
+          const pv = Number.isFinite(pick.at) ? hhmm(pick.at) : hhmm(endOfDay);
+          return '<p class="ab-sub">When</p><div class="ab-when">' +
+            '<label class="ab-pick' + (pick.where === 'pick' ? ' on' : '') + '"><small>Choose time</small><input type="time" class="ab-tm" step="300" value="' + pv + '" aria-label="choose a start time"></label>' +
+            '<button type="button" data-where="end"' + (pick.where === 'end' ? ' class="on"' : '') + '><b>' + clock(endOfDay) + '</b><small>at the end</small></button>' +
+            (pick.sug ? '<button type="button" data-where="usual"' + (pick.where === 'usual' ? ' class="on"' : '') + '><b>' + clock(pick.sug.at) + '</b><small>your usual</small></button>' : '') + '</div>'; })() +
+        '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b class="ab-st">' + clock(abStart()) + '</b> \u00b7 ends at <b class="ab-end">' + clock(abStart() + (usual || 60)) + '</b></p>' +
+        '<div class="ls-list ab-chips">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock(abStart() + m) + '</small>' : '') + '</button>').join('') + '</div>' +
         '<button type="button" class="wka-go ab-add">Add</button>';
     }
     html += '<button type="button" class="ls-cancel">Cancel</button></div>';
@@ -9516,10 +9529,13 @@ function addBlockSheet(preset, insertAt) {
     const abd = el.querySelector('.ab-dur');
     if (!abd) el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => add(Number(b.dataset.m))));
     if (abd) { let cur = usualLength(pick.label) || pick.mins || 60;
-      const st0 = () => pick.sug && pick.where === 'usual' ? pick.sug.at : endOfDay;
+      const st0 = abStart;
       const dfx = durField(abd, cur, m => { cur = m; el.querySelector('.ab-end').textContent = clock(st0() + m); el.querySelectorAll('[data-m]').forEach(y => y.classList.toggle('on', Number(y.dataset.m) === m)); });
       el.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { cur = Number(b.dataset.m); dfx.set(cur); el.querySelector('.ab-end').textContent = clock(st0() + cur); el.querySelectorAll('[data-m]').forEach(y => y.classList.toggle('on', y === b)); }));
       el.querySelectorAll('[data-where]').forEach(x => x.addEventListener('click', () => { pick.where = x.dataset.where; draw(); }));
+      const tm = el.querySelector('.ab-tm');
+      if (tm) { tm.addEventListener('focus', () => { if (pick.where !== 'pick') { pick.where = 'pick'; tm.closest('.ab-pick').classList.add('on'); el.querySelectorAll('[data-where]').forEach(y => y.classList.remove('on')); } });
+        tm.addEventListener('change', () => { if (!tm.value) return; pick.at = toMins(tm.value); pick.where = 'pick'; draw(); }); }
       el.querySelector('.ab-add').addEventListener('click', () => add(cur)); }
     const bk = el.querySelector('.fp-back'); if (bk) bk.addEventListener('click', () => { if (pick) pick = null; else step = null; draw(); });
     const bx = el.querySelector('#abx-in');
