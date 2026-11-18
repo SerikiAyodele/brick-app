@@ -6212,6 +6212,17 @@ html.kb-open .qn .ns-cancel { display: none; }
 #view-day#view-day .tms .tms-card small { font-size: 12px !important; }
 #view-day#view-day .tms .tms-card em { font-size: 18px !important; }
 #view-day#view-day .tms .tms-no { margin: 6px 0 4px !important; padding: 0 !important; min-height: 0 !important; font-size: 12px !important; color: var(--muted) !important; background: none !important; border: 0 !important; }
+
+.sg-h { margin: 22px 4px 8px; font: 600 16px "Inter", system-ui, sans-serif; }
+.sg-h small { display: block; margin-top: 2px; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+.sg-fr { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.sg-fr input { min-height: 42px; padding: 0 8px; font: 500 16px "Inter", system-ui, sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; }
+.sg-fr input[type=time] { width: 112px; flex: none; }
+.sg-fr input[type=text] { flex: 1; min-width: 0; }
+.sg-fr input[type=number] { width: 58px; flex: none; text-align: center; }
+.sg-fr small { font-size: 12px; color: var(--muted); }
+.sg-fr button { flex: none; width: 30px; height: 30px; font-size: 18px; color: var(--muted); background: none; border: 0; }
+.sg-addfx { margin: 0 4px; padding: 6px 0; font: 600 14px "Inter", system-ui, sans-serif; color: var(--pink); background: none; border: 0; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -6493,7 +6504,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:48</footer>
+  <footer>Mr.O:20:52</footer>
 </div>
 
 <script>
@@ -9917,19 +9928,29 @@ function suggestSetupPage(k) {
   const pw = prev && prev.blocks ? prev.blocks.filter(b => outcomeField(b.label) === 'goals').reduce((t, b) => t + (Number(b.mins) || 60), 0) : 0;
   const ps = prev && prev.blocks ? (prev.blocks.find(b => /^sleep/i.test(b.label || '')) || {}).mins : 0;
   const workH = pw ? Math.round(pw / 30) / 2 : 6, sleepH = ps ? Math.round(ps / 30) / 2 : 8;
-  const endM = day.end ? toMins(day.end) : (startM + 24 * 60) % 1440;
+  const endM = day.end ? toMins(day.end) : 330;   // 5:30am unless you set another
   const el = bigPage(k === planKey() ? 'Suggest my day' : 'Plan for me', cap(FULL[fromKey(k).getDay()]) + ' \u00b7 a few things first');
   el.querySelector('.bpg-body').innerHTML =
     '<div class="sg-f"><label>Start<small>when ' + (prev && prev.blocks && prev.blocks.length ? 'the day before ended' : 'you start') + '</small></label><input type="time" class="sg-st" step="300" value="' + hhmm(startM) + '"></div>' +
     '<div class="sg-f"><label>End<small>when this day ends</small></label><input type="time" class="sg-en" step="300" value="' + hhmm(endM) + '"></div>' +
     '<div class="sg-f"><label>Work<small>hours of work</small></label><input type="number" class="sg-w" inputmode="decimal" min="0" max="16" step="0.5" value="' + workH + '"></div>' +
     '<div class="sg-f"><label>Sleep<small>hours of sleep, at the end</small></label><input type="number" class="sg-s" inputmode="decimal" min="0" max="12" step="0.5" value="' + sleepH + '"></div>' +
+    '<p class="sg-h">Set times<small>things that can\u2019t move, like a meeting</small></p><div class="sg-fx"></div><button type="button" class="sg-addfx">+ Add a set time</button>' +
     '<p class="bpg-note">Everything from ' + (prev && prev.blocks && prev.blocks.length ? 'the day before' : 'your usual days') + ' comes too, like reading and meditation.</p>' +
     '<div class="bpg-btns"><button type="button" class="wka-go sg-go">Make my day</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
   el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
+  // set times: start with the meetings already on that day
+  const fxBox = el.querySelector('.sg-fx');
+  const fxRow = (at, label, mins) => { const r = document.createElement('div'); r.className = 'sg-fr';
+    r.innerHTML = '<input type="time" step="300" aria-label="time"><input type="text" maxlength="40" placeholder="what" aria-label="activity"><input type="number" inputmode="numeric" min="5" max="600" aria-label="minutes"><small>min</small><button type="button" aria-label="remove">\u00d7</button>';
+    const [ti, la, mi] = r.querySelectorAll('input'); ti.value = at || ''; la.value = label || ''; mi.value = mins || 30;
+    r.querySelector('button').addEventListener('click', () => r.remove()); fxBox.appendChild(r); return r; };
+  { let at = toMins(day.start); day.blocks.forEach(b => { const m = Number(b.mins) || 60; if (b.meeting || b.fixedAt || /meet|sync|standup|stand up|call|1:1|interview|all hands/i.test(b.label || '')) fxRow(b.fixedAt || hhmm(at), b.label, m); at += m; }); }
+  el.querySelector('.sg-addfx').addEventListener('click', () => { const r = fxRow('', '', 30); r.querySelector('input[type=text]').focus(); });
   el.querySelector('.sg-go').addEventListener('click', () => {
     const v = c => el.querySelector(c).value;
-    const opt = { start: toMins(v('.sg-st')), end: toMins(v('.sg-en')), work: Math.max(0, Number(v('.sg-w')) || 0) * 60, sleep: Math.max(0, Number(v('.sg-s')) || 0) * 60 };
+    const fixed = [...fxBox.querySelectorAll('.sg-fr')].map(r => { const [ti, la, mi] = r.querySelectorAll('input'); return ti.value && la.value.trim() ? { at: toMins(ti.value), label: la.value.trim(), mins: Math.max(5, Number(mi.value) || 30) } : null; }).filter(Boolean);
+    const opt = { start: toMins(v('.sg-st')), end: toMins(v('.sg-en')), work: Math.max(0, Number(v('.sg-w')) || 0) * 60, sleep: Math.max(0, Number(v('.sg-s')) || 0) * 60, fixed };
     el.remove(); planForMePage(k, opt);
   });
 }
@@ -9940,6 +9961,8 @@ function planFromSetup(k, o) {
   if (!src.length) { const H = planFromHistory(k); src = H ? H.blocks : []; }
   const isWork = b => outcomeField(b.label) === 'goals', isSleep = b => /^sleep|^nap$/i.test(b.label || ''), isFree = b => /^free time$/i.test(b.label || '');
   const seen = new Set(), items = [];
+  const FX = (o.fixed || []).slice().sort((a, b) => ((a.at - o.start + 1440) % 1440) - ((b.at - o.start + 1440) % 1440));
+  FX.forEach(f => seen.add(f.label.toLowerCase()));
   src.forEach((b, i) => { const l = (b.label || '').trim(); if (!l || isWork(b) || isSleep(b) || isFree(b) || seen.has(l.toLowerCase())) return; seen.add(l.toLowerCase()); items.push({ label: l, mins: Number(b.mins) || 30, i }); });
   const fw = src.findIndex(isWork), lw = src.length - 1 - [...src].reverse().findIndex(isWork);
   const before = fw < 0 ? items.filter(x => x.i < src.length / 2) : items.filter(x => x.i < fw);
@@ -9952,7 +9975,7 @@ function planFromSetup(k, o) {
   work.forEach((w, n) => { mid.push(w); if (n < work.length - 1) { const x = middle.shift(); mid.push(x ? { label: x.label, mins: x.mins } : { label: 'Break', mins: 15 }); } });
   middle.forEach(x => mid.push({ label: x.label, mins: x.mins }));
   const blocks = [...before.map(x => ({ label: x.label, mins: x.mins })), ...mid, ...after.map(x => ({ label: x.label, mins: x.mins }))];
-  const span = ((o.end - o.start) + 1440) % 1440 || 1440, used = blocks.reduce((t, b) => t + b.mins, 0) + o.sleep;
+  const span = ((o.end - o.start) + 1440) % 1440 || 1440, fxMins = FX.reduce((t, f) => t + f.mins, 0), used = blocks.reduce((t, b) => t + b.mins, 0) + o.sleep + fxMins;
   if (span - used >= 15) { const at = before.length + mid.length; blocks.splice(at, 0, { label: 'Free time', mins: Math.round((span - used) / 5) * 5 }); }
   // too long? trim until it fits the end time: leisure, then breaks, then extras, then meals, then work. sleep stays
   let over = used - span; const trimmed = [];
@@ -9966,6 +9989,23 @@ function planFromSetup(k, o) {
   cut(meal, 15, 'meals');
   cut(b => isWork(b), 30, 'work');
   for (let n = blocks.length - 1; n >= 0; n--) if (blocks[n].mins <= 0) blocks.splice(n, 1);
+  if (FX.length) {
+    // weave the set times in: fill up to each one, split work (or free time) to fit, a gap becomes free time
+    const out = [], Q = blocks.slice(); let t = 0;
+    for (const f of FX) {
+      const fAt = (f.at - o.start + 1440) % 1440;
+      while (Q.length && t + Q[0].mins <= fAt) { const b = Q.shift(); out.push(b); t += b.mins; }
+      const gap = fAt - t;
+      if (gap > 0 && Q.length && (isWork(Q[0]) || /^free time$/i.test(Q[0].label)) && gap >= 15) { out.push({ label: Q[0].label, mins: gap }); Q[0] = { ...Q[0], mins: Q[0].mins - gap }; if (Q[0].mins < 10) Q.shift(); t += gap; }
+      else if (gap >= 5) { out.push({ label: 'Free time', mins: gap }); t += gap; }
+      out.push({ label: f.label, mins: f.mins, fixedAt: hhmm(f.at) }); t = Math.max(t, fAt) + f.mins;
+    }
+    // what is left goes after the last set time; trim it if the day got too long
+    const tailRoom = span - o.sleep - t; let tail = Q.reduce((x, b) => x + b.mins, 0);
+    for (let n = Q.length - 1; n >= 0 && tail > tailRoom; n--) { const b = Q[n]; if (/^sleep/i.test(b.label)) continue; const c = Math.min(b.mins - (isWork(b) ? 30 : leisure(b) ? 0 : 5), tail - tailRoom); if (c > 0) { b.mins -= c; tail -= c; if (!trimmed.includes(leisure(b) ? 'leisure' : isWork(b) ? 'work' : 'extras')) trimmed.push(leisure(b) ? 'leisure' : isWork(b) ? 'work' : 'extras'); } }
+    if (tail < tailRoom && tailRoom - tail >= 15) Q.push({ label: 'Free time', mins: Math.round((tailRoom - tail) / 5) * 5 });
+    blocks.length = 0; blocks.push(...out, ...Q.filter(b => b.mins > 0)); over = Math.max(0, tail - tailRoom);
+  }
   if (o.sleep) blocks.push({ label: 'Sleep', mins: Math.round(o.sleep / 5) * 5 });
   return { start: hhmm(o.start), end: hhmm(o.end), blocks, over: Math.max(0, over), trimmed };
 }
@@ -9992,7 +10032,7 @@ function planForMePage(k, opt) {
   el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
   el.querySelector('.bpg-use').addEventListener('click', () => {
     const old = { start: day.start, blocks: day.blocks };
-    day.start = P.start; if (P.end) day.end = P.end; day.blocks = P.blocks.map(b => b.done ? b : ({ label: b.label, mins: b.mins })); day.touched = true; day.noSuggest = true;
+    day.start = P.start; if (P.end) day.end = P.end; day.blocks = P.blocks.map(b => b.done ? b : Object.assign({ label: b.label, mins: b.mins }, b.fixedAt ? { fixedAt: b.fixedAt } : {})); day.touched = true; day.noSuggest = true;
     save(); el.remove(); const ps = document.getElementById('paksheet'); if (ps) ps.remove(); renderDay(); renderHabits(); window.scrollTo(0, 0);
     offerUndo('=Planned ' + name, () => { day.start = old.start; day.blocks = old.blocks; day.noSuggest = false; save(); renderDay(); });
   });
