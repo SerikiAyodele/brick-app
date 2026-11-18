@@ -6200,6 +6200,18 @@ html.kb-open .qn .ns-cancel { display: none; }
 .sg-f input { width: 130px; min-height: 44px; padding: 0 12px; font: 600 17px "Inter", system-ui, sans-serif; text-align: center; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; }
 .bpg-note { margin-top: 14px; }
 .bpg-warn { color: #d9628a; }
+
+/* suggested for tomorrow, subtle: no box, a small heading, two slim rows */
+#view-day#view-day .tms { margin: 0 0 14px !important; padding: 0 !important; border: 0 !important; background: none !important; box-shadow: none !important; }
+#view-day#view-day .tms-h { display: flex; align-items: baseline; gap: 8px; }
+#view-day#view-day .tms-h b { font: 600 11px "Inter", system-ui, sans-serif !important; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); }
+#view-day#view-day .tms-h small { font-size: 12px !important; }
+#view-day#view-day .tms .tms-card { margin: 6px 0 0 !important; padding: 8px 4px !important; gap: 10px !important; background: none !important; border: 0 !important; border-bottom: 1px solid var(--hair) !important; border-radius: 0 !important; }
+#view-day#view-day .tms .tms-card i { width: 30px !important; height: 30px !important; font-size: 16px !important; border-radius: 9px !important; }
+#view-day#view-day .tms .tms-card b { font: 600 14px "Inter", system-ui, sans-serif !important; }
+#view-day#view-day .tms .tms-card small { font-size: 12px !important; }
+#view-day#view-day .tms .tms-card em { font-size: 18px !important; }
+#view-day#view-day .tms .tms-no { margin: 6px 0 4px !important; padding: 0 !important; min-height: 0 !important; font-size: 12px !important; color: var(--muted) !important; background: none !important; border: 0 !important; }
 </style>
 </head>
 <body>
@@ -6481,7 +6493,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:41</footer>
+  <footer>Mr.O:20:43</footer>
 </div>
 
 <script>
@@ -9993,7 +10005,7 @@ function renderTomorrowSuggest() {
   const has = lab => day.blocks.some(b => (b.label || '').toLowerCase() === lab.toLowerCase());
   const amL = S.am.filter(b => !has(b.label)), pmL = S.pm.filter(b => !has(b.label));
   if (!amL.length && !pmL.length) return;
-  const part = (kind, L) => !L.length ? '' : '<button type="button" class="bpg-card tms-card" data-tmo="' + kind + '"><i>' + (kind === 'am' ? '\u2600\uFE0F' : '\u{1F319}') + '</i><span><b>' + (kind === 'am' ? 'Morning' : 'Night') + ' ideas</b><small>' + L.length + ' suggestion' + (L.length > 1 ? 's' : '') + ', from how yesterday went</small></span><em>\u203a</em></button>';
+  const part = (kind, L) => !L.length ? '' : '<button type="button" class="bpg-card tms-card" data-tmo="' + kind + '"><i>' + (kind === 'am' ? '\u2600\uFE0F' : '\u{1F319}') + '</i><span><b>' + (kind === 'am' ? 'Morning' : 'Night') + ' ideas</b><small>' + L.length + ' suggestion' + (L.length > 1 ? 's' : '') + '</small></span><em>\u203a</em></button>';
   const box = document.createElement('div'); box.className = 'tms';
   box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>from how yesterday went</small></div>' +
     part('am', amL) + part('pm', pmL) + '<button type="button" class="tms-no">Not now</button>';
