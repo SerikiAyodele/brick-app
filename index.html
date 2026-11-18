@@ -6225,7 +6225,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:19</footer>
+  <footer>Mr.O:12:24</footer>
 </div>
 
 <script>
@@ -14992,7 +14992,7 @@ function renderDayCal() {
   let at = toMins(day.start);
   const W = day.blocks.map((b, i) => { const len = Number(b.mins) || 60, w = { b, i, from: at, to: at + len }; at += len; return w; });
   // zoom so the shortest block still has room for its name, like pinching in Google Calendar
-  const CAL_H = Math.round(Math.max(72, Math.min(160, 34 * 60 / Math.max(1, Math.min(...W.map(w => w.to - w.from))))));
+  const CAL_H = Math.round(Math.max(54, Math.min(84, 30 * 60 / Math.max(1, Math.min(...W.map(w => w.to - w.from))))));
   const h0 = Math.max(0, Math.floor(W[0].from / 60)), h1 = Math.max(h0 + 1, Math.ceil(W[W.length - 1].to / 60));
   const now = new Date(), nowM = now.getHours() * 60 + now.getMinutes(), isToday = viewDay === planKey();
   const y = m => (m - h0 * 60) / 60 * CAL_H;
