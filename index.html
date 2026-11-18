@@ -6098,16 +6098,27 @@ html.kb-open .qn .ns-cancel { display: none; }
 /* Home: no shortcut buttons (Focus, Sleep, Food, Stuck) */
 #view-home#view-home#view-home .hm-quick { display: none !important; }
 
-/* Home pulse: a warm, productive line under the greeting */
-#hm-pulse { margin: 2px 0 18px; }
-#hm-pulse p { margin: 0; font: 500 14px "Inter", system-ui, sans-serif; color: var(--muted); }
-#hm-pulse p b { font-weight: 700; color: var(--ink); cursor: default; }
-#hm-pulse i { display: block; height: 5px; margin: 10px 0 6px; border-radius: 3px; background: color-mix(in srgb, #f2a98c 16%, transparent); overflow: hidden; }
-#hm-pulse u { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #f6c08f, #f2a98c, color-mix(in srgb, var(--pink) 70%, #f2a98c)); transition: width .6s; }
-#hm-pulse small { font: 500 12px "Inter", system-ui, sans-serif; color: #c9805e; }
-#view-home { position: relative; }
-#view-home::before { content: ""; position: absolute; left: -20px; right: -20px; top: -40px; height: 260px; background: radial-gradient(60% 70% at 30% 0%, color-mix(in srgb, #f6c08f 22%, transparent), transparent 70%); pointer-events: none; z-index: 0; }
-#view-home > * { position: relative; z-index: 1; }
+
+/* Home cards: soft and filled, no thin outlines */
+#view-home#view-home#view-home#view-home#view-home .hm-goals.hm-goals, #view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area, #view-home#view-home#view-home#view-home#view-home .hm-now.hm-now, #view-home#view-home#view-home [class*="hm-log"], #view-home#view-home#view-home .hm-next {
+  border: 0 !important; border-radius: 22px !important;
+  background: color-mix(in srgb, var(--ink) 4%, var(--card)) !important;
+  box-shadow: 0 1px 0 color-mix(in srgb, #fff 60%, transparent) inset, 0 12px 28px -22px color-mix(in srgb, #8a5a40 55%, transparent) !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-now.hm-now { background: linear-gradient(150deg, color-mix(in srgb, #f6c08f 14%, var(--card)), color-mix(in srgb, var(--pink) 10%, var(--card))) !important; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #view-home#view-home#view-home#view-home#view-home .hm-goals.hm-goals, :root:not([data-theme="light"]) #view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { background: color-mix(in srgb, #fff 5%, var(--card)) !important; box-shadow: none !important; } }
+:root[data-theme="dark"] #view-home#view-home#view-home#view-home#view-home .hm-goals.hm-goals, :root[data-theme="dark"] #view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { background: color-mix(in srgb, #fff 5%, var(--card)) !important; box-shadow: none !important; }
+
+/* Home Now card, minimal: small label, the name, one quiet line, a thin bar. no rings */
+#view-home#view-home#view-home#view-home .hm-now.hm-now { padding: 16px 18px 14px !important; gap: 2px !important; }
+#view-home#view-home#view-home .hm-now .hm-rings, #view-home#view-home#view-home .hm-now::after { display: none !important; }
+#view-home#view-home#view-home .hm-now .hm-lbl { font: 600 10px "Inter", system-ui, sans-serif !important; letter-spacing: 1.6px; text-transform: uppercase; color: var(--pink) !important; }
+#view-home#view-home#view-home .hm-now .hm-lbl::before { display: none !important; }
+#view-home#view-home#view-home .hm-now > b { margin: 2px 0 0 !important; font: 700 22px "Inter", system-ui, sans-serif !important; letter-spacing: -.4px; color: var(--ink) !important; }
+#view-home#view-home#view-home .hm-now .hm-sub { font: 400 13px "Inter", system-ui, sans-serif !important; color: var(--muted) !important; }
+#view-home#view-home#view-home .hm-now .hm-prog { display: block !important; margin-top: 10px !important; }
+#view-home#view-home#view-home .hm-now .hm-prog > span:not(.hm-bar) { display: none !important; }
+#view-home#view-home#view-home .hm-now .hm-bar { display: block !important; height: 4px !important; border-radius: 2px !important; background: color-mix(in srgb, var(--ink) 8%, transparent) !important; overflow: hidden; }
+#view-home#view-home#view-home .hm-now .hm-bar u { display: block; height: 100%; background: var(--pink) !important; border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -6389,7 +6400,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:15:30</footer>
+  <footer>Mr.O:15:39</footer>
 </div>
 
 <script>
@@ -15704,7 +15715,6 @@ function renderHomePulse() {
   el.innerHTML = '<p>' + icon + ' <b>' + done + ' of ' + bs.length + '</b> done' + (wl ? ' \u00b7 <b>' + dur(wl) + '</b> of work left' : '') + '</p><i><u style="width:' + Math.round(tot ? dm / tot * 100 : 0) + '%"></u></i><small>' + cheer + '</small>';
 }
 function renderHome() {
-  setTimeout(() => { try { renderHomePulse(); } catch (e) { console.error(e); } }, 0);
   areaGoalsOpen = false;
   renderQuote();
   renderHomeNow();
