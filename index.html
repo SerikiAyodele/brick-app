@@ -5710,6 +5710,13 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 
 /* Plan: no Now card at all (Mia, 2026-11-18). tick with the circles; Focus and Stuck live on Home */
 #view-day#view-day#view-day#view-day .nowcard.nowcard.nowcard { display: none !important; }
+
+/* day goal: pick one of this week's goals, or type your own */
+.dg-ask .dg-h { margin: 12px 0 6px; font-size: 11px; font-weight: 600; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); }
+.dg-ask .dg-list { display: flex; flex-direction: column; gap: 6px; }
+.dg-ask .dg-list button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 8px 12px; text-align: left; font: 500 15px inherit; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; cursor: pointer; }
+.dg-ask .dg-list button i { font-style: normal; font-size: 18px; }
+.dg-ask .dg-list button span { flex: 1; min-width: 0; }
 </style>
 </head>
 <body>
@@ -8406,17 +8413,17 @@ function renderDayGoal() {
   const dayName = viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()]);
 
   // ideas: this week's big goal actions not done yet, and yesterday's goal if it was missed
+  // the options: your goals for this week (from Goals), then yesterday's goal if it was missed. or type your own
   const ideas = [];
-  for (const k of ['health', 'wealth', 'love', 'self']) {
-    for (const b of (typeof bigsOf === 'function' ? bigsOf(k) : [])) { const A = weekAction(b); if (A && !A.done) ideas.push(A.text); }
-  }
+  try { for (const a of AREAS) for (const g of areaGoals(a.k)) if (g && g.text) ideas.push({ t: g.text, e: a.e }); } catch {}
   const yd = state.days[shiftKey(viewDay, -1)];
-  if (yd && yd.goal && !yd.goalDone) ideas.unshift(yd.goal);
-  const uniq = [...new Set(ideas)].slice(0, 3);
+  if (yd && yd.goal && !yd.goalDone && !ideas.some(x => x.t === yd.goal)) ideas.push({ t: yd.goal, e: '\u21A9\uFE0F' });
+  const seen = new Set(), uniq = ideas.filter(x => !seen.has(x.t) && seen.add(x.t));
 
+  const typed = '<div class="dg-in"><input type="text" maxlength="100" placeholder="' + (ahead ? 'what makes ' + dayName + ' a win?' : 'what makes today a win?') + '"><button type="button" class="lf-btn main">Set</button></div>';
   box.innerHTML = '<div class="dg-ask"><b>' + (dayGoalEditing ? 'Change this day\u2019s goal' : ahead ? 'One goal for ' + dayName + '?' : 'New day. What\u2019s your one goal today?') + '</b>' +
-    '<div class="dg-in"><input type="text" maxlength="100" placeholder="' + (ahead ? 'what makes ' + dayName + ' a win?' : 'what makes today a win?') + '"><button type="button" class="lf-btn main">Set</button></div>' +
-    (uniq.length ? '<div class="dg-ideas">' + uniq.map(t => '<button type="button" data-t="' + esc(t) + '">' + esc(t) + '</button>').join('') + '</div>' : '') +
+    (uniq.length ? '' : typed) +
+    (uniq.length ? '<p class="dg-h">From your goals this week</p><div class="dg-ideas dg-list">' + uniq.map(x => '<button type="button" data-t="' + esc(x.t) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span></button>').join('') + '</div><p class="dg-h">Or type your own</p>' + typed : '') +
     '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : ahead ? 'Later' : 'Not today') + '</button></div>';
   const inp = box.querySelector('input');
   inp.value = dayGoalEditing ? (day.goal || '') : '';
