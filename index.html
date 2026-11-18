@@ -6183,6 +6183,15 @@ html.kb-open .qn .ns-cancel { display: none; }
 .bpg-note { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
 .bpg-btns { display: flex; flex-direction: column; gap: 8px; margin-top: auto; padding-top: 8px; }
 #view-day .tms .tms-card { margin: 8px 0 0; padding: 12px 14px; }
+
+/* one goal: a dropdown under the box */
+.dg-ask .dg-in { position: relative; }
+.dg-ask .dg-dd { margin-top: 6px; border: 1px solid var(--hair); border-radius: 14px; background: var(--card); overflow: hidden; }
+.dg-ask .dg-dd[hidden] { display: none; }
+.dg-ask .dg-dd button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 0 14px; text-align: left; font: 500 15px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 0; border-bottom: 1px solid var(--hair); cursor: pointer; }
+.dg-ask .dg-dd button:last-child { border-bottom: 0; }
+.dg-ask .dg-dd button[hidden] { display: none; }
+.dg-ask .dg-dd i { font-style: normal; }
 </style>
 </head>
 <body>
@@ -6464,7 +6473,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:32</footer>
+  <footer>Mr.O:20:34</footer>
 </div>
 
 <script>
@@ -9120,14 +9129,22 @@ function renderDayGoal() {
   const typed = '<div class="dg-in"><input type="text" maxlength="100" placeholder="' + (ahead ? 'what makes ' + dayName + ' a win?' : 'what makes today a win?') + '"><button type="button" class="lf-btn main">Set</button></div>';
   box.innerHTML = '<div class="dg-ask"><b>' + (dayGoalEditing ? 'Change this day\u2019s goal' : ahead ? 'One goal for ' + dayName + '?' : 'New day. What\u2019s your one goal today?') + '</b>' +
     (uniq.length ? '' : typed) +
-    (uniq.length ? '<p class="dg-h">From your goals this week</p><div class="dg-ideas dg-list">' + uniq.map(x => '<button type="button" data-t="' + esc(x.t) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span></button>').join('') + '</div><p class="dg-h">Or type your own</p>' + typed : '') +
+    (uniq.length ? typed + '<div class="dg-dd" hidden>' + uniq.map(x => '<button type="button" data-t="' + esc(x.t) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span></button>').join('') + '</div>' : '') +
     '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : ahead ? 'Later' : 'Not today') + '</button></div>';
   const inp = box.querySelector('input');
   inp.value = dayGoalEditing ? (day.goal || '') : '';
   const set = t => { t = (t || '').trim(); if (!t) { inp.focus(); return; } day.goal = t; day.goalDone = false; day.goalSkip = false; dayGoalEditing = false; save(); renderDayGoal(); };
   box.querySelector('.lf-btn').addEventListener('click', () => set(inp.value));
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') set(inp.value); });
-  box.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => set(b.dataset.t)));
+  box.querySelectorAll('[data-t]').forEach(b => { b.addEventListener('mousedown', e => e.preventDefault()); b.addEventListener('click', () => set(b.dataset.t)); });
+  // the dropdown: opens when you tap the box, narrows as you type
+  const dd = box.querySelector('.dg-dd');
+  if (dd) {
+    inp.placeholder = 'pick a goal, or type your own';
+    const paint = () => { const q = inp.value.trim().toLowerCase(); let any = false; dd.querySelectorAll('[data-t]').forEach(b => { const ok = !q || b.dataset.t.toLowerCase().includes(q); b.hidden = !ok; any = any || ok; }); dd.hidden = !any; };
+    inp.addEventListener('focus', paint); inp.addEventListener('click', paint); inp.addEventListener('input', paint);
+    inp.addEventListener('blur', () => setTimeout(() => { dd.hidden = true; }, 150));
+  }
   box.querySelector('.dg-skip').addEventListener('click', () => { if (dayGoalEditing) dayGoalEditing = false; else day.goalSkip = true; save(); renderDayGoal(); });
 }
 
