@@ -6223,6 +6223,27 @@ html.kb-open .qn .ns-cancel { display: none; }
 .sg-fr small { font-size: 12px; color: var(--muted); }
 .sg-fr button { flex: none; width: 30px; height: 30px; font-size: 18px; color: var(--muted); background: none; border: 0; }
 .sg-addfx { margin: 0 4px; padding: 6px 0; font: 600 14px "Inter", system-ui, sans-serif; color: var(--pink); background: none; border: 0; cursor: pointer; }
+
+/* setup page, finer */
+.sg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sg-t { display: flex; flex-direction: column; gap: 4px; padding: 14px; border-radius: 18px; background: var(--card); border: 1px solid var(--hair); cursor: text; }
+.sg-t small { font: 600 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+.sg-t input { width: 100%; min-width: 0; padding: 0; font: 700 24px "Inter", system-ui, sans-serif; letter-spacing: -.5px; color: var(--ink); background: none; border: 0; outline: none; }
+.sg-t input::-webkit-calendar-picker-indicator { display: none; }
+.sg-t span { display: flex; align-items: baseline; gap: 6px; }
+.sg-t span input { width: 56px; }
+.sg-t span b { font: 500 14px "Inter", system-ui, sans-serif; color: var(--muted); }
+.sg-t em { font-style: normal; font-size: 11px; color: var(--muted); }
+.sg-h { margin: 22px 2px 10px !important; }
+.sg-fr { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; padding: 6px 6px 6px 12px; border-radius: 14px; background: var(--card); border: 1px solid var(--hair); }
+.sg-fr input { min-height: 38px; border: 0 !important; background: none !important; }
+.sg-fr input[type=text] { flex: 1; min-width: 0; padding: 0 !important; font: 600 16px "Inter", system-ui, sans-serif !important; }
+.sg-fr input[type=time] { flex: none; width: 96px !important; padding: 0 8px !important; font: 500 15px "Inter", system-ui, sans-serif !important; color: var(--muted) !important; background: color-mix(in srgb, var(--ink) 6%, transparent) !important; border-radius: 10px; }
+.sg-fr input[type=time]::-webkit-calendar-picker-indicator { display: none; }
+.sg-fr .sg-mn { display: flex; align-items: center; padding: 0 8px; border-radius: 10px; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.sg-fr .sg-mn input { width: 34px !important; padding: 0 !important; text-align: right; font: 600 15px "Inter", system-ui, sans-serif !important; }
+.sg-fr .sg-mn small { font-size: 13px; color: var(--muted); }
+.bpg .bpg-btns .ls-cancel { min-height: 40px; background: none !important; color: var(--muted) !important; }
 </style>
 </head>
 <body>
@@ -6504,7 +6525,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:52</footer>
+  <footer>Mr.O:20:59</footer>
 </div>
 
 <script>
@@ -9931,26 +9952,29 @@ function suggestSetupPage(k) {
   const endM = day.end ? toMins(day.end) : 330;   // 5:30am unless you set another
   const el = bigPage(k === planKey() ? 'Suggest my day' : 'Plan for me', cap(FULL[fromKey(k).getDay()]) + ' \u00b7 a few things first');
   el.querySelector('.bpg-body').innerHTML =
-    '<div class="sg-f"><label>Start<small>when ' + (prev && prev.blocks && prev.blocks.length ? 'the day before ended' : 'you start') + '</small></label><input type="time" class="sg-st" step="300" value="' + hhmm(startM) + '"></div>' +
-    '<div class="sg-f"><label>End<small>when this day ends</small></label><input type="time" class="sg-en" step="300" value="' + hhmm(endM) + '"></div>' +
-    '<div class="sg-f"><label>Work<small>hours of work</small></label><input type="number" class="sg-w" inputmode="decimal" min="0" max="16" step="0.5" value="' + workH + '"></div>' +
-    '<div class="sg-f"><label>Sleep<small>hours of sleep, at the end</small></label><input type="number" class="sg-s" inputmode="decimal" min="0" max="12" step="0.5" value="' + sleepH + '"></div>' +
-    '<p class="sg-h">Set times<small>things that can\u2019t move, like a meeting</small></p><div class="sg-fx"></div><button type="button" class="sg-addfx">+ Add a set time</button>' +
+    '<div class="sg-grid">' +
+      '<label class="sg-t"><small>\u2600\uFE0F Start</small><input type="time" class="sg-st" step="300" value="' + hhmm(startM) + '"><em>' + (prev && prev.blocks && prev.blocks.length ? 'when yesterday ended' : 'when you start') + '</em></label>' +
+      '<label class="sg-t"><small>\u{1F319} End</small><input type="time" class="sg-en" step="300" value="' + hhmm(endM) + '"><em>when the day ends</em></label>' +
+      '<label class="sg-t"><small>\u{1F4BC} Work</small><span><input type="number" class="sg-w" inputmode="decimal" min="0" max="16" step="0.5" value="' + workH + '"><b>hours</b></span></label>' +
+      '<label class="sg-t"><small>\u{1F634} Sleep</small><span><input type="number" class="sg-s" inputmode="decimal" min="0" max="12" step="0.5" value="' + sleepH + '"><b>hours</b></span></label>' +
+    '</div>' +
+    '<p class="sg-h">Must haves<small>add a time if it can\u2019t move, like a meeting</small></p><div class="sg-fx"></div><button type="button" class="sg-addfx">+ Add one</button>' +
     '<p class="bpg-note">Everything from ' + (prev && prev.blocks && prev.blocks.length ? 'the day before' : 'your usual days') + ' comes too, like reading and meditation.</p>' +
     '<div class="bpg-btns"><button type="button" class="wka-go sg-go">Make my day</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
   el.querySelector('.bpg-no').addEventListener('click', () => el.remove());
   // set times: start with the meetings already on that day
   const fxBox = el.querySelector('.sg-fx');
   const fxRow = (at, label, mins) => { const r = document.createElement('div'); r.className = 'sg-fr';
-    r.innerHTML = '<input type="time" step="300" aria-label="time"><input type="text" maxlength="40" placeholder="what" aria-label="activity"><input type="number" inputmode="numeric" min="5" max="600" aria-label="minutes"><small>min</small><button type="button" aria-label="remove">\u00d7</button>';
-    const [ti, la, mi] = r.querySelectorAll('input'); ti.value = at || ''; la.value = label || ''; mi.value = mins || 30;
+    r.innerHTML = '<input type="text" maxlength="40" placeholder="What" aria-label="activity"><input type="time" step="300" aria-label="time (optional)"><span class="sg-mn"><input type="number" inputmode="numeric" min="5" max="600" aria-label="minutes"><small>m</small></span><button type="button" aria-label="remove">\u00d7</button>';
+    const [la, ti, mi] = r.querySelectorAll('input'); ti.value = at || ''; la.value = label || ''; mi.value = mins || 30;
     r.querySelector('button').addEventListener('click', () => r.remove()); fxBox.appendChild(r); return r; };
   { let at = toMins(day.start); day.blocks.forEach(b => { const m = Number(b.mins) || 60; if (b.meeting || b.fixedAt || /meet|sync|standup|stand up|call|1:1|interview|all hands/i.test(b.label || '')) fxRow(b.fixedAt || hhmm(at), b.label, m); at += m; }); }
   el.querySelector('.sg-addfx').addEventListener('click', () => { const r = fxRow('', '', 30); r.querySelector('input[type=text]').focus(); });
   el.querySelector('.sg-go').addEventListener('click', () => {
     const v = c => el.querySelector(c).value;
-    const fixed = [...fxBox.querySelectorAll('.sg-fr')].map(r => { const [ti, la, mi] = r.querySelectorAll('input'); return ti.value && la.value.trim() ? { at: toMins(ti.value), label: la.value.trim(), mins: Math.max(5, Number(mi.value) || 30) } : null; }).filter(Boolean);
-    const opt = { start: toMins(v('.sg-st')), end: toMins(v('.sg-en')), work: Math.max(0, Number(v('.sg-w')) || 0) * 60, sleep: Math.max(0, Number(v('.sg-s')) || 0) * 60, fixed };
+    const rows = [...fxBox.querySelectorAll('.sg-fr')].map(r => { const [la, ti, mi] = r.querySelectorAll('input'); return la.value.trim() ? { at: ti.value ? toMins(ti.value) : null, label: la.value.trim(), mins: Math.max(5, Number(mi.value) || 30) } : null; }).filter(Boolean);
+    const fixed = rows.filter(x => x.at !== null), musts = rows.filter(x => x.at === null);
+    const opt = { start: toMins(v('.sg-st')), end: toMins(v('.sg-en')), work: Math.max(0, Number(v('.sg-w')) || 0) * 60, sleep: Math.max(0, Number(v('.sg-s')) || 0) * 60, fixed, musts };
     el.remove(); planForMePage(k, opt);
   });
 }
@@ -9964,10 +9988,12 @@ function planFromSetup(k, o) {
   const FX = (o.fixed || []).slice().sort((a, b) => ((a.at - o.start + 1440) % 1440) - ((b.at - o.start + 1440) % 1440));
   FX.forEach(f => seen.add(f.label.toLowerCase()));
   src.forEach((b, i) => { const l = (b.label || '').trim(); if (!l || isWork(b) || isSleep(b) || isFree(b) || seen.has(l.toLowerCase())) return; seen.add(l.toLowerCase()); items.push({ label: l, mins: Number(b.mins) || 30, i }); });
+  // must haves with no time: in the day, wherever they fit (with the midday things)
+  (o.musts || []).forEach(m => { const ex = items.find(x => x.label.toLowerCase() === m.label.toLowerCase()); if (ex) ex.mins = m.mins; else items.push({ label: m.label, mins: m.mins, i: -2 }); });
   const fw = src.findIndex(isWork), lw = src.length - 1 - [...src].reverse().findIndex(isWork);
   const before = fw < 0 ? items.filter(x => x.i < src.length / 2) : items.filter(x => x.i < fw);
   const after = fw < 0 ? items.filter(x => x.i >= src.length / 2) : items.filter(x => x.i > lw);
-  const middle = fw < 0 ? [] : items.filter(x => x.i > fw && x.i < lw);
+  const middle = items.filter(x => x.i === -2 || (fw >= 0 && x.i > fw && x.i < lw));
   const day = dayFor(k), g = day.goal || ((state.days[prevK] || {}).goal); const gt = g && (typeof g === 'string' ? g : g.text);
   const work = []; let left = Math.round(o.work / 5) * 5, first = true;
   while (left > 0) { const m = Math.min(90, left); work.push({ label: first && gt ? 'Focus: ' + gt : first ? 'Deep work' : 'Work', mins: m }); first = false; left -= m; }
