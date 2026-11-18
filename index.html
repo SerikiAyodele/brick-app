@@ -5888,6 +5888,28 @@ html.kb-open .qn .ns-cancel { display: none; }
 .ab-when .ab-pick input { width: 100%; min-height: 28px; padding: 0; font: 600 17px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 0; }
 .ab-when .ab-pick.on { border-color: var(--pink); background: color-mix(in srgb, var(--pink) 12%, var(--card)); }
 .ab-when button small { display: block; }
+
+/* end time and the calm over-time note */
+#view-day .start-row { flex-wrap: wrap; row-gap: 8px; }
+#view-day .start-row .end-l { margin-left: 4px; }
+#view-day#view-day #endat { min-width: 150px; height: 36px; min-height: 36px; padding: 0 10px; font-size: 15px; color: var(--ink); background: none; border: 1px solid var(--hair); border-radius: 18px; }
+#overrun[hidden] { display: none; }
+#overrun { margin: 4px 0 14px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, #f29ab5 14%, var(--card)); border: 1px solid color-mix(in srgb, #f29ab5 35%, var(--hair)); }
+#overrun p { margin: 0 0 8px; font: 500 14px "Inter", system-ui, sans-serif; color: var(--ink); }
+#overrun p b { color: #d9628a; }
+#overrun div { display: flex; gap: 8px; flex-wrap: wrap; }
+#overrun button { min-height: 34px; padding: 0 12px; font: 600 13px "Inter", system-ui, sans-serif; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 17px; cursor: pointer; }
+.cut .cut-why { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+.cut .cut-list { margin: 0 0 14px; border: 1px solid var(--hair); border-radius: 14px; max-height: 46vh; overflow-y: auto; }
+.cut .cut-r { display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 6px 12px; border-bottom: 1px solid var(--hair); }
+.cut .cut-r:last-child { border-bottom: 0; }
+.cut .cut-r i { font-style: normal; }
+.cut .cut-r span { flex: 1; min-width: 0; }
+.cut .cut-r b { display: block; font: 600 15px "Inter", system-ui, sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cut .cut-r small { font-size: 12px; color: var(--muted); }
+.cut .cut-r button { min-height: 32px; padding: 0 10px; font: 600 13px "Inter", system-ui, sans-serif; color: var(--ink); background: none; border: 1px solid var(--hair); border-radius: 16px; cursor: pointer; }
+.cut .cut-r .cut-rm { color: #d9628a; }
+.cut .cut-r em { font-style: normal; font: 600 13px "Inter", system-ui, sans-serif; color: #d9628a; }
 </style>
 </head>
 <body>
@@ -6037,8 +6059,11 @@ html.kb-open .qn .ns-cancel { display: none; }
     <div class="start-row">
       <label for="start">Start at</label>
       <input id="start" type="time" step="300" aria-label="what time the day starts">
+      <label for="endat" class="end-l">End</label>
+      <input id="endat" type="time" step="300" aria-label="what time the day should end (optional)">
       <button class="undobtn" id="day-undo" type="button" disabled>Undo</button>
     </div>
+    <div id="overrun" hidden></div>
 
     <div class="md-seg dv-seg" id="dv-seg"><button type="button" class="md-seg-b" data-dv="list">List</button><button type="button" class="md-seg-b" data-dv="cal">Calendar</button></div>
     <div id="block-list"></div>
@@ -6165,7 +6190,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:11:16</footer>
+  <footer>Mr.O:11:18</footer>
 </div>
 
 <script>
@@ -14694,6 +14719,81 @@ function timeUpSheet(day, i, end) {
   });
 }
 setInterval(checkTimeUp, 20000);
+/* ---- an optional end time for the day: if the plan runs past it, a calm note and help to cut ---- */
+function planEndOf(day) { return (day.blocks || []).reduce((t, b) => t + (Number(b.mins) || 60), toMins(day.start)); }
+function renderOverrun() {
+  const box = document.getElementById('overrun'), ei = document.getElementById('endat'); if (!box) return;
+  const day = state.days[viewDay];
+  if (ei && document.activeElement !== ei) ei.value = day && day.end ? day.end : '';
+  if (!day || !day.end || !day.blocks || !day.blocks.length || sortingDay) { box.hidden = true; box.innerHTML = ''; return; }
+  const over = planEndOf(day) - toMins(day.end);
+  if (over <= 0) { box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  box.innerHTML = '<p>Your plan runs <b>' + dur(over) + '</b> past ' + clock(toMins(day.end)) + '.</p><div><button type="button" data-ov="pick">Choose where to cut</button><button type="button" data-ov="ai">\u2728 Suggest</button></div>';
+  box.querySelector('[data-ov=pick]').addEventListener('click', () => cutSheet(day));
+  box.querySelector('[data-ov=ai]').addEventListener('click', () => cutSuggest(day));
+}
+function cutSheet(day) {
+  const old = document.getElementById('cutsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'cutsheet'; el.className = 'w3';
+  document.body.appendChild(el);
+  const close = () => { el.remove(); renderDay(); };
+  const draw = () => {
+    const over = planEndOf(day) - toMins(day.end);
+    const open = day.blocks.map((b, i) => ({ b, i })).filter(x => !x.b.done);
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet cut" role="dialog" aria-modal="true" aria-label="Where to cut"><span class="w3-grab"></span>' +
+      '<p class="wk2-step">' + (over > 0 ? dur(over) + ' to cut' : 'It fits now \u2713') + '</p><h2>Where should time come from?</h2>' +
+      '<div class="cut-list">' + open.map(x => { const m = Number(x.b.mins) || 60; return '<div class="cut-r"><i>' + blockEmoji(x.b) + '</i><span><b>' + esc(x.b.label || 'Block') + '</b><small>' + minsLabel(m) + '</small></span>' +
+        (m > 15 ? '<button type="button" data-c="' + x.i + ':15">\u221215m</button>' : '') + (m > 30 ? '<button type="button" data-c="' + x.i + ':30">\u221230m</button>' : '') + '<button type="button" class="cut-rm" data-rm="' + x.i + '">Remove</button></div>'; }).join('') + '</div>' +
+      '<button type="button" class="wka-go cut-ok">Done</button></div>';
+    el.querySelector('.w3-back').addEventListener('click', close);
+    el.querySelector('.cut-ok').addEventListener('click', close);
+    el.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => { const [i, m] = b.dataset.c.split(':').map(Number), bl = day.blocks[i]; bl.mins = Math.max(5, (Number(bl.mins) || 60) - m); save(); draw(); }));
+    el.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { day.blocks.splice(Number(b.dataset.rm), 1); save(); draw(); }));
+  };
+  draw();
+}
+async function cutSuggest(day) {
+  const old = document.getElementById('cutsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'cutsheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet cut" role="dialog" aria-modal="true" aria-label="Suggested cuts"><span class="w3-grab"></span><p class="wk2-step">\u2728 Suggest</p><h2>Finding what to cut\u2026</h2><div class="cut-body"></div></div>';
+  document.body.appendChild(el);
+  const close = () => { el.remove(); renderDay(); };
+  el.querySelector('.w3-back').addEventListener('click', () => el.remove());
+  const over = planEndOf(day) - toMins(day.end);
+  const open = day.blocks.map((b, i) => ({ b, i })).filter(x => !x.b.done);
+  let cuts = null, why = '';
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 25000);
+    const list = open.map((x, n) => (n + 1) + '. ' + (x.b.label || 'Block') + (x.b.title ? ' (' + x.b.title + ')' : '') + ', ' + (Number(x.b.mins) || 60) + ' min' + (isFixedBlock(x.b) ? ', FIXED' : '')).join('\n');
+    const ask = 'My day plan runs ' + over + ' minutes past the time I want to stop. Suggest where to cut, adding up to at least ' + over + ' minutes. Prefer low value or flexible blocks, keep enough rest, never cut FIXED blocks. ' +
+      'Reply only with lines like CUT: number, minutes (minutes equal to its length means remove it), then one line WHY: one short sentence.\n\n' + list;
+    const r = await aiFetch('/api/chat', { messages: [{ role: 'user', content: ask }] }, ctl.signal);
+    if (r.ok) { const t = String((await r.json()).reply || '');
+      const c = [...t.matchAll(/CUT:\s*(\d+)\s*,\s*(\d+)/gi)].map(m => ({ x: open[Number(m[1]) - 1], m: Number(m[2]) })).filter(c => c.x && c.m > 0);
+      if (c.length) { cuts = c; const w = t.match(/WHY:\s*(.+)/i); why = w ? w[1].trim() : ''; } }
+  } catch {}
+  if (!cuts) {   // simple rules: leisure first, then the longest flexible blocks, 15 to 30 minutes at a time
+    cuts = []; let left = over;
+    const pool = open.filter(x => !isFixedBlock(x.b)).sort((a, c) => (/movie|tv|game|break|rest|nap|music/i.test(c.b.label || '') - /movie|tv|game|break|rest|nap|music/i.test(a.b.label || '')) || (Number(c.b.mins) || 60) - (Number(a.b.mins) || 60));
+    for (const x of pool) { if (left <= 0) break; const m = Math.min(left, Math.max(15, Math.round((Number(x.b.mins) || 60) / 3 / 5) * 5), (Number(x.b.mins) || 60) - 5); if (m > 0) { cuts.push({ x, m }); left -= m; } }
+    why = 'Leisure and the longest flexible blocks first.';
+  }
+  if (!el.isConnected) return;
+  el.querySelector('h2').textContent = 'Cut ' + dur(over) + ' like this?';
+  el.querySelector('.cut-body').innerHTML = (why ? '<p class="cut-why">' + esc(why) + '</p>' : '') +
+    '<div class="cut-list">' + cuts.map(c => { const len = Number(c.x.b.mins) || 60; return '<div class="cut-r"><i>' + blockEmoji(c.x.b) + '</i><span><b>' + esc(c.x.b.label || 'Block') + '</b><small>' + minsLabel(len) + '</small></span><em>' + (c.m >= len ? 'remove' : '\u2212' + minsLabel(c.m)) + '</em></div>'; }).join('') + '</div>' +
+    '<button type="button" class="wka-go cut-yes">Apply</button><button type="button" class="ls-cancel cut-no">Not now</button>';
+  el.querySelector('.cut-no').addEventListener('click', () => el.remove());
+  el.querySelector('.cut-yes').addEventListener('click', () => {
+    const before = day.blocks.map(b => ({ b, mins: b.mins })), list = day.blocks.slice();
+    const rm = new Set();
+    cuts.forEach(c => { const len = Number(c.x.b.mins) || 60; if (c.m >= len) rm.add(c.x.b); else c.x.b.mins = Math.max(5, len - c.m); });
+    day.blocks = day.blocks.filter(b => !rm.has(b));
+    save(); close();
+    offerUndo('the cuts', () => { before.forEach(x => { x.b.mins = x.mins; }); day.blocks = list; save(); renderDay(); });
+  });
+}
 /* ---- Best order: Claude reorders what is left of the day for the most focus ----
    done blocks stay put; meetings keep their place. you see the new order first. */
 function bestOrderRules(L) {
@@ -14829,7 +14929,9 @@ function renderDayCal() {
 }
 {
   const baseRender = renderDay;
-  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } return r; };
+  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } return r; };
+  const ei = document.getElementById('endat');
+  if (ei) ei.addEventListener('change', () => { const d = dayFor(viewDay); if (ei.value) d.end = ei.value; else delete d.end; save(); renderDay(); });
   document.querySelectorAll('#dv-seg [data-dv]').forEach(b => b.addEventListener('click', () => {
     dayView = b.dataset.dv; try { localStorage.setItem(DV_KEY, dayView); } catch {}
     const box = document.getElementById('day-cal'); if (box) delete box.dataset.scrolled;
