@@ -5811,6 +5811,16 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day#view-day .dg-card.dg2 .dg-tick { flex: none; width: 36px !important; height: 36px !important; margin: 0 !important; display: grid; place-items: center; font-size: 16px; color: transparent; background: var(--card); border: 2px solid var(--pink) !important; border-radius: 50%; cursor: pointer; }
 #view-day#view-day .dg-card.dg2.done .dg-tick { color: #fff; background: var(--pink); }
 #view-day .dg-card.dg2.done b { text-decoration: none; color: var(--ink); opacity: .7; }
+
+/* tasks sheet: the "not done last time" box, calm and readable in dark and light */
+.ro { margin: 0 0 16px !important; padding: 14px 14px 12px !important; background: color-mix(in srgb, var(--pink) 8%, var(--card)) !important; border: 1px solid color-mix(in srgb, var(--pink) 24%, var(--hair)) !important; border-radius: 16px !important; }
+.ro .ro-h { margin: 0 0 6px !important; padding: 0 !important; font: 600 11px "Inter", system-ui, sans-serif !important; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted) !important; border: 0 !important; }
+.ro .ro-i { min-height: 40px !important; padding: 0 !important; font: 500 15px "Inter", system-ui, sans-serif !important; border: 0 !important; }
+.ro .ro-i span { width: 22px !important; height: 22px !important; font-size: 14px; color: var(--pink) !important; background: none !important; border: 1.5px solid var(--pink); }
+.ro .ro-acts { margin-top: 8px !important; }
+.ro .ro-acts button { min-height: 38px !important; font: 600 14px "Inter", system-ui, sans-serif !important; border-radius: 19px !important; }
+.ro .ro-all { color: var(--paper) !important; background: var(--ink) !important; border: 0 !important; }
+.ro .ro-skip { color: var(--muted) !important; background: none !important; border: 1px solid var(--hair) !important; }
 </style>
 </head>
 <body>
@@ -6088,7 +6098,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:12</footer>
+  <footer>Mr.O:10:13</footer>
 </div>
 
 <script>
@@ -6627,7 +6637,7 @@ function rolloverBox(b, field, lo) {
   const when = lo.k === planKey() ? 'earlier today' : lo.k === shiftKey(planKey(), -1) ? 'yesterday' : cap(FULL[fromKey(lo.k).getDay()]);
   box.innerHTML = '<p class="ro-h">Not done in ' + esc(lo.src.label || 'your last block') + ', ' + when + '</p>' +
     lo.items.map((g, i) => '<button type="button" class="ro-i" data-ro="' + i + '"><span>+</span>' + esc(g.text) + '</button>').join('') +
-    '<div class="ro-acts"><button type="button" class="ro-all">Bring ' + (lo.items.length > 1 ? 'all ' + lo.items.length : 'it') + ' over</button><button type="button" class="ro-skip">Leave them</button></div>';
+    '<div class="ro-acts"><button type="button" class="ro-all">Bring ' + (lo.items.length > 1 ? 'all ' + lo.items.length : 'it') + ' over</button><button type="button" class="ro-skip">Leave ' + (lo.items.length > 1 ? 'them' : 'it') + '</button></div>';
   const take = list => { b[field] = b[field] || []; list.forEach(g => { if (!b[field].some(x => x.text === g.text && !x.done)) b[field].push({ text: g.text, done: false }); g.rolled = true; }); save(); paintListSheet(); };
   box.querySelectorAll('[data-ro]').forEach(x => x.addEventListener('click', () => take([lo.items[Number(x.dataset.ro)]])));
   box.querySelector('.ro-all').addEventListener('click', () => take(lo.items));
@@ -6671,7 +6681,7 @@ function paintListSheet() {
     '<button type="button" class="ls-x" aria-label="close">\u00d7</button></div><div class="ls-body"></div>' +
     '<button type="button" class="lf-btn main ls-done">Done</button></div>';
   el.querySelector('h2').textContent = b.label || 'block';
-  if (field === 'goals') {
+  if (false) {   // title moved to the name sheet (tap the block's name)
     const tw = document.createElement('label'); tw.className = 'ls-title';
     tw.innerHTML = '<span>Title (optional)</span><input type="text" maxlength="60" placeholder="e.g. Zart campaign">';
     const ti = tw.querySelector('input'); ti.value = b.title || '';
