@@ -5704,6 +5704,9 @@ body[data-view="day"] footer { margin-top: 12px !important; }
 #view-day#view-day#view-day .pt-open span { color: var(--muted) !important; }
 #view-day#view-day .totop { margin-top: 6px !important; }
 .ag-full { color: var(--muted) !important; cursor: default; }
+
+/* Plan: the top card only shows while a block is running (it holds Done, Focus, Stuck). before the day starts or after it ends, no card */
+#view-day#view-day#view-day .nowcard.waiting, #view-day#view-day#view-day .nowcard.over { display: none !important; }
 </style>
 </head>
 <body>
@@ -5979,7 +5982,7 @@ body[data-view="day"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:43</footer>
+  <footer>Mr.O:08:31</footer>
 </div>
 
 <script>
