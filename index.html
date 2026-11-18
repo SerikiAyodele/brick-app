@@ -6087,6 +6087,28 @@ html.kb-open .qn .ns-cancel { display: none; }
 #view-day #block-list .msub.ms-miss .ms-c::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px dashed #f29ab5; animation: fuspin 12s linear infinite; }
 #view-day #block-list .msub.ms-miss small { color: #d9628a; }
 #view-day #block-list .msub.ms-miss em { background: #d9628a; color: #fff; }
+
+/* ===== Home, warmer (same layout): cream and peach light, cocoa dark, warm edges, soft area tints ===== */
+:root { --warm-bg: #fbf4ec; --warm-card: #fffaf4; --warm-edge: #ecdccb; --warm-glow: #f6d9c3; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --warm-bg: #120d0b; --warm-card: #1d1714; --warm-edge: #3a2e26; --warm-glow: #4a2f24; } }
+:root[data-theme="dark"] { --warm-bg: #120d0b; --warm-card: #1d1714; --warm-edge: #3a2e26; --warm-glow: #4a2f24; }
+html body[data-view="home"][data-view="home"] { background-color: var(--warm-bg) !important; background-image: radial-gradient(120% 50% at 50% 0%, var(--warm-glow), transparent 70%) !important; }
+html:has(body[data-view="home"]) { background: var(--warm-bg) !important; }
+body[data-view="home"] .tabs, body[data-view="home"] nav { background: var(--warm-bg) !important; }
+#view-home#view-home#view-home .hm-now.hm-now { background: linear-gradient(150deg, color-mix(in srgb, #f2a98c 16%, var(--warm-card)), color-mix(in srgb, var(--pink) 10%, var(--warm-card))) padding-box, linear-gradient(135deg, #f2c1a5, color-mix(in srgb, var(--pink) 60%, #f2c1a5)) border-box !important; border: 1px solid transparent !important; box-shadow: 0 14px 30px -22px #b06a4a99 !important; }
+#view-home#view-home#view-home#view-home#view-home .hm-goals.hm-goals, #view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area, #view-home#view-home .hm-next, #view-home#view-home [class*="hm-log"], #view-home#view-home .hm-meal { background: var(--warm-card) !important; border: 1px solid var(--warm-edge) !important; box-shadow: 0 10px 24px -20px #8a5a4066 !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area:nth-of-type(1) { background: linear-gradient(160deg, color-mix(in srgb, #86b9d9 14%, var(--warm-card)), var(--warm-card)) !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area:nth-of-type(2) { background: linear-gradient(160deg, color-mix(in srgb, #e8c46a 16%, var(--warm-card)), var(--warm-card)) !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area:nth-of-type(3) { background: linear-gradient(160deg, color-mix(in srgb, #e9a6b8 16%, var(--warm-card)), var(--warm-card)) !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area:nth-of-type(4) { background: linear-gradient(160deg, color-mix(in srgb, #a99bd4 16%, var(--warm-card)), var(--warm-card)) !important; }
+#view-home .pghead span, #view-home .hm-sec, #view-home .hm-today, #view-home [class*='hm-sep'], #view-home .hm-div b { color: #c07a5a !important; }
+#view-home#view-home .pghead::after { background: linear-gradient(90deg, #f2a98c, color-mix(in srgb, var(--pink) 70%, #f2a98c)) !important; }
+/* meals: a line from the meal block into its log, like a branch */
+#view-day #block-list .msub { position: relative; overflow: visible; }
+#view-day #block-list .msub::before { content: ""; position: absolute; left: -42px; top: -18px; width: 40px; height: 40px; border-left: 2px solid var(--hair); border-bottom: 2px solid var(--hair); border-bottom-left-radius: 14px; pointer-events: none; }
+#view-day #block-list .msub.ms-ate::before { border-color: color-mix(in srgb, #5aa86a 55%, var(--hair)); }
+#view-day #block-list .msub.ms-miss::before { border-color: color-mix(in srgb, #f29ab5 60%, var(--hair)); border-left-style: dashed; border-bottom-style: dashed; }
+#view-day #block-list .msub.ms-now::before { border-color: var(--pink); }
 </style>
 </head>
 <body>
@@ -6368,7 +6390,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:13:05</footer>
+  <footer>Mr.O:13:18</footer>
 </div>
 
 <script>
