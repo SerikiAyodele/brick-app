@@ -6282,7 +6282,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:36</footer>
+  <footer>Mr.O:12:38</footer>
 </div>
 
 <script>
@@ -8891,7 +8891,7 @@ function renderDayGoal() {
   // ideas: this week's big goal actions not done yet, and yesterday's goal if it was missed
   // the options: your goals for this week (from Goals), then yesterday's goal if it was missed. or type your own
   const ideas = [];
-  try { for (const a of AREAS) for (const g of areaGoals(a.k)) if (g && g.text) ideas.push({ t: g.text, e: a.e }); } catch {}
+  try { const ks = perKeys(0); for (const a of AREAS) for (const g of areaGoals(a.k)) if (g && g.text && (goalScore(g, ks).pct || 0) < 100) ideas.push({ t: g.text, e: a.e }); } catch {}   // goals already done this week are left out
   const yd = state.days[shiftKey(viewDay, -1)];
   if (yd && yd.goal && !yd.goalDone && !ideas.some(x => x.t === yd.goal)) ideas.push({ t: yd.goal, e: '\u21A9\uFE0F' });
   const seen = new Set(), uniq = ideas.filter(x => !seen.has(x.t) && seen.add(x.t));
