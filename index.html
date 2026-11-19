@@ -6387,6 +6387,10 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #addsheet .ab-sum b { font-weight: 600; color: var(--ink); }
 #addsheet .ab-sum i { font-style: normal; color: var(--muted); }
 #addsheet .ls-cancel { background: none !important; border: 0 !important; color: var(--muted) !important; min-height: 44px; }
+
+/* days ahead: planned and free time */
+#total .free-sum { margin-top: 8px; }
+#total .free-sum.over b { color: #d9628a; }
 </style>
 </head>
 <body>
@@ -6668,7 +6672,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:24</footer>
+  <footer>Mr.O:20:27</footer>
 </div>
 
 <script>
@@ -9840,7 +9844,13 @@ function renderDay() {
   const total = document.getElementById('total');
   // work today: all work blocks added up, and how much of it is done
   { const W = day.blocks.filter(b => outcomeField(b.label) === 'goals'), wm = W.reduce((t, b) => t + (Number(b.mins) || 60), 0), wd = W.filter(b => b.done).reduce((t, b) => t + (Number(b.mins) || 60), 0);
-    total.innerHTML = wm ? '<span class="wk-sum">\u{1F4BC} ' + (wd ? '<b>' + dur(wd) + '</b> of <b>' + dur(wm) + '</b> work done' : '<b>' + dur(wm) + '</b> of work today') + '</span>' : ''; }
+    total.innerHTML = wm ? '<span class="wk-sum">\u{1F4BC} ' + (wd ? '<b>' + dur(wd) + '</b> of <b>' + dur(wm) + '</b> work done' : '<b>' + dur(wm) + '</b> of work' + (viewDay === planKey() ? ' today' : '')) + '</span>' : '';
+    // days ahead: how much is planned, and how much time is still free (to your end time, or the whole 24 hours)
+    if (viewDay > planKey() && day.blocks.length) {
+      const room = day.end ? endLimit(day) - toMins(day.start) : 1440, free = room - mins;
+      total.insertAdjacentHTML('beforeend', '<span class="wk-sum free-sum' + (free < 0 ? ' over' : '') + '">\u{1F552} <b>' + dur(mins) + '</b> planned \u00b7 ' +
+        (free > 0 ? '<b>' + dur(free) + '</b> free' : free < 0 ? '<b>' + dur(-free) + '</b> over' : 'full') + '</span>');
+    } }
 
   // where you are inside the plan, right now
   const old = document.getElementById('clockline');
