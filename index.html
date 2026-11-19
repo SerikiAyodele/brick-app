@@ -6261,6 +6261,17 @@ html.kb-open .qn .ns-cancel { display: none; }
 #view-day #block-list .line .took { display: block; margin-top: 2px; font: 500 11px "Inter", system-ui, sans-serif; }
 #view-day #block-list .line .took.over { color: #d9628a; }
 #view-day #block-list .line .took.under { color: #5aa86a; }
+
+/* plan: no gone/left line, no done fold row */
+#view-day#view-day #clockline, #view-day#view-day .donefold { display: none !important; }
+/* how long, smarter */
+#lensheet .ls-smart { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+#lensheet .ls-smart button { display: flex; flex-direction: column; align-items: flex-start; min-height: 44px; padding: 6px 14px; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; cursor: pointer; }
+#lensheet .ls-smart b { font: 600 14px "Inter", system-ui, sans-serif; }
+#lensheet .ls-smart small { font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+#lensheet .ls-end .ls-fx { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
+#lensheet .ls-end .ls-fx.warn { color: #d9628a; }
+#lensheet .ls-rm { min-height: 40px; background: none !important; border: 0 !important; color: #d9628a !important; font-size: 14px !important; }
 </style>
 </head>
 <body>
@@ -6542,7 +6553,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:05</footer>
+  <footer>Mr.O:16:24</footer>
 </div>
 
 <script>
@@ -6777,7 +6788,7 @@ function planMin(k) { return Math.floor((Date.now() - fromKey(k).getTime()) / 60
 
 let viewDay = planKey();
 let noteFor = null;   // the timestamp of the check in being annotated
-let dayShowDone = false;  // finished blocks fold into one line unless opened
+let dayShowDone = true;   // done blocks stay in the list, ticked (no fold row)
 let sortingDay = false;   // planning mode: number, drag, set lengths, then Finish plan
 let sortingKey = null;
 let compactDay = !!state.compact;
@@ -8886,7 +8897,7 @@ function lengthPicker(b, from, len) {
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
       '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2>' +
       (more ? '' : '<p class="ab-sub">Length</p><div class="ls-df"></div>' +
-        '<p class="ab-sub">Add or take off</p><div class="ls-dd"></div><p class="ls-hint">Type a \u2212 in front, or tap Take off, to take time away.</p>' +
+        '<div class="ls-smart"></div>' +
         '<p class="ls-from ls-end"></p><button type="button" class="wka-go ls-save">Save</button><p class="ab-sub" hidden>Or set it</p>') +
       (more
         ? '<div class="ls-step"><button type="button" data-o="-15" aria-label="15 minutes less">\u2212</button><div><b>' + minsLabel(other) + '</b><small>ends ' + clock(from + other) + '</small></div><button type="button" data-o="15" aria-label="15 minutes more">+</button></div>' +
@@ -8903,9 +8914,23 @@ function lengthPicker(b, from, len) {
     const dfBox = el.querySelector('.ls-df');
     if (dfBox) { let typed = len, delta = 0; const endP = el.querySelector('.ls-end');
       const result = () => Math.max(5, Math.min(1440, typed + delta));
-      const paintEnd = () => { const r = result(); endP.innerHTML = '<b>' + minsLabel(r) + '</b> \u00b7 ' + clock(from) + ' to ' + clock(from + r) + (typed + delta < 5 ? ' <i>(5 min is the least)</i>' : ''); };
-      durField(dfBox, len, m => { typed = m; paintEnd(); });
-      durField(el.querySelector('.ls-dd'), 0, m => { delta = m; paintEnd(); }, { signed: true });
+      const paintEnd = () => { const r = result(), dd = r - len, day = state.days[viewDay];
+        let fx = '';
+        if (dd && day) { const after = day.blocks.slice(day.blocks.indexOf(b) + 1).filter(x => !x.done).length;
+          if (after) fx = '<span class="ls-fx">Everything after moves ' + minsLabel(Math.abs(dd)) + (dd > 0 ? ' later' : ' earlier') + '.</span>';
+          if (day.end && dd > 0) { const over = planEndOf(day) + dd - endLimit(day); if (over > 0) fx += '<span class="ls-fx warn">That runs ' + minsLabel(over) + ' past your end time.</span>'; } }
+        endP.innerHTML = '<b>' + minsLabel(r) + '</b> \u00b7 ' + clock(from) + ' to ' + clock(from + r) + fx; };
+      const df = durField(dfBox, len, m => { typed = m; paintEnd(); });
+      // smart picks: your usual, what it really took last time, a little more or less, until the next set time
+      const day = dayFor(viewDay), idx = day.blocks.indexOf(b), picks = [];
+      if (usual && usual !== len) picks.push(['Usual', usual]);
+      { let last = null; for (let n = 1; n <= 30 && !last; n++) for (const x of ((state.days[shiftKey(viewDay, -n)] || {}).blocks || [])) if (x.took && (x.label || '').trim().toLowerCase() === name.toLowerCase()) last = x.took;
+        if (last && last !== len && last !== usual) picks.push(['Last took', Math.round(last / 5) * 5]); }
+      { let at2 = from + len; for (let j = idx + 1; j < day.blocks.length; j++) { const x = day.blocks[j]; if (x.fixedAt) { const u = toMins(x.fixedAt) - from; if (u >= 5 && u !== len) picks.push(['Until ' + (x.label || 'next'), u]); break; } at2 += Number(x.mins) || 60; } }
+      picks.push(['\u221215m', -15], ['+15m', 15]);
+      const sm = el.querySelector('.ls-smart');
+      sm.innerHTML = picks.map(([t, m], i) => '<button type="button" data-pk="' + i + '"><b>' + esc(t) + '</b>' + (t.startsWith('+') || t.startsWith('\u2212') ? '' : '<small>' + minsLabel(m) + '</small>') + '</button>').join('');
+      sm.querySelectorAll('[data-pk]').forEach(x => x.addEventListener('click', () => { const [t, m] = picks[Number(x.dataset.pk)]; typed = Math.max(5, Math.min(1440, (t.startsWith('+') || t.startsWith('\u2212')) ? typed + m : m)); df.set(typed); paintEnd(); }));
       paintEnd();
       el.querySelector('.ls-save').addEventListener('click', () => keep(result())); }
     const o = el.querySelector('[data-other]'); if (o) o.addEventListener('click', () => draw(true));
