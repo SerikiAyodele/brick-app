@@ -6607,7 +6607,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:03</footer>
+  <footer>Mr.O:20:10</footer>
 </div>
 
 <script>
@@ -15696,6 +15696,12 @@ function renderFuel() {
   });
 }
 setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); } catch {} }, 60000);
+// a believable real time: not under a third of the plan, not over double plus half an hour
+function tookOk(took, m) { return took >= Math.max(3, m * 0.33) && took <= m * 2 + 30; }
+// once: clear real times that were really late ticks
+try { if (!localStorage.getItem(KEY + '.tookfix')) { setTimeout(() => { let n = 0;
+  for (const k in state.days) for (const b of (state.days[k].blocks || [])) if (b.took && !tookOk(b.took, Number(b.mins) || 60)) { delete b.took; n++; }
+  if (n) save(); localStorage.setItem(KEY + '.tookfix', '1'); }, 0); } } catch {}
 // real vs planned: when a block is ticked today, how long it really took (from the tick before it, or its planned start)
 function noteTook() {
   const k = planKey(), d = state.days[k]; if (!d || !d.blocks) return;
@@ -15706,7 +15712,9 @@ function noteTook() {
       b.doneAt = Date.now();
       const from = prevDone ? prevDone : fromKey(k).getTime() + at * 60000;
       const took = Math.round((b.doneAt - from) / 60000);
-      if (took > 0 && took < 12 * 60) b.took = took;
+      // only a tick made around the time it ends is a real time. ticking later (or many at once) says nothing about how long it took
+      const batch = prevDone && b.doneAt - prevDone < 3 * 60000;
+      if (!batch && tookOk(took, m)) b.took = took;
     }
     if (b.done && b.doneAt) prevDone = b.doneAt;
     at += m;
