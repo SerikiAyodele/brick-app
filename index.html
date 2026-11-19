@@ -6672,7 +6672,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:27</footer>
+  <footer>Mr.O:20:28</footer>
 </div>
 
 <script>
@@ -10097,10 +10097,12 @@ function suggestRoutines(prevK, target) {
   A.sort((x, y) => { const f = b => /^focus|hardest/i.test(b.label) ? 9 : (order.indexOf(b.label.toLowerCase()) + 1 || 5); return f(x) - f(y); });
   const why = { am: A.map(b => b.why).filter(Boolean), pm: P.map(b => b.why).filter(Boolean).concat(note ? [note] : []) };
   // the routines are the same as the day before: its morning and night, in its order and lengths. the ideas above stay as tips
-  const Y = prevRoutineBlocks(prevK), same = { am: !!(Y && Y.am.length), pm: !!(Y && Y.pm.length) };
+  const Y = prevRoutineBlocks(prevK), same = { am: !!(Y && Y.am.length), mid: !!(Y && Y.mid.length), pm: !!(Y && Y.pm.length) };
   if (same.am) A = Y.am.map(b => ({ label: b.label, mins: b.mins, why: '' }));
   if (same.pm) P = Y.pm.map(b => ({ label: b.label, mins: b.mins, why: '' }));
-  return { am: A, pm: P, why, same, at: { am: Y && Y.amAt, pm: Y && Y.pmAt } };
+  why.mid = [];
+  const M = same.mid ? Y.mid.map(b => ({ label: b.label, mins: b.mins, why: '' })) : [];
+  return { am: A, mid: M, pm: P, why, same, at: { am: Y && Y.amAt, mid: Y && Y.midAt, pm: Y && Y.pmAt } };
 }
 // the day before: morning is what you did before 11am that is not work, night is from 6pm until sleep, not work or dinner
 function prevRoutineBlocks(prevK) {
@@ -10117,7 +10119,9 @@ function prevRoutineBlocks(prevK) {
   // night: from 6pm until sleep, dinner included; work, gym and commutes left out
   const NIGHT_SKIP = /\b(work|meeting|commute|drive|travel|call|class)\b|deep work|^focus|gym|glutes|quads|upper body|hamstrings/i;
   const pm = rows.filter(b => b.from >= 1080 && (!sl || b.from < sl.from) && !NIGHT_SKIP.test(b.label) && !SLEEP_RE.test(b.label) && uniq(b));
-  return { am, pm, amAt: am.length ? am[0].from : null, pmAt: pm.length ? pm[0].from : null };
+  // afternoon: from lunch (or noon) until 6pm, exactly as it was, meetings left out
+  const mid = rows.filter(b => b.from >= amEnd && b.from < 1080 && !/\bmeeting\b|\bcall\b/i.test(b.label) && !SLEEP_RE.test(b.label));
+  return { am, mid, pm, amAt: am.length ? am[0].from : null, midAt: mid.length ? mid[0].from : null, pmAt: pm.length ? pm[0].from : null };
 }
 /* plan for me: a whole day, wake to bed, from your routines, goal, work, gym day and sleep */
 function planForMe(k) {
@@ -10333,31 +10337,33 @@ function renderTomorrowSuggest() {
   // same as yesterday: the whole list, until you add it (work can repeat, so no name check)
   const added = day.tmsAdded || {};
   const pick = kind => (S.same && S.same[kind]) ? (added[kind] ? [] : S[kind]) : S[kind].filter(b => !has(b.label));
-  const amL = pick('am'), pmL = pick('pm');
-  if (!amL.length && !pmL.length) return;
-  const part = (kind, L) => !L.length ? '' : '<div class="tms2-row" data-tmo="' + kind + '" role="button" tabindex="0"><div class="tms2-top"><i>' + (kind === 'am' ? '\u2600\uFE0F' : '\u{1F319}') + '</i><span><b>' + (kind === 'am' ? 'Morning' : 'Night') + '</b><small>' +
+  const LS = { am: pick('am'), mid: pick('mid'), pm: pick('pm') }, amL = LS.am, pmL = LS.pm;
+  const KN = { am: ['\u2600\uFE0F', 'Morning', 'morning'], mid: ['\u{1F324}\uFE0F', 'Afternoon', 'afternoon'], pm: ['\u{1F319}', 'Night', 'night'] };
+  if (!LS.am.length && !LS.mid.length && !LS.pm.length) return;
+  const part = (kind, L) => !L.length ? '' : '<div class="tms2-row" data-tmo="' + kind + '" role="button" tabindex="0"><div class="tms2-top"><i>' + KN[kind][0] + '</i><span><b>' + KN[kind][1] + '</b><small>' +
       (S.at && S.at[kind] != null ? clock(S.at[kind]) + ' \u00b7 ' : '') + minsLabel(L.reduce((t, b) => t + (Number(b.mins) || 0), 0)) + '</small></span><button type="button" class="tms2-add" data-add="' + kind + '">Add</button></div>' +
       '<div class="tms2-chips">' + L.map(b => '<span>' + blockEmoji(b) + ' ' + esc(b.label) + '</span>').join('') + '</div></div>';
   const box = document.createElement('div'); box.className = 'tms tms2';
-  box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small></div>' +
-    '<div class="tms2-card">' + part('am', amL) + part('pm', pmL) + '</div><button type="button" class="tms-no">Not now</button>';
+  box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.mid || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small></div>' +
+    '<div class="tms2-card">' + part('am', LS.am) + part('mid', LS.mid) + part('pm', LS.pm) + '</div><button type="button" class="tms-no">Not now</button>';
   box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const t = box.querySelector('[data-tms-run="' + b.dataset.add + '"]'); if (t) t.click(); }));
   box.querySelectorAll('[data-tmo]').forEach(btn => btn.addEventListener('click', () => {
-    const kind = btn.dataset.tmo, L = kind === 'am' ? amL : pmL, W = kind === 'am' ? S.why.am : S.why.pm;
-    const pg = bigPage((kind === 'am' ? '\u2600\uFE0F Morning' : '\u{1F319} Night') + (S.same && S.same[kind] ? '' : ' ideas'), 'For ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])));
+    const kind = btn.dataset.tmo, L = LS[kind], W = S.why[kind] || [];
+    const pg = bigPage(KN[kind][0] + ' ' + KN[kind][1] + (S.same && S.same[kind] ? '' : ' ideas'), 'For ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])));
     pg.querySelector('.bpg-body').innerHTML = '<ol class="bpg-day">' + L.map(b => '<li><i>' + blockEmoji(b) + '</i><b>' + esc(b.label) + (b.why ? '<small>' + esc(b.why) + '</small>' : '') + '</b><em>' + minsLabel(b.mins) + '</em></li>').join('') + '</ol>' +
       (W.length && !L.some(b => b.why) ? '<p class="bpg-note">' + (S.same && S.same[kind] ? '\u{1F4A1} ' : '') + W.map(esc).join(' ') + '</p>' : '') +
-      '<div class="bpg-btns"><button type="button" class="wka-go" data-tms="' + kind + '">Add to the ' + (kind === 'am' ? 'morning' : 'night') + '</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
+      '<div class="bpg-btns"><button type="button" class="wka-go" data-tms="' + kind + '">Add to the ' + KN[kind][2] + '</button><button type="button" class="ls-cancel bpg-no">Back</button></div>';
     pg.querySelector('.bpg-no').addEventListener('click', () => pg.remove());
     pg.querySelector('[data-tms]').addEventListener('click', () => { pg.remove(); const t = box.querySelector('[data-tms-run="' + kind + '"]'); if (t) t.click(); });
   }));
-  box.insertAdjacentHTML('beforeend', '<button type="button" hidden data-tms-run="am"></button><button type="button" hidden data-tms-run="pm"></button>');
+  box.insertAdjacentHTML('beforeend', '<button type="button" hidden data-tms-run="am"></button><button type="button" hidden data-tms-run="mid"></button><button type="button" hidden data-tms-run="pm"></button>');
   box.querySelectorAll('[data-tms-run]').forEach(btn => btn.addEventListener('click', () => {
-    const kind = btn.dataset.tmsRun, L = (kind === 'am' ? amL : pmL).map(b => ({ label: b.label, mins: b.mins }));
-    if (kind === 'am') { day.blocks.unshift(...L); if (S.same && S.same.am && S.at && S.at.am != null) day.start = hhmm(((S.at.am % 1440) + 1440) % 1440); } else day.blocks.push(...L);
+    const kind = btn.dataset.tmsRun, L = LS[kind].map(b => ({ label: b.label, mins: b.mins }));
+    if (kind === 'mid') { const at = S.at && S.at.mid != null ? S.at.mid : 720, sl = slotFor(day.blocks, day.start, at); day.blocks.splice(sl.i, 0, ...L); }
+    else if (kind === 'am') { day.blocks.unshift(...L); if (S.same && S.same.am && S.at && S.at.am != null) day.start = hhmm(((S.at.am % 1440) + 1440) % 1440); } else day.blocks.push(...L);
     day.tmsAdded = Object.assign({}, day.tmsAdded, { [kind]: true });
     day.touched = true; save(); renderDay(); renderHabits();
-    offerUndo(kind === 'am' ? '=Added your morning' : '=Added your night', () => { L.forEach(b => { const i = day.blocks.indexOf(b); if (i >= 0) day.blocks.splice(i, 1); }); save(); renderDay(); });
+    offerUndo('=Added your ' + KN[kind][2], () => { L.forEach(b => { const i = day.blocks.indexOf(b); if (i >= 0) day.blocks.splice(i, 1); }); save(); renderDay(); });
   }));
   box.querySelector('.tms-no').addEventListener('click', () => { day.noSuggest = true; save(); renderTomorrowSuggest(); });
   slot.appendChild(box);
