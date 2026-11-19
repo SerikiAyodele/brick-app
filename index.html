@@ -6367,6 +6367,26 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 @keyframes swr { from { opacity: .4; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
 #view-day.sw-l { animation: swl .25s cubic-bezier(.22, 1, .36, 1); }
 #view-day.sw-r { animation: swr .25s cubic-bezier(.22, 1, .36, 1); }
+
+/* how long, cleaner: big length, one row of quick picks, then when, then a start to end line */
+#addsheet .ab-dur { margin-top: 4px; }
+#addsheet .df2 label { min-height: 72px; justify-content: center; gap: 6px; background: color-mix(in srgb, var(--ink) 5%, var(--card)); border: 0; border-radius: 20px; }
+#addsheet .df2 input { flex: none; width: 2.4ch; font-size: 34px; text-align: right; }
+#addsheet .df2 span { font-size: 15px; }
+#addsheet .ls-list.ab-chips { flex-wrap: nowrap !important; overflow-x: auto; margin: 12px -20px 20px !important; padding: 0 20px; scrollbar-width: none; }
+#addsheet .ab-chips::-webkit-scrollbar { display: none; }
+#addsheet .ab-chips .ls-row { min-height: 38px !important; padding: 0 14px !important; border: 0 !important; background: color-mix(in srgb, var(--ink) 6%, var(--card)) !important; }
+#addsheet .ab-chips .ls-row.on { color: #fff; background: var(--pink) !important; }
+#addsheet .ab-chips .ls-row.on b, #addsheet .ab-chips .ls-row.on i { color: #fff; }
+#addsheet .ab-sub { margin: 0 0 8px; }
+#addsheet .ab-when { margin-bottom: 0; }
+#addsheet .ab-when button, #addsheet .ab-when .ab-pick { padding: 8px 12px !important; border: 0 !important; background: color-mix(in srgb, var(--ink) 5%, var(--card)) !important; border-radius: 16px !important; }
+#addsheet .ab-when button.on, #addsheet .ab-when .ab-pick.on { background: color-mix(in srgb, var(--pink) 16%, var(--card)) !important; box-shadow: inset 0 0 0 1.5px var(--pink); }
+#addsheet .ab-when .ab-pick input { font-size: 17px; }
+#addsheet .ab-sum { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 18px 0 14px; font-size: 18px; }
+#addsheet .ab-sum b { font-weight: 600; color: var(--ink); }
+#addsheet .ab-sum i { font-style: normal; color: var(--muted); }
+#addsheet .ls-cancel { background: none !important; border: 0 !important; color: var(--muted) !important; min-height: 44px; }
 </style>
 </head>
 <body>
@@ -6648,7 +6668,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:21</footer>
+  <footer>Mr.O:20:24</footer>
 </div>
 
 <script>
@@ -10465,11 +10485,12 @@ function addBlockSheet(preset, insertAt) {
         '<ul class="abx-list" id="abx-list"></ul>';
     } else {
       const usual = usualLength(pick.label) || pick.mins || null;
-      let opts = [15, 30, 45, 60, 90, 120];
-      if (usual && !opts.includes(usual)) opts = [usual, ...opts];
-      opts.sort((a, b) => (b === usual) - (a === usual));
+      let opts = [5, 15, 30, 45, 60, 90, 120];
+      if (usual && !opts.includes(usual)) opts = [...opts, usual].sort((a, b) => a - b);
       html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div>' +
         (outcomeField(pick.label) === 'goals' ? '<input type="text" class="ab-goal ab-title2" maxlength="60" placeholder="Title (optional), e.g. Zart campaign" aria-label="title">' : '') + '<h2>How long?</h2>' +
+        '<div class="ab-dur"></div>' +
+        '<div class="ls-list ab-chips">' + opts.map(m => '<button type="button" class="ls-row' + (m === (usual || 60) ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>usual</i>' : '') + '</button>').join('') + '</div>' +
         (() => { const u = Number.isInteger(insertAt) ? null : usualStart(pick.label), sl = u === null ? null : slotFor(day.blocks, day.start, u);
           pick.sug = sl && sl.i < day.blocks.length ? sl : null; if (pick.where === undefined) pick.where = 'end';
           const pv = Number.isFinite(pick.at) ? hhmm(pick.at) : hhmm(endOfDay);
@@ -10477,8 +10498,7 @@ function addBlockSheet(preset, insertAt) {
             '<label class="ab-pick' + (pick.where === 'pick' ? ' on' : '') + '"><small>Choose time</small><input type="time" class="ab-tm" step="300" value="' + pv + '" aria-label="choose a start time"></label>' +
             '<button type="button" data-where="end"' + (pick.where === 'end' ? ' class="on"' : '') + '><b>' + clock(endOfDay) + '</b><small>at the end</small></button>' +
             (pick.sug ? '<button type="button" data-where="usual"' + (pick.where === 'usual' ? ' class="on"' : '') + '><b>' + clock(pick.sug.at) + '</b><small>your usual</small></button>' : '') + '</div>'; })() +
-        '<div class="ab-dur"></div><p class="wk2-ends">Starts at <b class="ab-st">' + clock(abStart()) + '</b> \u00b7 ends at <b class="ab-end">' + clock(abStart() + (usual || 60)) + '</b></p>' +
-        '<div class="ls-list ab-chips">' + opts.map(m => '<button type="button" class="ls-row' + (m === usual ? ' on' : '') + '" data-m="' + m + '"><b>' + minsLabel(m) + '</b>' + (m === usual ? '<i>' + (usualLength(pick.label) ? 'your usual' : 'usual') + '</i>' : '') + (endOfDay + m < 1440 ? '<small>ends ' + clock(abStart() + m) + '</small>' : '') + '</button>').join('') + '</div>' +
+        '<p class="wk2-ends ab-sum"><b class="ab-st">' + clock(abStart()) + '</b><i>\u2192</i><b class="ab-end">' + clock(abStart() + (usual || 60)) + '</b></p>' +
         '<button type="button" class="wka-go ab-add">Add</button>';
     }
     html += '<button type="button" class="ls-cancel">Cancel</button></div>';
