@@ -6297,6 +6297,31 @@ html.kb-open .qn .ns-cancel { display: none; }
 #view-day#view-day .donefold em { flex: 1; font-style: normal; font-size: 15px; letter-spacing: 2px; text-align: right; opacity: .85; }
 #view-day#view-day .donefold u { text-decoration: none; font-size: 16px; color: var(--muted); transition: transform .25s; }
 #view-day#view-day .donefold.open u { transform: rotate(180deg); }
+
+/* health: five things, one glance each */
+.hh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.hh-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 156px; padding: 14px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 11%, var(--card)); border: 0; border-radius: 22px; cursor: pointer; min-width: 0; }
+.hh-top { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.hh-top i { font-style: normal; font-size: 16px; }
+.hh-card b { margin-top: 8px; font-size: 28px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.hh-card b i { font-style: normal; font-size: 15px; font-weight: 500; color: var(--muted); }
+.hh-card small { font-size: 12px; line-height: 1.35; color: var(--muted); }
+.hh-bars { display: flex; align-items: flex-end; gap: 4px; width: 100%; height: 30px; margin-top: auto; padding-top: 8px; box-sizing: content-box; }
+.hh-bars u { flex: 1; border-radius: 3px; background: var(--c); }
+.hh-bars u.low { background: #d9628a; }
+.hh-bars u.none { background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.hh-drops { display: flex; gap: 4px; margin-top: 8px; }
+.hh-drops u { width: 10px; height: 13px; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; background: color-mix(in srgb, var(--ink) 10%, transparent); transition: background .3s; }
+.hh-drops u.on { background: var(--c); }
+.hh-water.pop .hh-drops u.on:nth-child(1n) { animation: pop .35s cubic-bezier(.3, 1.6, .5, 1); }
+.hh-wbtns { display: flex; gap: 6px; width: 100%; margin-top: auto; padding-top: 10px; }
+.hh-wbtns button { flex: 1; min-height: 40px; font: 600 14px "Poppins", sans-serif; color: #fff; background: var(--c); border: 0; border-radius: 12px; cursor: pointer; }
+.hh-wbtns button.less { flex: none; width: 40px; color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.hh-energy { margin-top: 10px; padding: 14px; border-radius: 22px; background: color-mix(in srgb, #f0b35a 11%, var(--card)); }
+.hh-ehead { display: flex; align-items: center; justify-content: space-between; }
+.hh-ehead button { min-height: 40px; padding: 0 14px; font: 500 14px "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 0; border-radius: 12px; cursor: pointer; }
+.hh-energy .ml { margin: 6px 0 0; padding: 0; background: none; border: 0; }
+.hh-log { display: block; margin-top: 6px; padding: 8px 0; font: 500 14px "Poppins", sans-serif; color: var(--muted); background: none; border: 0; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -6578,7 +6603,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:46</footer>
+  <footer>Mr.O:16:54</footer>
 </div>
 
 <script>
@@ -16204,7 +16229,7 @@ function quickSheet(kind) {
   el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet qs-cute"><span class="w3-grab"></span><div class="qs-body"></div></div>';
   document.body.appendChild(el);
   const body = el.querySelector('.qs-body');
-  const close = () => { el.remove(); renderHome(); };
+  const close = () => { el.remove(); renderHome(); if (document.body.dataset.view === 'life') renderLife(); };
   el.querySelector('.w3-back').addEventListener('click', close);
   if (kind === 'sleep') return sleepSheet(body, close);
   moodSheet(body, close, el);
@@ -17322,7 +17347,52 @@ function moodLinksHtml() {
   if (L.down.length) h += '<p class="ml-sub down">You feel worse on days you</p><ul class="ml-list">' + L.down.map(r => '<li><b>' + r.name + '</b><small>' + r.n + ' days</small></li>').join('') + '</ul>';
   return h + '</div>';
 }
+// health: sleep, water, move, food and energy, one glance each
+const WATER_GOAL = 8;
+function waterToday() { const t = todayKey(); return (state.food || []).filter(f => key(new Date(f.at)) === t && entryKinds(f).includes('water')); }
+function healthPage(box) {
+  const tk = todayKey(), sl = sleepOn(tk), sm = sl ? sleepMins(sl) : 0;
+  const nights = []; for (let i = 6; i >= 0; i--) { const e = sleepOn(shiftKey(tk, -i)); nights.push(e ? sleepMins(e) || 0 : 0); }
+  const W = waterToday().length, g = tileFor('gym'), f = tileFor('food');
+  const last = (state.moods || []).slice().sort((x, y) => y.at - x.at)[0];
+  const lm = last && key(new Date(last.at)) === tk ? MOODS.find(m => m.k === last.mood) : null;
+  const top = (e, t) => '<span class="hh-top"><i>' + e + '</i>' + t + '</span>';
+  box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">Health</h1>' +
+    '<div class="hh-grid">' +
+      '<button type="button" class="hh-card" data-h="sleep" style="--c:#8f8fe0">' + top('\u{1F634}', 'Sleep') + '<b>' + (sm ? dur(sm) : 'Log') + '</b><small>' + (sl ? clock(toMins(sl.bed)) + ' to ' + clock(toMins(sl.wake)) : 'last night') + '</small>' +
+        '<span class="hh-bars" aria-label="last 7 nights">' + nights.map(m => '<u style="height:' + Math.max(10, Math.min(100, Math.round(m / 600 * 100))) + '%" class="' + (!m ? 'none' : m < 420 ? 'low' : '') + '"></u>').join('') + '</span></button>' +
+      '<div class="hh-card hh-water" style="--c:#5fa8dc">' + top('\u{1F4A7}', 'Water') + '<b>' + W + '<i>/' + WATER_GOAL + '</i></b><small>' + (W >= WATER_GOAL ? 'done for today' : (WATER_GOAL - W) + ' glasses to go') + '</small>' +
+        '<span class="hh-drops">' + Array.from({ length: WATER_GOAL }, (_, i) => '<u class="' + (i < W ? 'on' : '') + '"></u>').join('') + '</span>' +
+        '<span class="hh-wbtns">' + (W ? '<button type="button" class="less" data-w="-1" aria-label="one glass less">\u2212</button>' : '') + '<button type="button" data-w="1">+ glass</button></span></div>' +
+      '<button type="button" class="hh-card" data-h="gym" style="--c:#7daf86">' + top('\u{1F3C3}\u200D\u2640\uFE0F', 'Move') + '<b>' + g.big + (g.unit ? '<i>' + esc(g.unit) + '</i>' : '') + '</b><small>' + esc(g.cap || '') + '</small></button>' +
+      '<button type="button" class="hh-card" data-h="food" style="--c:#e0a35a">' + top('\u{1F37D}\uFE0F', 'Food') + '<b>' + f.big + (f.unit ? '<i>' + esc(f.unit) + '</i>' : '') + '</b><small>' + esc(f.cap || '') + '</small></button>' +
+    '</div>' +
+    '<div class="hh-energy">' +
+      '<div class="hh-ehead">' + top('\u26A1', 'Energy') + '<button type="button" data-h="checkin">' + (lm ? lm.e + ' ' + lm.k : 'Check in') + '</button></div>' +
+      moodLinksHtml() +
+      '<button type="button" class="hh-log" data-h="mood">Health log \u203a</button>' +
+    '</div>';
+  box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; show('home'); window.scrollTo(0, 0); });
+  box.querySelectorAll('[data-h]').forEach(b => b.addEventListener('click', () => {
+    const h = b.dataset.h;
+    if (h === 'sleep') return quickSheet('sleep');
+    if (h === 'checkin') return quickSheet('mood');
+    show(h); window.scrollTo(0, 0);
+  }));
+  box.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.w === '1') {
+      state.food.unshift({ id: Date.now() + '', at: Date.now(), what: 'Water', meal: mealFor('water') });
+      state.food.sort((x, y) => y.at - x.at);
+      try { navigator.vibrate && navigator.vibrate(8); } catch {}
+    } else {
+      const w = waterToday()[0]; if (w) state.food = state.food.filter(x => x !== w);
+    }
+    save(); renderLife();
+    const c = document.querySelector('.hh-water'); if (c && b.dataset.w === '1') c.classList.add('pop');
+  }));
+}
 function areaPortals(box, a) {
+  if (a.k === 'health') return healthPage(box);
   const gs = areaGoals(a.k), j = a.k === 'health' ? activeJourney() : null;
   const tabs = (AREA_PAGES[a.k] || []).concat(a.k === 'love' ? ['love'] : []);
   const doors = tabs.map(tab => {
