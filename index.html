@@ -6244,6 +6244,14 @@ html.kb-open .qn .ns-cancel { display: none; }
 .sg-fr .sg-mn input { width: 34px !important; padding: 0 !important; text-align: right; font: 600 15px "Inter", system-ui, sans-serif !important; }
 .sg-fr .sg-mn small { font-size: 13px; color: var(--muted); }
 .bpg .bpg-btns .ls-cancel { min-height: 40px; background: none !important; color: var(--muted) !important; }
+
+/* to do: drag into the plan */
+#dump-slot .bd-list li { position: relative; }
+#dump-slot .bd-drag { flex: none; display: grid; place-items: center; width: 26px; min-height: 40px; margin-left: -4px; font-size: 18px; color: var(--muted); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+#dump-slot .bd-list li.td-dragging { opacity: .35; }
+.td-ghost { position: fixed; left: 0; top: 0; z-index: 90; max-width: 70vw; padding: 10px 14px; font: 600 15px "Inter", system-ui, sans-serif; color: var(--paper); background: var(--ink); border-radius: 14px; box-shadow: 0 14px 30px -10px rgba(0,0,0,.45); pointer-events: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-bar { position: fixed; z-index: 89; display: none; height: 3px; border-radius: 2px; background: var(--pink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 25%, transparent); pointer-events: none; }
+#view-day #block-list .line.td-into { outline: 2px dashed var(--pink); outline-offset: -2px; border-radius: 12px; background: color-mix(in srgb, var(--pink) 8%, transparent) !important; }
 </style>
 </head>
 <body>
@@ -6525,7 +6533,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:06:18</footer>
+  <footer>Mr.O:15:51</footer>
 </div>
 
 <script>
@@ -9795,6 +9803,61 @@ function planTodoSheet(x) {
   document.body.appendChild(el);
   step1();
 }
+// drag a to do into the plan: drop between blocks (it becomes a block there) or onto a work block (it becomes a task)
+function todoDrag(e, x, li) {
+  e.preventDefault();
+  const day = dayFor(viewDay), list = document.getElementById('block-list');
+  if (!list || document.getElementById('view-day').classList.contains('dv-cal')) { planTodoSheet(x); return; }
+  const ghost = document.createElement('div'); ghost.className = 'td-ghost'; ghost.textContent = x.text; document.body.appendChild(ghost);
+  const bar = document.createElement('div'); bar.className = 'td-bar'; document.body.appendChild(bar);
+  li.classList.add('td-dragging');
+  let target = null, scrollT = null;
+  const rows = () => [...list.querySelectorAll('.line[data-i]')];
+  const place = (cx, cy) => {
+    ghost.style.transform = 'translate(' + (cx - 20) + 'px,' + (cy - 22) + 'px)';
+    rows().forEach(r => r.classList.remove('td-into'));
+    bar.style.display = 'none'; target = null;
+    const R = rows(); if (!R.length) { const lr = list.getBoundingClientRect(); if (cy > lr.top - 40 && cy < lr.bottom + 60) target = { at: 0 }; return; }
+    const first = R[0].getBoundingClientRect(), last = R[R.length - 1].getBoundingClientRect();
+    if (cy < first.top - 50 || cy > last.bottom + 60) return;          // not over the plan
+    for (const r of R) {
+      const b = r.getBoundingClientRect(), i = Number(r.dataset.i), blk = day.blocks[i];
+      if (cy >= b.top && cy <= b.bottom) {
+        const mid = cy > b.top + b.height * .3 && cy < b.bottom - b.height * .3;
+        if (mid && blk && !blk.done && outcomeField(blk.label) === 'goals') { r.classList.add('td-into'); target = { into: i }; return; }
+        target = { at: cy < b.top + b.height / 2 ? i : i + 1 };
+        bar.style.display = 'block'; bar.style.top = (cy < b.top + b.height / 2 ? b.top : b.bottom) - 1 + 'px'; bar.style.left = b.left + 'px'; bar.style.width = b.width + 'px';
+        return;
+      }
+    }
+    target = { at: cy < first.top ? Number(R[0].dataset.i) : day.blocks.length };
+    bar.style.display = 'block'; bar.style.top = (cy < first.top ? first.top : last.bottom) - 1 + 'px'; bar.style.left = first.left + 'px'; bar.style.width = first.width + 'px';
+  };
+  const move = ev => { place(ev.clientX, ev.clientY);
+    clearInterval(scrollT); const edge = 80;
+    if (ev.clientY < edge) scrollT = setInterval(() => { scrollBy(0, -14); place(ev.clientX, ev.clientY); }, 16);
+    else if (ev.clientY > innerHeight - edge) scrollT = setInterval(() => { scrollBy(0, 14); place(ev.clientX, ev.clientY); }, 16); };
+  const end = () => {
+    removeEventListener('pointermove', move); removeEventListener('pointerup', end); removeEventListener('pointercancel', end); clearInterval(scrollT);
+    ghost.remove(); bar.remove(); li.classList.remove('td-dragging'); rows().forEach(r => r.classList.remove('td-into'));
+    if (!target) return;
+    const L = state.dump || [];
+    if (target.into !== undefined) {
+      const b = day.blocks[target.into]; b.goals = b.goals || [];
+      if (b.goals.length < MAX_GOALS) b.goals.push({ text: x.text, done: false }); else { b.extras = b.extras || []; b.extras.push({ id: x.id, text: x.text, done: false }); }
+      x.done = true; x.doneAt = Date.now(); x.planned = true; save(); renderDay();
+      offerUndo('=Added to ' + ((b.title || '').trim() || b.label || 'Work'), () => { b.goals = b.goals.filter(g => g.text !== x.text); if (b.extras) b.extras = b.extras.filter(z => z.id !== x.id); x.done = false; x.planned = false; save(); renderDay(); });
+    } else {
+      const nb = { label: x.text.slice(0, 60), mins: Number(x.mins) || usualLength(x.text) || 30, done: false };
+      day.blocks.splice(Math.max(0, Math.min(day.blocks.length, target.at)), 0, nb); day.touched = true;
+      x.done = true; x.doneAt = Date.now(); x.planned = true; save(); renderDay(); renderHabits();
+      offerUndo('=Moved into your plan', () => { const j = day.blocks.indexOf(nb); if (j > -1) day.blocks.splice(j, 1); x.done = false; x.planned = false; save(); renderDay(); });
+    }
+    try { navigator.vibrate && navigator.vibrate(10); } catch {}
+  };
+  addEventListener('pointermove', move); addEventListener('pointerup', end); addEventListener('pointercancel', end);
+  place(e.clientX, e.clientY);
+}
 function renderDump() {
   const slot = document.getElementById('dump-slot');
   if (!slot) return;
@@ -9806,7 +9869,7 @@ function renderDump() {
   const open = L.filter(x => !x.done), doneToday = L.filter(x => x.done && key(new Date(x.doneAt || x.at)) === t);
   slot.innerHTML = '<section class="bd"><div class="bd-h"><b>To do</b><small>' + (open.length ? open.length + ' open' : 'not in the plan yet') + '</small></div>' +
     '<div class="bd-add"><input type="text" maxlength="140" placeholder="Add a to do" aria-label="add a to do"><button type="button" aria-label="add">+</button></div>' +
-    (open.length ? '<ul class="bd-list">' + open.map(x => '<li><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
+    (open.length ? '<ul class="bd-list">' + open.map(x => '<li data-tdid="' + x.id + '"><span class="bd-drag" aria-label="drag into your plan">\u283F</span><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
     (doneToday.length ? '<button type="button" class="bd-done">' + (dumpOpenDone ? 'Hide' : 'Show') + ' ' + doneToday.length + ' done</button>' +
       (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
     (N.length ? '<button type="button" class="bd-done bd-nt">' + (dumpNotesOpen ? 'Hide' : 'Notes from earlier \u00b7') + ' ' + N.length + '</button>' +
@@ -9820,6 +9883,7 @@ function renderDump() {
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
   slot.querySelectorAll('[data-dt]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dt); if (!x) return; x.done = !x.done; x.doneAt = Date.now(); save(); renderDump(); }));
   slot.querySelectorAll('[data-dp]').forEach(b => b.addEventListener('click', () => { const x = L.find(y => y.id === b.dataset.dp); if (!x) return; planTodoSheet(x); }));
+  slot.querySelectorAll('.bd-drag').forEach(h => h.addEventListener('pointerdown', e => { const li = h.closest('li'), x = L.find(y => y.id === li.dataset.tdid); if (x) todoDrag(e, x, li); }));
   const dd = slot.querySelector('.bd-done:not(.bd-nt)'); if (dd) dd.addEventListener('click', () => { dumpOpenDone = !dumpOpenDone; renderDump(); });
   const nt = slot.querySelector('.bd-nt'); if (nt) nt.addEventListener('click', () => { dumpNotesOpen = !dumpNotesOpen; renderDump(); });
   slot.querySelectorAll('[data-nd]').forEach(b => b.addEventListener('click', () => { const x = (state.dumpNotes || []).find(y => y.id === b.dataset.nd); if (x) { x.gone = true; save(); renderDump(); } }));
