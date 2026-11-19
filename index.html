@@ -6411,6 +6411,13 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #lensheet .ls-end .ls-fx { margin-top: 6px; }
 #lensheet .ls-rm { margin-top: 4px; }
 #lensheet .ls-cancel { min-height: 44px; background: none !important; border: 0 !important; color: var(--muted) !important; }
+
+/* goal picks: soft pills under the line, not a boxed list */
+#view-day .dg-ask .dg-dd { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; background: none; border: 0; border-radius: 0; overflow: visible; animation: fadein .2s ease-out; }
+#view-day .dg-ask .dg-dd[hidden] { display: none; }
+#view-day .dg-ask .dg-dd button { width: auto; min-height: 36px; gap: 6px; padding: 0 12px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, var(--card)); border: 0; border-radius: 999px; }
+#view-day .dg-ask .dg-dd button i { font-size: 13px; }
+#view-day .dg-ask .dg-dd button:active { background: color-mix(in srgb, var(--pink) 18%, var(--card)); }
 </style>
 </head>
 <body>
@@ -6692,7 +6699,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:30</footer>
+  <footer>Mr.O:20:41</footer>
 </div>
 
 <script>
