@@ -6300,7 +6300,7 @@ html.kb-open .qn .ns-cancel { display: none; }
 
 /* health: five things, one glance each */
 .hh-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-.hh-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 156px; padding: 14px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 11%, var(--card)); border: 0; border-radius: 22px; cursor: pointer; min-width: 0; }
+.hh-card { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 132px; padding: 14px; text-align: left; font-family: "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 11%, var(--card)); border: 0; border-radius: 22px; cursor: pointer; min-width: 0; }
 .hh-top { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
 .hh-top i { font-style: normal; font-size: 16px; }
 .hh-card b { margin-top: 8px; font-size: 28px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
@@ -6322,6 +6322,10 @@ html.kb-open .qn .ns-cancel { display: none; }
 .hh-ehead button { min-height: 40px; padding: 0 14px; font: 500 14px "Poppins", sans-serif; color: var(--ink); background: var(--card); border: 0; border-radius: 12px; cursor: pointer; }
 .hh-energy .ml { margin: 6px 0 0; padding: 0; background: none; border: 0; }
 .hh-log { display: block; margin-top: 6px; padding: 8px 0; font: 500 14px "Poppins", sans-serif; color: var(--muted); background: none; border: 0; cursor: pointer; }
+
+/* health: no big gap under the page */
+body[data-view="life"] .wrap.wrap { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important; }
+body[data-view="life"] footer { margin-top: 12px !important; }
 </style>
 </head>
 <body>
@@ -6603,7 +6607,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:54</footer>
+  <footer>Mr.O:17:03</footer>
 </div>
 
 <script>
