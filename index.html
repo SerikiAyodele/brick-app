@@ -6263,7 +6263,7 @@ html.kb-open .qn .ns-cancel { display: none; }
 #view-day #block-list .line .took.under { color: #5aa86a; }
 
 /* plan: no gone/left line, no done fold row */
-#view-day#view-day #clockline, #view-day#view-day .donefold { display: none !important; }
+#view-day#view-day #clockline { display: none !important; }
 /* how long, smarter */
 #lensheet .ls-smart { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
 #lensheet .ls-smart button { display: flex; flex-direction: column; align-items: flex-start; min-height: 44px; padding: 6px 14px; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 14px; cursor: pointer; }
@@ -6272,6 +6272,31 @@ html.kb-open .qn .ns-cancel { display: none; }
 #lensheet .ls-end .ls-fx { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
 #lensheet .ls-end .ls-fx.warn { color: #d9628a; }
 #lensheet .ls-rm { min-height: 40px; background: none !important; border: 0 !important; color: #d9628a !important; font-size: 14px !important; }
+
+/* move: best order, steps, set dots */
+.gm-order { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.gm-order button { padding: 6px 0; font: 500 13px "Poppins", sans-serif; color: var(--pink); background: none; border: none; cursor: pointer; }
+#view-gym .gm-list { border-top: none; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+#view-gym .gm-list .gm-ex { border: none; border-radius: 18px; background: color-mix(in srgb, var(--ink) 4%, var(--card)); padding: 0 14px; transition: background .3s; }
+#view-gym .gm-row { gap: 14px; min-height: 68px; }
+#view-gym .gm-step { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 600; color: var(--muted); background: var(--hair); font-variant-numeric: tabular-nums; }
+#view-gym .gm-ex.on .gm-step { color: #fff; background: #7daf86; }
+#view-gym .gm-ex.on { opacity: .62; }
+#view-gym .gm-ex.next { background: color-mix(in srgb, var(--pink) 10%, var(--card)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--pink) 45%, transparent); }
+#view-gym .gm-ex.next .gm-step { color: #fff; background: var(--pink); }
+#view-gym .gm-rt em { font-style: normal; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--pink); }
+.gm-dots { display: flex; gap: 5px; margin-top: 5px; }
+.gm-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--hair); transition: background .3s, transform .3s; }
+.gm-dots i.on { background: #7daf86; transform: scale(1.1); }
+
+/* plan: the done fold, back and softer */
+#view-day#view-day .donefold { display: flex !important; align-items: center; gap: 10px; min-height: 48px; margin: 0 0 8px; padding: 0 14px; background: color-mix(in srgb, #7daf86 10%, var(--card)); border: 0; border-radius: 16px; font: 500 15px "Inter", system-ui, sans-serif; color: var(--ink); }
+#view-day#view-day .donefold i { width: 24px; height: 24px; font-size: 12px; background: #7daf86; }
+#view-day#view-day .donefold b { flex: none; display: flex; align-items: baseline; gap: 8px; font-weight: 600; }
+#view-day#view-day .donefold b small { font-weight: 400; font-size: 13px; color: var(--muted); }
+#view-day#view-day .donefold em { flex: 1; font-style: normal; font-size: 15px; letter-spacing: 2px; text-align: right; opacity: .85; }
+#view-day#view-day .donefold u { text-decoration: none; font-size: 16px; color: var(--muted); transition: transform .25s; }
+#view-day#view-day .donefold.open u { transform: rotate(180deg); }
 </style>
 </head>
 <body>
@@ -6553,7 +6578,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:24</footer>
+  <footer>Mr.O:16:46</footer>
 </div>
 
 <script>
@@ -6788,7 +6813,7 @@ function planMin(k) { return Math.floor((Date.now() - fromKey(k).getTime()) / 60
 
 let viewDay = planKey();
 let noteFor = null;   // the timestamp of the check in being annotated
-let dayShowDone = true;   // done blocks stay in the list, ticked (no fold row)
+let dayShowDone = (() => { try { return localStorage.getItem(KEY + '.showdone') === '1'; } catch { return false; } })();   // done blocks fold into one soft row
 let sortingDay = false;   // planning mode: number, drag, set lengths, then Finish plan
 let sortingKey = null;
 let compactDay = !!state.compact;
@@ -9331,8 +9356,11 @@ function renderDay() {
       if (i === 0) {
         const f = document.createElement('button');
         f.type = 'button'; f.className = 'donefold' + (dayShowDone ? ' open' : '');
-        f.innerHTML = '<i>\u2713</i><b>' + firstOpen + ' done</b><span>' + (dayShowDone ? 'hide' : 'show') + '</span>';
-        f.addEventListener('click', () => { dayShowDone = !dayShowDone; renderDay(); });
+        const doneB = day.blocks.slice(0, firstOpen), doneM = doneB.reduce((t, x) => t + (Number(x.mins) || 0), 0);
+        const emo = [...new Set(doneB.map(x => blockEmoji(x)).filter(Boolean))].slice(0, 5).join('');
+        f.innerHTML = '<i>\u2713</i><b>' + firstOpen + ' done<small>' + minsLabel(doneM) + '</small></b><em>' + emo + '</em><u aria-hidden="true">\u2304</u>';
+        f.setAttribute('aria-label', firstOpen + ' done, tap to ' + (dayShowDone ? 'fold' : 'show'));
+        f.addEventListener('click', () => { dayShowDone = !dayShowDone; try { localStorage.setItem(KEY + '.showdone', dayShowDone ? '1' : '0'); } catch {} renderDay(); });
         sheet.appendChild(f);
       }
       if (!dayShowDone) return;
@@ -14571,6 +14599,18 @@ function profileView(body) {
 }
 let gymProfile = false;
 
+// how demanding a move is: 0 big lifts, 1 strong accessories, 2 small isolation, 3 core, 4 cardio or stretch
+const TIER_WHY = ['big lift, do it fresh', 'strong move, still fresh', 'smaller move', 'core near the end', 'finish with this'];
+function exTier(it) {
+  const n = (it.nm || '').toLowerCase();
+  if (/\b(run|running|jog|walk|walking|treadmill|bike|cycling|stairs?|stairmaster|rowing machine|elliptical|jump rope|skipping|cardio|stretch|stretching|cool ?down|hiit|sprints?)\b/.test(n)) return 4;
+  if (/\babs?\b|crunch|plank|leg raise|knee raise|twist|dead ?bug|hollow|sit.?up|core|woodchop|wood chop|pallof|oblique|ab wheel|bicycle/.test(n) || it.sets.every(s => s.hold)) return 3;
+  if (/kickback|abduct|adduct|curl|raise|fly|flye|pushdown|push-down|tricep|bicep|calf|leg extension|face pull|shrug|frog pump|clam|band|pull ?over/.test(n)) return 2;
+  if (/squat|deadlift|\brdl\b|hip thrust|bench|overhead press|shoulder press|military|pull ?-?up|chin ?-?up|leg press|hack|clean|snatch|good ?morning/.test(n)) return 0;
+  if (/lunge|split squat|step ?-?up|row|press|dip|pull ?down|lat|back extension|hyperext|glute bridge|thrust|push ?-?up|hamstring/.test(n)) return 1;
+  return 2;
+}
+
 function renderGym() {
   const R = routine();
   if (!workoutById(gymDay)) gymDay = todaysSession() || (R.workouts[0] && R.workouts[0].id) || null;
@@ -14672,6 +14712,23 @@ function renderGym() {
     return { ex, sets, sd, nm: gymValue(ex.id, 'nm', ex.nm) };
   });
 
+  // best order: big lifts while you are fresh, then smaller moves, core, cardio last. done ones sink.
+  const bestOn = (() => { try { return localStorage.getItem(KEY + '.gymorder') !== 'mine'; } catch { return true; } })();
+  if (bestOn) {
+    const base = items.slice();
+    items.sort((a, b) => {
+      const da = a.sd.length >= a.sets.length, db = b.sd.length >= b.sets.length;
+      if (da !== db) return da ? 1 : -1;
+      const sa = a.sd.length > 0 && !da, sb = b.sd.length > 0 && !db;
+      if (sa !== sb) return sa ? -1 : 1;
+      const ta = exTier(a), tb = exTier(b);
+      if (ta !== tb) return ta - tb;
+      const ka = Math.max(0, ...a.sets.map(x => kgOf(x.w))), kb = Math.max(0, ...b.sets.map(x => kgOf(x.w)));
+      if (ka !== kb) return kb - ka;
+      return base.indexOf(a) - base.indexOf(b);
+    });
+  }
+
   // header: the workout, its days, one progress line
   const pct = totalSets ? doneSets / totalSets : 0;
   const head = document.createElement('div');
@@ -14684,6 +14741,13 @@ function renderGym() {
   head.querySelector('b').textContent = W.title;
   head.querySelector('[data-a=wk]').addEventListener('click', () => { gymWkEdit = !gymWkEdit; gymConfirm = null; renderGym(); });
   body.appendChild(head);
+  if (items.length > 1 && !gymWkEdit) {
+    const ob = document.createElement('div');
+    ob.className = 'gm-order';
+    ob.innerHTML = '<span>' + (bestOn ? '\u2728 Best order' : 'Your order') + '</span><button type="button">' + (bestOn ? 'Use mine' : 'Best order') + '</button>';
+    ob.querySelector('button').addEventListener('click', () => { try { localStorage.setItem(KEY + '.gymorder', bestOn ? 'mine' : 'best'); } catch {} renderGym(); });
+    body.appendChild(ob);
+  }
 
   // editing the workout: name, which days, warm up, remove
   if (gymWkEdit) {
@@ -14728,20 +14792,23 @@ function renderGym() {
   // the exercises: one line each, tap to open its sets
   const list = document.createElement('div');
   list.className = 'gm-list';
-  for (const it of items) {
+  const nextIt = items.find(x => x.sd.length < x.sets.length);
+  items.forEach((it, idx) => {
     const { ex, sets, sd } = it;
     const open = gymOpen === ex.id;
     const allOn = sd.length >= sets.length;
     const keep = () => { state.gymPlan[ex.id] = sets.map(x => ({ ...x })); save(); };
 
     const card = document.createElement('div');
-    card.className = 'gm-ex' + (allOn ? ' on' : '') + (open ? ' open' : '');
+    card.className = 'gm-ex' + (allOn ? ' on' : '') + (open ? ' open' : '') + (it === nextIt ? ' next' : '');
     const row = document.createElement('button');
     row.type = 'button';
     row.className = 'gm-row';
-    row.innerHTML = '<span class="gm-rt"><b></b><small></small></span><span class="gm-prog">' + (allOn ? '✓' : sd.length + '/' + sets.length) + '</span>';
+    row.innerHTML = '<span class="gm-step">' + (allOn ? '✓' : idx + 1) + '</span><span class="gm-rt">' + (it === nextIt ? '<em></em>' : '') + '<b></b><small></small><span class="gm-dots">' +
+      sets.map((_, i) => '<i class="' + (sd.includes(i) ? 'on' : '') + '"></i>').join('') + '</span></span>';
     row.querySelector('b').textContent = cap(it.nm.replace(/⭐/g, '').trim());
     row.querySelector('small').textContent = setSummary(sets);
+    if (it === nextIt) row.querySelector('em').textContent = (sd.length ? 'Now' : 'Up next') + (bestOn ? ' · ' + TIER_WHY[exTier(it)] : '');
     row.addEventListener('click', () => { gymOpen = open ? null : ex.id; gymConfirm = null; renderGym(); });
     card.appendChild(row);
 
@@ -14843,7 +14910,7 @@ function renderGym() {
       card.appendChild(inner);
     }
     list.appendChild(card);
-  }
+  });
   body.appendChild(list);
 
   // add an exercise
