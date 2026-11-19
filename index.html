@@ -6361,6 +6361,12 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day .dg-ask .dg-in input:focus { outline: none; border-bottom-color: var(--pink) !important; }
 #view-day .dg-ask .dg-in .lf-btn { min-height: 40px; padding: 0 4px; font: 600 14px "Inter", system-ui, sans-serif; color: var(--pink) !important; background: none !important; border: 0 !important; box-shadow: none !important; }
 #view-day .dg-ask .dg-skip { position: absolute; top: -6px; right: 0; min-height: 28px; padding: 0; font: 500 12px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; text-decoration: none; }
+
+/* plan swipe: the new day slides in from the side you swiped */
+@keyframes swl { from { opacity: .4; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+@keyframes swr { from { opacity: .4; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+#view-day.sw-l { animation: swl .25s cubic-bezier(.22, 1, .36, 1); }
+#view-day.sw-r { animation: swr .25s cubic-bezier(.22, 1, .36, 1); }
 </style>
 </head>
 <body>
@@ -6642,7 +6648,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:19</footer>
+  <footer>Mr.O:20:21</footer>
 </div>
 
 <script>
@@ -10539,6 +10545,28 @@ document.getElementById('sug-day').addEventListener('click', () => suggestSheet(
 document.getElementById('day-top').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 document.getElementById('day-prev').addEventListener('click',  () => { viewDay = shiftKey(viewDay, -1); renderDay(); });
 document.getElementById('day-next').addEventListener('click',  () => { viewDay = shiftKey(viewDay,  1); renderDay(); });
+// swipe in Plan: left for the next day, right for the day before
+(() => {
+  const v = document.getElementById('view-day'); if (!v) return;
+  let x0 = null, y0 = 0, t0 = 0;
+  v.addEventListener('touchstart', e => {
+    const t = e.target;
+    if (e.touches.length !== 1 || t.closest('input, textarea, select, button.line-h, .dragging, .w3, #dcal-slot, .dcal, .tms2-chips')) { x0 = null; return; }
+    if (document.querySelector('.line.dragging, .line.lift, .w3')) { x0 = null; return; }
+    x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; t0 = Date.now();
+  }, { passive: true });
+  // a block or to-do being dragged is never a swipe
+  v.addEventListener('touchmove', () => { if (x0 !== null && document.querySelector('.line.dragging, .td-ghost, .td-dragging')) x0 = null; }, { passive: true });
+  v.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if (Date.now() - t0 > 700 || Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.5) return;
+    if (document.querySelector('.line.dragging, .line.lift, .w3')) return;
+    viewDay = shiftKey(viewDay, dx < 0 ? 1 : -1); renderDay();
+    v.classList.remove('sw-l', 'sw-r'); void v.offsetWidth; v.classList.add(dx < 0 ? 'sw-l' : 'sw-r');
+    try { navigator.vibrate && navigator.vibrate(6); } catch {}
+  }, { passive: true });
+})();
 document.getElementById('day-today').addEventListener('click', () => { viewDay = planKey(); renderDay(); });
 
 /* =========== check in =========== */
