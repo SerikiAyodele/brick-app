@@ -6391,6 +6391,26 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 /* days ahead: planned and free time */
 #total .free-sum { margin-top: 8px; }
 #total .free-sum.over b { color: #d9628a; }
+
+/* how long (editing a block): big length, -15 -5 +5 +15 in one row, smart picks, a start to end line */
+#lensheet .df2 label { min-height: 72px; justify-content: center; gap: 6px; background: color-mix(in srgb, var(--ink) 5%, var(--card)); border: 0; border-radius: 20px; }
+#lensheet .df2 input { flex: none; width: 2.4ch; font-size: 34px; text-align: right; }
+#lensheet .df2 span { font-size: 15px; }
+#lensheet .ls-smart { display: block; margin: 12px 0 0; }
+#lensheet .ls-nudge { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+#lensheet .ls-nudge button { display: grid; place-items: center; padding: 0; text-align: center; min-height: 44px; font: 600 15px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, var(--card)); border: 0; border-radius: 14px; cursor: pointer; font-variant-numeric: tabular-nums; }
+#lensheet .ls-nudge button:active { background: color-mix(in srgb, var(--pink) 20%, var(--card)); }
+#lensheet .ls-picks { display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; scrollbar-width: none; }
+#lensheet .ls-picks button { flex: none; display: flex; align-items: baseline; gap: 6px; min-height: 40px; padding: 0 14px; color: var(--ink); background: color-mix(in srgb, var(--pink) 10%, var(--card)); border: 0; border-radius: 999px; cursor: pointer; }
+#lensheet .ls-picks b { font: 600 14px "Inter", system-ui, sans-serif; }
+#lensheet .ls-picks small { font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+#lensheet .ls-end { margin: 18px 0 12px; text-align: center; }
+#lensheet .ls-tl { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 18px; }
+#lensheet .ls-tl b { font-weight: 600; color: var(--ink); }
+#lensheet .ls-tl i { font-style: normal; color: var(--muted); }
+#lensheet .ls-end .ls-fx { margin-top: 6px; }
+#lensheet .ls-rm { margin-top: 4px; }
+#lensheet .ls-cancel { min-height: 44px; background: none !important; border: 0 !important; color: var(--muted) !important; }
 </style>
 </head>
 <body>
@@ -6672,7 +6692,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:28</footer>
+  <footer>Mr.O:20:30</footer>
 </div>
 
 <script>
@@ -9015,7 +9035,7 @@ function lengthPicker(b, from, len) {
   const draw = more => {
     el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ls" role="dialog" aria-modal="true" aria-label="How long"><span class="w3-grab"></span>' +
       '<h2>How long' + (name ? ' is ' + esc(name) : '') + '?</h2>' +
-      (more ? '' : '<p class="ab-sub">Length</p><div class="ls-df"></div>' +
+      (more ? '' : '<div class="ls-df"></div>' +
         '<div class="ls-smart"></div>' +
         '<p class="ls-from ls-end"></p><button type="button" class="wka-go ls-save">Save</button><p class="ab-sub" hidden>Or set it</p>') +
       (more
@@ -9038,7 +9058,7 @@ function lengthPicker(b, from, len) {
         if (dd && day) { const after = day.blocks.slice(day.blocks.indexOf(b) + 1).filter(x => !x.done).length;
           if (after) fx = '<span class="ls-fx">Everything after moves ' + minsLabel(Math.abs(dd)) + (dd > 0 ? ' later' : ' earlier') + '.</span>';
           if (day.end && dd > 0) { const over = planEndOf(day) + dd - endLimit(day); if (over > 0) fx += '<span class="ls-fx warn">That runs ' + minsLabel(over) + ' past your end time.</span>'; } }
-        endP.innerHTML = '<b>' + minsLabel(r) + '</b> \u00b7 ' + clock(from) + ' to ' + clock(from + r) + fx; };
+        endP.innerHTML = '<span class="ls-tl"><b>' + clock(from) + '</b><i>\u2192</i><b>' + clock(from + r) + '</b></span>' + fx; };
       const df = durField(dfBox, len, m => { typed = m; paintEnd(); });
       // smart picks: your usual, what it really took last time, a little more or less, until the next set time
       const day = dayFor(viewDay), idx = day.blocks.indexOf(b), picks = [];
@@ -9046,9 +9066,11 @@ function lengthPicker(b, from, len) {
       { let last = null; for (let n = 1; n <= 30 && !last; n++) for (const x of ((state.days[shiftKey(viewDay, -n)] || {}).blocks || [])) if (x.took && (x.label || '').trim().toLowerCase() === name.toLowerCase()) last = x.took;
         if (last && last !== len && last !== usual) picks.push(['Last took', Math.round(last / 5) * 5]); }
       { let at2 = from + len; for (let j = idx + 1; j < day.blocks.length; j++) { const x = day.blocks[j]; if (x.fixedAt) { const u = toMins(x.fixedAt) - from; if (u >= 5 && u !== len) picks.push(['Until ' + (x.label || 'next'), u]); break; } at2 += Number(x.mins) || 60; } }
-      picks.push(['\u221215m', -15], ['+15m', 15]);
+      picks.push(['\u221215m', -15], ['\u22125m', -5], ['+5m', 5], ['+15m', 15]);
       const sm = el.querySelector('.ls-smart');
-      sm.innerHTML = picks.map(([t, m], i) => '<button type="button" data-pk="' + i + '"><b>' + esc(t) + '</b>' + (t.startsWith('+') || t.startsWith('\u2212') ? '' : '<small>' + minsLabel(m) + '</small>') + '</button>').join('');
+      const signed = t => t.startsWith('+') || t.startsWith('\u2212');
+      sm.innerHTML = '<div class="ls-nudge">' + picks.map(([t], i) => signed(t) ? '<button type="button" data-pk="' + i + '">' + esc(t) + '</button>' : '').join('') + '</div>' +
+        (picks.some(([t]) => !signed(t)) ? '<div class="ls-picks">' + picks.map(([t, m], i) => signed(t) ? '' : '<button type="button" data-pk="' + i + '"><b>' + esc(t) + '</b><small>' + minsLabel(m) + '</small></button>').join('') + '</div>' : '');
       sm.querySelectorAll('[data-pk]').forEach(x => x.addEventListener('click', () => { const [t, m] = picks[Number(x.dataset.pk)]; typed = Math.max(5, Math.min(1440, (t.startsWith('+') || t.startsWith('\u2212')) ? typed + m : m)); df.set(typed); paintEnd(); }));
       paintEnd();
       el.querySelector('.ls-save').addEventListener('click', () => keep(result())); }
