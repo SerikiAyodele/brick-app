@@ -6272,11 +6272,6 @@ html.kb-open .qn .ns-cancel { display: none; }
 #lensheet .ls-end .ls-fx { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); }
 #lensheet .ls-end .ls-fx.warn { color: #d9628a; }
 #lensheet .ls-rm { min-height: 40px; background: none !important; border: 0 !important; color: #d9628a !important; font-size: 14px !important; }
-
-/* moving a block: it lifts like a card, shows its new start, the others make room */
-#view-day #block-list .line.dragging { position: relative; z-index: 20; border-radius: 16px !important; background: var(--card) !important; box-shadow: 0 18px 40px -14px rgba(0,0,0,.45), 0 0 0 2px color-mix(in srgb, var(--pink) 55%, transparent) !important; transition: box-shadow .15s; }
-#view-day #block-list .line .mv-at { position: absolute; right: 10px; top: -12px; padding: 3px 10px; font: 700 12px "Inter", system-ui, sans-serif; color: #fff; background: var(--pink); border-radius: 999px; box-shadow: 0 6px 14px -6px color-mix(in srgb, var(--pink) 80%, transparent); pointer-events: none; }
-#view-day #block-list .line.shifting { transition: transform .16s cubic-bezier(.2, .8, .2, 1) !important; }
 </style>
 </head>
 <body>
@@ -6558,7 +6553,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:16:28</footer>
+  <footer>Mr.O:16:24</footer>
 </div>
 
 <script>
@@ -9104,37 +9099,22 @@ function attachDrag(sheet) {
   const rows = Array.from(sheet.children).filter(r => r.classList.contains('line'));
   if (rows.length < 2) return;
 
-  let held = null, startY = 0, rowH = 0, from = 0, to = 0, wait = null, downY = 0, startScroll = 0, lastY = 0, edgeT = null, badge = null;
-  // the new start time, live, while you move it
-  const paintAt = () => {
-    if (!badge) return;
-    const d = dayFor(viewDay), idx = k => (rows[k].dataset.i != null ? Number(rows[k].dataset.i) : k);
-    const order = d.blocks.slice(), b = order.splice(idx(from), 1)[0]; order.splice(idx(to), 0, b);
-    let at = toMins(d.start); for (const x of order) { if (x === b) break; at += Number(x.mins) || 60; }
-    badge.textContent = '\u2192 ' + clock(at);
-  };
-  const edge = () => { clearInterval(edgeT); edgeT = null; const E = 90;
-    if (lastY < E) edgeT = setInterval(() => { scrollBy(0, -12); move(lastY); }, 16);
-    else if (lastY > innerHeight - E) edgeT = setInterval(() => { scrollBy(0, 12); move(lastY); }, 16); };
+  let held = null, startY = 0, rowH = 0, from = 0, to = 0, wait = null, downY = 0;
 
   const lift = (row, i, y) => {
-    held = row; from = to = i; startY = y; startScroll = scrollY; lastY = y;
+    held = row; from = to = i; startY = y;
     rowH = row.getBoundingClientRect().height;
     try { navigator.vibrate && navigator.vibrate(12); } catch {}
     row.classList.add('dragging');
     rows.forEach(r => { if (r !== row) r.classList.add('shifting'); });
-    badge = document.createElement('span'); badge.className = 'mv-at'; row.appendChild(badge); paintAt();
   };
   const move = y => {
-    lastY = y;
-    const row = held; if (!row) return;
-    const dy = (y + scrollY) - (startY + startScroll);
+    const row = held, dy = y - startY;
     row.style.transform = 'translateY(' + dy + 'px) scale(1.02)';
     let next = from + Math.round(dy / rowH);
     next = Math.max(0, Math.min(rows.length - 1, next));
-    if (!edgeT) edge();
     if (next === to) return;
-    to = next; paintAt();
+    to = next;
     try { navigator.vibrate && navigator.vibrate(6); } catch {}
     rows.forEach((r, j) => {
       if (r === row) return;
@@ -9145,10 +9125,10 @@ function attachDrag(sheet) {
     });
   };
   const drop = () => {
-    clearTimeout(wait); wait = null; clearInterval(edgeT); edgeT = null;
+    clearTimeout(wait); wait = null;
     if (!held) return;
     const row = held;
-    held = null; if (badge) { badge.remove(); badge = null; }
+    held = null;
     row.classList.remove('dragging');
     rows.forEach(r => { r.classList.remove('shifting'); r.style.transform = ''; });
     // the lift was not a tap: swallow the click that follows
