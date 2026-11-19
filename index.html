@@ -6525,7 +6525,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:21:00</footer>
+  <footer>Mr.O:06:18</footer>
 </div>
 
 <script>
@@ -15438,6 +15438,19 @@ function timeUpSheet(day, i, end) {
   });
 }
 setInterval(checkTimeUp, 20000);
+// how do you feel: about once an hour, wherever you are in the app (not after ticks, not in the focus room)
+let moodAskNext = 0;
+setInterval(() => {
+  try {
+    if (document.hidden || Date.now() < moodAskNext || document.body.classList.contains('focusing') || document.querySelector('.w3, #mood-after, .bpg')) return;
+    const last = (state.moods || []).slice().sort((a, c) => c.at - a.at)[0];
+    if (last && Date.now() - last.at < MOOD_EVERY) return;
+    const h = new Date().getHours(); if (h < 7 || h >= 23) return;   // not in the night
+    moodAskNext = Date.now() + 20 * 60000;                          // if you skip it, ask again in 20 minutes
+    const cur = (typeof currentBlockLabel === 'function' && currentBlockLabel()) || '';
+    askMoodAfter({ label: cur || 'the last hour' });
+  } catch {}
+}, 60000);
 // cloud backup: check on open and when you come back to the app; a fresh install asks for the passcode to restore
 setTimeout(() => {
   if (cloudPass()) cloudPull();
