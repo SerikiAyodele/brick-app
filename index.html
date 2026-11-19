@@ -6252,6 +6252,15 @@ html.kb-open .qn .ns-cancel { display: none; }
 .td-ghost { position: fixed; left: 0; top: 0; z-index: 90; max-width: 70vw; padding: 10px 14px; font: 600 15px "Inter", system-ui, sans-serif; color: var(--paper); background: var(--ink); border-radius: 14px; box-shadow: 0 14px 30px -10px rgba(0,0,0,.45); pointer-events: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .td-bar { position: fixed; z-index: 89; display: none; height: 3px; border-radius: 2px; background: var(--pink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 25%, transparent); pointer-events: none; }
 #view-day #block-list .line.td-into { outline: 2px dashed var(--pink); outline-offset: -2px; border-radius: 12px; background: color-mix(in srgb, var(--pink) 8%, transparent) !important; }
+
+/* running late, and real vs planned */
+#late-note { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 10px 12px 10px 14px; border-radius: 14px; background: color-mix(in srgb, #f29ab5 12%, var(--card)); border: 1px solid color-mix(in srgb, #f29ab5 40%, var(--hair)); }
+#late-note p { flex: 1; margin: 0; font: 400 13px "Inter", system-ui, sans-serif; color: var(--muted); }
+#late-note p b { color: #d9628a; font-weight: 700; }
+#late-note button { flex: none; min-height: 34px; padding: 0 14px; font: 600 13px "Inter", system-ui, sans-serif; color: #fff; background: #d9628a; border: 0; border-radius: 17px; cursor: pointer; }
+#view-day #block-list .line .took { display: block; margin-top: 2px; font: 500 11px "Inter", system-ui, sans-serif; }
+#view-day #block-list .line .took.over { color: #d9628a; }
+#view-day #block-list .line .took.under { color: #5aa86a; }
 </style>
 </head>
 <body>
@@ -6533,7 +6542,7 @@ html.kb-open .qn .ns-cancel { display: none; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:15:51</footer>
+  <footer>Mr.O:16:05</footer>
 </div>
 
 <script>
@@ -6661,6 +6670,7 @@ function load() {
 }
 
 function save() {
+  try { noteTook(); } catch {}
   try { recordDay(); } catch {}   // undo history for the day page
   try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(KEY + '.at', String(Date.now())); } catch {}
   try { cloudSoon(); } catch {}
@@ -8848,7 +8858,7 @@ function usualLength(label) {
   for (const k in state.days) {
     if (k === viewDay) continue;
     for (const x of (state.days[k].blocks || [])) {
-      if (String(x.label || '').trim().toLowerCase() === name) count[x.mins] = (count[x.mins] || 0) + 1;
+      if (String(x.label || '').trim().toLowerCase() === name) { const m = x.took ? Math.round(x.took / 5) * 5 : x.mins; count[m] = (count[m] || 0) + (x.took ? 2 : 1); }   // what it really took counts double
     }
   }
   const best = Object.entries(count).sort((a, b) => b[1] - a[1])[0];
@@ -15565,6 +15575,63 @@ function renderFuel() {
   });
 }
 setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); } catch {} }, 60000);
+// real vs planned: when a block is ticked today, how long it really took (from the tick before it, or its planned start)
+function noteTook() {
+  const k = planKey(), d = state.days[k]; if (!d || !d.blocks) return;
+  let at = toMins(d.start), prevDone = null;
+  for (const b of d.blocks) {
+    const m = Number(b.mins) || 60;
+    if (b.done && !b.doneAt) {
+      b.doneAt = Date.now();
+      const from = prevDone ? prevDone : fromKey(k).getTime() + at * 60000;
+      const took = Math.round((b.doneAt - from) / 60000);
+      if (took > 0 && took < 12 * 60) b.took = took;
+    }
+    if (b.done && b.doneAt) prevDone = b.doneAt;
+    at += m;
+  }
+}
+// running late: the first block not ticked should have ended by now
+function lateBy() {
+  const k = planKey(), d = state.days[k]; if (!d || !d.blocks || viewDay !== k) return null;
+  let at = toMins(d.start); const nowM = planMin(k);
+  for (let i = 0; i < d.blocks.length; i++) { const b = d.blocks[i], m = Number(b.mins) || 60;
+    if (!b.done) { const late = nowM - (at + m); return late >= 10 ? { i, late } : null; }
+    at += m; }
+  return null;
+}
+function catchUp() {
+  const d = dayFor(planKey()), L = lateBy(); if (!L) return;
+  const before = d.blocks.map(b => ({ ...b })), cur = d.blocks[L.i], trimmed = [];
+  cur.mins = (Number(cur.mins) || 60) + L.late;     // the block you are on runs until now, the rest starts from now
+  if (d.end) {
+    // still end on time: trim what is after, leisure first, then breaks, extras, meals, work last. sleep stays
+    let over = planEndOf(d) - endLimit(d);
+    const rest = d.blocks.slice(L.i + 1);
+    const cut = (test, floor, why) => { for (const b of rest.slice().reverse()) { if (over <= 0) return; if (!test(b)) continue; const can = (Number(b.mins) || 60) - floor; if (can <= 0) continue; const c = Math.min(can, Math.ceil(over / 5) * 5); b.mins = (Number(b.mins) || 60) - c; over -= c; if (!trimmed.includes(why)) trimmed.push(why); } };
+    const lei = b => /movie|tv|netflix|youtube|game|scroll|social|free time|chill/i.test(b.label || ''), meal = b => /breakfast|lunch|dinner|meal|eat/i.test(b.label || ''), sl = b => /^sleep/i.test(b.label || ''), wk = b => outcomeField(b.label) === 'goals', br = b => /^break$/i.test(b.label || '');
+    if (over > 0) { cut(lei, 0, 'leisure'); cut(br, 5, 'breaks'); cut(b => !lei(b) && !meal(b) && !sl(b) && !wk(b) && !br(b), 5, 'extras'); cut(meal, 15, 'meals'); cut(wk, 30, 'work'); }
+    d.blocks = d.blocks.filter(b => (Number(b.mins) || 0) > 0);
+  }
+  d.touched = true; save(); renderDay();
+  offerUndo('=Caught up' + (trimmed.length ? ', shortened ' + trimmed.join(', ') : ''), () => { d.blocks = before; save(); renderDay(); });
+}
+function renderLate() {
+  let box = document.getElementById('late-note');
+  const L = sortingDay ? null : lateBy();
+  if (!L) { if (box) box.remove(); return; }
+  if (!box) { box = document.createElement('div'); box.id = 'late-note'; const bl = document.getElementById('block-list'); if (!bl) return; bl.parentNode.insertBefore(box, bl); }
+  const d = state.days[planKey()], b = d.blocks[L.i];
+  box.innerHTML = '<p><b>' + dur(L.late) + ' behind.</b> ' + esc(b.label || 'This block') + ' ran over.</p><button type="button">Catch up</button>';
+  box.querySelector('button').addEventListener('click', catchUp);
+}
+// real vs planned on ticked blocks, and the time each one really took
+function renderTook() {
+  const d = state.days[viewDay]; if (!d) return;
+  d.blocks.forEach((b, i) => { if (!b.done || !b.took) return; const m = Number(b.mins) || 60; if (Math.abs(b.took - m) < 5) return;
+    const mid = document.querySelector('#block-list .line[data-i="' + i + '"] .mid'); if (!mid || mid.querySelector('.took')) return;
+    const t = document.createElement('span'); t.className = 'took ' + (b.took > m ? 'over' : 'under'); t.textContent = 'took ' + minsLabel(b.took) + ' \u00b7 planned ' + minsLabel(m); mid.appendChild(t); });
+}
 function planEndOf(day) { return (day.blocks || []).reduce((t, b) => t + (Number(b.mins) || 60), toMins(day.start)); }
 function renderOverrun() {
   const box = document.getElementById('overrun'), ei = document.getElementById('endat'); if (!box) return;
@@ -15775,7 +15842,7 @@ function renderDayCal() {
 }
 {
   const baseRender = renderDay;
-  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } try { renderFuel(); } catch (e) { console.error(e); } return r; };
+  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } try { renderFuel(); } catch (e) { console.error(e); } try { renderLate(); renderTook(); } catch (e) { console.error(e); } return r; };
   const ei = document.getElementById('endat');
   if (ei) ei.addEventListener('change', () => { const d = dayFor(viewDay); if (ei.value) d.end = ei.value; else delete d.end; save(); renderDay(); });
   document.querySelectorAll('#dv-seg [data-dv]').forEach(b => b.addEventListener('click', () => {
