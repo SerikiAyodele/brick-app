@@ -6568,6 +6568,16 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day#view-day .tms2-top small { font-size: 12px; }
 #view-day#view-day .tms2-add { min-height: 28px; padding: 0; font-size: 12px; font-weight: 600; color: var(--pink); background: none; opacity: .85; }
 #view-day#view-day .tms2-names { margin-top: 2px; font-size: 12px; opacity: .8; }
+
+/* suggested for tomorrow: one quiet line until you open it */
+#view-day#view-day .tms2:not(.open) .tms2-card, #view-day#view-day .tms2:not(.open) .tms-no { display: none !important; }
+#view-day#view-day .tms2 .tms-h { cursor: pointer; padding-bottom: 6px; border-bottom: 1px solid color-mix(in srgb, var(--hair) 60%, transparent); }
+#view-day#view-day .tms2.open .tms-h { border-bottom: 0; }
+#view-day#view-day .tms2-tog { min-height: 28px; padding: 0 2px 0 10px; font-size: 14px; color: var(--muted); background: none; border: 0; transition: transform .2s; cursor: pointer; }
+#view-day#view-day .tms2.open .tms2-tog { transform: rotate(180deg); }
+/* to do: plain text, no pills */
+#view-day .dcq-chips button { min-height: 30px; padding: 0 10px 0 0; font-size: 13px; color: var(--muted); background: none; }
+#view-day .dcq-chips button:active { color: var(--ink); }
 </style>
 </head>
 <body>
@@ -6849,7 +6859,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:16</footer>
+  <footer>Mr.O:20:22</footer>
 </div>
 
 <script>
@@ -10509,6 +10519,7 @@ function planAskSheet(k) {
   el.querySelector('.pak-self').addEventListener('click', () => el.remove());
   el.querySelector('.pak-me').addEventListener('click', () => planForMePage(k));
 }
+let tmsOpen = null;   // the day whose suggestion is opened up
 function renderTomorrowSuggest() {
   let slot = document.getElementById('tmsug-slot');
   if (!slot) { const c = document.getElementById('carry-slot'); if (!c) return; slot = document.createElement('div'); slot.id = 'tmsug-slot'; c.parentNode.insertBefore(slot, c); }
@@ -10529,8 +10540,8 @@ function renderTomorrowSuggest() {
       (S.at && S.at[kind] != null ? clock(S.at[kind]) + ' \u00b7 ' : '') + minsLabel(L.reduce((t, b) => t + (Number(b.mins) || 0), 0)) + '</small></span><button type="button" class="tms2-add" data-add="' + kind + '">Add</button></div>' +
       '<div class="tms2-emo">' + L.map(b => '<i>' + blockEmoji(b) + '</i>').join('') + '</div>' +
       '<p class="tms2-names">' + esc((() => { const c = {}, o = []; L.forEach(b => { const k = b.label; if (!(k in c)) { c[k] = 0; o.push(k); } c[k]++; }); return o.map(k => k + (c[k] > 1 ? ' \u00d7' + c[k] : '')).join(' \u00b7 '); })()) + '</p></div>';
-  const box = document.createElement('div'); box.className = 'tms tms2';
-  box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.mid || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small>' + ([LS.am, LS.mid, LS.pm].filter(x => x.length).length > 1 ? '<button type="button" class="tms2-all">Add all</button>' : '') + '</div>' +
+  const box = document.createElement('div'); box.className = 'tms tms2' + (tmsOpen === viewDay ? ' open' : '');
+  box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.mid || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small>' + ([LS.am, LS.mid, LS.pm].filter(x => x.length).length > 1 ? '<button type="button" class="tms2-all">Add all</button>' : '') + '<button type="button" class="tms2-tog" aria-label="show the parts">\u2304</button></div>' +
     '<div class="tms2-card">' + part('am', LS.am) + part('mid', LS.mid) + part('pm', LS.pm) + '</div><button type="button" class="tms-no">Not now</button>';
   box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const t = box.querySelector('[data-tms-run="' + b.dataset.add + '"]'); if (t) t.click(); }));
   box.querySelectorAll('[data-tmo]').forEach(btn => btn.addEventListener('click', () => {
@@ -10565,6 +10576,8 @@ function renderTomorrowSuggest() {
     offerUndo('=Added your ' + KN[kind][2], () => { L.forEach(b => { const i = day.blocks.indexOf(b); if (i >= 0) day.blocks.splice(i, 1); }); save(); renderDay(); });
   }));
   box.querySelector('.tms-no').addEventListener('click', () => { day.noSuggest = true; save(); renderTomorrowSuggest(); });
+  box.querySelector('.tms2-tog').addEventListener('click', () => { tmsOpen = tmsOpen === viewDay ? null : viewDay; renderTomorrowSuggest(); });
+  box.querySelector('.tms-h').addEventListener('click', e => { if (e.target.closest('button')) return; tmsOpen = tmsOpen === viewDay ? null : viewDay; renderTomorrowSuggest(); });
   slot.appendChild(box);
 }
 function routineGet(kind) { const r = (state.dayRoutines || {})[kind]; return r && r.blocks && r.blocks.length ? r : (typeof routineFromHistory === 'function' ? routineFromHistory(kind) : null); }
