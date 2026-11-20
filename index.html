@@ -6608,6 +6608,16 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day#view-day#view-day #day-prog { margin-top: 12px !important; gap: 10px !important; align-items: center !important; }
 #view-day#view-day#view-day #day-prog i { height: 4px !important; }
 #view-day#view-day#view-day #day-prog span { font: 500 12px "Inter", system-ui, sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--muted) !important; }
+
+/* one goal, nicer: a soft field with a target, an arrow that lights up when you type */
+#view-day .dg-ask .dg-in { align-items: center; gap: 0; padding: 0 6px 0 14px; min-height: 52px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 5%, var(--card)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hair) 70%, transparent); transition: box-shadow .2s; }
+#view-day .dg-ask .dg-in:focus-within { box-shadow: inset 0 0 0 1.5px var(--pink); }
+#view-day .dg-ask .dg-ic { flex: none; margin-right: 10px; font-size: 18px; }
+#view-day .dg-ask .dg-in input { border: 0 !important; background: none !important; min-height: 48px; font-size: 16px; }
+#view-day .dg-ask .dg-in input:focus { border: 0 !important; }
+#view-day .dg-ask .dg-in .lf-btn { flex: none; width: 40px; height: 40px; min-height: 40px; padding: 0 !important; font-size: 18px !important; color: var(--muted) !important; background: color-mix(in srgb, var(--ink) 8%, transparent) !important; border-radius: 12px !important; transition: background .2s, color .2s; }
+#view-day .dg-ask .dg-in .lf-btn.ready { color: #fff !important; background: var(--pink) !important; }
+#view-day .dg-ask .dg-dd { margin-top: 6px; padding-left: 14px; }
 </style>
 </head>
 <body>
@@ -6889,7 +6899,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:30</footer>
+  <footer>Mr.O:20:36</footer>
 </div>
 
 <script>
@@ -9565,13 +9575,14 @@ function renderDayGoal() {
   if (yd && yd.goal && !yd.goalDone && !ideas.some(x => x.t === yd.goal)) ideas.push({ t: yd.goal, e: '\u21A9\uFE0F' });
   const seen = new Set(), uniq = ideas.filter(x => !seen.has(x.t) && seen.add(x.t));
 
-  const typed = '<div class="dg-in"><input type="text" maxlength="100" placeholder="' + (ahead ? 'what makes ' + dayName + ' a win?' : 'what makes today a win?') + '"><button type="button" class="lf-btn main">Set</button></div>';
+  const typed = '<div class="dg-in"><span class="dg-ic" aria-hidden="true">\u{1F3AF}</span><input type="text" maxlength="100" placeholder="' + (ahead ? 'What makes ' + dayName + ' a win?' : 'What makes today a win?') + '"><button type="button" class="lf-btn main" aria-label="set this goal">\u2192</button></div>';
   box.innerHTML = '<div class="dg-ask"><b>' + (dayGoalEditing ? 'Change this day\u2019s goal' : ahead ? 'One goal for ' + dayName : 'One goal today') + '</b>' +
     (uniq.length ? '' : typed) +
     (uniq.length ? typed + '<div class="dg-dd" hidden>' + uniq.map(x => '<button type="button" data-t="' + esc(x.t) + '"><i>' + x.e + '</i><span>' + esc(x.t) + '</span></button>').join('') + '</div>' : '') +
     '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : ahead ? 'Later' : 'Not today') + '</button></div>';
   const inp = box.querySelector('input');
   inp.value = dayGoalEditing ? (day.goal || '') : '';
+  { const go = box.querySelector('.dg-in .lf-btn'), sync = () => go.classList.toggle('ready', !!inp.value.trim()); inp.addEventListener('input', sync); sync(); }
   const set = t => { t = (t || '').trim(); if (!t) { inp.focus(); return; } day.goal = t; day.goalDone = false; day.goalSkip = false; dayGoalEditing = false; save(); renderDayGoal(); };
   box.querySelector('.lf-btn').addEventListener('click', () => set(inp.value));
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') set(inp.value); });
