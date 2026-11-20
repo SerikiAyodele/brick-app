@@ -6445,6 +6445,32 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #money-body .bg-new li.nt-new { padding: 12px 14px; border: 1px dashed var(--hair); border-radius: 16px; text-align: center; font: 500 14px "Poppins", sans-serif; color: var(--muted); background: none; cursor: pointer; }
 #money-body .bg-list li.ed { padding: 12px 14px; border-radius: 16px; background: var(--card); border: 1px solid var(--hair); }
 .bg-sum { margin: 12px 2px 0; text-align: center; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* sort new alerts: a line, or a split */
+.mn-sortbar { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; margin: 4px 0 12px; padding: 0 14px; font: 500 14px "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--pink) 12%, var(--card)); border: 0; border-radius: 16px; cursor: pointer; text-align: left; }
+.mn-sortbar i { display: grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; font: 600 12px "Poppins", sans-serif; font-style: normal; color: #fff; background: var(--pink); border-radius: 12px; }
+.mn-sortbar span { flex: 1; }
+.mn-sortbar b { font-weight: 600; color: var(--pink); }
+#sortsheet .srt h2 { margin: 2px 0 0; font-size: 30px; font-variant-numeric: tabular-nums; }
+#sortsheet .srt-d { margin: 2px 0 14px; color: var(--muted); font-size: 14px; text-transform: capitalize; }
+#sortsheet .srt-chips { display: flex; flex-wrap: wrap; gap: 6px; max-height: 42vh; overflow-y: auto; }
+#sortsheet .srt-chips button { min-height: 40px; padding: 0 14px; font: 500 14px "Poppins", sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, var(--card)); border: 0; border-radius: 999px; cursor: pointer; }
+#sortsheet .srt-chips button.on { color: #fff; background: var(--pink); }
+#sortsheet .srt-chips button i { font-style: normal; margin-right: 4px; }
+#sortsheet .srt-chips.small button { min-height: 34px; font-size: 13px; color: var(--muted); }
+#sortsheet .srt-btns { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+#sortsheet .srt-split { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+#sortsheet .srt-split label { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 14px; border-radius: 14px; background: color-mix(in srgb, var(--ink) 5%, var(--card)); }
+#sortsheet .srt-split span { flex: 1; font: 500 15px "Poppins", sans-serif; }
+#sortsheet .srt-split input { width: 110px; min-height: 40px; padding: 0 10px; font: 600 16px "Poppins", sans-serif; text-align: right; color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 10px; }
+#sortsheet .srt-split button { width: 36px; height: 36px; color: var(--muted); background: none; border: 0; font-size: 18px; cursor: pointer; }
+#sortsheet .srt-rest { margin: 12px 0; text-align: center; font-size: 14px; color: var(--muted); }
+#sortsheet .srt-rest.ok { color: #5aa86a; }
+#sortsheet .srt-rest.over { color: #d9628a; }
+#sortsheet [data-a=savesplit][disabled] { opacity: .4; }
+#sortsheet [data-a=back] { display: block; margin: 8px auto 0; }
+.mn-pick .mn-split { color: var(--pink); }
+.mn-d .ln2 { font-style: normal; color: var(--pink); }
 </style>
 </head>
 <body>
@@ -6726,7 +6752,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:34</footer>
+  <footer>Mr.O:19:46</footer>
 </div>
 
 <script>
@@ -11875,8 +11901,61 @@ function importMoney(data) {
 
 // which budget line a transaction belongs to: your pick, else words that match a line, else its kind
 const KIND_LINE = { Food: /grocer|food/i, Transport: /fuel|transport/i, Subscriptions: /subscri/i, Bills: /light|data|bill/i, Health: /gym|health/i };
+// where an alert's money goes: one line, or split across several
+// new alerts from your bank texts that have not been given a line yet (the last 14 days)
+function toSort() {
+  const since = Date.now() - 14 * 864e5;
+  return (state.money || []).filter(x => x.dir === 'DR' && !x.asked && !x.line && !(x.split && x.split.length) && (x.src === 'sms' || x.src === 'paste') && x.at >= since).sort((a, b) => a.at - b.at);
+}
+// which line does it go on? tap one, or split it across a few
+function sortSheet(list, i, splitNow) {
+  const old = document.getElementById('sortsheet'); if (old) old.remove();
+  const tx = list[i]; if (!tx) { renderMoney(); return; }
+  const B = linesFor(ymOf(tx.at)).slice().sort((a, b) => ((b.amount > 0) - (a.amount > 0)) || a.name.localeCompare(b.name));
+  const guess = txLine(tx);
+  let split = splitNow ? (tx.split && tx.split.length ? Object.fromEntries(tx.split.map(p => [p.line, p.amt])) : {}) : null;
+  const el = document.createElement('div'); el.id = 'sortsheet'; el.className = 'w3';
+  const next = () => { el.remove(); save(); if (i + 1 < list.length) sortSheet(list, i + 1); else renderMoney(); };
+  const draw = () => {
+    const placed = split ? Object.values(split).reduce((t, v) => t + (Number(v) || 0), 0) : 0, rest = Math.round((tx.amt - placed) * 100) / 100;
+    const d = new Date(tx.at);
+    el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet srt" role="dialog" aria-modal="true" aria-label="Sort this alert"><span class="w3-grab"></span>' +
+      (list.length > 1 ? '<p class="wk2-step">' + (i + 1) + ' of ' + list.length + '</p>' : '') +
+      '<h2>\u2212' + mnNaira(tx.amt) + '</h2><p class="srt-d"></p>' +
+      (split === null
+        ? '<p class="ab-sub">Which line?</p><div class="srt-chips">' + (guess ? '<button type="button" class="on" data-pick="' + guess.id + '"><i>\u2728</i></button>' : '') +
+            B.filter(b => !guess || b.id !== guess.id).map(b => '<button type="button" data-pick="' + b.id + '"></button>').join('') + '</div>' +
+          '<div class="srt-btns"><button type="button" class="lf-btn" data-a="split">Split it</button><button type="button" class="gm-link" data-a="skip">' + (guess ? 'Keep the guess' : 'Skip') + '</button></div>'
+        : '<p class="ab-sub">Split across lines</p><div class="srt-split">' + Object.keys(split).map(id => '<label data-row="' + id + '"><span></span><input type="text" inputmode="decimal" value="' + (split[id] || '') + '" placeholder="0"><button type="button" data-x="' + id + '" aria-label="take this line off">\u00d7</button></label>').join('') + '</div>' +
+          '<div class="srt-chips small">' + B.filter(b => !(b.id in split)).map(b => '<button type="button" data-add="' + b.id + '"></button>').join('') + '</div>' +
+          '<p class="srt-rest' + (rest === 0 ? ' ok' : rest < 0 ? ' over' : '') + '">' + (rest === 0 ? '\u2713 All placed' : rest > 0 ? mnNaira(rest) + ' left to place' : mnNaira(-rest) + ' too much') + '</p>' +
+          '<button type="button" class="wka-go" data-a="savesplit"' + (rest === 0 && Object.keys(split).length > 1 ? '' : ' disabled') + '>Save split</button><button type="button" class="gm-link" data-a="back">Back</button>') +
+      '</div>';
+    el.querySelector('.srt-d').textContent = (tx.desc || 'Spent').toLowerCase() + ' \u00b7 ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3));
+    const nm = id => (B.find(b => b.id === id) || {}).name || '';
+    el.querySelectorAll('[data-pick]').forEach(b => { b.insertAdjacentText('beforeend', nm(b.dataset.pick)); b.addEventListener('click', () => { tx.line = b.dataset.pick; delete tx.split; tx.asked = true; next(); }); });
+    el.querySelectorAll('[data-add]').forEach(b => { b.textContent = '+ ' + nm(b.dataset.add); b.addEventListener('click', () => { const r = Math.max(0, tx.amt - Object.values(split).reduce((t, v) => t + (Number(v) || 0), 0)); split[b.dataset.add] = Object.keys(split).length ? r : ''; draw(); }); });
+    el.querySelectorAll('[data-row]').forEach(r => { r.querySelector('span').textContent = nm(r.dataset.row); const inp = r.querySelector('input');
+      inp.addEventListener('input', () => { split[r.dataset.row] = Number(inp.value.replace(/[^\d.]/g, '')) || 0; const pl = Object.values(split).reduce((t, v) => t + (Number(v) || 0), 0), rs = Math.round((tx.amt - pl) * 100) / 100;
+        const p = el.querySelector('.srt-rest'); p.className = 'srt-rest' + (rs === 0 ? ' ok' : rs < 0 ? ' over' : ''); p.textContent = rs === 0 ? '\u2713 All placed' : rs > 0 ? mnNaira(rs) + ' left to place' : mnNaira(-rs) + ' too much';
+        el.querySelector('[data-a=savesplit]').disabled = !(rs === 0 && Object.keys(split).length > 1); }); });
+    el.querySelectorAll('[data-x]').forEach(b => b.addEventListener('click', e => { e.preventDefault(); delete split[b.dataset.x]; draw(); }));
+    const on = (a, fn) => { const b = el.querySelector('[data-a=' + a + ']'); if (b) b.addEventListener('click', fn); };
+    on('split', () => { split = guess ? { [guess.id]: tx.amt } : {}; draw(); });
+    on('back', () => { split = null; draw(); });
+    on('skip', () => { tx.asked = true; next(); });
+    on('savesplit', () => { tx.split = Object.entries(split).filter(([, v]) => Number(v) > 0).map(([line, amt]) => ({ line, amt: Number(amt) })); delete tx.line; tx.asked = true; next(); });
+    el.querySelector('.w3-back').addEventListener('click', () => { el.remove(); renderMoney(); });
+  };
+  draw(); document.body.appendChild(el);
+}
+function txParts(tx) {
+  if (Array.isArray(tx.split) && tx.split.length) { const B = linesFor(ymOf(tx.at)); return tx.split.map(p => ({ L: B.find(b => b.id === p.line) || null, amt: p.amt })); }
+  return [{ L: txLine(tx), amt: tx.amt }];
+}
 function txLine(tx) {
   const B = linesFor(ymOf(tx.at));
+  if (Array.isArray(tx.split) && tx.split.length) return B.find(b => b.id === tx.split[0].line) || null;
   if (tx.line) return B.find(b => b.id === tx.line) || null;
   if (tx.dir !== 'DR' || !B.length) return null;
   const d = (tx.desc || '').toLowerCase();
@@ -11891,7 +11970,7 @@ function moneyPlanCards(box, inMonth) {
   if (!P.budget.length && !P.subs.length && !P.invest.length && !P.income.length) return;
   const spent = {};
   let unbudgeted = 0;
-  for (const x of inMonth) if (x.dir === 'DR') { const L = txLine(x); if (L) spent[L.id] = (spent[L.id] || 0) + x.amt; else unbudgeted += x.amt; }
+  for (const x of inMonth) if (x.dir === 'DR') for (const { L, amt } of txParts(x)) { if (L) spent[L.id] = (spent[L.id] || 0) + amt; else unbudgeted += amt; }
   const lines = P.budget.filter(b => b.amount > 0 || spent[b.id]);
   const total = lines.reduce((a, b) => a + b.amount, 0), used = lines.reduce((a, b) => a + (spent[b.id] || 0), 0);
   let html = '';
@@ -11985,7 +12064,7 @@ function renderMoney() {
   const B = linesFor(moneyMonth);
   const budget = B.reduce((a, b) => a + b.amount, 0);
   const spentBy = {}; let loose = 0;
-  for (const x of inMonth) if (x.dir === 'DR') { const L = txLine(x); if (L) spentBy[L.id] = (spentBy[L.id] || 0) + x.amt; else loose += x.amt; }
+  for (const x of inMonth) if (x.dir === 'DR') for (const { L, amt } of txParts(x)) { if (L) spentBy[L.id] = (spentBy[L.id] || 0) + amt; else loose += amt; }
   const spent = inMonth.filter(x => x.dir === 'DR').reduce((a, x) => a + x.amt, 0);
   const left = budget - spent;
   const daysLeft = isNow ? new Date(Y, M, 0).getDate() - now.getDate() + 1 : 0;
@@ -12005,6 +12084,7 @@ function renderMoney() {
     '<div class="mn-sum"><div><span>Income</span><b>' + mnNaira(income) + '</b></div><div><span>Budget</span><b>' + mnNaira(budget) + '</b></div><div><span>Spent</span><b>' + mnNaira(spent) + '</b></div></div>' +
     (bal ? '<p class="mn-check ' + bal[0] + '">' + (bal[0] === 'ok' ? '✓ ' : '') + bal[1] + '</p>' : '');
 
+  { const T = toSort(); if (T.length) html += '<button type="button" class="mn-sortbar" data-a="sortnew"><i>' + T.length + '</i><span>new alert' + (T.length > 1 ? 's' : '') + ' to sort</span><b>Sort \u203a</b></button>'; }
   html += '<div class="md-seg mn-tabs">' + [['budget', 'Budget'], ['spend', 'Spending'], ['income', 'Income']].map(([k, t]) =>
     '<button type="button" class="md-seg-b' + (moneyTab === k ? ' on' : '') + '" data-t="' + k + '">' + t + '</button>').join('') + '</div>';
 
@@ -12067,10 +12147,10 @@ function renderMoney() {
     html += '<div class="mn-list">' + (inMonth.length ? inMonth.map(x => {
       const d = new Date(x.at), L = txLine(x), open = moneyOpen === x.id;
       return '<div class="mn-tx' + (x.dir === 'CR' ? ' in' : '') + '" data-id="' + x.id + '"><button type="button" class="mn-txb">' +
-        '<span class="mn-d"><b></b><small>' + (x.dir === 'CR' ? 'Money in' : L ? '' : '<em class="nol">no line</em>') + (L ? '<em class="ln"></em>' : '') + ' · ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</small></span>' +
+        '<span class="mn-d"><b></b><small>' + (x.dir === 'CR' ? 'Money in' : (x.split && x.split.length) ? '<em class="ln2">split \u00b7 ' + x.split.length + ' lines</em>' : L ? '' : '<em class="nol">no line</em>') + (L && !(x.split && x.split.length) ? '<em class="ln"></em>' : '') + ' · ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()].slice(0, 3)) + '</small></span>' +
         '<em class="amt">' + (x.dir === 'CR' ? '+' : '−') + mnNaira(x.amt) + '</em></button>' +
         (open && x.dir === 'DR' ? '<div class="mn-pick">' + linesFor(ymOf(x.at)).map(b => '<button type="button" data-l="' + b.id + '" class="' + (L && L.id === b.id ? 'on' : '') + '"></button>').join('') +
-          '<button type="button" class="mn-del">Remove</button></div>' : '') +
+          '<button type="button" class="mn-split">Split</button><button type="button" class="mn-del">Remove</button></div>' : '') +
         (open && x.dir === 'CR' ? '<div class="mn-pick"><button type="button" class="mn-del">Remove</button></div>' : '') + '</div>';
     }).join('') : '<p class="mn-empty">No alerts this month yet.</p>') + '</div>';
   }
@@ -12106,7 +12186,9 @@ function renderMoney() {
   on('.mn-lines2 li[data-b]:not(.ed)', el => { moneyEdit = el.dataset.b; renderMoney(); focusEd(); });
   on('.mn-lines2 li[data-i]', el => { moneyEdit = 'inc:' + el.dataset.i; renderMoney(); focusEd(); });
   on('.mn-txb', el => { const id = el.parentElement.dataset.id; moneyOpen = moneyOpen === id ? null : id; renderMoney(); });
-  on('[data-l]', el => { const x = state.money.find(t => t.id === el.closest('.mn-tx').dataset.id); x.line = el.dataset.l; moneyOpen = null; save(); renderMoney(); });
+  on('[data-l]', el => { const x = state.money.find(t => t.id === el.closest('.mn-tx').dataset.id); x.line = el.dataset.l; delete x.split; x.asked = true; moneyOpen = null; save(); renderMoney(); });
+  on('.mn-split', el => { const x = state.money.find(t => t.id === el.closest('.mn-tx').dataset.id); moneyOpen = null; sortSheet([x], 0, true); });
+  on('[data-a=sortnew]', () => sortSheet(toSort(), 0));
   on('.mn-del', el => {
     const i = state.money.findIndex(t => t.id === el.closest('.mn-tx').dataset.id), gone = state.money[i];
     state.money.splice(i, 1); moneyOpen = null; save(); renderMoney();
@@ -15649,7 +15731,7 @@ function homeNudge() {
   // a wallet line gone over
   if (state.moneyPlan) {
     const cur = ymOf(Date.now()), B = linesFor(cur), sp = {};
-    for (const x of (state.money || [])) if (x.dir === 'DR' && ymOf(x.at) === cur) { const L = txLine(x); if (L) sp[L.id] = (sp[L.id] || 0) + x.amt; }
+    for (const x of (state.money || [])) if (x.dir === 'DR' && ymOf(x.at) === cur) for (const { L, amt } of txParts(x)) if (L) sp[L.id] = (sp[L.id] || 0) + amt;
     const over = B.filter(b => b.amount && sp[b.id] > b.amount).sort((a, b) => (sp[b.id] - b.amount) - (sp[a.id] - a.amount))[0];
     if (over) return { e: '\u{1F45B}', t: over.name + ' is over budget', s: mnNaira(sp[over.id] - over.amount) + ' more than planned', go: 'money' };
   }
