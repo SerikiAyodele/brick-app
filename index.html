@@ -6618,6 +6618,20 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day .dg-ask .dg-in .lf-btn { flex: none; width: 40px; height: 40px; min-height: 40px; padding: 0 !important; font-size: 18px !important; color: var(--muted) !important; background: color-mix(in srgb, var(--ink) 8%, transparent) !important; border-radius: 12px !important; transition: background .2s, color .2s; }
 #view-day .dg-ask .dg-in .lf-btn.ready { color: #fff !important; background: var(--pink) !important; }
 #view-day .dg-ask .dg-dd { margin-top: 6px; padding-left: 14px; }
+
+/* suggested for tomorrow: three soft tiles with when and how long; added ones tick */
+#view-day#view-day .tms2-btns { gap: 8px; margin-top: 10px; }
+#view-day#view-day .tms2-btns button { flex: 1; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; min-height: 68px; padding: 10px 12px; text-align: left; border: 0; border-radius: 16px; background: color-mix(in srgb, var(--pink) 8%, var(--card)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pink) 16%, transparent); }
+#view-day#view-day .tms2-btns button i { font-size: 16px; line-height: 1; }
+#view-day#view-day .tms2-btns button b { font: 600 13px "Inter", system-ui, sans-serif; color: var(--ink); }
+#view-day#view-day .tms2-btns button small { font: 400 11px "Inter", system-ui, sans-serif; color: var(--muted); white-space: nowrap; }
+#view-day#view-day .tms2-btns button.added { background: color-mix(in srgb, #7daf86 12%, var(--card)); box-shadow: none; opacity: .75; cursor: default; }
+#view-day#view-day .tms2-btns button.added i { color: #5aa86a; font-style: normal; font-weight: 700; }
+
+/* planning mode: start and end stack in a narrow column, so they never run under the number */
+#view-day#view-day #block-list .line.plan-row .at { flex: none !important; width: 58px !important; min-width: 58px !important; display: flex !important; flex-direction: column !important; gap: 1px; font-size: 12px !important; line-height: 1.2 !important; white-space: nowrap; overflow: hidden; }
+#view-day#view-day #block-list .line.plan-row .at .endat { display: block !important; font-size: 11px !important; opacity: .7; }
+#view-day#view-day #block-list .line.plan-row .at .endat::before { content: none !important; }
 </style>
 </head>
 <body>
@@ -6899,7 +6913,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:36</footer>
+  <footer>Mr.O:20:38</footer>
 </div>
 
 <script>
@@ -10583,7 +10597,8 @@ function renderTomorrowSuggest() {
       '<p class="tms2-names">' + esc((() => { const c = {}, o = []; L.forEach(b => { const k = b.label; if (!(k in c)) { c[k] = 0; o.push(k); } c[k]++; }); return o.map(k => k + (c[k] > 1 ? ' \u00d7' + c[k] : '')).join(' \u00b7 '); })()) + '</p></div>';
   const box = document.createElement('div'); box.className = 'tms tms2' + (tmsOpen === viewDay ? ' open' : '');
   box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.mid || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small>' + ([LS.am, LS.mid, LS.pm].filter(x => x.length).length > 1 ? '<button type="button" class="tms2-all">Add all</button>' : '') + '<button type="button" class="tms2-tog" aria-label="show the parts">\u2304</button></div>' +
-    '<div class="tms2-btns">' + ['am', 'mid', 'pm'].filter(k => LS[k].length).map(k => '<button type="button" data-add="' + k + '"><i>' + KN[k][0] + '</i>' + KN[k][1] + '</button>').join('') + '</div>' +
+    '<div class="tms2-btns">' + ['am', 'mid', 'pm'].filter(k => (S[k] || []).length).map(k => { const done = !LS[k].length, L = S[k], m = L.reduce((t, b) => t + (Number(b.mins) || 0), 0);
+        return '<button type="button"' + (done ? ' class="added" disabled' : ' data-add="' + k + '"') + '><i>' + (done ? '\u2713' : KN[k][0]) + '</i><b>' + KN[k][1] + '</b><small>' + (done ? 'added' : (S.at && S.at[k] != null ? clock(S.at[k]) + ' \u00b7 ' : '') + minsLabel(m)) + '</small></button>'; }).join('') + '</div>' +
     '<div class="tms2-card">' + part('am', LS.am) + part('mid', LS.mid) + part('pm', LS.pm) + '</div><button type="button" class="tms-no">Not now</button>';
   box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const t = box.querySelector('[data-tms-run="' + b.dataset.add + '"]'); if (t) t.click(); }));
   box.querySelectorAll('[data-tmo]').forEach(btn => btn.addEventListener('click', () => {
