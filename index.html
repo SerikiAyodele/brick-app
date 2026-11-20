@@ -6533,6 +6533,17 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day .dcq-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 #view-day .dcq-chips button { min-height: 34px; padding: 0 12px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, var(--card)); border: 0; border-radius: 999px; cursor: pointer; }
 #view-day .dcq-chips small { color: var(--muted); font-size: 11px; }
+
+/* suggested for tomorrow, cleaner: emoji strip, one line of names, an Add pill */
+#view-day#view-day .tms-h { align-items: center; }
+#view-day#view-day .tms-h .tms2-all { margin-left: auto; min-height: 32px; padding: 0 12px; font: 600 12px "Inter", system-ui, sans-serif; color: #fff; background: var(--pink); border: 0; border-radius: 999px; cursor: pointer; }
+#view-day#view-day .tms2-card { margin-top: 8px; border-top: 1px solid var(--hair); }
+#view-day#view-day .tms2-row { padding: 12px 0; border-bottom: 1px solid var(--hair); }
+#view-day#view-day .tms2-add { min-height: 30px; padding: 0 12px; font-size: 12px; color: var(--pink); background: color-mix(in srgb, var(--pink) 12%, transparent); border-radius: 999px; }
+#view-day#view-day .tms2-emo { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0 0 22px; font-size: 15px; line-height: 1.3; }
+#view-day#view-day .tms2-emo i { font-style: normal; }
+#view-day#view-day .tms2-names { margin: 3px 0 0 22px; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#view-day#view-day .tms .tms-no { display: block; margin: 8px 0 0 auto !important; text-decoration: none !important; }
 </style>
 </head>
 <body>
@@ -6814,7 +6825,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:03</footer>
+  <footer>Mr.O:20:06</footer>
 </div>
 
 <script>
@@ -10484,9 +10495,10 @@ function renderTomorrowSuggest() {
   if (!LS.am.length && !LS.mid.length && !LS.pm.length) return;
   const part = (kind, L) => !L.length ? '' : '<div class="tms2-row" data-tmo="' + kind + '" role="button" tabindex="0"><div class="tms2-top"><i>' + KN[kind][0] + '</i><span><b>' + KN[kind][1] + '</b><small>' +
       (S.at && S.at[kind] != null ? clock(S.at[kind]) + ' \u00b7 ' : '') + minsLabel(L.reduce((t, b) => t + (Number(b.mins) || 0), 0)) + '</small></span><button type="button" class="tms2-add" data-add="' + kind + '">Add</button></div>' +
-      '<div class="tms2-chips">' + L.map(b => '<span>' + blockEmoji(b) + ' ' + esc(b.label) + '</span>').join('') + '</div></div>';
+      '<div class="tms2-emo">' + L.map(b => '<i>' + blockEmoji(b) + '</i>').join('') + '</div>' +
+      '<p class="tms2-names">' + esc((() => { const c = {}, o = []; L.forEach(b => { const k = b.label; if (!(k in c)) { c[k] = 0; o.push(k); } c[k]++; }); return o.map(k => k + (c[k] > 1 ? ' \u00d7' + c[k] : '')).join(' \u00b7 '); })()) + '</p></div>';
   const box = document.createElement('div'); box.className = 'tms tms2';
-  box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.mid || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small></div>' +
+  box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.mid || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small>' + ([LS.am, LS.mid, LS.pm].filter(x => x.length).length > 1 ? '<button type="button" class="tms2-all">Add all</button>' : '') + '</div>' +
     '<div class="tms2-card">' + part('am', LS.am) + part('mid', LS.mid) + part('pm', LS.pm) + '</div><button type="button" class="tms-no">Not now</button>';
   box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const t = box.querySelector('[data-tms-run="' + b.dataset.add + '"]'); if (t) t.click(); }));
   box.querySelectorAll('[data-tmo]').forEach(btn => btn.addEventListener('click', () => {
@@ -10499,6 +10511,19 @@ function renderTomorrowSuggest() {
     pg.querySelector('[data-tms]').addEventListener('click', () => { pg.remove(); const t = box.querySelector('[data-tms-run="' + kind + '"]'); if (t) t.click(); });
   }));
   box.insertAdjacentHTML('beforeend', '<button type="button" hidden data-tms-run="am"></button><button type="button" hidden data-tms-run="mid"></button><button type="button" hidden data-tms-run="pm"></button>');
+  const runKind = kind => {
+    const L = LS[kind].map(b => ({ label: b.label, mins: b.mins })); if (!L.length) return [];
+    if (kind === 'mid') { const at = S.at && S.at.mid != null ? S.at.mid : 720, sl = slotFor(day.blocks, day.start, at); day.blocks.splice(sl.i, 0, ...L); }
+    else if (kind === 'am') { day.blocks.unshift(...L); if (S.same && S.same.am && S.at && S.at.am != null) day.start = hhmm(((S.at.am % 1440) + 1440) % 1440); } else day.blocks.push(...L);
+    day.tmsAdded = Object.assign({}, day.tmsAdded, { [kind]: true });
+    return L;
+  };
+  const allBtn = box.querySelector('.tms2-all');
+  if (allBtn) allBtn.addEventListener('click', () => {
+    const start0 = day.start, L = [...runKind('am'), ...runKind('mid'), ...runKind('pm')];
+    day.touched = true; save(); renderDay(); renderHabits();
+    offerUndo('=Added your whole day', () => { L.forEach(b => { const i = day.blocks.indexOf(b); if (i >= 0) day.blocks.splice(i, 1); }); day.start = start0; day.tmsAdded = {}; save(); renderDay(); });
+  });
   box.querySelectorAll('[data-tms-run]').forEach(btn => btn.addEventListener('click', () => {
     const kind = btn.dataset.tmsRun, L = LS[kind].map(b => ({ label: b.label, mins: b.mins }));
     if (kind === 'mid') { const at = S.at && S.at.mid != null ? S.at.mid : 720, sl = slotFor(day.blocks, day.start, at); day.blocks.splice(sl.i, 0, ...L); }
