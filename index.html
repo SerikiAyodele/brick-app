@@ -6550,6 +6550,12 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day .carry-fold span { font: 600 11px "Inter", system-ui, sans-serif; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); }
 #view-day .carry-fold small { flex: 1; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
 #view-day .carry-fold b { color: var(--muted); font-weight: 400; }
+
+/* goal picks, quieter still: plain small rows under the line, no boxes or pills */
+#view-day .dg-ask .dg-dd { display: block; margin-top: 2px; }
+#view-day .dg-ask .dg-dd button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 2px; font: 400 14px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; border-radius: 0; text-align: left; }
+#view-day .dg-ask .dg-dd button i { width: 18px; font-size: 13px; text-align: center; opacity: .9; }
+#view-day .dg-ask .dg-dd button:active, #view-day .dg-ask .dg-dd button:hover { color: var(--ink); background: none; }
 </style>
 </head>
 <body>
@@ -6831,7 +6837,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:12</footer>
+  <footer>Mr.O:20:14</footer>
 </div>
 
 <script>
