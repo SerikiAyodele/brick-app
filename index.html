@@ -6471,6 +6471,13 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #sortsheet [data-a=back] { display: block; margin: 8px auto 0; }
 .mn-pick .mn-split { color: var(--pink); }
 .mn-d .ln2 { font-style: normal; color: var(--pink); }
+
+/* today in stages */
+#view-day#view-day#view-day #block-list .sheet > .stg-hide, #view-day#view-day#view-day .stg-hide { display: none !important; }
+#view-day .stg-more { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; margin: 2px 0 6px; padding: 0 2px; font: 500 14px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; border-bottom: 1px solid var(--hair); text-align: left; cursor: pointer; }
+#view-day .stg-more span { flex: none; }
+#view-day .stg-more em { flex: 1; font-style: normal; letter-spacing: 2px; opacity: .8; }
+#view-day .stg-more b { margin-left: auto; font-weight: 600; color: var(--pink); }
 </style>
 </head>
 <body>
@@ -6752,7 +6759,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:46</footer>
+  <footer>Mr.O:19:48</footer>
 </div>
 
 <script>
@@ -16027,7 +16034,32 @@ function renderFuel() {
     line.after(sub);
   });
 }
-setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); } catch {} }, 60000);
+setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); stageDay(); } catch {} }, 60000);
+// today in stages: the part of the day you are in shows; later parts fold to one quiet row until you open them (or get there)
+let stageOpen = new Set(), stageKey = null;
+function stageDay() {
+  const sheet = document.querySelector('#block-list .sheet'); if (!sheet) return;
+  sheet.querySelectorAll('.stg-more').forEach(x => x.remove());
+  sheet.querySelectorAll('.stg-hide').forEach(x => x.classList.remove('stg-hide'));
+  if (viewDay !== planKey() || sortingDay) return;
+  if (stageKey !== viewDay) { stageOpen = new Set(); stageKey = viewDay; }
+  const groups = []; let g = null;
+  for (const el of [...sheet.children]) { if (el.classList.contains('dpart')) { g = { label: el, items: [] }; groups.push(g); } else if (g) g.items.push(el); }
+  if (groups.length < 2) return;
+  const cur = groups.findIndex(gr => gr.items.some(el => el.classList.contains('line') && !el.classList.contains('ticked')));
+  if (cur < 0) return;
+  groups.forEach((gr, i) => {
+    if (i <= cur) return;
+    const name = gr.label.textContent.trim(); if (stageOpen.has(name)) return;
+    const L = gr.items.filter(el => el.classList.contains('line')); if (!L.length) return;
+    gr.items.forEach(el => el.classList.add('stg-hide'));
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'stg-more';
+    const em = L.slice(0, 5).map(el => { const e = el.querySelector('.bemo, .be, .emo'); return e ? e.textContent.trim() : ''; }).filter(Boolean).join(' ');
+    b.innerHTML = '<span>' + L.length + ' block' + (L.length > 1 ? 's' : '') + ' later</span>' + (em ? '<em>' + esc(em) + '</em>' : '') + '<b>Show \u203a</b>';
+    b.addEventListener('click', () => { stageOpen.add(name); stageDay(); });
+    gr.label.after(b);
+  });
+}
 // a believable real time: not under a third of the plan, not over double plus half an hour
 function tookOk(took, m) { return took >= Math.max(3, m * 0.33) && took <= m * 2 + 30; }
 // once: clear real times that were really late ticks
@@ -16303,7 +16335,7 @@ function renderDayCal() {
 }
 {
   const baseRender = renderDay;
-  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } try { renderFuel(); } catch (e) { console.error(e); } try { renderLate(); renderTook(); } catch (e) { console.error(e); } return r; };
+  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } try { renderFuel(); } catch (e) { console.error(e); } try { renderLate(); renderTook(); } catch (e) { console.error(e); } try { stageDay(); } catch (e) { console.error(e); } return r; };
   const ei = document.getElementById('endat');
   if (ei) ei.addEventListener('change', () => { const d = dayFor(viewDay); if (ei.value) d.end = ei.value; else delete d.end; save(); renderDay(); });
   document.querySelectorAll('#dv-seg [data-dv]').forEach(b => b.addEventListener('click', () => {
