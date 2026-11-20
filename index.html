@@ -6418,6 +6418,33 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day .dg-ask .dg-dd button { width: auto; min-height: 36px; gap: 6px; padding: 0 12px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, var(--card)); border: 0; border-radius: 999px; }
 #view-day .dg-ask .dg-dd button i { font-size: 13px; }
 #view-day .dg-ask .dg-dd button:active { background: color-mix(in srgb, var(--pink) 18%, var(--card)); }
+
+/* budget, upgraded */
+.bg { margin-top: 18px; }
+.bg-g { margin-bottom: 18px; }
+.bg-gh { display: flex; align-items: baseline; justify-content: space-between; margin: 0 2px 8px; }
+.bg-gh span { display: flex; align-items: center; gap: 8px; font: 600 12px "Poppins", sans-serif; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); }
+.bg-gh i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.bg-gh small { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+#money-body .bg-list { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; border: 0; }
+#money-body .bg-list li.bg-r { display: block; padding: 10px 14px; border: 0; border-radius: 16px; background: color-mix(in srgb, var(--c, var(--ink)) 7%, var(--card)); cursor: pointer; }
+.bg-top { display: flex; align-items: baseline; gap: 8px; }
+.bg-top .nm { flex: 1; min-width: 0; font: 500 15px "Poppins", sans-serif; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bg-top em { font-style: normal; font-size: 11px; color: var(--pink); }
+.bg-top b { font: 600 15px "Poppins", sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bg-bar { display: block; height: 5px; margin: 6px 0 5px; border-radius: 3px; background: color-mix(in srgb, var(--ink) 8%, transparent); overflow: hidden; }
+.bg-bar u { display: block; height: 100%; border-radius: 3px; background: var(--c, var(--pink)); transition: width .5s cubic-bezier(.22, 1, .36, 1); }
+.bg-r small { display: block; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bg-r.near .bg-bar u { background: #e0a35a; }
+.bg-r.over .bg-bar u { background: #d9628a; }
+.bg-r.over .bg-top b { color: #d9628a; }
+.bg-r.nob .bg-top b { color: var(--muted); font-weight: 500; }
+.bg-idle { margin: 4px 0 12px; }
+.bg-idle summary { padding: 10px 2px; font: 500 14px "Poppins", sans-serif; color: var(--muted); cursor: pointer; }
+.bg-idle .bg-list { margin-top: 4px; }
+#money-body .bg-new li.nt-new { padding: 12px 14px; border: 1px dashed var(--hair); border-radius: 16px; text-align: center; font: 500 14px "Poppins", sans-serif; color: var(--muted); background: none; cursor: pointer; }
+#money-body .bg-list li.ed { padding: 12px 14px; border-radius: 16px; background: var(--card); border: 1px solid var(--hair); }
+.bg-sum { margin: 12px 2px 0; text-align: center; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -6699,7 +6726,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:28</footer>
+  <footer>Mr.O:19:34</footer>
 </div>
 
 <script>
@@ -12010,13 +12037,28 @@ function renderMoney() {
         (b.unplanned ? '<em>unplanned</em>' : '') + '</span>' + cell(b.amount) + cell(sp) + cell(crBy[b.id] || 0) + '</li>';
     };
     const sumDr = all.reduce((a, b) => a + (spentBy[b.id] || 0), 0), sumCr = all.reduce((a, b) => a + (crBy[b.id] || 0), 0);
-    html += '<div class="nt"><div class="nt-title"><span class="nt-ic" aria-hidden="true">▦</span>Bills<small>' + all.length + '</small></div>' +
-      '<div class="nt-scroll"><ul class="mn-lines2 nt-t">' +
-      '<li class="nt-h"><span>Aa Name</span><span># Budget</span><span># Debit</span><span># Credit</span></li>' +
-      all.map(trow).join('') +
-      (moneyEdit === 'new' || moneyEdit === 'newu' ? '<li class="ed">' + lineEditor(null) + '</li>' : '<li class="nt-new" data-a="newline" role="button" tabindex="0">+ New</li>') +
-      '<li class="nt-f"><span>Sum</span>' + cell(budget) + cell(sumDr) + cell(sumCr) + '</li>' +
-      '</ul></div></div>';
+    // budget, upgraded: grouped by area of life, each line with what is left and a bar; lines with no budget fold away
+    const areaOf = b => b.area || guessArea(b.name);
+    const used = b => b.amount || spentBy[b.id] || crBy[b.id] || moneyEdit === b.id;
+    const live = all.filter(used), idle = all.filter(b => !used(b));
+    const brow = b => {
+      if (moneyEdit === b.id) return '<li class="ed" data-b="' + b.id + '">' + lineEditor(b) + '</li>';
+      const sp = spentBy[b.id] || 0, cr = crBy[b.id] || 0, lf = b.amount - sp, pc = b.amount ? Math.min(100, Math.round(sp / b.amount * 100)) : (sp ? 100 : 0);
+      const st = !b.amount ? 'nob' : lf < 0 ? 'over' : pc >= 85 ? 'near' : '';
+      return '<li data-b="' + b.id + '" class="bg-r ' + st + '"><div class="bg-top"><span class="nm"></span>' + (b.unplanned ? '<em>unplanned</em>' : '') +
+        '<b>' + (b.amount ? (lf < 0 ? mnNaira(-lf) + ' over' : mnNaira(lf) + ' left') : sp ? mnNaira(sp) + ' spent' : mnNaira(0)) + '</b></div>' +
+        (b.amount || sp ? '<i class="bg-bar"><u style="width:' + pc + '%"></u></i>' : '') +
+        '<small>' + (b.amount ? mnNaira(sp) + ' of ' + mnNaira(b.amount) : sp ? 'no budget set' : 'tap to set a budget') + (cr ? ' \u00b7 +' + mnNaira(cr) + ' back' : '') + '</small></li>';
+    };
+    const gnames = [...new Set(MN_AREAS.concat(live.map(areaOf)))];
+    const groups = gnames.map(a => ({ a, L: live.filter(b => areaOf(b) === a).sort((x, y) => (y.amount - x.amount) || x.name.localeCompare(y.name)) })).filter(g => g.L.length);
+    html += '<div class="bg">' + groups.map(g => {
+        const gb = g.L.reduce((t, b) => t + b.amount, 0), gs = g.L.reduce((t, b) => t + (spentBy[b.id] || 0), 0);
+        return '<div class="bg-g" style="--c:' + (MN_AREA_C[g.a] || '#999') + '"><div class="bg-gh"><span><i></i>' + esc(g.a) + '</span><small>' + mnNaira(gs) + ' of ' + mnNaira(gb) + '</small></div>' +
+          '<ul class="mn-lines2 bg-list">' + g.L.map(brow).join('') + '</ul></div>'; }).join('') +
+      (idle.length ? '<details class="bg-idle"><summary>' + idle.length + ' line' + (idle.length > 1 ? 's' : '') + ' with no budget yet</summary><ul class="mn-lines2 bg-list">' + idle.map(brow).join('') + '</ul></details>' : '') +
+      '<ul class="mn-lines2 bg-list bg-new">' + (moneyEdit === 'new' || moneyEdit === 'newu' ? '<li class="ed">' + lineEditor(null) + '</li>' : '<li class="nt-new" data-a="newline" role="button" tabindex="0">+ New line</li>') + '</ul>' +
+      '<p class="bg-sum">' + mnNaira(sumDr) + ' spent of ' + mnNaira(budget) + (sumCr ? ' \u00b7 +' + mnNaira(sumCr) + ' back' : '') + '</p></div>';
     if (moneyEdit !== 'newu' && moneyEdit !== 'new') html += '<button type="button" class="mn-add" data-a="newunp">+ Add unplanned, this month only</button>';
     if (loose) html += '<p class="mn-note">' + mnNaira(loose) + ' spent outside your lines. Open Spending to give it a line.</p>';
   }
