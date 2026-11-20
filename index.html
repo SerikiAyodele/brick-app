@@ -6682,6 +6682,11 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #lensheet .ls-end .ls-fx { font-size: 13px; }
 #lensheet .ls-rm { font-size: 14px !important; min-height: 40px; }
 #lensheet .ls-cancel { font-size: 15px !important; }
+
+/* hours, easy to see: each block's length is a clear pill, each part of the day shows its total */
+#view-day#view-day#view-day#view-day #block-list .line .how { justify-self: end; min-width: 48px; height: 30px; padding: 0 10px !important; font: 600 14px "Inter", system-ui, sans-serif !important; color: var(--ink) !important; background: color-mix(in srgb, var(--bc, var(--pink)) 18%, var(--card)) !important; border-radius: 999px !important; opacity: 1 !important; }
+#view-day#view-day#view-day#view-day #block-list .line.ticked .how { opacity: .5 !important; }
+#view-day .dpart .dp-hrs { order: 3; margin-left: auto; padding-left: 10px; font: 600 12px "Inter", system-ui, sans-serif; letter-spacing: 0; text-transform: none; color: var(--ink); opacity: .75; }
 </style>
 </head>
 <body>
@@ -6963,7 +6968,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:57</footer>
+  <footer>Mr.O:20:59</footer>
 </div>
 
 <script>
@@ -16317,16 +16322,24 @@ function renderFuel() {
 setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); stageDay(); } catch {} }, 60000);
 // today in stages: the part of the day you are in shows; later parts fold to one quiet row until you open them (or get there)
 let stageOpen = new Set(), stageKey = null;
+function partHours(sheet) {
+  const d = state.days[viewDay]; if (!d) return; let lab = null, m = 0;
+  const put = () => { if (lab && m) { lab.querySelectorAll('.dp-hrs').forEach(x => x.remove()); const sp = document.createElement('span'); sp.className = 'dp-hrs'; sp.textContent = minsLabel(m); lab.appendChild(sp); } };
+  for (const el of [...sheet.children]) { if (el.classList.contains('dpart')) { put(); lab = el; m = 0; } else if (el.classList.contains('line') && el.dataset.i != null) m += Number((d.blocks[Number(el.dataset.i)] || {}).mins) || 0; }
+  put();
+}
 function stageDay() {
   const sheet = document.querySelector('#block-list .sheet'); if (!sheet) return;
   // each block's badge takes its kind's colour (work, food, move, rest, care), like the calendar
   try { const d = state.days[viewDay]; if (d && d.blocks) sheet.querySelectorAll('.line[data-i]').forEach(el => { const b = d.blocks[Number(el.dataset.i)]; if (b) el.style.setProperty('--bc', calColor(b)); }); } catch {}
   sheet.querySelectorAll('.stg-more').forEach(x => x.remove());
   sheet.querySelectorAll('.stg-hide').forEach(x => x.classList.remove('stg-hide'));
-  if (viewDay !== planKey() || sortingDay) return;
+  if (viewDay !== planKey() || sortingDay) { try { partHours(sheet); } catch {} return; }
   if (stageKey !== viewDay) { stageOpen = new Set(); stageKey = viewDay; }
   const groups = []; let g = null;
   for (const el of [...sheet.children]) { if (el.classList.contains('dpart')) { g = { label: el, items: [] }; groups.push(g); } else if (g) g.items.push(el); }
+  // each part of the day shows how many hours it holds
+  try { const d = state.days[viewDay]; groups.forEach(gr => { gr.label.querySelectorAll('.dp-hrs').forEach(x => x.remove()); const m = gr.items.filter(el => el.classList.contains('line') && el.dataset.i != null).reduce((t, el) => t + (Number((d.blocks[Number(el.dataset.i)] || {}).mins) || 0), 0); if (m) { const sp = document.createElement('span'); sp.className = 'dp-hrs'; sp.textContent = minsLabel(m); gr.label.appendChild(sp); } }); } catch {}
   if (groups.length < 2) return;
   const cur = groups.findIndex(gr => gr.items.some(el => el.classList.contains('line') && !el.classList.contains('ticked')));
   if (cur < 0) return;
