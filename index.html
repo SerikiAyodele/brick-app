@@ -6499,6 +6499,13 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #money-body .pk-lines { margin: 6px 0 4px 10px; }
 #money-body .pk-lines li.bg-r { background: color-mix(in srgb, var(--c) 5%, var(--card)); }
 .pk-rm { display: block; margin: 2px 0 4px auto; font-size: 13px !important; }
+
+/* an open pocket holds its lines inside the same card */
+.pk.open { border-radius: 20px; background: color-mix(in srgb, var(--c) 9%, var(--card)); padding-bottom: 10px; }
+.pk.open .pk-card { background: none; }
+#money-body .pk.open .pk-lines { margin: 0 10px; padding: 10px 0 0; background: none !important; box-shadow: none !important; border-radius: 0; border-top: 1px solid color-mix(in srgb, var(--c) 25%, transparent); }
+#money-body .pk.open .pk-lines li.bg-r { background: color-mix(in srgb, var(--ink) 4%, var(--card)); }
+.pk.open .pk-rm { margin: 6px 14px 0 auto; }
 </style>
 </head>
 <body>
@@ -6780,7 +6787,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:50</footer>
+  <footer>Mr.O:19:53</footer>
 </div>
 
 <script>
