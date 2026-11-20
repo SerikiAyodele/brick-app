@@ -6831,7 +6831,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:09</footer>
+  <footer>Mr.O:20:12</footer>
 </div>
 
 <script>
@@ -12194,12 +12194,14 @@ function renderMoney() {
 
   if (moneyGear) html += '<div class="mn-gearbox"></div>';
 
+  // left to spend is the money really in your account: the balance from your newest bank alert
+  const realLeft = isNow && latest ? latest.bal : left;
   html += '<div class="mn-top">' +
-    '<div class="mn-big"><span>Left to spend</span><b class="' + (left < 0 ? 'neg' : '') + '">' + mnNaira(left) + '</b>' +
-      (isNow && daysLeft > 0 && left > 0 ? '<small>about ' + mnNaira(left / daysLeft) + ' a day for ' + daysLeft + ' days</small>' : '<small>of ' + mnNaira(budget) + ' budgeted</small>') + '</div>' +
+    '<div class="mn-big"><span>Left to spend</span><b class="' + (realLeft < 0 ? 'neg' : '') + '">' + mnNaira(realLeft) + '</b>' +
+      (isNow && daysLeft > 0 && realLeft > 0 ? '<small>about ' + mnNaira(realLeft / daysLeft) + ' a day for ' + daysLeft + ' days</small>' : '<small>of ' + mnNaira(budget) + ' budgeted</small>') + '</div>' +
     '</div>' +
     // one quiet line instead of three boxes, a warning only when something is off
-    '<p class="mn-line"><span>Balance <b>' + (latest ? mnNaira(latest.bal) : '\u2013') + '</b></span><span>Spent <b>' + shortNaira(spent) + '</b> of ' + shortNaira(budget) + '</span><span>Income <b>' + shortNaira(income) + '</b></span></p>' +
+    '<p class="mn-line"><span>Budget left <b>' + shortNaira(left) + '</b></span><span>Spent <b>' + shortNaira(spent) + '</b> of ' + shortNaira(budget) + '</span><span>Income <b>' + shortNaira(income) + '</b></span></p>' +
     (bal && bal[0] !== 'ok' ? '<p class="mn-check2 ' + bal[0] + '">' + bal[1] + '</p>' : '');
 
   { const T = toSort(); if (T.length) html += '<button type="button" class="mn-sortbar" data-a="sortnew"><i>' + T.length + '</i><span>new alert' + (T.length > 1 ? 's' : '') + ' to sort</span><b>Sort \u203a</b></button>'; }
