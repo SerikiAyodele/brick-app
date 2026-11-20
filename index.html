@@ -6544,6 +6544,12 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day#view-day .tms2-emo i { font-style: normal; }
 #view-day#view-day .tms2-names { margin: 3px 0 0 22px; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #view-day#view-day .tms .tms-no { display: block; margin: 8px 0 0 auto !important; text-decoration: none !important; }
+
+/* yesterday, folded */
+#view-day .carry-fold { display: flex; align-items: baseline; gap: 10px; width: 100%; min-height: 44px; margin: 0 0 14px; padding: 0 2px; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--hair); cursor: pointer; }
+#view-day .carry-fold span { font: 600 11px "Inter", system-ui, sans-serif; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); }
+#view-day .carry-fold small { flex: 1; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+#view-day .carry-fold b { color: var(--muted); font-weight: 400; }
 </style>
 </head>
 <body>
@@ -6825,7 +6831,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:06</footer>
+  <footer>Mr.O:20:09</footer>
 </div>
 
 <script>
@@ -9296,6 +9302,7 @@ function renderDayStats() {
     '<span><b>' + done + '<i>/' + bs.length + '</i></b><small>done</small></span><span><b>' + hrsShort(plan) + '</b><small>planned</small></span><span><b>' + hrsShort(left) + '</b><small>' + (isT ? 'left' : viewDay > planKey() ? 'to come' : 'left') + '</small></span></div>';
 }
 const hrsShort = m => { const h = Math.floor(m / 60), r = m % 60; return h ? h + 'h' + (r ? String(r).padStart(2, '0') : '') : r + 'm'; };
+let carryExpand = null;   // the day whose Yesterday card you opened
 function renderCarry() {
   const slot = document.getElementById('carry-slot');
   slot.innerHTML = '';
@@ -9311,6 +9318,13 @@ function renderCarry() {
   const items = prev.day.blocks.filter(b => (b.label || '').trim());
   if (!items.length) return;
   const when = (prev.k === shiftKey(viewDay, -1)) ? 'Yesterday' : 'On ' + cap(FULL[fromKey(prev.k).getDay()]);
+  // with the suggestion showing, yesterday folds to one small row (it lists the same blocks); tap to pick from it
+  if (viewDay > planKey() && !day.noSuggest && carryExpand !== viewDay) {
+    const r = document.createElement('button'); r.type = 'button'; r.className = 'carry-fold';
+    r.innerHTML = '<span>' + when + '</span><small>' + prev.day.blocks.filter(b => b.done).length + ' of ' + items.length + ' done \u00b7 pick blocks</small><b>\u203a</b>';
+    r.addEventListener('click', () => { carryExpand = viewDay; renderCarry(); });
+    slot.appendChild(r); return;
+  }
   if (!day.carried || day.carried.from !== prev.k) day.carried = { from: prev.k, i: [] };
   const got = day.carried.i;
 
