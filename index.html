@@ -6578,6 +6578,14 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 /* to do: plain text, no pills */
 #view-day .dcq-chips button { min-height: 30px; padding: 0 10px 0 0; font-size: 13px; color: var(--muted); background: none; }
 #view-day .dcq-chips button:active { color: var(--ink); }
+
+/* one button each for morning, afternoon and night */
+#view-day#view-day .tms2-btns { display: flex; gap: 6px; margin-top: 8px; }
+#view-day#view-day .tms2.open .tms2-btns { display: none; }
+#view-day#view-day .tms2-btns button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 8px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--card)); border: 1px solid color-mix(in srgb, var(--hair) 70%, transparent); border-radius: 12px; cursor: pointer; }
+#view-day#view-day .tms2-btns button i { font-style: normal; font-size: 13px; }
+#view-day#view-day .tms2-btns button:active { background: color-mix(in srgb, var(--pink) 16%, var(--card)); }
+#view-day#view-day .tms2:not(.open) .tms-h { border-bottom: 0; padding-bottom: 0; }
 </style>
 </head>
 <body>
@@ -6859,7 +6867,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:22</footer>
+  <footer>Mr.O:20:25</footer>
 </div>
 
 <script>
@@ -10542,6 +10550,7 @@ function renderTomorrowSuggest() {
       '<p class="tms2-names">' + esc((() => { const c = {}, o = []; L.forEach(b => { const k = b.label; if (!(k in c)) { c[k] = 0; o.push(k); } c[k]++; }); return o.map(k => k + (c[k] > 1 ? ' \u00d7' + c[k] : '')).join(' \u00b7 '); })()) + '</p></div>';
   const box = document.createElement('div'); box.className = 'tms tms2' + (tmsOpen === viewDay ? ' open' : '');
   box.innerHTML = '<div class="tms-h"><b>Suggested for ' + (viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()])) + '</b><small>' + (S.same && (S.same.am || S.same.mid || S.same.pm) ? 'same as yesterday' : 'from how yesterday went') + '</small>' + ([LS.am, LS.mid, LS.pm].filter(x => x.length).length > 1 ? '<button type="button" class="tms2-all">Add all</button>' : '') + '<button type="button" class="tms2-tog" aria-label="show the parts">\u2304</button></div>' +
+    '<div class="tms2-btns">' + ['am', 'mid', 'pm'].filter(k => LS[k].length).map(k => '<button type="button" data-add="' + k + '"><i>' + KN[k][0] + '</i>' + KN[k][1] + '</button>').join('') + '</div>' +
     '<div class="tms2-card">' + part('am', LS.am) + part('mid', LS.mid) + part('pm', LS.pm) + '</div><button type="button" class="tms-no">Not now</button>';
   box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); const t = box.querySelector('[data-tms-run="' + b.dataset.add + '"]'); if (t) t.click(); }));
   box.querySelectorAll('[data-tmo]').forEach(btn => btn.addEventListener('click', () => {
