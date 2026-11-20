@@ -6596,6 +6596,18 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day#view-day #block-list .line .bin { opacity: .3; }
 #view-day#view-day #block-list .line.ticked .bemo { filter: grayscale(.6); opacity: .6; }
 #view-day#view-day #block-list .line.now { background: color-mix(in srgb, var(--bc, var(--pink)) 7%, transparent) !important; border-radius: 14px; }
+
+/* plan header, calmer: a normal title, one small pill for the day buttons, a thin progress line */
+#view-day#view-day#view-day .datebar { align-items: center !important; }
+#view-day#view-day#view-day #day-title { font: 700 30px "Inter", system-ui, sans-serif !important; font-style: normal !important; text-transform: capitalize !important; letter-spacing: -.6px !important; line-height: 1.1 !important; }
+#view-day#view-day#view-day #day-title small { display: block; margin-top: 4px; font: 500 12px "Inter", system-ui, sans-serif !important; letter-spacing: .4px !important; text-transform: capitalize !important; color: var(--muted) !important; }
+#view-day#view-day#view-day #day-title small::first-letter { text-transform: uppercase; }
+#view-day#view-day#view-day .daynav { display: flex !important; align-items: center; gap: 0 !important; padding: 3px !important; background: color-mix(in srgb, var(--ink) 6%, var(--card)) !important; border-radius: 999px !important; }
+#view-day#view-day#view-day .daynav .nav { min-width: 36px !important; width: auto !important; height: 34px !important; min-height: 34px !important; padding: 0 10px !important; font: 600 13px "Inter", system-ui, sans-serif !important; letter-spacing: 0 !important; text-transform: capitalize !important; color: var(--ink) !important; background: none !important; border: 0 !important; border-radius: 999px !important; box-shadow: none !important; }
+#view-day#view-day#view-day .daynav #day-today { background: var(--card) !important; box-shadow: 0 1px 2px rgba(0,0,0,.12) !important; }
+#view-day#view-day#view-day #day-prog { margin-top: 12px !important; gap: 10px !important; align-items: center !important; }
+#view-day#view-day#view-day #day-prog i { height: 4px !important; }
+#view-day#view-day#view-day #day-prog span { font: 500 12px "Inter", system-ui, sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--muted) !important; }
 </style>
 </head>
 <body>
@@ -6877,7 +6889,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:28</footer>
+  <footer>Mr.O:20:30</footer>
 </div>
 
 <script>
