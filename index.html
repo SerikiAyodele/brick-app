@@ -6478,6 +6478,27 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day .stg-more span { flex: none; }
 #view-day .stg-more em { flex: 1; font-style: normal; letter-spacing: 2px; opacity: .8; }
 #view-day .stg-more b { margin-left: auto; font-weight: 600; color: var(--pink); }
+
+/* budget pockets */
+.pk-title { margin: 22px 2px 10px; font: 600 17px "Poppins", sans-serif; color: var(--ink); }
+.pk { margin-bottom: 10px; }
+.pk-card { display: flex; align-items: stretch; gap: 12px; padding: 14px; border-radius: 20px; background: color-mix(in srgb, var(--c) 9%, var(--card)); cursor: pointer; }
+.pk-l { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pk-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.pk-tag i { width: 18px; height: 18px; border-radius: 6px; background: var(--c); opacity: .85; }
+.pk-name { margin-top: 14px; font: 500 12px "Poppins", sans-serif; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+.pk-amt { margin-top: 2px; font: 700 24px "Poppins", sans-serif; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pk.over .pk-amt { color: #d9628a; }
+.pk-sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pk-bar { display: block; height: 4px; margin-top: 8px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 8%, transparent); overflow: hidden; }
+.pk-bar u { display: block; height: 100%; background: var(--c); border-radius: 2px; }
+.pk.over .pk-bar u { background: #d9628a; }
+.pk-pic { flex: none; width: 112px; min-height: 100px; padding: 0; overflow: hidden; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--c) 18%, var(--card)); cursor: pointer; }
+.pk-pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.pk-pic span { font: 500 12px "Poppins", sans-serif; color: var(--muted); }
+#money-body .pk-lines { margin: 6px 0 4px 10px; }
+#money-body .pk-lines li.bg-r { background: color-mix(in srgb, var(--c) 5%, var(--card)); }
+.pk-rm { display: block; margin: 2px 0 4px auto; font-size: 13px !important; }
 </style>
 </head>
 <body>
@@ -6759,7 +6780,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:48</footer>
+  <footer>Mr.O:19:50</footer>
 </div>
 
 <script>
@@ -12039,6 +12060,24 @@ const NOTION_BILLS = ['Cleaning and Laundry', 'Offering', 'Gym sub', 'Subscripti
   'Visa', 'Zart', 'Tennis', 'Swimming', 'White board', 'Unplanned Outing'];
 let moneyMonth = null;   // "YYYY-MM" being looked at
 let moneyOpen = null;    // transaction id open for picking its line
+let pocketOpen = null;    // the pocket (area) whose lines are showing
+// your picture for a pocket: made small (a few KB) so it fits in the app's data
+function pocketPic(area) {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+  inp.addEventListener('change', () => {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    const img = new Image(), url = URL.createObjectURL(f);
+    img.onload = () => {
+      const W = 320, H = 256, c = document.createElement('canvas'); c.width = W; c.height = H;
+      const r = Math.max(W / img.width, H / img.height), w = img.width * r, h = img.height * r;
+      c.getContext('2d').drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+      const P = moneyPlan(); P.pics = P.pics || {}; P.pics[area] = c.toDataURL('image/jpeg', 0.72);
+      URL.revokeObjectURL(url); save(); renderMoney();
+    };
+    img.src = url;
+  });
+  inp.click();
+}
 let moneyTab = 'budget'; // budget, spending, income
 let moneyGear = false;   // the small settings panel
 let moneyEdit = null;    // budget line id, 'new', 'inc:<i>' or 'inc:new' being edited
@@ -12139,10 +12178,17 @@ function renderMoney() {
     };
     const gnames = [...new Set(MN_AREAS.concat(live.map(areaOf)))];
     const groups = gnames.map(a => ({ a, L: live.filter(b => areaOf(b) === a).sort((x, y) => (y.amount - x.amount) || x.name.localeCompare(y.name)) })).filter(g => g.L.length);
-    html += '<div class="bg">' + groups.map(g => {
-        const gb = g.L.reduce((t, b) => t + b.amount, 0), gs = g.L.reduce((t, b) => t + (spentBy[b.id] || 0), 0);
-        return '<div class="bg-g" style="--c:' + (MN_AREA_C[g.a] || '#999') + '"><div class="bg-gh"><span><i></i>' + esc(g.a) + '</span><small>' + mnNaira(gs) + ' of ' + mnNaira(gb) + '</small></div>' +
-          '<ul class="mn-lines2 bg-list">' + g.L.map(brow).join('') + '</ul></div>'; }).join('') +
+    // pockets: one card per area of life, with your own picture; tap a pocket to see its lines
+    const pics = (P.pics = P.pics || {});
+    html += '<p class="pk-title">Your pockets</p><div class="bg">' + groups.map(g => {
+        const gb = g.L.reduce((t, b) => t + b.amount, 0), gs = g.L.reduce((t, b) => t + (spentBy[b.id] || 0), 0), lf = gb - gs;
+        const open = pocketOpen === g.a || g.L.some(b => b.id === moneyEdit), pc = gb ? Math.min(100, Math.round(gs / gb * 100)) : 0;
+        return '<div class="pk' + (open ? ' open' : '') + (lf < 0 ? ' over' : '') + '" style="--c:' + (MN_AREA_C[g.a] || '#999') + '">' +
+          '<div class="pk-card" data-pk="' + esc(g.a) + '" role="button" tabindex="0"><div class="pk-l"><span class="pk-tag"><i></i>' + g.L.length + ' line' + (g.L.length > 1 ? 's' : '') + '</span>' +
+            '<small class="pk-name">' + esc(g.a) + '</small><b class="pk-amt">' + (lf < 0 ? '\u2212' + mnNaira(-lf) : mnNaira(lf)) + '</b><small class="pk-sub">' + (lf < 0 ? 'over \u00b7 ' : 'left \u00b7 ') + mnNaira(gs) + ' of ' + mnNaira(gb) + '</small>' +
+            '<i class="pk-bar"><u style="width:' + pc + '%"></u></i></div>' +
+            '<button type="button" class="pk-pic" data-pic="' + esc(g.a) + '" aria-label="' + (pics[g.a] ? 'change picture' : 'add a picture') + '">' + (pics[g.a] ? '<img alt="" src="' + pics[g.a] + '">' : '<span>+ picture</span>') + '</button></div>' +
+          (open ? '<ul class="mn-lines2 bg-list pk-lines">' + g.L.map(brow).join('') + '</ul>' + (pics[g.a] ? '<button type="button" class="gm-link pk-rm" data-rmpic="' + esc(g.a) + '">Remove picture</button>' : '') : '') + '</div>'; }).join('') +
       (idle.length ? '<details class="bg-idle"><summary>' + idle.length + ' line' + (idle.length > 1 ? 's' : '') + ' with no budget yet</summary><ul class="mn-lines2 bg-list">' + idle.map(brow).join('') + '</ul></details>' : '') +
       '<ul class="mn-lines2 bg-list bg-new">' + (moneyEdit === 'new' || moneyEdit === 'newu' ? '<li class="ed">' + lineEditor(null) + '</li>' : '<li class="nt-new" data-a="newline" role="button" tabindex="0">+ New line</li>') + '</ul>' +
       '<p class="bg-sum">' + mnNaira(sumDr) + ' spent of ' + mnNaira(budget) + (sumCr ? ' \u00b7 +' + mnNaira(sumCr) + ' back' : '') + '</p></div>';
@@ -12188,6 +12234,9 @@ function renderMoney() {
   on('[data-t]', el => { moneyTab = el.dataset.t; moneyEdit = null; moneyOpen = null; renderMoney(); });
   on('.mn-gear', () => { moneyGear = !moneyGear; renderMoney(); });
   on('[data-a=newline]', () => { moneyEdit = 'new'; renderMoney(); focusEd(); });
+  on('[data-pk]', (el, e) => { if (e.target.closest('[data-pic]')) return; pocketOpen = pocketOpen === el.dataset.pk ? null : el.dataset.pk; moneyEdit = null; renderMoney(); });
+  on('[data-pic]', (el, e) => { e.stopPropagation(); pocketPic(el.dataset.pic); });
+  on('[data-rmpic]', el => { const P2 = moneyPlan(); if (P2.pics) delete P2.pics[el.dataset.rmpic]; save(); renderMoney(); });
   on('[data-a=newunp]', () => { moneyEdit = 'newu'; renderMoney(); focusEd(); });
   on('[data-a=newinc]', () => { moneyEdit = 'inc:new'; renderMoney(); focusEd(); });
   on('.mn-lines2 li[data-b]:not(.ed)', el => { moneyEdit = el.dataset.b; renderMoney(); focusEd(); });
