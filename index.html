@@ -6653,6 +6653,16 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #addsheet .ab-when .ab-pick input { text-align: left; }
 #addsheet .ab-sum { margin: 16px 0 12px; font-size: 16px; color: var(--muted); }
 #addsheet .ab-sum b { font-weight: 600; }
+
+/* one goal, simpler: no heading, the field says it; Not today sits inside until you type, then the arrow shows */
+#view-day .dg-ask.dg-ask > b { display: none; }
+#view-day .dg-ask .dg-in { min-height: 50px; padding: 0 6px 0 14px; box-shadow: none; background: color-mix(in srgb, var(--ink) 5%, var(--card)); }
+#view-day .dg-ask .dg-in input::placeholder { color: var(--muted); }
+#view-day .dg-ask .dg-in .dg-skip { position: static !important; top: auto !important; right: auto !important; align-self: center; margin: 0 !important; display: flex; align-items: center; flex: none; min-height: 36px; padding: 0 10px; font: 500 12px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; }
+#view-day .dg-ask .dg-in .lf-btn { display: none; }
+#view-day .dg-ask.typing .dg-in .lf-btn { display: block; }
+#view-day .dg-ask.typing .dg-in .dg-skip { display: none; }
+#view-day .dg-ask .dg-ic { font-size: 16px; opacity: .9; }
 </style>
 </head>
 <body>
@@ -6934,7 +6944,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:42</footer>
+  <footer>Mr.O:20:44</footer>
 </div>
 
 <script>
@@ -9617,7 +9627,8 @@ function renderDayGoal() {
     '<button type="button" class="dg-skip">' + (dayGoalEditing ? 'Cancel' : ahead ? 'Later' : 'Not today') + '</button></div>';
   const inp = box.querySelector('input');
   inp.value = dayGoalEditing ? (day.goal || '') : '';
-  { const go = box.querySelector('.dg-in .lf-btn'), sync = () => go.classList.toggle('ready', !!inp.value.trim()); inp.addEventListener('input', sync); sync(); }
+  { const go = box.querySelector('.dg-in .lf-btn'), ask = box.querySelector('.dg-ask'), sync = () => { const t = !!inp.value.trim(); go.classList.toggle('ready', t); if (ask) ask.classList.toggle('typing', t); }; inp.addEventListener('input', sync); sync(); }
+  { const ask = box.querySelector('.dg-ask'), sk = box.querySelector('.dg-skip'), din = box.querySelector('.dg-in'); if (ask && sk && din) { din.appendChild(sk); } }
   const set = t => { t = (t || '').trim(); if (!t) { inp.focus(); return; } day.goal = t; day.goalDone = false; day.goalSkip = false; dayGoalEditing = false; save(); renderDayGoal(); };
   box.querySelector('.lf-btn').addEventListener('click', () => set(inp.value));
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') set(inp.value); });
@@ -9625,7 +9636,7 @@ function renderDayGoal() {
   // the dropdown: opens when you tap the box, narrows as you type
   const dd = box.querySelector('.dg-dd');
   if (dd) {
-    inp.placeholder = 'pick a goal, or type your own';
+    inp.placeholder = ahead ? 'One goal for ' + dayName : 'One goal for today';
     const paint = () => { const q = inp.value.trim().toLowerCase(); let any = false; dd.querySelectorAll('[data-t]').forEach(b => { const ok = !q || b.dataset.t.toLowerCase().includes(q); b.hidden = !ok; any = any || ok; }); dd.hidden = !any; };
     inp.addEventListener('focus', paint); inp.addEventListener('click', paint); inp.addEventListener('input', paint);
     inp.addEventListener('blur', () => setTimeout(() => { dd.hidden = true; }, 150));
