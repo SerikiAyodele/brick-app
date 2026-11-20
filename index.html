@@ -6556,6 +6556,18 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day .dg-ask .dg-dd button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 2px; font: 400 14px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; border-radius: 0; text-align: left; }
 #view-day .dg-ask .dg-dd button i { width: 18px; font-size: 13px; text-align: center; opacity: .9; }
 #view-day .dg-ask .dg-dd button:active, #view-day .dg-ask .dg-dd button:hover { color: var(--ink); background: none; }
+
+/* suggested for tomorrow, easy on the eyes: no emoji strip, text buttons, tighter rows */
+#view-day#view-day .tms2-emo { display: none; }
+#view-day#view-day .tms-h .tms2-all { min-height: 28px; padding: 0; font-weight: 600; color: var(--pink); background: none; }
+#view-day#view-day .tms2-card { margin-top: 4px; border-top: 0; }
+#view-day#view-day .tms2-row { padding: 9px 0; border-bottom: 1px solid color-mix(in srgb, var(--hair) 60%, transparent); }
+#view-day#view-day .tms2-row:last-child { border-bottom: 0; }
+#view-day#view-day .tms2-top i { font-size: 13px; opacity: .7; }
+#view-day#view-day .tms2-top b { font-size: 13px; font-weight: 600; color: var(--ink); opacity: .85; }
+#view-day#view-day .tms2-top small { font-size: 12px; }
+#view-day#view-day .tms2-add { min-height: 28px; padding: 0; font-size: 12px; font-weight: 600; color: var(--pink); background: none; opacity: .85; }
+#view-day#view-day .tms2-names { margin-top: 2px; font-size: 12px; opacity: .8; }
 </style>
 </head>
 <body>
@@ -6837,7 +6849,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:14</footer>
+  <footer>Mr.O:20:16</footer>
 </div>
 
 <script>
