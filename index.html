@@ -6523,6 +6523,16 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 .mn-check2.give::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #e0a35a; vertical-align: middle; }
 #money-body .mn-sortbar { min-height: 40px; margin: 14px 0 10px; padding: 0 12px; font-size: 13px; border-radius: 12px; }
 #money-body .mn-sortbar i { min-width: 20px; height: 20px; font-size: 11px; }
+
+/* from your to do, quiet: a small heading and one-tap chips */
+#view-day .dcq { margin: 14px 0 14px; }
+#view-day .dcq-h { display: flex; align-items: center; gap: 14px; }
+#view-day .dcq-h b { flex: 1; font: 600 11px "Inter", system-ui, sans-serif; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); }
+#view-day .dcq-h button { min-height: 32px; padding: 0; font: 500 12px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; cursor: pointer; }
+#view-day .dcq-h .dc-go { color: var(--pink); font-weight: 600; }
+#view-day .dcq-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+#view-day .dcq-chips button { min-height: 34px; padding: 0 12px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 6%, var(--card)); border: 0; border-radius: 999px; cursor: pointer; }
+#view-day .dcq-chips small { color: var(--muted); font-size: 11px; }
 </style>
 </head>
 <body>
@@ -6804,7 +6814,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:02</footer>
+  <footer>Mr.O:20:03</footer>
 </div>
 
 <script>
@@ -9245,11 +9255,9 @@ function renderDumpCarry() {
   if (!planning) return;
   const name = dayWord();
   // one tap: an item goes straight onto the day (with undo); or all of them at once
-  const box = document.createElement('div'); box.className = 'suggest studs cy cy2';
-  box.innerHTML = '<div class="cy2-h"><b>From your brain dump</b><small>' + L.length + ' waiting</small></div>' +
-    '<p class="cy-sub">Tap one to put it on ' + name + '.</p><div class="cy2-list">' +
-    L.map(x => '<div class="cy2-row"><button type="button" class="cy2-pick" data-dc="' + x.id + '"><i class="dc-plus">+</i><span><b>' + esc(x.text) + '</b><small>' + minsLabel(usualLength(x.text) || 30) + '</small></span></button></div>').join('') + '</div>' +
-    '<div class="cy-btns"><button type="button" class="cy-all dc-go">Add ' + (L.length > 1 ? 'all ' + L.length : 'it') + ' to ' + name + '</button><button type="button" class="cy-done dc-no">Not now</button></div>';
+  const box = document.createElement('div'); box.className = 'dcq';
+  box.innerHTML = '<div class="dcq-h"><b>From your to do</b>' + (L.length > 1 ? '<button type="button" class="dc-go">Add all</button>' : '<button type="button" class="dc-go" hidden></button>') + '<button type="button" class="dc-no">Not now</button></div>' +
+    '<div class="dcq-chips">' + L.map(x => '<button type="button" data-dc="' + x.id + '">+ ' + blockEmoji({ label: x.text }) + ' ' + esc(x.text) + ' <small>' + minsLabel(usualLength(x.text) || 30) + '</small></button>').join('') + '</div>';
   const put = list => {
     const where = viewDay, added = [];
     for (const x of list) { const b = { label: x.text, mins: usualLength(x.text) || 30 }; day.blocks.push(b); added.push([x, b]); x.done = true; x.doneAt = Date.now(); x.planned = true; }
