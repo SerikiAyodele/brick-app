@@ -6687,6 +6687,11 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day#view-day#view-day#view-day #block-list .line .how { justify-self: end; min-width: 48px; height: 30px; padding: 0 10px !important; font: 600 14px "Inter", system-ui, sans-serif !important; color: var(--ink) !important; background: color-mix(in srgb, var(--bc, var(--pink)) 18%, var(--card)) !important; border-radius: 999px !important; opacity: 1 !important; }
 #view-day#view-day#view-day#view-day #block-list .line.ticked .how { opacity: .5 !important; }
 #view-day .dpart .dp-hrs { order: 3; margin-left: auto; padding-left: 10px; font: 600 12px "Inter", system-ui, sans-serif; letter-spacing: 0; text-transform: none; color: var(--ink); opacity: .75; }
+
+/* copy my day */
+#cpsheet .cp-st { margin: 0 0 10px; font-size: 14px; color: #5aa86a; }
+#cpsheet .cp-txt { width: 100%; box-sizing: border-box; padding: 12px; font: 400 13px/1.5 "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--card)); border: 0; border-radius: 14px; resize: none; }
+#cpsheet .cp-go { display: flex; align-items: center; justify-content: center; margin-top: 14px; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -6968,7 +6973,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:59</footer>
+  <footer>Mr.O:21:53</footer>
 </div>
 
 <script>
@@ -10141,6 +10146,8 @@ function renderDay() {
       al.addEventListener('click', () => alarmSheet(ups));
       tools.append(al);
     }
+    { const cp = document.createElement('button'); cp.className = 'arrange'; cp.type = 'button'; cp.textContent = 'Copy my day';
+      cp.setAttribute('aria-label', 'copy this day as text, to paste into ChatGPT'); cp.addEventListener('click', () => copyDaySheet(viewDay)); tools.append(cp); }
     blockList.appendChild(tools);
   }
 
@@ -10631,6 +10638,45 @@ function planAskSheet(k) {
   el.querySelector('.pak-me').addEventListener('click', () => planForMePage(k));
 }
 let tmsOpen = null;   // the day whose suggestion is opened up
+// this day as plain text, to paste into ChatGPT (or anywhere) and talk it through
+function dayText(k) {
+  const d = state.days[k] || { blocks: [] }, on = x => key(new Date(x.at)) === k, hm = at => { const t = new Date(at); return clock(t.getHours() * 60 + t.getMinutes()); };
+  const L = [], dt = fromKey(k);
+  L.push('My day from brick: ' + cap(FULL[dt.getDay()]) + ' ' + dt.getDate() + ' ' + cap(MONTHS[dt.getMonth()]));
+  if (d.goal) L.push('One goal: ' + d.goal + (d.goalDone ? ' (done)' : ' (not done yet)'));
+  if (d.blocks && d.blocks.length) {
+    let at = toMins(d.start); const done = d.blocks.filter(b => b.done).length;
+    L.push('', 'Plan (' + done + ' of ' + d.blocks.length + ' done):');
+    for (const b of d.blocks) { const m = Number(b.mins) || 60;
+      const extra = [b.title, (b.goals || []).map(g => (g.done ? '[x] ' : '[ ] ') + g.text).join(', '), b.took ? 'really took ' + minsLabel(b.took) : ''].filter(Boolean).join('; ');
+      L.push('- ' + clock(at) + ' to ' + clock(at + m) + ' ' + (b.label || 'Block') + ' (' + minsLabel(m) + ')' + (b.done ? ' done' : '') + (extra ? ': ' + extra : '')); at += m; }
+    const W = d.blocks.filter(b => outcomeField(b.label) === 'goals'), wm = W.reduce((t, b) => t + (Number(b.mins) || 60), 0);
+    if (wm) L.push('Work planned: ' + minsLabel(wm) + ', done: ' + minsLabel(W.filter(b => b.done).reduce((t, b) => t + (Number(b.mins) || 60), 0)));
+  }
+  const mo = (state.moods || []).filter(on).sort((a, b) => a.at - b.at);
+  if (mo.length) L.push('', 'Mood: ' + mo.map(m => hm(m.at) + ' ' + m.mood + (m.note ? ' (' + m.note + ')' : '')).join(', '));
+  const fo = (state.food || []).filter(on).sort((a, b) => a.at - b.at);
+  if (fo.length) L.push('Food and drink: ' + fo.map(f => hm(f.at) + ' ' + f.what).join(', '));
+  try { const sl = sleepOn(k); if (sl) L.push('Sleep the night before: ' + minsLabel(sleepMins(sl)) + ', ' + clock(toMins(sl.bed)) + ' to ' + clock(toMins(sl.wake))); } catch {}
+  const sets = (state.gymLog || []).filter(x => x.d === k).length; if (sets) L.push('Gym: ' + sets + ' sets logged');
+  const mn = (state.money || []).filter(x => on(x));
+  if (mn.length) { const out = mn.filter(x => x.dir === 'DR'), sp = out.reduce((t, x) => t + x.amt, 0);
+    L.push('Money: spent ' + mnNaira(sp) + (out.length ? ' (' + out.map(x => (x.desc || 'spent').toLowerCase() + ' ' + mnNaira(x.amt)).join(', ') + ')' : '') + (mn[0].bal != null ? ', balance ' + mnNaira(mn[0].bal) : '')); }
+  const td = (state.dump || []).filter(x => !x.done); if (td.length) L.push('Still on my to do: ' + td.map(x => x.text).join(', '));
+  L.push('', 'Talk my day through with me: what went well, what to change tomorrow.');
+  return L.join('\n');
+}
+function copyDaySheet(k) {
+  const txt = dayText(k), old = document.getElementById('cpsheet'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'cpsheet'; el.className = 'w3';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet cp" role="dialog" aria-modal="true" aria-label="Copy my day"><span class="w3-grab"></span><h2>Copy my day</h2><p class="cp-st">Copying\u2026</p><textarea class="cp-txt" rows="10" readonly></textarea>' +
+    '<a class="wka-go cp-go" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT and paste</a><button type="button" class="ls-cancel cp-x">Done</button></div>';
+  const ta = el.querySelector('.cp-txt'); ta.value = txt;
+  document.body.appendChild(el);
+  const st = el.querySelector('.cp-st'), close = () => el.remove();
+  el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.cp-x').addEventListener('click', close);
+  (async () => { try { await navigator.clipboard.writeText(txt); st.textContent = '\u2713 Copied. Paste it into ChatGPT.'; } catch { ta.focus(); ta.select(); st.textContent = 'Hold the text, Select All, then Copy.'; } })();
+}
 function renderTomorrowSuggest() {
   let slot = document.getElementById('tmsug-slot');
   if (!slot) { const c = document.getElementById('carry-slot'); if (!c) return; slot = document.createElement('div'); slot.id = 'tmsug-slot'; c.parentNode.insertBefore(slot, c); }
