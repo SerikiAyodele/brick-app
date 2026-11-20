@@ -6699,7 +6699,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:41</footer>
+  <footer>Mr.O:18:43</footer>
 </div>
 
 <script>
@@ -11540,7 +11540,7 @@ function parseAlert(text) {
   let dir = (amt[2] || '').toUpperCase();
   if (!dir) dir = /\b(credit|cr|received|inflow)\b/i.test(t) ? 'CR' : /\b(debit|dr|spent|withdraw|purchase|pos)\b/i.test(t) ? 'DR' : 'DR';
   if (dir.startsWith('C')) dir = 'CR'; else dir = 'DR';
-  const desc = (t.match(/(?:desc|description|narration|details?)\s*[:=]\s*([^\n]+)/i) || [])[1] || '';
+  const desc = ((t.match(/(?:desc|description|narration|details?)\s*[:=]\s*([^\n]+)/i) || [])[1] || '').split(/\s+(?:bal|balance|avail(?:able)?|date|time|acct|account|amt)\s*[:=]/i)[0].trim();   // one-line texts: stop at the next label
   const bal = (t.match(/(?:bal|balance|avail(?:able)?\s*bal)\s*[:=]?\s*(?:NGN|N|₦)?\s*(-?[\d,]+(?:\.\d{1,2})?)/i) || [])[1];
   const acct = (t.match(/(?:acct|account|a\/c)\s*[:=]?\s*\**\s*(\d{3,4})\b/i) || [])[1] || '';
   const dm = t.match(/(\d{4}-\d{2}-\d{2})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM)?)?/i) || t.match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})(?:\s+(\d{1,2}):(\d{2})\s*(AM|PM)?)?/i);
@@ -11625,10 +11625,30 @@ async function syncInbox(quiet) {
   if (n || !quiet) { if (!document.getElementById('view-money').hidden) renderMoney(); }
   return n;
 }
+// bank texts through your own server: the Shortcut sends each text there with your brick passcode,
+// brick takes them in and then clears them. no GitHub key needed.
+let alertsBusy = false, alertsSeen = 0;
+async function syncAlerts(quiet) {
+  const pass = cloudPass(); if (!pass || alertsBusy) return 0;
+  alertsBusy = true; let n = 0;
+  const H = { 'Content-Type': 'application/json', 'X-Brick-Pass': pass };
+  try {
+    const r = await fetch(AI_URL + '/api/alert/get', { method: 'POST', headers: H, body: '{}' });
+    if (!r.ok) return 0;
+    const o = await r.json(), L = (o && o.alerts) || [];
+    if (!L.length) return 0;
+    for (const a of L) if (addAlert(a.text, 'sms')) n++;
+    await fetch(AI_URL + '/api/alert/ack', { method: 'POST', headers: H, body: JSON.stringify({ ids: L.map(a => a.id) }) });
+    alertsSeen += n; if (n) inboxNote = n + ' new from your bank texts';
+  } catch {}
+  finally { alertsBusy = false; }
+  if (n && !document.getElementById('view-money').hidden) renderMoney();
+  return n;
+}
 // check when the app opens, when it comes back to the front, and every few minutes
-setTimeout(() => syncInbox(true), 1500);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) syncInbox(true); });
-setInterval(() => syncInbox(true), 5 * 60000);
+setTimeout(() => { syncInbox(true); syncAlerts(true); }, 1500);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { syncInbox(true); syncAlerts(true); } });
+setInterval(() => { syncInbox(true); syncAlerts(true); }, 5 * 60000);
 
 function inboxSetup(box) {
   const has = !!inboxToken();
@@ -11637,9 +11657,8 @@ function inboxSetup(box) {
   el.innerHTML = has
     ? '<b class="mn-h">Bank texts \\u00b7 connected</b><p class="mn-small">' + (esc(inboxNote) || 'New alerts come in when you open brick.') + '</p>' +
       '<div class="mn-row"><button type="button" class="lf-btn" data-a="sync">Check now</button><button type="button" class="gm-link" data-a="help">Shortcut steps</button><button type="button" class="gm-link danger" data-a="off">Disconnect</button></div>'
-    : '<b class="mn-h">Make bank texts log themselves</b><p class="mn-small">Paste your inbox access key here once. Then set up the Shortcut.</p>' +
-      '<div class="mn-row"><input type="password" class="mn-key" placeholder="access key" autocomplete="off"><button type="button" class="lf-btn main" data-a="save">Connect</button></div>' +
-      '<button type="button" class="gm-link" data-a="help">How to get the key and the Shortcut</button>';
+    : '<b class="mn-h">Make bank texts log themselves</b><p class="mn-small">' + (esc(inboxNote) || 'Set up one iPhone Shortcut. No key needed.') + '</p>' +
+      '<div class="mn-row"><button type="button" class="lf-btn main" data-a="sms">Shortcut steps</button><button type="button" class="lf-btn" data-a="sync2">Check now</button></div>';
   box.appendChild(el);
   const on = (a, fn) => { const b = el.querySelector('[data-a=' + a + ']'); if (b) b.addEventListener('click', fn); };
   on('save', async () => {
@@ -11648,10 +11667,36 @@ function inboxSetup(box) {
     inboxNote = 'Connected. Checking\\u2026'; renderMoney(); await syncInbox(false);
   });
   on('sync', () => { inboxNote = 'Checking\\u2026'; renderMoney(); syncInbox(false); });
+  on('sms', () => smsHelp());
+  on('sync2', async () => { inboxNote = 'Checking\u2026'; renderMoney(); const n = await syncAlerts(false); inboxNote = n ? n + ' new from your bank texts' : 'Nothing new yet.'; renderMoney(); });
   on('off', () => { try { localStorage.removeItem(INBOX_KEY); } catch {} inboxNote = ''; renderMoney(); });
   on('help', () => inboxHelp());
 }
 
+function smsHelp() {
+  const old = document.getElementById('why3'); if (old) old.remove();
+  const el = document.createElement('div');
+  el.id = 'why3'; el.className = 'w3';
+  const url = AI_URL + '/api/alert/put';
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet ib-help" role="dialog" aria-modal="true"><span class="w3-grab"></span><h2>Bank texts, set up once</h2>' +
+    '<p class="ib-sec">In the Shortcuts app on your iPhone</p><ol>' +
+      '<li>Tap <b>Automation</b>, then <b>+</b>, then <b>Message</b>.</li>' +
+      '<li><b>Message Contains</b>: <b>Amt</b>. Pick <b>Run Immediately</b>. Tap Next.</li>' +
+      '<li>New blank automation. Add <b>Get Contents of URL</b>.</li>' +
+      '<li>URL: <b class="ib-url"></b> <button type="button" class="gm-link ib-copy">Copy</button></li>' +
+      '<li>Tap the arrow. Method: <b>POST</b>.</li>' +
+      '<li>Headers: add <b>X-Brick-Pass</b> = your brick passcode.</li>' +
+      '<li>Request Body: <b>JSON</b>. Add a <b>Text</b> field: key <b>text</b>, value <b>Shortcut Input</b> (tap it, pick <b>Message</b>).</li>' +
+      '<li>Done. Your next bank text shows up in Spending.</li></ol>' +
+    '<p class="ib-note">If your bank texts do not say Amt, use a word they always have, like NGN.</p>' +
+    '<button type="button" class="lf-btn main w3-ok">Got it</button></div>';
+  el.querySelector('.ib-url').textContent = url;
+  el.querySelector('.ib-copy').addEventListener('click', async e => { try { await navigator.clipboard.writeText(url); e.target.textContent = 'Copied'; } catch { e.target.textContent = 'Hold the link to copy'; } });
+  document.body.appendChild(el);
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 200); };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  el.querySelector('.w3-ok').addEventListener('click', close);
+}
 function inboxHelp() {
   const old = document.getElementById('why3'); if (old) old.remove();
   const el = document.createElement('div');
