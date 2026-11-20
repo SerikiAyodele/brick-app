@@ -6699,7 +6699,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:43</footer>
+  <footer>Mr.O:19:28</footer>
 </div>
 
 <script>
@@ -11629,20 +11629,23 @@ async function syncInbox(quiet) {
 // brick takes them in and then clears them. no GitHub key needed.
 let alertsBusy = false, alertsSeen = 0;
 async function syncAlerts(quiet) {
-  const pass = cloudPass(); if (!pass || alertsBusy) return 0;
+  const pass = cloudPass();
+  if (!pass) { if (!quiet) { inboxNote = 'No passcode on this phone yet. Tap Set passcode.'; } return 0; }
+  if (alertsBusy) return 0;
   alertsBusy = true; let n = 0;
   const H = { 'Content-Type': 'application/json', 'X-Brick-Pass': pass };
   try {
-    const r = await fetch(AI_URL + '/api/alert/get', { method: 'POST', headers: H, body: '{}' });
-    if (!r.ok) return 0;
+    const r = await fetch(AI_URL + '/api/alert/get', { method: 'POST', headers: H, body: '{}', cache: 'no-store' });
+    if (r.status === 401) { inboxNote = 'The passcode on this phone is wrong. Tap Set passcode.'; return 0; }
+    if (!r.ok) { inboxNote = 'The server said ' + r.status + '. Try again soon.'; return 0; }
     const o = await r.json(), L = (o && o.alerts) || [];
-    if (!L.length) return 0;
+    if (!L.length) { if (!quiet) inboxNote = 'Nothing new yet.'; return 0; }
     for (const a of L) if (addAlert(a.text, 'sms')) n++;
     await fetch(AI_URL + '/api/alert/ack', { method: 'POST', headers: H, body: JSON.stringify({ ids: L.map(a => a.id) }) });
     alertsSeen += n; if (n) inboxNote = n + ' new from your bank texts';
-  } catch {}
+  } catch (e) { inboxNote = 'Could not reach the server (' + (e && e.message || 'no signal') + ').'; }
   finally { alertsBusy = false; }
-  if (n && !document.getElementById('view-money').hidden) renderMoney();
+  if ((n || !quiet) && !document.getElementById('view-money').hidden) renderMoney();
   return n;
 }
 // check when the app opens, when it comes back to the front, and every few minutes
@@ -11656,9 +11659,11 @@ function inboxSetup(box) {
   el.className = 'mn-card mn-inbox';
   el.innerHTML = has
     ? '<b class="mn-h">Bank texts \\u00b7 connected</b><p class="mn-small">' + (esc(inboxNote) || 'New alerts come in when you open brick.') + '</p>' +
-      '<div class="mn-row"><button type="button" class="lf-btn" data-a="sync">Check now</button><button type="button" class="gm-link" data-a="help">Shortcut steps</button><button type="button" class="gm-link danger" data-a="off">Disconnect</button></div>'
+      '<div class="mn-row"><button type="button" class="lf-btn" data-a="sync">Check now</button><button type="button" class="gm-link" data-a="help">Shortcut steps</button><button type="button" class="gm-link danger" data-a="off">Disconnect</button></div>' +
+      '<button type="button" class="gm-link" data-a="pass">' + (cloudPass() ? 'Change passcode' : 'Set passcode') + '</button>'
     : '<b class="mn-h">Make bank texts log themselves</b><p class="mn-small">' + (esc(inboxNote) || 'Set up one iPhone Shortcut. No key needed.') + '</p>' +
-      '<div class="mn-row"><button type="button" class="lf-btn main" data-a="sms">Shortcut steps</button><button type="button" class="lf-btn" data-a="sync2">Check now</button></div>';
+      '<div class="mn-row"><button type="button" class="lf-btn main" data-a="sms">Shortcut steps</button><button type="button" class="lf-btn" data-a="sync2">Check now</button></div>' +
+      '<button type="button" class="gm-link" data-a="pass">' + (cloudPass() ? 'Change passcode' : 'Set passcode') + '</button>';
   box.appendChild(el);
   const on = (a, fn) => { const b = el.querySelector('[data-a=' + a + ']'); if (b) b.addEventListener('click', fn); };
   on('save', async () => {
@@ -11666,9 +11671,10 @@ function inboxSetup(box) {
     try { localStorage.setItem(INBOX_KEY, v); } catch {}
     inboxNote = 'Connected. Checking\\u2026'; renderMoney(); await syncInbox(false);
   });
-  on('sync', () => { inboxNote = 'Checking\\u2026'; renderMoney(); syncInbox(false); });
+  on('sync', async () => { inboxNote = 'Checking\u2026'; renderMoney(); await syncInbox(false); await syncAlerts(false); renderMoney(); });
   on('sms', () => smsHelp());
-  on('sync2', async () => { inboxNote = 'Checking\u2026'; renderMoney(); const n = await syncAlerts(false); inboxNote = n ? n + ' new from your bank texts' : 'Nothing new yet.'; renderMoney(); });
+  on('sync2', async () => { inboxNote = 'Checking\u2026'; renderMoney(); await syncAlerts(false); renderMoney(); });
+  on('pass', () => aiPassSheet(false));
   on('off', () => { try { localStorage.removeItem(INBOX_KEY); } catch {} inboxNote = ''; renderMoney(); });
   on('help', () => inboxHelp());
 }
