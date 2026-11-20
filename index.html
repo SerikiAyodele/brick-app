@@ -6513,6 +6513,16 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #money-body .bg-list li.bg-r.sw-open > :not(.bg-del) { transform: translateX(-92px); }
 #money-body .bg-r .bg-del { position: absolute; top: 0; right: 0; bottom: 0; width: 88px; font: 600 14px "Poppins", sans-serif; color: #fff; background: #d9628a; border: 0; transform: translateX(100%); cursor: pointer; }
 #money-body .bg-r.sw-open .bg-del { transform: none; }
+
+/* wallet top, calmer */
+#money-body .mn-top { margin-bottom: 4px; }
+.mn-line { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 10px 0 0; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.mn-line b { font-weight: 600; color: var(--ink); }
+.mn-check2 { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+.mn-check2.over::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #d9628a; vertical-align: middle; }
+.mn-check2.give::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #e0a35a; vertical-align: middle; }
+#money-body .mn-sortbar { min-height: 40px; margin: 14px 0 10px; padding: 0 12px; font-size: 13px; border-radius: 12px; }
+#money-body .mn-sortbar i { min-width: 20px; height: 20px; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -6794,7 +6804,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:00</footer>
+  <footer>Mr.O:20:02</footer>
 </div>
 
 <script>
@@ -12140,9 +12150,10 @@ function renderMoney() {
   html += '<div class="mn-top">' +
     '<div class="mn-big"><span>Left to spend</span><b class="' + (left < 0 ? 'neg' : '') + '">' + mnNaira(left) + '</b>' +
       (isNow && daysLeft > 0 && left > 0 ? '<small>about ' + mnNaira(left / daysLeft) + ' a day for ' + daysLeft + ' days</small>' : '<small>of ' + mnNaira(budget) + ' budgeted</small>') + '</div>' +
-    '<div class="mn-bal"><span>Balance</span><b>' + (latest ? mnNaira(latest.bal) : '–') + '</b></div></div>' +
-    '<div class="mn-sum"><div><span>Income</span><b>' + mnNaira(income) + '</b></div><div><span>Budget</span><b>' + mnNaira(budget) + '</b></div><div><span>Spent</span><b>' + mnNaira(spent) + '</b></div></div>' +
-    (bal ? '<p class="mn-check ' + bal[0] + '">' + (bal[0] === 'ok' ? '✓ ' : '') + bal[1] + '</p>' : '');
+    '</div>' +
+    // one quiet line instead of three boxes, a warning only when something is off
+    '<p class="mn-line"><span>Balance <b>' + (latest ? mnNaira(latest.bal) : '\u2013') + '</b></span><span>Spent <b>' + shortNaira(spent) + '</b> of ' + shortNaira(budget) + '</span><span>Income <b>' + shortNaira(income) + '</b></span></p>' +
+    (bal && bal[0] !== 'ok' ? '<p class="mn-check2 ' + bal[0] + '">' + bal[1] + '</p>' : '');
 
   { const T = toSort(); if (T.length) html += '<button type="button" class="mn-sortbar" data-a="sortnew"><i>' + T.length + '</i><span>new alert' + (T.length > 1 ? 's' : '') + ' to sort</span><b>Sort \u203a</b></button>'; }
   html += '<div class="md-seg mn-tabs">' + [['budget', 'Budget'], ['spend', 'Spending'], ['income', 'Income']].map(([k, t]) =>
@@ -12156,7 +12167,7 @@ function renderMoney() {
     const byArea = {};
     for (const b of B) { const a = b.area || guessArea(b.name); byArea[a] = (byArea[a] || 0) + b.amount; }
     const areas = MN_AREAS.filter(a => byArea[a] > 0);
-    if (budget > 0 && areas.length) html += '<div class="mn-split">' + areas.map(a => '<u style="flex:' + byArea[a] + ';--c:' + MN_AREA_C[a] + '"></u>').join('') + '</div>' +
+    if (false && budget > 0 && areas.length) html += '<div class="mn-split">' + areas.map(a => '<u style="flex:' + byArea[a] + ';--c:' + MN_AREA_C[a] + '"></u>').join('') + '</div>' +
       '<div class="mn-legend">' + areas.map(a => '<span style="--c:' + MN_AREA_C[a] + '"><i></i>' + a + ' ' + Math.round(byArea[a] / budget * 100) + '%</span>').join('') + '</div>';
     const row = b => {
       const sp = spentBy[b.id] || 0, lf = b.amount - sp, pc = b.amount ? Math.min(1, sp / b.amount) : (sp ? 1 : 0);
