@@ -6632,6 +6632,27 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day#view-day #block-list .line.plan-row .at { flex: none !important; width: 58px !important; min-width: 58px !important; display: flex !important; flex-direction: column !important; gap: 1px; font-size: 12px !important; line-height: 1.2 !important; white-space: nowrap; overflow: hidden; }
 #view-day#view-day #block-list .line.plan-row .at .endat { display: block !important; font-size: 11px !important; opacity: .7; }
 #view-day#view-day #block-list .line.plan-row .at .endat::before { content: none !important; }
+
+/* add a block, How long: one length box, a neat grid of picks, a segmented When */
+#addsheet h2 { font-size: 22px !important; margin: 6px 0 12px !important; }
+#addsheet .df2 { flex-wrap: nowrap; gap: 0; border-radius: 20px; overflow: hidden; background: color-mix(in srgb, var(--ink) 5%, var(--card)); }
+#addsheet .df2 label { min-height: 64px; border-radius: 0; background: none; }
+#addsheet .df2 label + label { border-left: 1px solid color-mix(in srgb, var(--hair) 80%, transparent); }
+#addsheet .df2 label:focus-within { box-shadow: inset 0 -2px 0 var(--pink); border-color: color-mix(in srgb, var(--hair) 80%, transparent); }
+#addsheet .df2 input { font-size: 30px; }
+#addsheet .ls-list.ab-chips { display: grid !important; grid-template-columns: repeat(4, 1fr); gap: 6px; overflow: visible; margin: 10px 0 18px !important; padding: 0; }
+#addsheet .ab-chips .ls-row { justify-content: center; min-height: 38px !important; padding: 0 !important; font-size: 14px; }
+#addsheet .ab-chips .ls-row b { font-size: 14px !important; }
+#addsheet .ab-chips .ls-row i { display: none; }
+#addsheet .ab-sub { font-size: 11px; letter-spacing: 1.4px; }
+#addsheet .ab-when { display: grid !important; grid-template-columns: 1fr 1fr; gap: 0; padding: 4px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 5%, var(--card)); }
+#addsheet .ab-when > * { min-height: 56px; border-radius: 12px !important; background: none !important; box-shadow: none !important; justify-content: center; }
+#addsheet .ab-when button.on, #addsheet .ab-when .ab-pick.on { background: var(--card) !important; box-shadow: 0 1px 3px rgba(0,0,0,.18) !important; }
+#addsheet .ab-when b, #addsheet .ab-when .ab-pick input { font-size: 16px !important; font-weight: 600; }
+#addsheet .ab-when small { font-size: 11px !important; }
+#addsheet .ab-when .ab-pick input { text-align: left; }
+#addsheet .ab-sum { margin: 16px 0 12px; font-size: 16px; color: var(--muted); }
+#addsheet .ab-sum b { font-weight: 600; }
 </style>
 </head>
 <body>
@@ -6913,7 +6934,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:20:38</footer>
+  <footer>Mr.O:20:42</footer>
 </div>
 
 <script>
@@ -10770,7 +10791,7 @@ function addBlockSheet(preset, insertAt) {
         '<ul class="abx-list" id="abx-list"></ul>';
     } else {
       const usual = usualLength(pick.label) || pick.mins || null;
-      let opts = [5, 15, 30, 45, 60, 90, 120];
+      let opts = [5, 15, 30, 45, 60, 90, 120, 180];
       if (usual && !opts.includes(usual)) opts = [...opts, usual].sort((a, b) => a - b);
       html += '<div class="fp-head"><button type="button" class="fp-back" aria-label="back">\u2190</button><b>' + esc(pick.label) + '</b></div>' +
         (outcomeField(pick.label) === 'goals' ? '<input type="text" class="ab-goal ab-title2" maxlength="60" placeholder="Title (optional), e.g. Zart campaign" aria-label="title">' : '') + '<h2>How long?</h2>' +
