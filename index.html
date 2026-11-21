@@ -7064,7 +7064,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:35</footer>
+  <footer>Mr.O:17:56</footer>
 </div>
 
 <script>
@@ -10834,8 +10834,8 @@ function renderWeekNudge() {
   const c = document.getElementById('carry-slot'); if (!c) return;
   let slot = document.getElementById('wknudge-slot'); if (!slot) { slot = document.createElement('div'); slot.id = 'wknudge-slot'; c.parentNode.insertBefore(slot, document.getElementById('tmsug-slot') || c); }
   slot.innerHTML = '';
-  const now = new Date(), wd = now.getDay(), mon = wd === 0 ? mondayOf(shiftKey(planKey(), 1)) : mondayOf(planKey());
-  if (!((wd === 0 && now.getHours() >= 12) || (wd === 1 && now.getHours() < 14)) || viewDay !== planKey()) return;
+  const now = new Date(), wd = now.getDay(), mon = (wd === 0 || wd === 5 || wd === 6) ? mondayOf(shiftKey(planKey(), 7)) : mondayOf(planKey());
+  if (!(wd === 5 && now.getHours() >= 15 || wd === 6 || wd === 0 || (wd === 1 && now.getHours() < 14)) || viewDay !== planKey()) return;
   if ((state.weekPlans || {})[mon] && state.weekPlans[mon].appliedAt) return;
   const b = document.createElement('button'); b.type = 'button'; b.className = 'wk-nudge'; b.innerHTML = '<span>\u2728 Plan your week</span><small>4 short steps</small><b>\u203a</b>';
   b.addEventListener('click', () => planWeekPage(mon)); slot.appendChild(b);
