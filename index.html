@@ -6723,6 +6723,66 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { grid-template-rows: auto 1fr auto auto; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area em { align-self: end; font-size: 30px !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-abar { position: static !important; width: 100% !important; left: auto !important; right: auto !important; bottom: auto !important; }
+
+/* plan my week */
+#view-day .wk-nudge { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; margin: 6px 0 14px; padding: 0 14px; text-align: left; border: 0; border-radius: 16px; background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 18%, var(--card)), color-mix(in srgb, #c9a0d6 14%, var(--card))); cursor: pointer; }
+#view-day .wk-nudge span { font: 600 15px "Inter", system-ui, sans-serif; color: var(--ink); }
+#view-day .wk-nudge small { flex: 1; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); }
+#view-day .wk-nudge b { color: var(--pink); font-size: 18px; }
+.wk-planweek { display: block; width: 100%; min-height: 46px; margin: 10px 0; font: 600 15px "Inter", system-ui, sans-serif; color: var(--ink); background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 18%, var(--card)), color-mix(in srgb, #c9a0d6 14%, var(--card))); border: 0; border-radius: 16px; cursor: pointer; }
+.pw .bpg-body { padding-bottom: 40px; }
+.pw-dots { display: flex; gap: 6px; margin: 4px 0 18px; }
+.pw-dots i { flex: 1; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 10%, transparent); }
+.pw-dots i.on { background: var(--pink); }
+.pw-dots i.done { background: color-mix(in srgb, var(--pink) 45%, transparent); }
+.pw-q { margin: 0 0 4px; font: 700 22px "Inter", system-ui, sans-serif; color: var(--ink); letter-spacing: -.3px; }
+.pw-sub { margin: 0 0 14px; font-size: 14px; color: var(--muted); }
+.pw-sub b { color: var(--ink); }
+.pw-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+.pw-stats span { display: flex; flex-direction: column; padding: 14px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 5%, var(--card)); }
+.pw-stats b { font: 700 24px "Inter", system-ui, sans-serif; color: var(--ink); }
+.pw-stats small { font-size: 12px; color: var(--muted); }
+.pw-line { margin: 6px 2px; font-size: 14px; color: var(--muted); }
+.pw-line b { color: var(--ink); }
+.pw-lesson { margin: 16px 0 6px; padding: 14px; border-radius: 16px; background: color-mix(in srgb, var(--pink) 12%, var(--card)); }
+.pw-lesson small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--pink); }
+.pw-lesson b { display: block; margin-top: 4px; font: 600 16px "Inter", system-ui, sans-serif; color: var(--ink); }
+.pw-focus { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.pw-focus button { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 14px; text-align: left; font: 500 15px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--c) 8%, var(--card)); border: 0; border-radius: 14px; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 18%, transparent); cursor: pointer; }
+.pw-focus button.on { background: color-mix(in srgb, var(--c) 22%, var(--card)); box-shadow: inset 0 0 0 2px var(--c); }
+.pw-focus i { font-style: normal; }
+.pw-own, .pw-becoming input, .pw-addf input { width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 12px; font: 400 16px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 5%, var(--card)); border: 0; border-radius: 12px; }
+.pw-becoming { display: block; margin-top: 16px; }
+.pw-becoming small { display: block; margin: 0 0 6px 2px; font-size: 13px; color: var(--muted); }
+.pw-days { display: flex; flex-direction: column; gap: 8px; }
+.pw-day { padding: 12px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 4%, var(--card)); }
+.pw-dh { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pw-dh b { font: 600 15px "Inter", system-ui, sans-serif; color: var(--ink); }
+.pw-seg { display: flex; padding: 3px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 7%, transparent); }
+.pw-seg button { min-height: 32px; padding: 0 12px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; border-radius: 999px; cursor: pointer; }
+.pw-seg button.on { color: var(--ink); background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+.pw-dx { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.pw-dx > button, .pw-fx { min-height: 32px; padding: 0 12px; display: inline-flex; align-items: center; gap: 6px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 1px dashed color-mix(in srgb, var(--hair) 100%, transparent); border-radius: 999px; cursor: pointer; }
+.pw-gym.on { color: var(--ink); background: color-mix(in srgb, #c07f8c 22%, var(--card)); border: 1px solid transparent; }
+.pw-fx { color: var(--ink); border-style: solid; }
+.pw-fx button { padding: 0; font-size: 15px; color: var(--muted); background: none; border: 0; cursor: pointer; }
+.pw-addf { display: flex; gap: 6px; width: 100%; }
+.pw-addf .pw-fl { flex: 1; }
+.pw-addf .pw-ft { width: 120px; flex: none; }
+.pw-addf button { min-height: 46px; padding: 0 14px; color: #fff; background: var(--pink); border: 0; border-radius: 12px; font-weight: 600; }
+.pw-rev { display: flex; flex-direction: column; gap: 8px; }
+.pw-r { padding: 12px 14px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 4%, var(--card)); }
+.pw-rh { display: flex; align-items: baseline; justify-content: space-between; }
+.pw-rh b { font: 600 15px "Inter", system-ui, sans-serif; color: var(--ink); }
+.pw-rh span { font-size: 12px; color: var(--muted); }
+.pw-goal { margin: 6px 0 4px; font-size: 13px; color: var(--ink); }
+.pw-emo { display: flex; flex-wrap: wrap; gap: 3px; font-size: 15px; }
+.pw-emo i { font-style: normal; }
+.pw-rep { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.pw-sum { margin: 14px 2px 0; text-align: center; font-size: 13px; color: var(--muted); }
+.pw-btns { display: flex; gap: 8px; margin-top: 20px; }
+.pw-btns .pw-next { flex: 1; }
+.pw-btns .pw-back { flex: none; width: auto; padding: 0 18px; }
 </style>
 </head>
 <body>
@@ -7004,7 +7064,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:20</footer>
+  <footer>Mr.O:17:35</footer>
 </div>
 
 <script>
@@ -7065,7 +7125,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { dayRoutines: {}, habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [] };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [], weekPlans: {} };
 
 function load() {
   try {
@@ -7114,6 +7174,7 @@ function load() {
         habitsOld: Array.isArray(d.habitsOld) ? d.habitsOld : [],
         dump: Array.isArray(d.dump) ? d.dump : [],
         forest: Array.isArray(d.forest) ? d.forest : [],
+        weekPlans: (d.weekPlans && typeof d.weekPlans === 'object') ? d.weekPlans : {},
         dayRoutines: (d.dayRoutines && typeof d.dayRoutines === 'object') ? d.dayRoutines : {}
       };
     }
@@ -10177,6 +10238,7 @@ function renderDay() {
       al.addEventListener('click', () => alarmSheet(ups));
       tools.append(al);
     }
+    { const pw = document.createElement('button'); pw.className = 'arrange best-order'; pw.type = 'button'; pw.textContent = '\u2728 Plan my week'; pw.addEventListener('click', () => planWeekPage()); tools.append(pw); }
     { const cp = document.createElement('button'); cp.className = 'arrange'; cp.type = 'button'; cp.textContent = 'Copy my day';
       cp.setAttribute('aria-label', 'copy this day as text, to paste into ChatGPT'); cp.addEventListener('click', () => copyDaySheet(viewDay)); tools.append(cp); }
     blockList.appendChild(tools);
@@ -10578,20 +10640,22 @@ function suggestSetupPage(k) {
 // suggest my day, step 2: the day before's items, your work hours in 90 min blocks with breaks, free time, sleep at the end
 function planFromSetup(k, o) {
   const prevK = shiftKey(k, -1);
-  let src = (state.days[prevK] || {}).blocks || [];
+  let src = o.src || (state.days[prevK] || {}).blocks || [];
   if (!src.length) { const H = planFromHistory(k); src = H ? H.blocks : []; }
   const isWork = b => outcomeField(b.label) === 'goals', isSleep = b => /^sleep|^nap$/i.test(b.label || ''), isFree = b => /^free time$/i.test(b.label || '');
   const seen = new Set(), items = [];
   const FX = (o.fixed || []).slice().sort((a, b) => ((a.at - o.start + 1440) % 1440) - ((b.at - o.start + 1440) % 1440));
   FX.forEach(f => seen.add(f.label.toLowerCase()));
-  src.forEach((b, i) => { const l = (b.label || '').trim(); if (!l || isWork(b) || isSleep(b) || isFree(b) || seen.has(l.toLowerCase())) return; seen.add(l.toLowerCase()); items.push({ label: l, mins: Number(b.mins) || 30, i }); });
+  const wkSkip = o.week ? (b => /^focus:/i.test(b.label || '') || routine().workouts.some(w => (w.title || '').toLowerCase() === String(b.label || '').trim().toLowerCase()) || /gym|commute|meeting|\bcall\b|unable to sleep|can.?t sleep/i.test(b.label || '')) : (() => false);
+  src.forEach((b, i) => { const l = (b.label || '').trim(); if (!l || isWork(b) || isSleep(b) || isFree(b) || wkSkip(b) || seen.has(l.toLowerCase())) return; seen.add(l.toLowerCase()); items.push({ label: l, mins: Number(b.mins) || 30, i }); });
   // must haves with no time: in the day, wherever they fit (with the midday things)
   (o.musts || []).forEach(m => { const ex = items.find(x => x.label.toLowerCase() === m.label.toLowerCase()); if (ex) ex.mins = m.mins; else items.push({ label: m.label, mins: m.mins, i: -2 }); });
   const fw = src.findIndex(isWork), lw = src.length - 1 - [...src].reverse().findIndex(isWork);
   const before = fw < 0 ? items.filter(x => x.i >= 0 && x.i < src.length / 2) : items.filter(x => x.i >= 0 && x.i < fw);
   const after = fw < 0 ? items.filter(x => x.i >= src.length / 2) : items.filter(x => x.i > lw);
   const middle = items.filter(x => x.i === -2 || (fw >= 0 && x.i > fw && x.i < lw));
-  const day = dayFor(k), g = day.goal || ((state.days[prevK] || {}).goal); const gt = g && (typeof g === 'string' ? g : g.text);
+  const day = dayFor(k), g = day.goal || ((state.days[prevK] || {}).goal); let gt = g && (typeof g === 'string' ? g : g.text);
+  if (o.week && gt && /gym|workout|run\b|walk|swim|yoga|meditat|pray|call|date|rest|recharge|sleep/i.test(gt)) gt = null;   // not work: the day's goal, but not a work block
   const work = []; let left = Math.round(o.work / 5) * 5, first = true;
   while (left > 0) { const m = Math.min(90, left); work.push({ label: first && gt ? 'Focus: ' + gt : first ? 'Deep work' : 'Work', mins: m }); first = false; left -= m; }
   const mid = [];
@@ -10631,6 +10695,150 @@ function planFromSetup(k, o) {
   }
   if (o.sleep) blocks.push({ label: 'Sleep', mins: Math.round(o.sleep / 5) * 5 });
   return { start: hhmm(o.start), end: hhmm(o.end), blocks, over: Math.max(0, over), trimmed };
+}
+/* =========== plan my week ===========
+   four short steps: look back at last week, pick one focus (who you are becoming),
+   set each day (work, light or rest, gym, set times), then review the whole week and apply it.
+   each day is built like Suggest my day, and each gets its own one goal from your goals' steps. */
+const WK_TYPES = { work: ['\u{1F4BC}', 'Work'], light: ['\u{1F33F}', 'Light'], rest: ['\u{1F6CC}', 'Rest'] };
+function weekHabits() {
+  const tk = planKey(), past = []; for (let n = 1; n <= 21; n++) past.push(shiftKey(tk, -n));
+  const isWork = b => outcomeField(b.label) === 'goals';
+  const workBy = {}, starts = [];
+  for (const k of past) { const d = state.days[k]; if (!d || !d.blocks || !d.blocks.length) continue; starts.push(toMins(d.start));
+    const w = d.blocks.filter(isWork).reduce((t, b) => t + (Number(b.mins) || 60), 0), wd = fromKey(k).getDay(); (workBy[wd] = workBy[wd] || []).push(w); }
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+  const workDays = Object.values(workBy).flat().filter(m => m >= 180);
+  const wsort = workDays.slice().sort((a, b) => a - b), p75 = wsort.length ? wsort[Math.floor(wsort.length * .75)] : 480;
+  const workMins = Math.round(Math.min(600, Math.max(240, p75)) / 30) * 30;
+  const st = starts.length ? starts.slice().sort((a, b) => a - b)[Math.floor(starts.length / 2)] : 360;
+  const typeOf = wd => { const L = workBy[wd] || []; if (L.length) return avg(L) >= 180 ? 'work' : avg(L) >= 60 ? 'light' : 'rest'; return wd === 0 ? 'rest' : wd === 6 ? 'light' : 'work'; };
+  let tpl = null; for (const k of past) { const d = state.days[k]; if (d && d.blocks && d.blocks.length >= 8) { tpl = d.blocks; break; } }
+  return { workMins, start: Math.round(st / 15) * 15, typeOf, tpl };
+}
+function weekLookBack(mon) {
+  const prev = shiftKey(mon, -7), ks = [0, 1, 2, 3, 4, 5, 6].map(n => shiftKey(prev, n));
+  let planned = 0, total = 0, done = 0, workDone = 0, best = null, sleepM = [], gym = new Set();
+  for (const k of ks) { const d = state.days[k]; if (d && d.blocks && d.blocks.length) { planned++; total += d.blocks.length; const dn = d.blocks.filter(b => b.done).length; done += dn;
+      workDone += d.blocks.filter(b => b.done && outcomeField(b.label) === 'goals').reduce((t, b) => t + (Number(b.mins) || 60), 0);
+      const r = dn / d.blocks.length; if (!best || r > best.r) best = { k, r }; }
+    try { const sl = sleepOn(k); if (sl) sleepM.push(sleepMins(sl)); } catch {}
+    if ((state.gymLog || []).some(x => x.d === k) || (d && d.blocks && d.blocks.some(b => b.done && /gym|workout/i.test(b.label || '')))) gym.add(k); }
+  const M = typeof moodByDay === 'function' ? moodByDay(21) : {}, mv = ks.map(k => M[k]).filter(v => v !== undefined), good = mv.filter(v => v >= .5).length;
+  const pct = total ? Math.round(done / total * 100) : 0, sl = sleepM.length ? Math.round(sleepM.reduce((a, b) => a + b, 0) / sleepM.length) : 0;
+  const lesson = !planned ? 'Start small: plan three days, not seven.' : pct < 60 ? 'Plan a little less, and leave space between blocks.' : sl && sl < 420 ? 'Protect sleep: start winding down 30 minutes earlier.' : gym.size < 3 ? 'Put the gym on set days so it just happens.' : 'Keep the same rhythm. It is working.';
+  return { planned, total, done, pct, workDone, best, sleep: sl, gym: gym.size, moods: mv.length, good, lesson };
+}
+function weekSteps() {
+  const out = [];
+  try { for (const a of AREAS) for (const g of areaGoals(a.k)) { if (!g || !g.text) continue; const steps = (g.actions || []).filter(Boolean); out.push({ area: a, goal: g.text, steps: steps.length ? steps : [g.text] }); } } catch {}
+  return out;
+}
+function planWeekPage(monIn) {
+  const mon = monIn || (new Date().getDay() === 0 || new Date().getDay() === 6 ? mondayOf(shiftKey(planKey(), 7)) : mondayOf(planKey()));
+  const days = [0, 1, 2, 3, 4, 5, 6].map(n => shiftKey(mon, n)).filter(k => k >= planKey());
+  const H = weekHabits(), G = weekSteps();
+  state.weekPlans = state.weekPlans || {};
+  const W = state.weekPlans[mon] = state.weekPlans[mon] || {};
+  W.days = W.days || {};
+  days.forEach(k => { const wd = fromKey(k).getDay(); if (!W.days[k]) W.days[k] = { type: H.typeOf(wd), gym: (routine().workouts || []).some(w => (w.days || []).includes(wd)), fixed: [], replace: false }; });
+  if (!W.focus && G.length) W.focus = G[0].goal;
+  const a = fromKey(mon), z = fromKey(shiftKey(mon, 6));
+  const pg = bigPage('\u2728 Plan my week', a.getDate() + ' ' + cap(MONTHS[a.getMonth()].slice(0, 3)) + ' to ' + z.getDate() + ' ' + cap(MONTHS[z.getMonth()].slice(0, 3)));
+  pg.classList.add('pw');
+  const body = pg.querySelector('.bpg-body');
+  let step = 0, adding = null;
+  // each day's one goal: the focus first, then your goals' steps spread over the working days
+  const goalsFor = () => { const out = {}, q = []; const F = G.find(x => x.goal === W.focus);
+    if (F) F.steps.forEach(s => q.push(s)); G.filter(x => x !== F).forEach(x => x.steps.forEach(s => q.push(s)));
+    const gymish = x => /gym|workout|train/i.test(x); let i = 0;
+    days.forEach(k => { const D = W.days[k]; if (D.type === 'rest') { out[k] = 'Rest and recharge'; return; } if (!q.length) { out[k] = W.focus || ''; return; }
+      let pick = null; for (let t = 0; t < q.length; t++) { const c = q[(i + t) % q.length]; if (!gymish(c) || D.gym) { pick = c; i = i + t + 1; break; } }
+      out[k] = pick || q[i++ % q.length]; }); return out; };
+  const optFor = k => { const D = W.days[k], wm = D.type === 'work' ? H.workMins : D.type === 'light' ? 120 : 0, wk = routine().workouts.find(w => (w.days || []).includes(fromKey(k).getDay()));
+    return { week: true, src: H.tpl || undefined, start: H.start, end: (H.start - 30 + 1440) % 1440, work: wm, sleep: 450, fixed: (D.fixed || []).map(f => ({ label: f.label, at: toMins(f.at), mins: f.mins || 60 })),
+      musts: D.gym ? [{ label: wk ? cap(wk.title) : 'Gym', mins: 75 }] : [] }; };
+  const build = (k, goal) => { const had = k in state.days, g0 = had ? state.days[k].goal : undefined; dayFor(k).goal = goal || undefined;
+    let P; try { P = planFromSetup(k, optFor(k)); } catch { P = { start: hhmm(H.start), blocks: [] }; }
+    if (!had) delete state.days[k]; else if (g0 === undefined) delete state.days[k].goal; else state.days[k].goal = g0; return P; };
+  const dn = k => cap(FULL[fromKey(k).getDay()]).slice(0, 3) + ' ' + fromKey(k).getDate();
+  const draw = () => {
+    const dots = '<div class="pw-dots">' + [0, 1, 2, 3].map(i => '<i class="' + (i === step ? 'on' : i < step ? 'done' : '') + '"></i>').join('') + '</div>';
+    let h = dots;
+    if (step === 0) { const L = weekLookBack(mon);
+      h += '<p class="pw-q">How last week went</p><div class="pw-stats">' +
+        '<span><b>' + (L.total ? L.pct + '%' : '\u2013') + '</b><small>blocks done</small></span><span><b>' + (L.workDone ? hrsLabel(L.workDone) : '\u2013') + '</b><small>work done</small></span>' +
+        '<span><b>' + L.gym + '</b><small>gym days</small></span><span><b>' + (L.sleep ? dur(L.sleep) : '\u2013') + '</b><small>sleep a night</small></span></div>' +
+        (L.best ? '<p class="pw-line">\u{1F31F} Best day: <b>' + cap(FULL[fromKey(L.best.k).getDay()]) + '</b></p>' : '') +
+        (L.moods ? '<p class="pw-line">\u{1F642} You felt good in ' + L.good + ' of ' + L.moods + ' days</p>' : '') +
+        '<div class="pw-lesson"><small>For this week</small><b></b></div>';
+    }
+    if (step === 1) {
+      h += '<p class="pw-q">One focus for the week</p><p class="pw-sub">Who are you becoming? Pick the goal that matters most. The rest still get time.</p><div class="pw-focus">' +
+        G.map((x, i) => '<button type="button" data-f="' + i + '" class="' + (W.focus === x.goal ? 'on' : '') + '" style="--c:' + x.area.c + '"><i>' + x.area.e + '</i><span></span></button>').join('') + '</div>' +
+        '<input type="text" class="pw-own" maxlength="80" placeholder="' + (G.length ? 'or type your own focus' : 'Type your focus for the week') + '">' +
+        '<label class="pw-becoming"><small>This week I am someone who\u2026</small><input type="text" maxlength="100" placeholder="e.g. trains three times and ships every day"></label>';
+    }
+    if (step === 2) {
+      h += '<p class="pw-q">Your days</p><p class="pw-sub">Work, light or rest. Tap the gym if it is a gym day. Add anything with a set time.</p><div class="pw-days">' +
+        days.map(k => { const D = W.days[k];
+          return '<div class="pw-day" data-k="' + k + '"><div class="pw-dh"><b>' + dn(k) + '</b><div class="pw-seg">' + Object.keys(WK_TYPES).map(t => '<button type="button" data-t="' + t + '" class="' + (D.type === t ? 'on' : '') + '">' + WK_TYPES[t][1] + '</button>').join('') + '</div></div>' +
+            '<div class="pw-dx"><button type="button" class="pw-gym' + (D.gym ? ' on' : '') + '">\u{1F3CB}\uFE0F Gym</button>' + (D.fixed || []).map((f, i) => '<span class="pw-fx">' + esc(f.label) + ' \u00b7 ' + clock(toMins(f.at)) + '<button type="button" data-rmfx="' + i + '" aria-label="remove">\u00d7</button></span>').join('') +
+            (adding === k ? '<span class="pw-addf"><input type="text" maxlength="40" placeholder="What" class="pw-fl"><input type="time" class="pw-ft" step="300" value="15:00"><button type="button" class="pw-fok">Add</button></span>' : '<button type="button" class="pw-fadd">+ set time</button>') + '</div></div>'; }).join('') + '</div>';
+    }
+    if (step === 3) { const GO = goalsFor();
+      let wm = 0, gy = 0;
+      h += '<p class="pw-q">Your week</p>' + (W.focus ? '<p class="pw-sub">Focus: <b></b></p>' : '') + '<div class="pw-rev">' +
+        days.map(k => { const P = build(k, GO[k]), cur = (state.days[k] || {}).blocks || [], D = W.days[k];
+          const w = P.blocks.filter(b => outcomeField(b.label) === 'goals' || /^focus:/i.test(b.label)).reduce((t, b) => t + b.mins, 0); wm += w; if (D.gym) gy++;
+          return '<div class="pw-r" data-k="' + k + '"><div class="pw-rh"><b>' + dn(k) + '</b><span>' + WK_TYPES[D.type][0] + ' ' + WK_TYPES[D.type][1] + (w ? ' \u00b7 ' + hrsLabel(w) + ' work' : '') + '</span></div>' +
+            '<p class="pw-goal">\u{1F3AF} <span></span></p><div class="pw-emo">' + P.blocks.slice(0, 16).map(b => '<i title="' + esc(b.label) + '">' + blockEmoji(b) + '</i>').join('') + '</div>' +
+            (cur.length ? '<label class="pw-rep"><input type="checkbox"' + (D.replace ? ' checked' : '') + '> replace the ' + cur.length + ' blocks already there</label>' : '') + '</div>'; }).join('') + '</div>' +
+        '<p class="pw-sum">' + hrsLabel(wm) + ' of work \u00b7 ' + gy + ' gym day' + (gy === 1 ? '' : 's') + ' \u00b7 7h 30m sleep a night</p>';
+    }
+    h += '<div class="pw-btns">' + (step ? '<button type="button" class="ls-cancel pw-back">Back</button>' : '') + '<button type="button" class="wka-go pw-next">' + (step === 3 ? 'Apply to my week' : 'Next') + '</button></div>';
+    body.innerHTML = h;
+    // text in safely
+    if (step === 0) body.querySelector('.pw-lesson b').textContent = weekLookBack(mon).lesson;
+    if (step === 1) { body.querySelectorAll('[data-f]').forEach(b => { b.querySelector('span').textContent = G[Number(b.dataset.f)].goal; b.addEventListener('click', () => { W.focus = G[Number(b.dataset.f)].goal; draw(); }); });
+      const own = body.querySelector('.pw-own'); if (W.focus && !G.some(x => x.goal === W.focus)) own.value = W.focus; own.addEventListener('input', () => { if (own.value.trim()) { W.focus = own.value.trim(); body.querySelectorAll('[data-f]').forEach(b => b.classList.remove('on')); } });
+      const be = body.querySelector('.pw-becoming input'); be.value = W.becoming || ''; be.addEventListener('input', () => { W.becoming = be.value.trim(); }); }
+    if (step === 2) body.querySelectorAll('.pw-day').forEach(el => { const k = el.dataset.k, D = W.days[k];
+      el.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { D.type = b.dataset.t; draw(); }));
+      el.querySelector('.pw-gym').addEventListener('click', () => { D.gym = !D.gym; draw(); });
+      el.querySelectorAll('[data-rmfx]').forEach(b => b.addEventListener('click', () => { D.fixed.splice(Number(b.dataset.rmfx), 1); draw(); }));
+      const fa = el.querySelector('.pw-fadd'); if (fa) fa.addEventListener('click', () => { adding = k; draw(); setTimeout(() => { const i = body.querySelector('.pw-fl'); if (i) i.focus(); }, 30); });
+      const ok = el.querySelector('.pw-fok'); if (ok) ok.addEventListener('click', () => { const l = el.querySelector('.pw-fl').value.trim(), t = el.querySelector('.pw-ft').value; if (!l || !t) return; D.fixed.push({ label: cap(l), at: t, mins: usualLength(l) || 60 }); adding = null; draw(); }); });
+    if (step === 3) { const GO = goalsFor(); const fs = body.querySelector('.pw-sub b'); if (fs) fs.textContent = W.focus;
+      body.querySelectorAll('.pw-r').forEach(el => { const k = el.dataset.k; el.querySelector('.pw-goal span').textContent = GO[k]; const c = el.querySelector('.pw-rep input'); if (c) c.addEventListener('change', () => { W.days[k].replace = c.checked; }); }); }
+    const bk = body.querySelector('.pw-back'); if (bk) bk.addEventListener('click', () => { step--; adding = null; draw(); pg.scrollTop = 0; });
+    body.querySelector('.pw-next').addEventListener('click', () => {
+      if (step < 3) { step++; adding = null; save(); draw(); pg.scrollTop = 0; return; }
+      // apply: build each day, keep days that already have a plan unless you said replace
+      const GO = goalsFor(), before = {}, built = {}; let n = 0;
+      days.forEach(k => { built[k] = build(k, GO[k]); });
+      days.forEach(k => { const cur = (state.days[k] || {}).blocks || [], D = W.days[k];
+        before[k] = state.days[k] ? JSON.parse(JSON.stringify(state.days[k])) : null;
+        const d = dayFor(k); if (!d.goal || D.replace || !cur.length) d.goal = GO[k];
+        if (cur.length && !D.replace) return;
+        const P = built[k]; d.start = P.start; d.blocks = P.blocks.map(b => ({ label: b.label, mins: b.mins, done: false, ...(b.fixedAt ? { fixedAt: b.fixedAt } : {}) })); d.touched = true; d.askedPlan = true; n++; });
+      W.appliedAt = Date.now(); save(); pg.remove();
+      if (typeof setPlanMode === 'function') setPlanMode('week'); show('day'); window.scrollTo(0, 0);
+      offerUndo('=Planned ' + n + ' day' + (n === 1 ? '' : 's'), () => { days.forEach(k => { if (before[k]) state.days[k] = before[k]; else delete state.days[k]; }); delete W.appliedAt; save(); renderDay(); if (typeof renderWeek === 'function') renderWeek(); });
+    });
+  };
+  draw();
+}
+// a quiet nudge on Sunday (from noon) and Monday morning when the week has no plan yet
+function renderWeekNudge() {
+  const c = document.getElementById('carry-slot'); if (!c) return;
+  let slot = document.getElementById('wknudge-slot'); if (!slot) { slot = document.createElement('div'); slot.id = 'wknudge-slot'; c.parentNode.insertBefore(slot, document.getElementById('tmsug-slot') || c); }
+  slot.innerHTML = '';
+  const now = new Date(), wd = now.getDay(), mon = wd === 0 ? mondayOf(shiftKey(planKey(), 1)) : mondayOf(planKey());
+  if (!((wd === 0 && now.getHours() >= 12) || (wd === 1 && now.getHours() < 14)) || viewDay !== planKey()) return;
+  if ((state.weekPlans || {})[mon] && state.weekPlans[mon].appliedAt) return;
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'wk-nudge'; b.innerHTML = '<span>\u2728 Plan your week</span><small>4 short steps</small><b>\u203a</b>';
+  b.addEventListener('click', () => planWeekPage(mon)); slot.appendChild(b);
 }
 function planForMePage(k, opt) {
   if (!opt) return suggestSetupPage(k);
@@ -16744,7 +16952,7 @@ function renderDayCal() {
 }
 {
   const baseRender = renderDay;
-  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } try { renderFuel(); } catch (e) { console.error(e); } try { renderLate(); renderTook(); } catch (e) { console.error(e); } try { stageDay(); } catch (e) { console.error(e); } return r; };
+  renderDay = function () { const r = baseRender.apply(this, arguments); try { renderDayCal(); } catch (e) { console.error(e); } try { renderOverrun(); } catch (e) { console.error(e); } try { renderFuel(); } catch (e) { console.error(e); } try { renderLate(); renderTook(); } catch (e) { console.error(e); } try { stageDay(); } catch (e) { console.error(e); } try { renderWeekNudge(); } catch (e) { console.error(e); } return r; };
   const ei = document.getElementById('endat');
   if (ei) ei.addEventListener('change', () => { const d = dayFor(viewDay); if (ei.value) d.end = ei.value; else delete d.end; save(); renderDay(); });
   document.querySelectorAll('#dv-seg [data-dv]').forEach(b => b.addEventListener('click', () => {
@@ -19604,6 +19812,7 @@ function renderWeek() {
       '<div class="ws-bars">' + days.map((k, n) => '<button type="button" class="ws-bar' + (k === today ? ' today' : '') + '" data-day="' + k + '" aria-label="' + FULL[fromKey(k).getDay()] + ', ' + hrsLabel(mins[n] || 0) + '"><i><s style="height:' + Math.round(mins[n] / mx * 100) + '%"><u style="height:' + (mins[n] ? Math.round(done[n] / mins[n] * 100) : 0) + '%"></u></s></i><small>' + FULL[fromKey(k).getDay()].slice(0, 1).toUpperCase() + '</small></button>').join('') + '</div></div>';
   }
 
+  if (weekOf >= mondayOf(planKey())) html += '<button type="button" class="wk-planweek" id="wk-planweek">\u2728 Plan ' + (weekOf > planKey() ? 'next week' : 'my week') + '</button>';
   html += '<button type="button" class="wk-add" id="wk-add"><span class="plusbox">+</span> Add a block</button>';
 
   if (weekLook === 'list') {
@@ -19682,6 +19891,7 @@ function renderWeek() {
   box.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
     viewDay = b.dataset.day; setPlanMode('day'); renderDay(); window.scrollTo(0, 0);
   }));
+  { const pw = document.getElementById('wk-planweek'); if (pw) pw.addEventListener('click', () => planWeekPage(weekOf)); }
   document.getElementById('wk-add').addEventListener('click', () => days.includes(today) ? weekAddSheet(today, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(today, x))) : weekAddSheet(days[0], days));   // from today: the next 7 days
   box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) { const k = c.dataset.addto, m = mondayOf(k); weekAddSheet(k, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(m, x))); } }));
   box.querySelectorAll('[data-sel]').forEach(b => b.addEventListener('click', () => { renderWeek.sel = b.dataset.sel; renderWeek(); }));
