@@ -6783,6 +6783,14 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 .pw-btns { display: flex; gap: 8px; margin-top: 20px; }
 .pw-btns .pw-next { flex: 1; }
 .pw-btns .pw-back { flex: none; width: auto; padding: 0 18px; }
+
+/* plan my week: the goals belong to the week */
+.pw-wgoals { margin: 6px 0 14px; padding: 14px; border-radius: 16px; background: color-mix(in srgb, var(--pink) 10%, var(--card)); }
+.pw-wgoals small { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--pink); }
+.pw-wgoals p { display: flex; gap: 8px; margin: 4px 0; font-size: 14px; color: var(--ink); }
+.pw-wgoals p i { font-style: normal; }
+.pw-wgoals .pw-wf b { font-weight: 600; }
+.pw-wgoals .pw-wb { margin-top: 10px; font-style: italic; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -7064,7 +7072,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:56</footer>
+  <footer>Mr.O:19:12</footer>
 </div>
 
 <script>
@@ -10786,13 +10794,15 @@ function planWeekPage(monIn) {
             '<div class="pw-dx"><button type="button" class="pw-gym' + (D.gym ? ' on' : '') + '">\u{1F3CB}\uFE0F Gym</button>' + (D.fixed || []).map((f, i) => '<span class="pw-fx">' + esc(f.label) + ' \u00b7 ' + clock(toMins(f.at)) + '<button type="button" data-rmfx="' + i + '" aria-label="remove">\u00d7</button></span>').join('') +
             (adding === k ? '<span class="pw-addf"><input type="text" maxlength="40" placeholder="What" class="pw-fl"><input type="time" class="pw-ft" step="300" value="15:00"><button type="button" class="pw-fok">Add</button></span>' : '<button type="button" class="pw-fadd">+ set time</button>') + '</div></div>'; }).join('') + '</div>';
     }
-    if (step === 3) { const GO = goalsFor();
+    if (step === 3) {
       let wm = 0, gy = 0;
-      h += '<p class="pw-q">Your week</p>' + (W.focus ? '<p class="pw-sub">Focus: <b></b></p>' : '') + '<div class="pw-rev">' +
+      const GO = {}; days.forEach(k => { GO[k] = W.days[k].type === 'rest' ? '' : (W.focus || ''); });
+      h += '<p class="pw-q">Your week</p>' +
+        '<div class="pw-wgoals"><small>This week\u2019s goals</small>' + (W.focus ? '<p class="pw-wf">\u2B50 <b></b></p>' : '') + G.filter(x => x.goal !== W.focus).map((x, i) => '<p data-wg="' + i + '"><i>' + x.area.e + '</i><span></span></p>').join('') + (W.becoming ? '<p class="pw-wb"></p>' : '') + '</div><div class="pw-rev">' +
         days.map(k => { const P = build(k, GO[k]), cur = (state.days[k] || {}).blocks || [], D = W.days[k];
           const w = P.blocks.filter(b => outcomeField(b.label) === 'goals' || /^focus:/i.test(b.label)).reduce((t, b) => t + b.mins, 0); wm += w; if (D.gym) gy++;
           return '<div class="pw-r" data-k="' + k + '"><div class="pw-rh"><b>' + dn(k) + '</b><span>' + WK_TYPES[D.type][0] + ' ' + WK_TYPES[D.type][1] + (w ? ' \u00b7 ' + hrsLabel(w) + ' work' : '') + '</span></div>' +
-            '<p class="pw-goal">\u{1F3AF} <span></span></p><div class="pw-emo">' + P.blocks.slice(0, 16).map(b => '<i title="' + esc(b.label) + '">' + blockEmoji(b) + '</i>').join('') + '</div>' +
+            '<div class="pw-emo">' + P.blocks.slice(0, 16).map(b => '<i title="' + esc(b.label) + '">' + blockEmoji(b) + '</i>').join('') + '</div>' +
             (cur.length ? '<label class="pw-rep"><input type="checkbox"' + (D.replace ? ' checked' : '') + '> replace the ' + cur.length + ' blocks already there</label>' : '') + '</div>'; }).join('') + '</div>' +
         '<p class="pw-sum">' + hrsLabel(wm) + ' of work \u00b7 ' + gy + ' gym day' + (gy === 1 ? '' : 's') + ' \u00b7 7h 30m sleep a night</p>';
     }
@@ -10809,17 +10819,19 @@ function planWeekPage(monIn) {
       el.querySelectorAll('[data-rmfx]').forEach(b => b.addEventListener('click', () => { D.fixed.splice(Number(b.dataset.rmfx), 1); draw(); }));
       const fa = el.querySelector('.pw-fadd'); if (fa) fa.addEventListener('click', () => { adding = k; draw(); setTimeout(() => { const i = body.querySelector('.pw-fl'); if (i) i.focus(); }, 30); });
       const ok = el.querySelector('.pw-fok'); if (ok) ok.addEventListener('click', () => { const l = el.querySelector('.pw-fl').value.trim(), t = el.querySelector('.pw-ft').value; if (!l || !t) return; D.fixed.push({ label: cap(l), at: t, mins: usualLength(l) || 60 }); adding = null; draw(); }); });
-    if (step === 3) { const GO = goalsFor(); const fs = body.querySelector('.pw-sub b'); if (fs) fs.textContent = W.focus;
-      body.querySelectorAll('.pw-r').forEach(el => { const k = el.dataset.k; el.querySelector('.pw-goal span').textContent = GO[k]; const c = el.querySelector('.pw-rep input'); if (c) c.addEventListener('change', () => { W.days[k].replace = c.checked; }); }); }
+    if (step === 3) { const fs = body.querySelector('.pw-wf b'); if (fs) fs.textContent = W.focus;
+      const rest = G.filter(x => x.goal !== W.focus); body.querySelectorAll('[data-wg]').forEach(p => { p.querySelector('span').textContent = rest[Number(p.dataset.wg)].goal; });
+      const wb = body.querySelector('.pw-wb'); if (wb) wb.textContent = 'This week I am someone who ' + W.becoming;
+      body.querySelectorAll('.pw-r').forEach(el => { const k = el.dataset.k; const c = el.querySelector('.pw-rep input'); if (c) c.addEventListener('change', () => { W.days[k].replace = c.checked; }); }); }
     const bk = body.querySelector('.pw-back'); if (bk) bk.addEventListener('click', () => { step--; adding = null; draw(); pg.scrollTop = 0; });
     body.querySelector('.pw-next').addEventListener('click', () => {
       if (step < 3) { step++; adding = null; save(); draw(); pg.scrollTop = 0; return; }
       // apply: build each day, keep days that already have a plan unless you said replace
-      const GO = goalsFor(), before = {}, built = {}; let n = 0;
+      const GO = {}; days.forEach(k => { GO[k] = W.days[k].type === 'rest' ? '' : (W.focus || ''); }); const before = {}, built = {}; let n = 0;
       days.forEach(k => { built[k] = build(k, GO[k]); });
       days.forEach(k => { const cur = (state.days[k] || {}).blocks || [], D = W.days[k];
         before[k] = state.days[k] ? JSON.parse(JSON.stringify(state.days[k])) : null;
-        const d = dayFor(k); if (!d.goal || D.replace || !cur.length) d.goal = GO[k];
+        const d = dayFor(k);
         if (cur.length && !D.replace) return;
         const P = built[k]; d.start = P.start; d.blocks = P.blocks.map(b => ({ label: b.label, mins: b.mins, done: false, ...(b.fixedAt ? { fixedAt: b.fixedAt } : {}) })); d.touched = true; d.askedPlan = true; n++; });
       W.appliedAt = Date.now(); save(); pg.remove();
