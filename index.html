@@ -6709,6 +6709,20 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #gptsheet .gp-warn { margin: 10px 0 0; font-size: 13px; color: #d9628a; }
 #gptsheet .bpg-day { width: 100%; box-sizing: border-box; max-height: 46vh; overflow-y: auto; margin: 0; }
 #gptsheet .bpg-day li { min-height: 48px; }
+
+/* home, tidier: icon and name share a row, so the four cards are shorter and the page fits better */
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { display: grid !important; grid-template-columns: auto 1fr; grid-template-areas: "ic nm" "big big" "cap cap" "bar bar"; align-items: center; column-gap: 10px; row-gap: 2px; min-height: 0 !important; padding: 14px 16px 14px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-ae { grid-area: ic; width: 34px !important; height: 34px !important; min-width: 34px; margin: 0 !important; border-radius: 11px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-ae svg { width: 18px; height: 18px; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-an { grid-area: nm; margin: 0 !important; font-size: 12px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-an::before { display: none !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area em { grid-area: big; margin: 14px 0 0 !important; font-size: 26px !important; line-height: 1.1 !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area small { grid-area: cap; margin: 0 !important; font-size: 12px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-abar { grid-area: bar; margin-top: 10px !important; }
+#view-home .hm-hello::after, #view-home h1 + i, #view-home .hm-line { display: none !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area { grid-template-rows: auto 1fr auto auto; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area em { align-self: end; font-size: 30px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area.hm-area .hm-abar { position: static !important; width: 100% !important; left: auto !important; right: auto !important; bottom: auto !important; }
 </style>
 </head>
 <body>
@@ -6990,7 +7004,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:17:18</footer>
+  <footer>Mr.O:17:20</footer>
 </div>
 
 <script>
