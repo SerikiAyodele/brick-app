@@ -6703,6 +6703,12 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-now.hm-now { background: linear-gradient(150deg, color-mix(in srgb, var(--pink) 26%, var(--card)) 0%, color-mix(in srgb, #c9a0d6 12%, var(--card)) 100%) !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pink) 22%, transparent) !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-goals.hm-goals { background: linear-gradient(160deg, color-mix(in srgb, #e6c35c 16%, var(--card)), color-mix(in srgb, #e6c35c 4%, var(--card))) !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-goals.hm-habs.hm-habs, :root:root #view-home#view-home#view-home#view-home#view-home#view-home [data-habs] { background: linear-gradient(160deg, color-mix(in srgb, #9b8fe0 18%, var(--card)), color-mix(in srgb, #9b8fe0 4%, var(--card))) !important; border: 0 !important; }
+
+/* a plan from ChatGPT */
+#gptsheet .gp-note { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+#gptsheet .gp-warn { margin: 10px 0 0; font-size: 13px; color: #d9628a; }
+#gptsheet .bpg-day { width: 100%; box-sizing: border-box; max-height: 46vh; overflow-y: auto; margin: 0; }
+#gptsheet .bpg-day li { min-height: 48px; }
 </style>
 </head>
 <body>
@@ -6984,7 +6990,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:10</footer>
+  <footer>Mr.O:17:18</footer>
 </div>
 
 <script>
@@ -12001,10 +12007,47 @@ async function syncAlerts(quiet) {
   if ((n || !quiet) && !document.getElementById('view-money').hidden) renderMoney();
   return n;
 }
+// plans ChatGPT sent: brick shows each one and you choose to use it or not
+let gptBusy = false;
+async function syncGptPlans() {
+  const pass = cloudPass(); if (!pass || gptBusy || document.getElementById('gptsheet')) return;
+  gptBusy = true;
+  try {
+    const H = { 'Content-Type': 'application/json', 'X-Brick-Pass': pass };
+    const r = await fetch(AI_URL + '/api/gptplan/get', { method: 'POST', headers: H, body: '{}', cache: 'no-store' });
+    if (!r.ok) return;
+    const L = ((await r.json()) || {}).plans || [], keep = L.filter(p => p.date >= planKey());
+    const old = L.filter(p => p.date < planKey()).map(p => p.id);
+    if (old.length) fetch(AI_URL + '/api/gptplan/ack', { method: 'POST', headers: H, body: JSON.stringify({ ids: old }) });
+    if (keep.length) gptPlanSheet(keep[0], () => fetch(AI_URL + '/api/gptplan/ack', { method: 'POST', headers: H, body: JSON.stringify({ ids: [keep[0].id] }) }));
+  } catch {} finally { gptBusy = false; }
+}
+function gptPlanSheet(P, done) {
+  const el = document.createElement('div'); el.id = 'gptsheet'; el.className = 'w3';
+  const dt = fromKey(P.date), name = P.date === planKey() ? 'today' : P.date === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[dt.getDay()]) + ' ' + dt.getDate() + ' ' + cap(MONTHS[dt.getMonth()].slice(0, 3));
+  const cur = state.days[P.date], had = cur && cur.blocks ? cur.blocks.length : 0;
+  let at = toMins(P.start || (cur && cur.start) || '07:00');
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet gp" role="dialog" aria-modal="true" aria-label="Plan from ChatGPT"><span class="w3-grab"></span>' +
+    '<p class="wk2-step">From ChatGPT</p><h2>A plan for ' + esc(name) + '</h2>' + (P.note ? '<p class="gp-note"></p>' : '') +
+    '<ol class="bpg-day">' + P.blocks.map(b => { const f = at; at += b.mins; return '<li><span>' + clock(f) + '</span><i>' + blockEmoji(b) + '</i><b>' + esc(b.label) + '</b><em>' + minsLabel(b.mins) + '</em></li>'; }).join('') + '</ol>' +
+    (had ? '<p class="gp-warn">This replaces the ' + had + ' block' + (had > 1 ? 's' : '') + ' already on ' + esc(name) + '.</p>' : '') +
+    '<button type="button" class="wka-go gp-use">Use this plan</button><button type="button" class="ls-cancel gp-no">Not now</button></div>';
+  if (P.note) el.querySelector('.gp-note').textContent = P.note;
+  document.body.appendChild(el);
+  const close = () => { el.remove(); done && done(); };
+  el.querySelector('.gp-no').addEventListener('click', close);
+  el.querySelector('.w3-back').addEventListener('click', () => el.remove());
+  el.querySelector('.gp-use').addEventListener('click', () => {
+    const d = dayFor(P.date), before = { start: d.start, blocks: d.blocks };
+    d.blocks = P.blocks.map(b => ({ label: b.label, mins: b.mins, done: false })); if (P.start) d.start = P.start; d.touched = true;
+    save(); close(); viewDay = P.date; show('day'); renderDay(); window.scrollTo(0, 0);
+    offerUndo('=Using ChatGPT\u2019s plan', () => { const d2 = dayFor(P.date); d2.start = before.start; d2.blocks = before.blocks; save(); renderDay(); });
+  });
+}
 // check when the app opens, when it comes back to the front, and every few minutes
-setTimeout(() => { syncInbox(true); syncAlerts(true); }, 1500);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { syncInbox(true); syncAlerts(true); } });
-setInterval(() => { syncInbox(true); syncAlerts(true); }, 5 * 60000);
+setTimeout(() => { syncInbox(true); syncAlerts(true); syncGptPlans(); }, 1500);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { syncInbox(true); syncAlerts(true); syncGptPlans(); } });
+setInterval(() => { syncInbox(true); syncAlerts(true); syncGptPlans(); }, 5 * 60000);
 
 function inboxSetup(box) {
   const has = !!inboxToken();
