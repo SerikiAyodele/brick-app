@@ -6875,6 +6875,37 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 #view-home .hm-week b { font-size: 18px; color: var(--pink); }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-week.done { background: color-mix(in srgb, #7daf86 12%, var(--card)); box-shadow: none; }
 .pw-day.tpl .pw-seg, .pw-day.tpl .pw-fadd, .pw-day.tpl .pw-fx { display: none !important; }
+
+/* plan inside a block (date, meeting) */
+.agp-bar { height: 8px; border-radius: 4px; background: color-mix(in srgb, var(--ink) 9%, transparent); overflow: hidden; margin: 4px 0 8px; }
+.agp-bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--pink), #d9718e); }
+.agp-left { margin: 0 0 14px; font-size: 14px; color: var(--muted); }
+.agp-left b { color: var(--ink); }
+.agp-left.over b { color: #d9628a; }
+.agp-list { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.agp-list li { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 12px; border-radius: 14px; background: color-mix(in srgb, #d9718e 9%, var(--card)); cursor: pointer; }
+.agp-list li time { flex: none; width: 58px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.agp-t { flex: none; width: 24px; height: 24px; padding: 0; font-size: 12px; color: #fff; background: none; border: 1.5px solid color-mix(in srgb, var(--ink) 30%, transparent); border-radius: 50%; cursor: pointer; }
+.agp-list li.done .agp-t { background: #7daf86; border-color: #7daf86; }
+.agp-list li.done span { opacity: .55; text-decoration: line-through; }
+.agp-list li span { flex: 1; min-width: 0; font: 500 15px "Inter", system-ui, sans-serif; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agp-list li em { flex: none; font-style: normal; font-size: 13px; font-weight: 600; color: var(--ink); padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.agp-ed { flex-direction: column; align-items: stretch !important; padding: 12px !important; cursor: default !important; }
+.agp-n, .agp-new { width: 100%; box-sizing: border-box; min-height: 46px; padding: 0 12px; font: 400 16px "Inter", system-ui, sans-serif; color: var(--ink); background: var(--card); border: 0; border-radius: 12px; }
+.agp-lens { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 8px 0; }
+.agp-lens button { min-height: 34px; font: 500 13px "Inter", system-ui, sans-serif; color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, var(--card)); border: 0; border-radius: 10px; cursor: pointer; white-space: nowrap; }
+.agp-lens button.on { color: #fff; background: var(--pink); }
+.agp-edb { display: flex; gap: 8px; }
+.agp-edb button { flex: 1; min-height: 40px; font: 600 14px "Inter", system-ui, sans-serif; border: 0; border-radius: 12px; cursor: pointer; }
+.agp-ok { color: #fff; background: var(--pink); }
+.agp-rm { color: #d9628a; background: none; border: 1px solid color-mix(in srgb, #d9628a 40%, transparent) !important; }
+.agp-add { padding: 12px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 4%, var(--card)); }
+.agp-ih { margin: 16px 2px 6px; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+.agp-ideas { display: flex; flex-wrap: wrap; gap: 6px; }
+.agp-ideas button { min-height: 36px; padding: 0 12px; font: 500 13px "Inter", system-ui, sans-serif; white-space: nowrap; color: var(--ink); background: color-mix(in srgb, #d9718e 10%, var(--card)); border: 0; border-radius: 999px; cursor: pointer; }
+.agp-ideas small { color: var(--muted); }
+.agp-done { margin-top: 16px; }
+.agp-grow { display: block; margin: -6px 0 14px; padding: 0; min-height: 32px; font: 600 13px "Inter", system-ui, sans-serif; color: var(--pink); background: none; border: 0; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -7156,7 +7187,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:31</footer>
+  <footer>Mr.O:07:35</footer>
 </div>
 
 <script>
@@ -7757,6 +7788,7 @@ function notesBox(b) {
   return box;
 }
 function openListSheet(b, field, from) {
+  if (field === 'agenda') return agendaPage(b, from);   // dates, meetings, calls: plan inside their own time
   listSheet = { b, field, from };
   // an empty list opens straight into typing, once, when the panel opens
   if (!(b[field] || []).length) goalEdit = { b, n: 0, f: field };
@@ -7778,6 +7810,47 @@ function goalPickBox(b) {
     todoEdit = { g: ng, n: 0 }; save(); paintListSheet();
   }));
   return box;
+}
+/* plan inside a block: a date, a meeting, a call. its own small timeline from the block's start,
+   each agenda point with how long it takes, and how much of the time is left */
+const AG_IDEAS = { date: [['\u{1F37D}\uFE0F', 'Dinner', 60], ['\u{1F6B6}', 'Walk', 20], ['\u{1F3AC}', 'Movie', 90], ['\u{1F370}', 'Dessert', 20], ['\u{1F4AC}', 'Deep talk', 30], ['\u{1F3B2}', 'Games', 30]],
+  meet: [['\u{1F44B}', 'Catch up', 5], ['\u{1F4CB}', 'Updates', 10], ['\u{1F914}', 'Decisions', 15], ['\u2753', 'Questions', 10], ['\u2705', 'Next steps', 5]] };
+function agendaPage(b, from) {
+  b.agenda = b.agenda || [];
+  const len = Number(b.mins) || 60, st = typeof from === 'number' ? from : 0, isDate = /\bdate\b/i.test(b.label || '');
+  const pg = bigPage(b.label || 'Agenda', clock(st) + ' to ' + clock(st + len) + ' \u00b7 ' + minsLabel(len)); pg.classList.add('agp');
+  const body = pg.querySelector('.bpg-body'); let edit = null, newMins = isDate ? 30 : 10;
+  const parts = g => { const m = agendaTime(g.text) || 0; return { name: String(g.text || '').replace(AG_TIME, '').replace(AG_TIME_START, '').trim(), m }; };
+  const setItem = (g, name, m) => { g.text = name + (m ? ' ' + m + 'm' : ''); };
+  const LENS = [5, 10, 15, 20, 30, 45, 60, 90];
+  const draw = () => {
+    const L = b.agenda, used = L.reduce((t, g) => t + parts(g).m, 0), left = len - used; let at = st;
+    body.innerHTML = '<div class="agp-bar"><i style="width:' + Math.min(100, Math.round(used / len * 100)) + '%"></i></div>' +
+      '<p class="agp-left' + (left < 0 ? ' over' : '') + '">' + (left > 0 ? minsLabel(used) + ' planned \u00b7 <b>' + minsLabel(left) + ' free</b>' : left === 0 ? '\u2713 The time is full' : '<b>' + minsLabel(-left) + ' more</b> than the time you have') + '</p>' + (left < 0 ? '<button type="button" class="agp-grow">Make it ' + minsLabel(used) + '</button>' : '') +
+      '<ol class="agp-list">' + L.map((g, i) => { const P = parts(g), a = at; at += P.m;
+        return edit === i
+          ? '<li class="agp-ed"><input type="text" class="agp-n" maxlength="60" value="' + esc(P.name) + '"><div class="agp-lens">' + LENS.map(m => '<button type="button" data-el="' + m + '" class="' + (m === P.m ? 'on' : '') + '">' + minsLabel(m) + '</button>').join('') + '</div><div class="agp-edb"><button type="button" class="agp-ok">Done</button><button type="button" class="agp-rm">Remove</button></div></li>'
+          : '<li data-i="' + i + '" class="' + (g.done ? 'done' : '') + '"><time>' + clock(a) + '</time><button type="button" class="agp-t" data-tick="' + i + '" aria-label="done">' + (g.done ? '\u2713' : '') + '</button><span></span><em>' + (P.m ? minsLabel(P.m) : '+ time') + '</em></li>'; }).join('') + '</ol>' +
+      '<div class="agp-add"><input type="text" class="agp-new" maxlength="60" placeholder="' + (isDate ? 'What will you do? e.g. Dinner' : 'Add a point, e.g. Updates') + '"><div class="agp-lens">' + LENS.map(m => '<button type="button" data-nl="' + m + '" class="' + (m === newMins ? 'on' : '') + '">' + minsLabel(m) + '</button>').join('') + '</div><button type="button" class="wka-go agp-go">Add</button></div>' +
+      '<p class="agp-ih">Ideas</p><div class="agp-ideas">' + AG_IDEAS[isDate ? 'date' : 'meet'].filter(x => !L.some(g => parts(g).name.toLowerCase() === x[1].toLowerCase())).map((x, i) => '<button type="button" data-idea="' + i + '">' + x[0] + ' ' + x[1] + ' <small>' + minsLabel(x[2]) + '</small></button>').join('') + '</div>' +
+      '<button type="button" class="ls-cancel agp-done">Done</button>';
+    body.querySelectorAll('.agp-list li[data-i]').forEach(li => { li.querySelector('span').textContent = parts(L[Number(li.dataset.i)]).name; li.addEventListener('click', e => { if (e.target.closest('[data-tick]')) return; edit = Number(li.dataset.i); draw(); }); });
+    body.querySelectorAll('[data-tick]').forEach(t => t.addEventListener('click', () => { const g = L[Number(t.dataset.tick)]; g.done = !g.done; save(); draw(); }));
+    const ed = body.querySelector('.agp-ed');
+    if (ed) { const g = L[edit], n = ed.querySelector('.agp-n'); let m = parts(g).m;
+      ed.querySelectorAll('[data-el]').forEach(x => x.addEventListener('click', () => { m = Number(x.dataset.el); setItem(g, n.value.trim() || parts(g).name, m); save(); draw(); }));
+      ed.querySelector('.agp-ok').addEventListener('click', () => { setItem(g, n.value.trim() || parts(g).name, m); edit = null; save(); draw(); });
+      ed.querySelector('.agp-rm').addEventListener('click', () => { L.splice(edit, 1); edit = null; save(); draw(); }); }
+    const inp = body.querySelector('.agp-new');
+    body.querySelectorAll('[data-nl]').forEach(x => x.addEventListener('click', () => { newMins = Number(x.dataset.nl); body.querySelectorAll('[data-nl]').forEach(y => y.classList.toggle('on', y === x)); }));
+    const add = () => { const t = inp.value.trim(); if (!t) { inp.focus(); return; } const g = { text: '', done: false }; setItem(g, cap(t), newMins); L.push(g); save(); draw(); setTimeout(() => { const i2 = body.querySelector('.agp-new'); if (i2) i2.focus(); }, 30); };
+    body.querySelector('.agp-go').addEventListener('click', add); inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+    body.querySelectorAll('[data-idea]').forEach(x => x.addEventListener('click', () => { const I = AG_IDEAS[isDate ? 'date' : 'meet'].filter(y => !L.some(g => parts(g).name.toLowerCase() === y[1].toLowerCase()))[Number(x.dataset.idea)]; const g = { text: '', done: false }; setItem(g, I[1], I[2]); L.push(g); save(); draw(); }));
+    body.querySelector('.agp-done').addEventListener('click', () => { pg.remove(); renderDay(); });
+    { const gr = body.querySelector('.agp-grow'); if (gr) gr.addEventListener('click', () => { b.mins = used; save(); pg.remove(); agendaPage(b, st); }); }
+  };
+  pg.querySelector('.bpg-back').addEventListener('click', () => renderDay());
+  draw();
 }
 function paintListSheet() {
   const old = document.getElementById('listsheet');
