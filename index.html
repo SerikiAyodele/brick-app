@@ -6865,6 +6865,16 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 .tpp-hint { margin: 0; font-size: 13px; color: var(--muted); }
 
 .wk-undoweek, .pw-undo { display: block; width: 100%; min-height: 42px; margin: 10px 0 0; font: 600 14px "Inter", system-ui, sans-serif; color: #d9628a; background: none; border: 1px solid color-mix(in srgb, #d9628a 40%, transparent); border-radius: 14px; cursor: pointer; }
+
+/* plan my week: the template choice, and the Home button */
+.pw-tpl { color: var(--muted); }
+.pw-tpl.on { color: var(--ink) !important; background: color-mix(in srgb, var(--pink) 18%, var(--card)) !important; border: 1px solid transparent !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-week { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px; margin: 10px 0 2px; padding: 0 16px; text-align: left; border: 0; border-radius: 18px; background: linear-gradient(120deg, color-mix(in srgb, var(--pink) 26%, var(--card)), color-mix(in srgb, #c9a0d6 18%, var(--card))); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--pink) 25%, transparent); cursor: pointer; }
+#view-home .hm-week span { font: 600 15px "Inter", system-ui, sans-serif; color: var(--ink); white-space: nowrap; }
+#view-home .hm-week small { flex: 1; min-width: 0; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#view-home .hm-week b { font-size: 18px; color: var(--pink); }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home .hm-week.done { background: color-mix(in srgb, #7daf86 12%, var(--card)); box-shadow: none; }
+.pw-day.tpl .pw-seg, .pw-day.tpl .pw-fadd, .pw-day.tpl .pw-fx { display: none !important; }
 </style>
 </head>
 <body>
@@ -7146,7 +7156,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:28</footer>
+  <footer>Mr.O:07:31</footer>
 </div>
 
 <script>
@@ -10845,7 +10855,10 @@ function planWeekPage(monIn) {
   const optFor = k => { const D = W.days[k], wm = D.type === 'work' ? H.workMins : D.type === 'light' ? 120 : 0, wk = routine().workouts.find(w => (w.days || []).includes(fromKey(k).getDay()));
     return { week: true, src: H.tpl || undefined, start: H.start, end: (H.start - 30 + 1440) % 1440, work: wm, sleep: 450, fixed: (D.fixed || []).map(f => ({ label: f.label, at: toMins(f.at), mins: f.mins || 60 })),
       musts: D.gym ? [{ label: wk ? cap(wk.title) : 'Gym', mins: 75 }] : [] }; };
-  const build = (k, goal) => { const had = k in state.days, g0 = had ? state.days[k].goal : undefined; dayFor(k).goal = goal || undefined;
+  const tplOf = k => (state.dayTemplates || {})[fromKey(k).getDay()] || null;
+  const useTpl = k => { const D = W.days[k], T = tplOf(k); return !!T && D.tpl !== false; };
+  const build = (k, goal) => { if (useTpl(k)) { const T = tplOf(k); return { start: T.start, blocks: tplBlocks(T.blocks) }; }
+    const had = k in state.days, g0 = had ? state.days[k].goal : undefined; dayFor(k).goal = goal || undefined;
     let P; try { P = planFromSetup(k, optFor(k)); } catch { P = { start: hhmm(H.start), blocks: [] }; }
     if (!had) delete state.days[k]; else if (g0 === undefined) delete state.days[k].goal; else state.days[k].goal = g0; return P; };
   const dn = k => cap(FULL[fromKey(k).getDay()]).slice(0, 3) + ' ' + fromKey(k).getDate();
@@ -10868,10 +10881,10 @@ function planWeekPage(monIn) {
         '<label class="pw-becoming"><small>This week I am someone who\u2026</small><input type="text" maxlength="100" placeholder="e.g. trains three times and ships every day"></label>';
     }
     if (step === 2) {
-      h += '<p class="pw-q">Your days</p><p class="pw-sub">Work, light or rest. Tap the gym if it is a gym day. Add anything with a set time.</p><div class="pw-days">' +
+      h += '<p class="pw-q">Your days</p><p class="pw-sub">' + (Object.keys(state.dayTemplates || {}).length ? 'Days with a template use it. Tap it off to build the day instead.' : 'Work, light or rest. Tap the gym if it is a gym day. Add anything with a set time.') + '</p><div class="pw-days">' +
         days.map(k => { const D = W.days[k];
-          return '<div class="pw-day" data-k="' + k + '"><div class="pw-dh"><b>' + dn(k) + '</b><div class="pw-seg">' + Object.keys(WK_TYPES).map(t => '<button type="button" data-t="' + t + '" class="' + (D.type === t ? 'on' : '') + '">' + WK_TYPES[t][1] + '</button>').join('') + '</div></div>' +
-            '<div class="pw-dx"><button type="button" class="pw-gym' + (D.gym ? ' on' : '') + '">\u{1F3CB}\uFE0F Gym</button>' + (D.fixed || []).map((f, i) => '<span class="pw-fx">' + esc(f.label) + ' \u00b7 ' + clock(toMins(f.at)) + '<button type="button" data-rmfx="' + i + '" aria-label="remove">\u00d7</button></span>').join('') +
+          return '<div class="pw-day' + (useTpl(k) ? ' tpl' : '') + '" data-k="' + k + '"><div class="pw-dh"><b>' + dn(k) + '</b><div class="pw-seg">' + Object.keys(WK_TYPES).map(t => '<button type="button" data-t="' + t + '" class="' + (D.type === t ? 'on' : '') + '">' + WK_TYPES[t][1] + '</button>').join('') + '</div></div>' +
+            '<div class="pw-dx">' + (tplOf(k) ? '<button type="button" class="pw-tpl' + (useTpl(k) ? ' on' : '') + '">\u{1F4CB} ' + cap(FULL[fromKey(k).getDay()]) + ' template</button>' : '') + (useTpl(k) ? '' : '<button type="button" class="pw-gym' + (D.gym ? ' on' : '') + '">\u{1F3CB}\uFE0F Gym</button>') + (D.fixed || []).map((f, i) => '<span class="pw-fx">' + esc(f.label) + ' \u00b7 ' + clock(toMins(f.at)) + '<button type="button" data-rmfx="' + i + '" aria-label="remove">\u00d7</button></span>').join('') +
             (adding === k ? '<span class="pw-addf"><input type="text" maxlength="40" placeholder="What" class="pw-fl"><input type="time" class="pw-ft" step="300" value="15:00"><button type="button" class="pw-fok">Add</button></span>' : '<button type="button" class="pw-fadd">+ set time</button>') + '</div></div>'; }).join('') + '</div>';
     }
     if (step === 3) {
@@ -10881,7 +10894,7 @@ function planWeekPage(monIn) {
         '<div class="pw-wgoals"><small>This week\u2019s goals</small>' + (W.focus ? '<p class="pw-wf">\u2B50 <b></b></p>' : '') + G.filter(x => x.goal !== W.focus).map((x, i) => '<p data-wg="' + i + '"><i>' + x.area.e + '</i><span></span></p>').join('') + (W.becoming ? '<p class="pw-wb"></p>' : '') + '</div><div class="pw-rev">' +
         days.map(k => { const P = build(k, GO[k]), cur = (state.days[k] || {}).blocks || [], D = W.days[k];
           const w = P.blocks.filter(b => outcomeField(b.label) === 'goals' || /^focus:/i.test(b.label)).reduce((t, b) => t + b.mins, 0); wm += w; if (D.gym) gy++;
-          return '<div class="pw-r" data-k="' + k + '"><div class="pw-rh"><b>' + dn(k) + '</b><span>' + WK_TYPES[D.type][0] + ' ' + WK_TYPES[D.type][1] + (w ? ' \u00b7 ' + hrsLabel(w) + ' work' : '') + '</span></div>' +
+          return '<div class="pw-r" data-k="' + k + '"><div class="pw-rh"><b>' + dn(k) + '</b><span>' + (useTpl(k) ? '\u{1F4CB} Template' : WK_TYPES[D.type][0] + ' ' + WK_TYPES[D.type][1]) + (w ? ' \u00b7 ' + hrsLabel(w) + ' work' : '') + '</span></div>' +
             '<div class="pw-emo">' + P.blocks.slice(0, 16).map(b => '<i title="' + esc(b.label) + '">' + blockEmoji(b) + '</i>').join('') + '</div>' +
             (cur.length ? '<label class="pw-rep"><input type="checkbox"' + (D.replace ? ' checked' : '') + '> replace the ' + cur.length + ' blocks already there</label>' : '') + '</div>'; }).join('') + '</div>' +
         '<p class="pw-sum">' + hrsLabel(wm) + ' of work \u00b7 ' + gy + ' gym day' + (gy === 1 ? '' : 's') + ' \u00b7 7h 30m sleep a night</p>';
@@ -10896,7 +10909,8 @@ function planWeekPage(monIn) {
       const be = body.querySelector('.pw-becoming input'); be.value = W.becoming || ''; be.addEventListener('input', () => { W.becoming = be.value.trim(); }); }
     if (step === 2) body.querySelectorAll('.pw-day').forEach(el => { const k = el.dataset.k, D = W.days[k];
       el.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { D.type = b.dataset.t; draw(); }));
-      el.querySelector('.pw-gym').addEventListener('click', () => { D.gym = !D.gym; draw(); });
+      { const g = el.querySelector('.pw-gym'); if (g) g.addEventListener('click', () => { D.gym = !D.gym; draw(); }); }
+      { const t = el.querySelector('.pw-tpl'); if (t) t.addEventListener('click', () => { D.tpl = !useTpl(k) ? true : false; draw(); }); }
       el.querySelectorAll('[data-rmfx]').forEach(b => b.addEventListener('click', () => { D.fixed.splice(Number(b.dataset.rmfx), 1); draw(); }));
       const fa = el.querySelector('.pw-fadd'); if (fa) fa.addEventListener('click', () => { adding = k; draw(); setTimeout(() => { const i = body.querySelector('.pw-fl'); if (i) i.focus(); }, 30); });
       const ok = el.querySelector('.pw-fok'); if (ok) ok.addEventListener('click', () => { const l = el.querySelector('.pw-fl').value.trim(), t = el.querySelector('.pw-ft').value; if (!l || !t) return; D.fixed.push({ label: cap(l), at: t, mins: usualLength(l) || 60 }); adding = null; draw(); }); });
@@ -17520,6 +17534,10 @@ function renderHome() {
     const H = (state.habits || []).slice(0, 3), tkh = todayKey(), dn = H.filter(x => (x.marks || []).includes(tkh)).length, best = H.length ? Math.max(...H.map(x => streakOf(x.marks || []))) : 0;
     html = '<div class="hm-gh">' + html + '<button type="button" class="hm-goals hm-habs" data-habs="1"><span class="hm-gt"><b>Habits</b><small>' + (H.length ? dn + ' of ' + H.length + ' today' : 'up to 3') + '</small></span><em>' + (best ? best + '<i>day streak</i>' : '+') + '</em></button></div>';
   }
+  {   // plan my week, right on Home
+    const wd = new Date().getDay(), mon = (wd === 0 || wd === 5 || wd === 6) ? mondayOf(shiftKey(planKey(), 7)) : mondayOf(planKey()), done = !!((state.weekPlans || {})[mon] || {}).appliedAt;
+    html += '<button type="button" class="hm-week' + (done ? ' done' : '') + '" data-week="' + mon + '"><span>' + (done ? '\u2713 Week planned' : '\u2728 Plan my week') + '</span><small>' + (done ? 'see or change it' : (mon > planKey() ? 'next week \u00b7 4 short steps' : '4 short steps')) + '</small><b>\u203a</b></button>';
+  }
   // the areas, each with one live number from the systems that run it
   html += '<div class="hm-sec">Today</div><div class="hm-areas">' + AREAS.map(x => {
     const L = areaLive(x.k);
@@ -17529,6 +17547,7 @@ function renderHome() {
   slot.innerHTML = html;
   slot.querySelectorAll('[data-goals]').forEach(g => g.addEventListener('click', () => { goalsTab = 'week'; show('goals'); window.scrollTo(0, 0); }));
   slot.querySelectorAll('[data-habs]').forEach(g => g.addEventListener('click', () => { show('habits'); window.scrollTo(0, 0); }));
+  slot.querySelectorAll('[data-week]').forEach(b => b.addEventListener('click', () => planWeekPage(b.dataset.week)));
   slot.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => {
     lifeTab = 'week'; lifeSetup = null; areaGoalsOpen = false; lifeOpen = b.dataset.open;
     try { show('life'); } catch (e) { bugToast(e); }
