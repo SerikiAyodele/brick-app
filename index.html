@@ -6906,6 +6906,28 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 .agp-ideas small { color: var(--muted); }
 .agp-done { margin-top: 16px; }
 .agp-grow { display: block; margin: -6px 0 14px; padding: 0; min-height: 32px; font: 600 13px "Inter", system-ui, sans-serif; color: var(--pink); background: none; border: 0; cursor: pointer; }
+
+/* plan my week, your days: one light row per day */
+.pw .pw-days { gap: 0; border-radius: 18px; overflow: hidden; background: color-mix(in srgb, var(--ink) 4%, var(--card)); }
+.pw .pw-day { padding: 10px 12px; border-radius: 0; background: none; border-bottom: 1px solid color-mix(in srgb, var(--hair) 60%, transparent); }
+.pw .pw-day:last-child { border-bottom: 0; }
+.pw .pw-dh b { font-size: 14px; white-space: nowrap; }
+.pw .pw-seg button { min-height: 28px; padding: 0 10px; font-size: 12px; }
+.pw .pw-dx { margin-top: 6px; gap: 6px; }
+.pw .pw-dx > button, .pw .pw-fx { min-height: 28px; padding: 0 10px; font-size: 12px; border-style: solid; border-color: transparent; background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.pw .pw-gym.on { background: color-mix(in srgb, #c07f8c 26%, var(--card)); }
+.pw .pw-fadd { color: var(--muted); }
+
+.pw .pw-day { display: grid; grid-template-columns: 64px 1fr auto; grid-template-areas: "d x s"; align-items: center; column-gap: 8px; min-height: 52px; padding: 6px 10px 6px 14px; }
+.pw .pw-dh { display: contents; }
+.pw .pw-dh b { grid-area: d; }
+.pw .pw-seg { grid-area: s; }
+.pw .pw-dx { grid-area: x; margin: 0; flex-wrap: nowrap; overflow: hidden; }
+.pw .pw-dx .pw-addf { grid-column: 1 / -1; }
+.pw .pw-day:has(.pw-addf) { grid-template-areas: "d . s" "x x x"; row-gap: 8px; }
+.pw .pw-gym { width: 32px; padding: 0 !important; justify-content: center; }
+.pw .pw-gym { opacity: .45; }
+.pw .pw-gym.on { opacity: 1; background: color-mix(in srgb, #c07f8c 45%, var(--card)) !important; box-shadow: inset 0 0 0 1.5px #c07f8c; }
 </style>
 </head>
 <body>
@@ -7187,7 +7209,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:35</footer>
+  <footer>Mr.O:07:38</footer>
 </div>
 
 <script>
@@ -10957,8 +10979,8 @@ function planWeekPage(monIn) {
       h += '<p class="pw-q">Your days</p><p class="pw-sub">' + (Object.keys(state.dayTemplates || {}).length ? 'Days with a template use it. Tap it off to build the day instead.' : 'Work, light or rest. Tap the gym if it is a gym day. Add anything with a set time.') + '</p><div class="pw-days">' +
         days.map(k => { const D = W.days[k];
           return '<div class="pw-day' + (useTpl(k) ? ' tpl' : '') + '" data-k="' + k + '"><div class="pw-dh"><b>' + dn(k) + '</b><div class="pw-seg">' + Object.keys(WK_TYPES).map(t => '<button type="button" data-t="' + t + '" class="' + (D.type === t ? 'on' : '') + '">' + WK_TYPES[t][1] + '</button>').join('') + '</div></div>' +
-            '<div class="pw-dx">' + (tplOf(k) ? '<button type="button" class="pw-tpl' + (useTpl(k) ? ' on' : '') + '">\u{1F4CB} ' + cap(FULL[fromKey(k).getDay()]) + ' template</button>' : '') + (useTpl(k) ? '' : '<button type="button" class="pw-gym' + (D.gym ? ' on' : '') + '">\u{1F3CB}\uFE0F Gym</button>') + (D.fixed || []).map((f, i) => '<span class="pw-fx">' + esc(f.label) + ' \u00b7 ' + clock(toMins(f.at)) + '<button type="button" data-rmfx="' + i + '" aria-label="remove">\u00d7</button></span>').join('') +
-            (adding === k ? '<span class="pw-addf"><input type="text" maxlength="40" placeholder="What" class="pw-fl"><input type="time" class="pw-ft" step="300" value="15:00"><button type="button" class="pw-fok">Add</button></span>' : '<button type="button" class="pw-fadd">+ set time</button>') + '</div></div>'; }).join('') + '</div>';
+            '<div class="pw-dx">' + (tplOf(k) ? '<button type="button" class="pw-tpl' + (useTpl(k) ? ' on' : '') + '">\u{1F4CB} ' + cap(FULL[fromKey(k).getDay()]) + ' template</button>' : '') + (useTpl(k) ? '' : '<button type="button" class="pw-gym' + (D.gym ? ' on' : '') + '">\u{1F3CB}\uFE0F</button>') + (D.fixed || []).map((f, i) => '<span class="pw-fx">' + esc(f.label) + ' \u00b7 ' + clock(toMins(f.at)) + '<button type="button" data-rmfx="' + i + '" aria-label="remove">\u00d7</button></span>').join('') +
+            (adding === k ? '<span class="pw-addf"><input type="text" maxlength="40" placeholder="What" class="pw-fl"><input type="time" class="pw-ft" step="300" value="15:00"><button type="button" class="pw-fok">Add</button></span>' : '<button type="button" class="pw-fadd" aria-label="add something with a set time">+ time</button>') + '</div></div>'; }).join('') + '</div>';
     }
     if (step === 3) {
       let wm = 0, gy = 0;
@@ -17663,7 +17685,8 @@ function areaLive(k) {
 // invisible sits on top (Self could not be tapped on the phone). it also says
 // what was on top, so the real cause can be found.
 document.addEventListener('click', e => {
-  if (document.body.dataset.view !== 'home' || document.querySelector('.w3, #focus:not([hidden])')) return;
+  if (document.body.dataset.view !== 'home' || document.querySelector('.w3, .bpg, #bigpage, #focus:not([hidden])')) return;
+  if (e.target.closest && e.target.closest('.bpg, .w3, #undo, .undo')) return;
   const hit = [...document.querySelectorAll('#view-home .hm-area[data-open]')].find(c => {
     const r = c.getBoundingClientRect();
     return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
