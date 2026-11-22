@@ -6816,6 +6816,26 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-day#view-day#view-day#view-day #block-list .line .how.live { padding: 0 8px !important; height: 28px !important; font-size: 12px !important; }
 #view-day#view-day#view-day#view-day #block-list .line:not(.plan-row) { grid-template-areas: "tick emo mid chip how bin" "tick emo at at at bin" !important; }
 #view-day#view-day#view-day#view-day #block-list .line:not(.plan-row) .at { font-size: 12px !important; }
+
+/* plan, with life: a timeline down the left, the now block glows and fills, the next says when */
+#view-day#view-day#view-day#view-day #block-list .sheet > .line[data-i] { position: relative !important; }
+#view-day#view-day#view-day#view-day #block-list .sheet > .line[data-i]::before { content: "" !important; display: block !important; position: absolute !important; left: 15px; top: 0; bottom: 0; width: 2px; border-radius: 1px; background: color-mix(in srgb, var(--ink) 14%, transparent); z-index: 0; }
+#view-day#view-day#view-day#view-day #block-list .sheet > .line.tl-past::before { background: color-mix(in srgb, var(--pink) 55%, transparent); }
+#view-day#view-day#view-day#view-day #block-list .sheet > .line.tl-now::before { left: 25px !important;  background: linear-gradient(to bottom, var(--pink) calc(var(--p, 0) * 100%), color-mix(in srgb, var(--ink) 10%, transparent) calc(var(--p, 0) * 100%)); }
+#view-day#view-day #block-list .line .tick { position: relative; z-index: 1; }
+#view-day#view-day#view-day#view-day #block-list .sheet > .line.tl-now { background: linear-gradient(100deg, color-mix(in srgb, var(--bc, var(--pink)) 22%, transparent), color-mix(in srgb, var(--pink) 8%, transparent)) !important; border-radius: 18px !important; margin: 4px -10px !important; padding-left: 10px !important; padding-right: 10px !important; border-bottom-color: transparent !important; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bc, var(--pink)) 30%, transparent); }
+#view-day#view-day#view-day#view-day #block-list .sheet > .line.tl-now::after { content: "" !important; display: block !important; position: absolute !important; left: 66px; right: 16px; bottom: 7px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--pink) calc(var(--p, 0) * 100%), color-mix(in srgb, var(--ink) 10%, transparent) calc(var(--p, 0) * 100%)); }
+#view-day#view-day#view-day #block-list .sheet > .line.tl-now .tick { border-color: var(--pink) !important; box-shadow: 0 0 0 4px color-mix(in srgb, var(--pink) 22%, transparent); }
+#view-day #block-list .line .tl-in { margin-left: 8px; padding: 1px 8px; font-size: 11px; font-weight: 600; color: var(--pink); background: color-mix(in srgb, var(--pink) 14%, transparent); border-radius: 999px; }
+#view-day#view-day#view-day #block-list .sheet > .line.tl-past:not(.ticked) .what { opacity: .7; }
+/* colour: a soft glow at the top of Plan, each part of the day has its own colour */
+body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, color-mix(in srgb, var(--pink) 16%, transparent), transparent 70%), var(--bg, var(--paper)) !important; background-attachment: fixed !important; }
+#view-day .dpart { --pc: var(--pink); color: var(--pc) !important; }
+#view-day .dpart::after { background: linear-gradient(90deg, color-mix(in srgb, var(--pc) 50%, transparent), transparent) !important; }
+#view-day .dpart[data-part="Morning"] { --pc: #e0a35a; }
+#view-day .dpart[data-part="Afternoon"] { --pc: #6aa6d8; }
+#view-day .dpart[data-part="Night"] { --pc: #a58fe0; }
+#view-day .dpart .dp-hrs { color: var(--pc) !important; opacity: 1 !important; }
 </style>
 </head>
 <body>
@@ -7097,7 +7117,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:08</footer>
+  <footer>Mr.O:07:15</footer>
 </div>
 
 <script>
@@ -9881,7 +9901,7 @@ function renderDay() {
     const from = at;
     at = at + len;
     const partOf = m => { m = ((m % 1440) + 1440) % 1440; return m >= 240 && m < 720 ? 'Morning' : m >= 720 && m < 1080 ? 'Afternoon' : 'Night'; };
-    const showPart = () => { const pt = partOf(from); if (pt !== partShown) { partShown = pt; const lab = document.createElement('div'); lab.className = 'dpart'; lab.textContent = pt; sheet.appendChild(lab); } };
+    const showPart = () => { const pt = partOf(from); if (pt !== partShown) { partShown = pt; const lab = document.createElement('div'); lab.className = 'dpart'; lab.dataset.part = pt; lab.textContent = pt; sheet.appendChild(lab); } };
     if (!(!sortingDay && b.done && i < firstOpen && firstOpen > 0 && !dayShowDone)) showPart();
 
     // finished blocks fold into one line, so the page shows what is left
@@ -10105,7 +10125,7 @@ function renderDay() {
       const endMs = fromKey(viewDay).getTime() + (from + len) * 60000;
       if (!b.done && viewDay === planKey() && i === firstOpen && nm >= from && nm < from + len) {
         how.classList.add('live');
-        how.dataset.end = endMs;
+        how.dataset.end = endMs; how.dataset.start = fromKey(viewDay).getTime() + from * 60000;
         how.textContent = leftWords(endMs - Date.now());
       } else if (!b.done && viewDay === planKey() && i === firstOpen && nm >= from + len) {
         // the block you are actually on has run past its planned end: count up how far over
@@ -16684,6 +16704,22 @@ function renderFuel() {
 setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); stageDay(); } catch {} }, 60000);
 // today in stages: the part of the day you are in shows; later parts fold to one quiet row until you open them (or get there)
 let stageOpen = new Set(), stageKey = null, stageMore = 0;
+// the day as a timeline: rows before now are past, the one you are on glows, the next says when it starts
+function markTimeline(sheet) {
+  const L = [...sheet.querySelectorAll(':scope > .line[data-i]')];
+  L.forEach(el => { el.classList.remove('tl-past', 'tl-now', 'tl-next'); el.querySelectorAll('.tl-in').forEach(x => x.remove()); el.style.removeProperty('--p'); });
+  if (viewDay !== planKey() || sortingDay) return;
+  const d = state.days[viewDay]; if (!d || !d.blocks) return;
+  const nm = planMin(viewDay); let at = toMins(d.start); const span = {};
+  d.blocks.forEach((b, i) => { const m = Number(b.mins) || 60; span[i] = [at, at + m]; at += m; });
+  // the block you are on is the first one not ticked (even if it ran over); it glows and fills
+  let nowEl = null, nextEl = null;
+  for (const el of L) { const i = Number(el.dataset.i), [a, z] = span[i] || [0, 0];
+    if (el.classList.contains('ticked')) { el.classList.add('tl-past'); continue; }
+    if (!nowEl && a <= nm) { nowEl = el; el.classList.add('tl-now'); el.style.setProperty('--p', Math.min(1, (nm - a) / (z - a)).toFixed(4)); continue; }
+    if (!nowEl && a > nm) { nowEl = 'none'; }
+    if (!nextEl) { nextEl = el; el.classList.add('tl-next'); const t = el.querySelector('.at'); if (t) { const n = a - nm, sp = document.createElement('span'); sp.className = 'tl-in'; sp.textContent = n <= 0 ? 'next' : 'in ' + (n >= 60 ? Math.floor(n / 60) + 'h' + (n % 60 ? ' ' + (n % 60) + 'm' : '') : n + 'm'); t.appendChild(sp); } } }
+}
 function partHours(sheet) {
   const d = state.days[viewDay]; if (!d) return; let lab = null, m = 0;
   const put = () => { if (lab && m) { lab.querySelectorAll('.dp-hrs').forEach(x => x.remove()); const sp = document.createElement('span'); sp.className = 'dp-hrs'; sp.textContent = minsLabel(m); lab.appendChild(sp); } };
@@ -16696,6 +16732,7 @@ function stageDay() {
   try { const d = state.days[viewDay]; if (d && d.blocks) sheet.querySelectorAll('.line[data-i]').forEach(el => { const b = d.blocks[Number(el.dataset.i)]; if (b) el.style.setProperty('--bc', calColor(b)); }); } catch {}
   sheet.querySelectorAll('.stg-more').forEach(x => x.remove());
   sheet.querySelectorAll('.stg-hide').forEach(x => x.classList.remove('stg-hide'));
+  try { markTimeline(sheet); } catch {}
   if (viewDay !== planKey() || sortingDay) { try { partHours(sheet); } catch {} return; }
   if (stageKey !== viewDay) { stageMore = 0; stageKey = viewDay; }
   try { partHours(sheet); } catch {}
@@ -20105,6 +20142,7 @@ setInterval(() => {
     if (el.classList.contains('over')) { el.textContent = '+' + fmtIn(-left); continue; }
     if (left <= 0) { renderDay(); return; }
     el.textContent = el.classList.contains('how') ? leftWords(left) : fmtLeft(left);
+    if (el.dataset.start) { const st = Number(el.dataset.start), en = Number(el.dataset.end), row = el.closest('.line'); if (row) row.style.setProperty('--p', Math.min(1, Math.max(0, (Date.now() - st) / (en - st))).toFixed(4)); }
   }
 }, 1000);
 
