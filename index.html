@@ -6928,6 +6928,25 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 .pw .pw-gym { width: 32px; padding: 0 !important; justify-content: center; }
 .pw .pw-gym { opacity: .45; }
 .pw .pw-gym.on { opacity: 1; background: color-mix(in srgb, #c07f8c 45%, var(--card)) !important; box-shadow: inset 0 0 0 1.5px #c07f8c; }
+
+/* goals: the weekly check-in and the ladder */
+.gl-review { margin: 6px 0 18px; padding: 14px; border-radius: 18px; background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 16%, var(--card)), color-mix(in srgb, #c9a0d6 10%, var(--card))); }
+.gl-rh { margin: 0; font: 700 17px "Inter", system-ui, sans-serif; color: var(--ink); }
+.gl-rs { margin: 4px 0 10px; font-size: 13px; color: var(--muted); }
+.gl-rr { display: flex; align-items: center; gap: 10px; min-height: 40px; border-top: 1px solid color-mix(in srgb, var(--hair) 60%, transparent); }
+.gl-rr i { flex: none; width: 22px; height: 22px; display: grid; place-items: center; font-style: normal; font-size: 12px; color: var(--muted); border-radius: 50%; background: color-mix(in srgb, var(--ink) 8%, transparent); }
+.gl-rr i.ok { color: #fff; background: #7daf86; }
+.gl-rr span { flex: 1; min-width: 0; font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gl-rr.drop span { opacity: .45; text-decoration: line-through; }
+.gl-rr button { flex: none; min-height: 30px; padding: 0 10px; font: 500 12px "Inter", system-ui, sans-serif; color: var(--muted); background: none; border: 0; cursor: pointer; }
+.gl-rb { display: flex; gap: 8px; margin-top: 12px; }
+.gl-rb button { flex: 1; min-height: 42px; font: 600 14px "Inter", system-ui, sans-serif; white-space: nowrap; border: 0; border-radius: 999px; cursor: pointer; }
+.gl-rkeep { color: #fff; background: var(--pink); }
+.gl-rchg { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, var(--card)); }
+.gl-up, .gl-down { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 8px 46px; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; }
+.gl-up i { font-style: normal; color: var(--c, var(--pink)); }
+.gl-up small, .gl-down small { flex: none; font-weight: 600; color: var(--c, var(--pink)); }
+.gl-up span, .gl-down span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 </style>
 </head>
 <body>
@@ -7209,7 +7228,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:38</footer>
+  <footer>Mr.O:07:40</footer>
 </div>
 
 <script>
@@ -17864,6 +17883,23 @@ function renderGoals() {
   const tabs = [['week', 'Week'], ['month', 'Month'], ['6', '6 months'], ['12', '1 year']];
   let html = '<header class="pghead"><h1>Goals</h1><span>' + ({ week: weekGoalCount() + ' of ' + MAX_WEEK_ALL + ' this week', month: cap(MONTHS[new Date().getMonth()]), 6: 'one per area', 12: 'one per area' })[goalsTab] + '</span></header>' +
     '<div class="md-seg gl-tabs">' + tabs.map(([k, t]) => '<button type="button" class="md-seg-b' + (goalsTab === k ? ' on' : '') + '" data-gt="' + k + '">' + t + '</button>').join('') + '</div>';
+  // the ladder: each goal shows what it builds toward (week to month to 6 months to a year) and what feeds it
+  const big = (k, m) => bigsOf(k).find(x => x.months === m);
+  const upOf = (k, from) => { const mo = MG[k], six = big(k, 6), yr = big(k, 12);
+    if (from === 'week') return mo ? ['This month', mo.text] : six ? ['6 months', six.text] : yr ? ['This year', yr.text] : null;
+    if (from === 'month') return six ? ['6 months', six.text] : yr ? ['This year', yr.text] : null;
+    if (from === 6) return yr ? ['This year', yr.text] : null; return null; };
+  const upLine = U => U ? '<p class="gl-up"><i>\u2191</i><small>' + U[0] + '</small><span>' + esc(U[1]) + '</span></p>' : '';
+  // a new week: look at last week's goals, then keep them, change them, or drop some
+  const wkNow = mondayOf(planKey()), wkLast = shiftKey(wkNow, -7), anyGoals = AREAS.some(a => areaGoals(a.k).length);
+  if (state.goalWeek === undefined) { state.goalWeek = wkNow; save(); }   // first time: this week counts as started; the check-in comes next Monday
+  if (goalsTab === 'week' && anyGoals && state.goalWeek !== wkNow) {
+    const rows = AREAS.flatMap(a => areaGoals(a.k).map((g, gi) => ({ a, g, gi })));
+    const dn = rows.filter(r => r.g.doneWk === wkLast).length;
+    html += '<div class="gl-review"><p class="gl-rh">\u{1F501} New week</p><p class="gl-rs">Last week you did ' + dn + ' of ' + rows.length + '. Keep, change or drop each one for this week.</p>' +
+      rows.map(r => '<div class="gl-rr' + (r.g.dropping ? ' drop' : '') + '"><i class="' + (r.g.doneWk === wkLast ? 'ok' : '') + '">' + (r.g.doneWk === wkLast ? '\u2713' : '\u00b7') + '</i><span>' + esc(r.g.text) + '</span><button type="button" data-rvdrop="' + r.a.k + ':' + r.gi + '">' + (r.g.dropping ? 'Keep' : 'Drop') + '</button></div>').join('') +
+      '<div class="gl-rb"><button type="button" class="gl-rkeep" data-rvkeep="1">Start the week</button><button type="button" class="gl-rchg" data-rvchg="1">Change goals</button></div></div>';
+  }
   html += '<div class="gl-list">' + AREAS.map(a => {
     let body = '';
     if (goalsTab === 'week') {
@@ -17871,20 +17907,22 @@ function renderGoals() {
       body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct);
         if (goalEditing === a.k + ':' + gi) return '<div class="gl-edit"><input type="text" class="gl-in" maxlength="100" data-gein="' + a.k + ':' + gi + '" aria-label="edit goal"><div class="gl-ebtns"><button type="button" data-gesave="' + a.k + ':' + gi + '">Save</button><button type="button" data-gecancel="1">Cancel</button><button type="button" class="rm" data-germ="' + a.k + ':' + gi + '">Remove</button></div></div>';
         return '<div class="gl-rowwrap"><button type="button" class="gl-edbtn" data-ged="' + a.k + ':' + gi + '" aria-label="edit ' + esc(g.text) + '">Edit</button><button type="button" class="gl-row" data-wkt="' + a.k + ':' + gi + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button></div>' +
-        ((g.actions || []).length ? '<p class="gl-sl' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') +
+        ((g.actions || []).length ? '<p class="gl-sl' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') + upLine(upOf(a.k, 'week')) +
         '<div class="gl-btns"><button type="button" data-gls="' + a.k + ':' + gi + '">' + ((g.actions || []).length ? 'Edit steps' : '+ Add steps') + '</button><button type="button" data-glsug="' + a.k + ':' + gi + '">\u2728 Suggest steps</button></div>'; }).join('') +
         (gs.length < MAX_LIFE_GOALS && (weekGoalCount() < MAX_WEEK_ALL || !gs.length) ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
     } else if (goalsTab === 'month') {
       const g = MG[a.k];
       body = monthEdit === a.k || !g
         ? '<input type="text" class="gl-in" data-mo="' + a.k + '" maxlength="100" placeholder="one thing for ' + a.name.toLowerCase() + ' this month">'
-        : '<div class="gl-row"><button type="button" class="gl-tick' + (g.done ? ' on' : '') + '" data-motick="' + a.k + '" aria-label="done">\u2713</button><button type="button" class="gl-t gl-mt" data-moed="' + a.k + '"></button></div>';
+        : '<div class="gl-row"><button type="button" class="gl-tick' + (g.done ? ' on' : '') + '" data-motick="' + a.k + '" aria-label="done">\u2713</button><button type="button" class="gl-t gl-mt" data-moed="' + a.k + '"></button></div>' +
+          upLine(upOf(a.k, 'month')) + (areaGoals(a.k).length ? '<p class="gl-down"><small>This week</small><span>' + areaGoals(a.k).map(x => esc(x.text)).join(' \u00b7 ') + '</span></p>' : '');
     } else {
       const m = Number(goalsTab), b = bigsOf(a.k).find(x => x.months === m);
       if (b) { const { st, left } = bigState(b), A = weekAction(b);
         body = '<button type="button" class="gl-big" data-bigopen="1"><span class="gl-t">' + esc(b.text) + '</span><span class="lf-pill ' + st[0] + '">' + st[1] + '</span>' +
           '<i class="gl-bar"><u style="width:' + b.pct + '%"></u></i><small>' + (b.done ? 'Done' : left + ' days left') + (A ? ' \u00b7 this week: ' + esc(A.text) : '') + '</small></button>'; }
       else body = '<button type="button" class="gl-add" data-bignew="' + a.k + '">+ ' + (m === 6 ? 'where you want to be in 6 months' : 'where you want to be in a year') + '</button>';
+      if (b) body += upLine(upOf(a.k, m)) + (m === 6 && MG[a.k] ? '<p class="gl-down"><small>This month</small><span>' + esc(MG[a.k].text) + '</span></p>' : m === 12 && big(a.k, 6) ? '<p class="gl-down"><small>6 months</small><span>' + esc(big(a.k, 6).text) + '</span></p>' : '');
     }
     return '<section class="gl-area" data-a="' + a.k + '" style="--c:' + a.c + '"><div class="gl-ah"><i>' + a.e + '</i><b>' + a.name + '</b></div>' + body + '</section>';
   }).join('') + '</div>';
@@ -17899,12 +17937,18 @@ function renderGoals() {
   on('[data-gt]', el => { goalsTab = el.dataset.gt; monthEdit = null; renderGoals(); });
   // goal rows are just text; Edit changes the words (twice in 8 hours)
   on('[data-ged]', el => {
-    const left = goalEditsLeft();
-    if (left.n <= 0) { el.textContent = 'again at ' + clockOf(left.next); el.disabled = true; return; }
+    const left = goalEditsLeft(), free = (state.goalFreeUntil || 0) > Date.now();   // a new week: change freely for a few hours
+    if (!free && left.n <= 0) { el.textContent = 'again at ' + clockOf(left.next); el.disabled = true; return; }
     goalEditing = el.dataset.ged; renderGoals();
     const i = box.querySelector('[data-gein]'); if (i) { const [ak, gi] = goalEditing.split(':'); i.value = areaGoals(ak)[Number(gi)].text; i.focus(); }
   });
   on('[data-gecancel]', () => { goalEditing = null; renderGoals(); });
+  on('[data-rvdrop]', el => { const [ak, gi] = el.dataset.rvdrop.split(':'), g = areaGoals(ak)[Number(gi)]; if (g) { g.dropping = !g.dropping; save(); renderGoals(); } });
+  const startWeek = () => { const hist = state.goalHistory = state.goalHistory || {}; hist[wkLast] = AREAS.flatMap(a => areaGoals(a.k).map(g => ({ area: a.k, text: g.text, done: g.doneWk === wkLast })));
+    AREAS.forEach(a => { const gs = areaGoals(a.k); for (let i = gs.length - 1; i >= 0; i--) if (gs[i].dropping) gs.splice(i, 1); else delete gs[i].dropping; });
+    state.goalWeek = wkNow; save(); renderGoals(); };
+  on('[data-rvkeep]', () => startWeek());
+  on('[data-rvchg]', () => { state.goalFreeUntil = Date.now() + 3 * 3600e3; startWeek(); });
   // tap a week goal to tick it off for this week (tap again to undo)
   on('[data-wkt]', el => {
     const [ak, gi] = el.dataset.wkt.split(':'), g = areaGoals(ak)[Number(gi)]; if (!g) return;
