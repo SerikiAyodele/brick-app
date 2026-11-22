@@ -6810,6 +6810,12 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 #view-home .hm-tip span { font-size: 12.5px !important; }
 .mn-line { flex-wrap: nowrap !important; overflow: hidden; }
 .mn-line span { flex: 0 1 auto; }
+
+#view-day#view-day#view-day#view-day #block-list .line .how.live { font-variant-numeric: tabular-nums; }
+#view-day#view-day#view-day#view-day #block-list .line .fbtn { min-height: 28px !important; height: 28px !important; padding: 0 9px !important; font: 600 12px "Inter", system-ui, sans-serif !important; border-radius: 999px !important; }
+#view-day#view-day#view-day#view-day #block-list .line .how.live { padding: 0 8px !important; height: 28px !important; font-size: 12px !important; }
+#view-day#view-day#view-day#view-day #block-list .line:not(.plan-row) { grid-template-areas: "tick emo mid chip how bin" "tick emo at at at bin" !important; }
+#view-day#view-day#view-day#view-day #block-list .line:not(.plan-row) .at { font-size: 12px !important; }
 </style>
 </head>
 <body>
@@ -7091,7 +7097,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:01</footer>
+  <footer>Mr.O:07:08</footer>
 </div>
 
 <script>
@@ -8428,7 +8434,8 @@ function holdToAdd(row, day, i, firstOpen) {
 let nowTimer = null;
 
 // "34m left", "1h 20m left": easier to read than a clock on the plan
-function leftWords(ms) { const m = Math.max(0, Math.ceil(ms / 60000)); return (m < 1 ? '<1m' : m >= 60 ? Math.floor(m / 60) + 'h' + (m % 60 ? String(m % 60).padStart(2, '0') : '') : m + 'm') + ' left'; }
+function leftWords(ms) { const t = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, sec = t % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(sec).padStart(2, '0') + ' left'; }
 function fmtLeft(ms) {
   const t = Math.max(0, Math.round(ms / 1000));
   const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, sec = t % 60;
@@ -16693,6 +16700,7 @@ function stageDay() {
   if (stageKey !== viewDay) { stageMore = 0; stageKey = viewDay; }
   try { partHours(sheet); } catch {}
   const kids = [...sheet.children], open = kids.filter(el => el.classList.contains('line') && el.dataset.i != null && !el.classList.contains('ticked'));
+  return;   // every block shows (no hiding)
   const SHOW = 3 + stageMore;
   if (open.length <= SHOW + 1) return;
   const hideFrom = open[SHOW], start = kids.indexOf(hideFrom), hidden = [];
