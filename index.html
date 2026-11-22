@@ -6863,6 +6863,8 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 .tpp-btns [data-save] { color: #fff; background: var(--pink); }
 .tpp-btns .danger { color: #d9628a; }
 .tpp-hint { margin: 0; font-size: 13px; color: var(--muted); }
+
+.wk-undoweek, .pw-undo { display: block; width: 100%; min-height: 42px; margin: 10px 0 0; font: 600 14px "Inter", system-ui, sans-serif; color: #d9628a; background: none; border: 1px solid color-mix(in srgb, #d9628a 40%, transparent); border-radius: 14px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -7144,7 +7146,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:24</footer>
+  <footer>Mr.O:07:28</footer>
 </div>
 
 <script>
@@ -10856,7 +10858,8 @@ function planWeekPage(monIn) {
         '<span><b>' + L.gym + '</b><small>gym days</small></span><span><b>' + (L.sleep ? dur(L.sleep) : '\u2013') + '</b><small>sleep a night</small></span></div>' +
         (L.best ? '<p class="pw-line">\u{1F31F} Best day: <b>' + cap(FULL[fromKey(L.best.k).getDay()]) + '</b></p>' : '') +
         (L.moods ? '<p class="pw-line">\u{1F642} You felt good in ' + L.good + ' of ' + L.moods + ' days</p>' : '') +
-        '<div class="pw-lesson"><small>For this week</small><b></b></div>';
+        '<div class="pw-lesson"><small>For this week</small><b></b></div>' +
+        (W.appliedAt ? '<button type="button" class="pw-undo">Undo this week\u2019s plan</button>' : '');
     }
     if (step === 1) {
       h += '<p class="pw-q">One focus for the week</p><p class="pw-sub">Who are you becoming? Pick the goal that matters most. The rest still get time.</p><div class="pw-focus">' +
@@ -10886,7 +10889,8 @@ function planWeekPage(monIn) {
     h += '<div class="pw-btns">' + (step ? '<button type="button" class="ls-cancel pw-back">Back</button>' : '') + '<button type="button" class="wka-go pw-next">' + (step === 3 ? 'Apply to my week' : 'Next') + '</button></div>';
     body.innerHTML = h;
     // text in safely
-    if (step === 0) body.querySelector('.pw-lesson b').textContent = weekLookBack(mon).lesson;
+    if (step === 0) { body.querySelector('.pw-lesson b').textContent = weekLookBack(mon).lesson;
+      const un = body.querySelector('.pw-undo'); if (un) un.addEventListener('click', () => { if (un.dataset.sure !== '1') { un.dataset.sure = '1'; un.textContent = 'Tap again to clear the planned days'; return; } const n = undoWeekPlan(mon); pg.remove(); offerUndo('=Cleared ' + n + ' planned day' + (n === 1 ? '' : 's'), () => {}); }); }
     if (step === 1) { body.querySelectorAll('[data-f]').forEach(b => { b.querySelector('span').textContent = G[Number(b.dataset.f)].goal; b.addEventListener('click', () => { W.focus = G[Number(b.dataset.f)].goal; draw(); }); });
       const own = body.querySelector('.pw-own'); if (W.focus && !G.some(x => x.goal === W.focus)) own.value = W.focus; own.addEventListener('input', () => { if (own.value.trim()) { W.focus = own.value.trim(); body.querySelectorAll('[data-f]').forEach(b => b.classList.remove('on')); } });
       const be = body.querySelector('.pw-becoming input'); be.value = W.becoming || ''; be.addEventListener('input', () => { W.becoming = be.value.trim(); }); }
@@ -10911,12 +10915,23 @@ function planWeekPage(monIn) {
         const d = dayFor(k);
         if (cur.length && !D.replace) return;
         const P = built[k]; d.start = P.start; d.blocks = P.blocks.map(b => ({ label: b.label, mins: b.mins, done: false, ...(b.fixedAt ? { fixedAt: b.fixedAt } : {}) })); d.touched = true; d.askedPlan = true; n++; });
-      W.appliedAt = Date.now(); save(); pg.remove();
+      W.appliedAt = Date.now(); W.before = before; save(); pg.remove();
       if (typeof setPlanMode === 'function') setPlanMode('week'); show('day'); window.scrollTo(0, 0);
       offerUndo('=Planned ' + n + ' day' + (n === 1 ? '' : 's'), () => { days.forEach(k => { if (before[k]) state.days[k] = before[k]; else delete state.days[k]; }); delete W.appliedAt; save(); renderDay(); if (typeof renderWeek === 'function') renderWeek(); });
     });
   };
   draw();
+}
+// undo a week plan later: each day goes back to how it was (days you already started stay)
+function undoWeekPlan(mon) {
+  const W = (state.weekPlans || {})[mon]; if (!W || !W.appliedAt) return 0;
+  let n = 0;
+  for (let i = 0; i < 7; i++) { const k = shiftKey(mon, i); if (k < planKey()) continue; const d = state.days[k]; if (!d) continue;
+    if ((d.blocks || []).some(b => b.done)) continue;   // you already started this day: keep it
+    const B = W.before && k in W.before ? W.before[k] : undefined;
+    if (B) state.days[k] = B; else if (B === null || !W.before) delete state.days[k]; n++; }
+  delete W.appliedAt; delete W.before; save(); renderDay(); if (typeof renderWeek === 'function' && planMode === 'week') renderWeek();
+  return n;
 }
 // a quiet nudge on Sunday (from noon) and Monday morning when the week has no plan yet
 function renderWeekNudge() {
@@ -19964,7 +19979,7 @@ function renderWeek() {
       '<div class="ws-bars">' + days.map((k, n) => '<button type="button" class="ws-bar' + (k === today ? ' today' : '') + '" data-day="' + k + '" aria-label="' + FULL[fromKey(k).getDay()] + ', ' + hrsLabel(mins[n] || 0) + '"><i><s style="height:' + Math.round(mins[n] / mx * 100) + '%"><u style="height:' + (mins[n] ? Math.round(done[n] / mins[n] * 100) : 0) + '%"></u></s></i><small>' + FULL[fromKey(k).getDay()].slice(0, 1).toUpperCase() + '</small></button>').join('') + '</div></div>';
   }
 
-  if (weekOf >= mondayOf(planKey())) html += '<button type="button" class="wk-planweek" id="wk-planweek">\u2728 Plan ' + (weekOf > planKey() ? 'next week' : 'my week') + '</button>';
+  if (weekOf >= mondayOf(planKey())) html += ((state.weekPlans || {})[weekOf] && state.weekPlans[weekOf].appliedAt ? '<button type="button" class="wk-undoweek" id="wk-undoweek">Undo week plan</button>' : '') + '<button type="button" class="wk-planweek" id="wk-planweek">\u2728 Plan ' + (weekOf > planKey() ? 'next week' : 'my week') + '</button>';
   html += '<button type="button" class="wk-add" id="wk-add"><span class="plusbox">+</span> Add a block</button>';
 
   if (weekLook === 'list') {
@@ -20044,6 +20059,7 @@ function renderWeek() {
     viewDay = b.dataset.day; setPlanMode('day'); renderDay(); window.scrollTo(0, 0);
   }));
   { const pw = document.getElementById('wk-planweek'); if (pw) pw.addEventListener('click', () => planWeekPage(weekOf)); }
+  { const uw = document.getElementById('wk-undoweek'); if (uw) uw.addEventListener('click', () => { if (uw.dataset.sure !== '1') { uw.dataset.sure = '1'; uw.textContent = 'Tap again to clear the planned days'; return; } const n = undoWeekPlan(weekOf); offerUndo('=Cleared ' + n + ' planned day' + (n === 1 ? '' : 's'), () => {}); }); }
   document.getElementById('wk-add').addEventListener('click', () => days.includes(today) ? weekAddSheet(today, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(today, x))) : weekAddSheet(days[0], days));   // from today: the next 7 days
   box.querySelectorAll('[data-addto]').forEach(c => c.addEventListener('click', e => { if (e.target === c) { const k = c.dataset.addto, m = mondayOf(k); weekAddSheet(k, [0, 1, 2, 3, 4, 5, 6].map(x => shiftKey(m, x))); } }));
   box.querySelectorAll('[data-sel]').forEach(b => b.addEventListener('click', () => { renderWeek.sel = b.dataset.sel; renderWeek(); }));
