@@ -6836,6 +6836,33 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 #view-day .dpart[data-part="Afternoon"] { --pc: #6aa6d8; }
 #view-day .dpart[data-part="Night"] { --pc: #a58fe0; }
 #view-day .dpart .dp-hrs { color: var(--pc) !important; opacity: 1 !important; }
+
+/* day templates */
+#view-day .dtp { margin: 4px 0 16px; }
+#view-day .dtp-h { display: flex; align-items: center; gap: 10px; }
+#view-day .dtp-h b { flex: 1; font: 600 11px "Inter", system-ui, sans-serif; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+#view-day .dtp-h button { min-height: 30px; padding: 0; font: 500 12px "Inter", system-ui, sans-serif; color: var(--pink); background: none; border: 0; cursor: pointer; }
+#view-day .dtp-card { display: block; width: 100%; margin-top: 8px; padding: 12px 14px; text-align: left; border: 0; border-radius: 16px; background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 12%, var(--card)), color-mix(in srgb, #c9a0d6 8%, var(--card))); cursor: pointer; }
+#view-day .dtp-emo { display: flex; flex-wrap: nowrap; gap: 3px; overflow: hidden; font-size: 17px; }
+#view-day .dtp-emo i { font-style: normal; }
+#view-day .dtp-card small { display: block; margin-top: 6px; font: 400 12px "Inter", system-ui, sans-serif; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#view-day .dtp-btns { display: flex; gap: 8px; margin-top: 8px; }
+#view-day .dtp-btns button { min-height: 38px; padding: 0 14px; font: 600 13px "Inter", system-ui, sans-serif; white-space: nowrap; border: 0; border-radius: 999px; cursor: pointer; }
+#view-day .dtp-use { color: #fff; background: var(--pink); }
+#view-day .dtp-save { color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, var(--card)); }
+#view-day .dtp-none { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+.tpp-sub { margin: 0 0 14px; font-size: 14px; color: var(--muted); }
+.tpp-d { margin-bottom: 8px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 4%, var(--card)); overflow: hidden; }
+.tpp-h { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 56px; padding: 0 14px; text-align: left; background: none; border: 0; cursor: pointer; }
+.tpp-h b { flex: none; width: 92px; font: 600 15px "Inter", system-ui, sans-serif; color: var(--ink); }
+.tpp-h span { flex: 1; min-width: 0; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpp-h em { flex: none; font-style: normal; font-size: 13px; letter-spacing: 1px; }
+.tpp-d.open .bpg-day { margin: 0 10px; width: auto; }
+.tpp-btns { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px 14px; }
+.tpp-btns button { min-height: 38px; padding: 0 14px; font: 600 13px "Inter", system-ui, sans-serif; white-space: nowrap; color: var(--ink); background: color-mix(in srgb, var(--ink) 7%, var(--card)); border: 0; border-radius: 999px; cursor: pointer; }
+.tpp-btns [data-save] { color: #fff; background: var(--pink); }
+.tpp-btns .danger { color: #d9628a; }
+.tpp-hint { margin: 0; font-size: 13px; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -7117,7 +7144,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:07:15</footer>
+  <footer>Mr.O:07:24</footer>
 </div>
 
 <script>
@@ -7178,7 +7205,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { dayRoutines: {}, habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [], weekPlans: {} };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [], weekPlans: {}, dayTemplates: {} };
 
 function load() {
   try {
@@ -7228,6 +7255,7 @@ function load() {
         dump: Array.isArray(d.dump) ? d.dump : [],
         forest: Array.isArray(d.forest) ? d.forest : [],
         weekPlans: (d.weekPlans && typeof d.weekPlans === 'object') ? d.weekPlans : {},
+        dayTemplates: (d.dayTemplates && typeof d.dayTemplates === 'object') ? d.dayTemplates : {},
         dayRoutines: (d.dayRoutines && typeof d.dayRoutines === 'object') ? d.dayRoutines : {}
       };
     }
@@ -10294,6 +10322,7 @@ function renderDay() {
       al.addEventListener('click', () => alarmSheet(ups));
       tools.append(al);
     }
+    { const tp = document.createElement('button'); tp.className = 'arrange'; tp.type = 'button'; tp.textContent = '\u{1F4CB} Templates'; tp.addEventListener('click', () => templatesPage(fromKey(viewDay).getDay())); tools.append(tp); }
     { const pw = document.createElement('button'); pw.className = 'arrange best-order'; pw.type = 'button'; pw.textContent = '\u2728 Plan my week'; pw.addEventListener('click', () => planWeekPage()); tools.append(pw); }
     { const cp = document.createElement('button'); cp.className = 'arrange'; cp.type = 'button'; cp.textContent = 'Copy my day';
       cp.setAttribute('aria-label', 'copy this day as text, to paste into ChatGPT'); cp.addEventListener('click', () => copyDaySheet(viewDay)); tools.append(cp); }
@@ -10976,6 +11005,54 @@ function copyDaySheet(k) {
   el.querySelector('.w3-back').addEventListener('click', close); el.querySelector('.cp-x').addEventListener('click', close);
   (async () => { try { await navigator.clipboard.writeText(txt); st.textContent = '\u2713 Copied. Paste it into ChatGPT.'; } catch { ta.focus(); ta.select(); st.textContent = 'Hold the text, Select All, then Copy.'; } })();
 }
+/* =========== day templates ===========
+   one saved plan for each weekday. planning a Monday? use your Monday template in one tap.
+   save any day as its weekday's template; until you do, last week's same day is offered. */
+const tplName = wd => cap(FULL[wd]);
+function lastSameDay(k) { for (let n = 7; n <= 28; n += 7) { const kk = shiftKey(k, -n), d = state.days[kk]; if (d && d.blocks && d.blocks.length >= 5) return kk; } return null; }
+function tplBlocks(blocks) { return (blocks || []).filter(b => (b.label || '').trim()).map(b => ({ label: b.label, mins: Number(b.mins) || 60, ...(b.title ? { title: b.title } : {}), ...(b.meeting ? { meeting: true } : {}), ...(Array.isArray(b.goals) && b.goals.length ? { goals: b.goals.map(g => ({ text: g.text, done: false })) } : {}) })); }
+function saveTemplate(k) { const d = state.days[k]; if (!d || !d.blocks || !d.blocks.length) return false; state.dayTemplates = state.dayTemplates || {}; state.dayTemplates[fromKey(k).getDay()] = { start: d.start, blocks: tplBlocks(d.blocks), savedAt: Date.now(), from: k }; save(); return true; }
+function useTemplate(k, T, what) {
+  const d = dayFor(k), before = { start: d.start, blocks: d.blocks };
+  d.start = T.start || d.start; d.blocks = tplBlocks(T.blocks).map(b => ({ ...b, done: false })); d.touched = true; save(); renderDay(); renderHabits();
+  offerUndo('=Used ' + what, () => { const d2 = dayFor(k); d2.start = before.start; d2.blocks = before.blocks; save(); renderDay(); });
+}
+function tplSummary(T) { const m = T.blocks.reduce((t, b) => t + (Number(b.mins) || 60), 0), w = T.blocks.filter(b => outcomeField(b.label) === 'goals' || /^focus:/i.test(b.label)).reduce((t, b) => t + (Number(b.mins) || 60), 0);
+  return clock(toMins(T.start)) + ' \u00b7 ' + T.blocks.length + ' blocks' + (w ? ' \u00b7 ' + hrsLabel(w) + ' work' : ''); }
+function renderDayTemplate(slot, day) {
+  const wd = fromKey(viewDay).getDay(), T = (state.dayTemplates || {})[wd], last = lastSameDay(viewDay), L = !T && last ? { start: state.days[last].start, blocks: state.days[last].blocks } : null, use = T || L;
+  const box = document.createElement('div'); box.className = 'dtp';
+  if (!use) { box.innerHTML = '<div class="dtp-h"><b>' + tplName(wd) + ' template</b><button type="button" class="dtp-all">Templates</button></div><p class="dtp-none">No ' + tplName(wd) + ' template yet. Plan this day, then save it as your ' + tplName(wd) + ' template.</p>'; }
+  else {
+    box.innerHTML = '<div class="dtp-h"><b>' + (T ? 'Your ' + tplName(wd) + ' template' : 'Last ' + tplName(wd)) + '</b><button type="button" class="dtp-all">Templates</button></div>' +
+      '<button type="button" class="dtp-card"><div class="dtp-emo">' + use.blocks.slice(0, 14).map(b => '<i>' + blockEmoji(b) + '</i>').join('') + '</div><small></small></button>' +
+      '<div class="dtp-btns"><button type="button" class="dtp-use">' + (day.blocks.length ? 'Replace with this' : 'Use this') + '</button>' + (T ? '' : '<button type="button" class="dtp-save">Save as ' + tplName(wd) + ' template</button>') + '</div>';
+    box.querySelector('.dtp-card small').textContent = tplSummary({ start: use.start, blocks: use.blocks });
+    box.querySelector('.dtp-card').addEventListener('click', () => templatesPage(wd));
+    box.querySelector('.dtp-use').addEventListener('click', () => useTemplate(viewDay, use, T ? 'your ' + tplName(wd) + ' template' : 'last ' + tplName(wd)));
+    const sv = box.querySelector('.dtp-save'); if (sv) sv.addEventListener('click', () => { saveTemplate(last); renderTomorrowSuggest(); });
+  }
+  box.querySelector('.dtp-all').addEventListener('click', () => templatesPage(wd));
+  slot.appendChild(box);
+}
+function templatesPage(focusWd) {
+  const pg = bigPage('Day templates', 'One plan for each weekday'); pg.classList.add('tpp');
+  const body = pg.querySelector('.bpg-body'); let open = focusWd;
+  const draw = () => {
+    const order = [1, 2, 3, 4, 5, 6, 0], vwd = fromKey(viewDay).getDay(), hasDay = ((state.days[viewDay] || {}).blocks || []).length;
+    body.innerHTML = '<p class="tpp-sub">Plan a day the way you like it, then save it here. Next time that weekday comes, use it in one tap.</p>' + order.map(wd => { const T = (state.dayTemplates || {})[wd], on = open === wd;
+      return '<div class="tpp-d' + (on ? ' open' : '') + '" data-wd="' + wd + '"><button type="button" class="tpp-h"><b>' + tplName(wd) + '</b><span>' + (T ? esc(tplSummary(T)) : 'not set') + '</span><em>' + (T ? T.blocks.slice(0, 8).map(b => blockEmoji(b)).join('') : '') + '</em></button>' +
+        (on ? (T ? planDayRows(T.start, T.blocks) : '') + '<div class="tpp-btns">' +
+          (wd === vwd && hasDay ? '<button type="button" data-save="' + wd + '">Save ' + (viewDay === planKey() ? 'today' : 'this day') + ' as ' + tplName(wd) + '</button>' : '') +
+          (T ? '<button type="button" data-use="' + wd + '">Use for ' + (viewDay === planKey() ? 'today' : cap(FULL[vwd])) + '</button><button type="button" class="danger" data-rm="' + wd + '">Remove</button>' : '') +
+          (!T && !(wd === vwd && hasDay) ? '<p class="tpp-hint">Open a ' + tplName(wd) + ' in Plan, plan it, then save it here.</p>' : '') + '</div>' : '') + '</div>'; }).join('');
+    body.querySelectorAll('.tpp-h').forEach(b => b.addEventListener('click', () => { const wd = Number(b.closest('.tpp-d').dataset.wd); open = open === wd ? null : wd; draw(); }));
+    body.querySelectorAll('[data-save]').forEach(b => b.addEventListener('click', () => { saveTemplate(viewDay); draw(); renderTomorrowSuggest(); }));
+    body.querySelectorAll('[data-use]').forEach(b => b.addEventListener('click', () => { const wd = Number(b.dataset.use); pg.remove(); useTemplate(viewDay, state.dayTemplates[wd], 'your ' + tplName(wd) + ' template'); }));
+    body.querySelectorAll('[data-rm]').forEach(b => b.addEventListener('click', () => { delete state.dayTemplates[Number(b.dataset.rm)]; save(); draw(); renderTomorrowSuggest(); }));
+  };
+  draw();
+}
 function renderTomorrowSuggest() {
   let slot = document.getElementById('tmsug-slot');
   if (!slot) { const c = document.getElementById('carry-slot'); if (!c) return; slot = document.createElement('div'); slot.id = 'tmsug-slot'; c.parentNode.insertBefore(slot, c); }
@@ -10984,6 +11061,7 @@ function renderTomorrowSuggest() {
   const day = dayFor(viewDay);
   if (!day.askedPlan && viewDay === shiftKey(planKey(), 1) && !document.getElementById('paksheet')) { day.askedPlan = true; save(); setTimeout(() => planAskSheet(viewDay), 250); }
   if (day.noSuggest) return;
+  return renderDayTemplate(slot, day);
   const S = suggestRoutines(shiftKey(viewDay, -1), viewDay);
   const has = lab => day.blocks.some(b => (b.label || '').toLowerCase() === lab.toLowerCase());
   // same as yesterday: the whole list, until you add it (work can repeat, so no name check)
