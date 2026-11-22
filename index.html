@@ -6800,6 +6800,16 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 /* the live block: time left reads as words */
 #view-day#view-day#view-day#view-day #block-list .line .how.live { min-width: 0; width: auto !important; max-width: none !important; white-space: nowrap !important; padding: 0 10px !important; font-size: 12px !important; color: #fff !important; background: var(--pink) !important; }
 #view-day#view-day#view-day#view-day #block-list .line .how.live.over { background: #d9628a !important; }
+
+/* never wrap: labels, pills, chips and short lines stay on one line (ellipsis if too long) */
+#view-day #block-list .line .what, #view-day #block-list .line .at, .stg-more span, .tms2-top b, .tms2-top small, .tms2-names,
+#view-home .hm-area .hm-an, #view-home .hm-area small, #view-home .hm-area em, #view-home .hm-tip span, .hm-goals small, .hm-goals > span, .hm-habs small,
+.dg-ask .dg-dd button span, .dcq-chips button, .pw-focus button span, .pw-rh span, .bg-top .nm, .pk-sub, .pk-name, .mn-line span, .wk-nudge span, .wk-nudge small,
+#lensheet .ls-picks button, #addsheet .ab-chips .ls-row, .mn-sortbar span {
+  white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+#view-home .hm-tip span { font-size: 12.5px !important; }
+.mn-line { flex-wrap: nowrap !important; overflow: hidden; }
+.mn-line span { flex: 0 1 auto; }
 </style>
 </head>
 <body>
@@ -7081,7 +7091,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:06:58</footer>
+  <footer>Mr.O:07:01</footer>
 </div>
 
 <script>
@@ -17365,7 +17375,7 @@ function renderHome() {
   const all = AREAS.flatMap(x => areaGoals(x.k).map(g => goalStatus(goalScore(g, ks).pct)[0]));
   const onT = all.filter(x => x === 'on').length;
   let html = '<button type="button" class="hm-goals" data-goals="1"><span class="hm-gt"><b>Goals</b><small>' +
-    (all.length ? onT + ' of ' + all.length + ' on track this week' : 'set this week\u2019s goals') + '</small></span>' +
+    (all.length ? onT + ' of ' + all.length + ' on track' : 'set your goals') + '</small></span>' +
     '<span class="hm-gbars">' + AREAS.map(x => { const gs = areaGoals(x.k), sc = gs.length ? areaScore(x.k, ks) : 0;
       return '<i style="--c:' + x.c + '"><u style="height:' + Math.max(gs.length ? 12 : 0, sc) + '%"></u></i>'; }).join('') + '</span></button>';
   {   // habits sit beside goals: done today, and the best streak
