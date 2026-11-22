@@ -6791,6 +6791,15 @@ body[data-view="life"] footer { margin-top: 12px !important; }
 .pw-wgoals p i { font-style: normal; }
 .pw-wgoals .pw-wf b { font-weight: 600; }
 .pw-wgoals .pw-wb { margin-top: 10px; font-style: italic; color: var(--muted); }
+
+/* plan tools: tidy chips on one line that scroll sideways, no words breaking onto three lines */
+#view-day#view-day#view-day .viewtools { display: flex !important; flex-wrap: nowrap !important; gap: 8px !important; overflow-x: auto; margin: 14px -20px 6px !important; padding: 0 20px 4px !important; scrollbar-width: none; justify-content: flex-start !important; }
+#view-day#view-day#view-day .viewtools::-webkit-scrollbar { display: none; }
+#view-day#view-day#view-day .viewtools > button { flex: none !important; width: auto !important; min-height: 36px !important; padding: 0 14px !important; white-space: nowrap !important; font: 500 13px "Inter", system-ui, sans-serif !important; color: var(--ink) !important; background: color-mix(in srgb, var(--ink) 6%, var(--card)) !important; border: 0 !important; border-radius: 999px !important; text-align: center !important; }
+#view-day#view-day#view-day .viewtools > button[hidden] { display: none !important; }
+/* the live block: time left reads as words */
+#view-day#view-day#view-day#view-day #block-list .line .how.live { min-width: 0; width: auto !important; max-width: none !important; white-space: nowrap !important; padding: 0 10px !important; font-size: 12px !important; color: #fff !important; background: var(--pink) !important; }
+#view-day#view-day#view-day#view-day #block-list .line .how.live.over { background: #d9628a !important; }
 </style>
 </head>
 <body>
@@ -7072,7 +7081,7 @@ body[data-view="life"] footer { margin-top: 12px !important; }
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:12</footer>
+  <footer>Mr.O:06:58</footer>
 </div>
 
 <script>
@@ -8408,6 +8417,8 @@ function holdToAdd(row, day, i, firstOpen) {
    that fills as the block runs. it ticks every second by itself. */
 let nowTimer = null;
 
+// "34m left", "1h 20m left": easier to read than a clock on the plan
+function leftWords(ms) { const m = Math.max(0, Math.ceil(ms / 60000)); return (m < 1 ? '<1m' : m >= 60 ? Math.floor(m / 60) + 'h' + (m % 60 ? String(m % 60).padStart(2, '0') : '') : m + 'm') + ' left'; }
 function fmtLeft(ms) {
   const t = Math.max(0, Math.round(ms / 1000));
   const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, sec = t % 60;
@@ -10078,7 +10089,7 @@ function renderDay() {
       if (!b.done && viewDay === planKey() && i === firstOpen && nm >= from && nm < from + len) {
         how.classList.add('live');
         how.dataset.end = endMs;
-        how.textContent = fmtLeft(endMs - Date.now());
+        how.textContent = leftWords(endMs - Date.now());
       } else if (!b.done && viewDay === planKey() && i === firstOpen && nm >= from + len) {
         // the block you are actually on has run past its planned end: count up how far over
         how.classList.add('live', 'over');
@@ -16655,7 +16666,7 @@ function renderFuel() {
 }
 setInterval(() => { if (document.body.dataset.view === 'day' && !document.querySelector('.w3')) try { renderFuel(); stageDay(); } catch {} }, 60000);
 // today in stages: the part of the day you are in shows; later parts fold to one quiet row until you open them (or get there)
-let stageOpen = new Set(), stageKey = null;
+let stageOpen = new Set(), stageKey = null, stageMore = 0;
 function partHours(sheet) {
   const d = state.days[viewDay]; if (!d) return; let lab = null, m = 0;
   const put = () => { if (lab && m) { lab.querySelectorAll('.dp-hrs').forEach(x => x.remove()); const sp = document.createElement('span'); sp.className = 'dp-hrs'; sp.textContent = minsLabel(m); lab.appendChild(sp); } };
@@ -16669,25 +16680,21 @@ function stageDay() {
   sheet.querySelectorAll('.stg-more').forEach(x => x.remove());
   sheet.querySelectorAll('.stg-hide').forEach(x => x.classList.remove('stg-hide'));
   if (viewDay !== planKey() || sortingDay) { try { partHours(sheet); } catch {} return; }
-  if (stageKey !== viewDay) { stageOpen = new Set(); stageKey = viewDay; }
-  const groups = []; let g = null;
-  for (const el of [...sheet.children]) { if (el.classList.contains('dpart')) { g = { label: el, items: [] }; groups.push(g); } else if (g) g.items.push(el); }
-  // each part of the day shows how many hours it holds
-  try { const d = state.days[viewDay]; groups.forEach(gr => { gr.label.querySelectorAll('.dp-hrs').forEach(x => x.remove()); const m = gr.items.filter(el => el.classList.contains('line') && el.dataset.i != null).reduce((t, el) => t + (Number((d.blocks[Number(el.dataset.i)] || {}).mins) || 0), 0); if (m) { const sp = document.createElement('span'); sp.className = 'dp-hrs'; sp.textContent = minsLabel(m); gr.label.appendChild(sp); } }); } catch {}
-  if (groups.length < 2) return;
-  const cur = groups.findIndex(gr => gr.items.some(el => el.classList.contains('line') && !el.classList.contains('ticked')));
-  if (cur < 0) return;
-  groups.forEach((gr, i) => {
-    if (i <= cur) return;
-    const name = gr.label.textContent.trim(); if (stageOpen.has(name)) return;
-    const L = gr.items.filter(el => el.classList.contains('line')); if (!L.length) return;
-    gr.items.forEach(el => el.classList.add('stg-hide'));
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'stg-more';
-    const em = L.slice(0, 5).map(el => { const e = el.querySelector('.bemo, .be, .emo'); return e ? e.textContent.trim() : ''; }).filter(Boolean).join(' ');
-    b.innerHTML = '<span>' + L.length + ' block' + (L.length > 1 ? 's' : '') + ' later</span>' + (em ? '<em>' + esc(em) + '</em>' : '') + '<b>Show \u203a</b>';
-    b.addEventListener('click', () => { stageOpen.add(name); stageDay(); });
-    gr.label.after(b);
-  });
+  if (stageKey !== viewDay) { stageMore = 0; stageKey = viewDay; }
+  try { partHours(sheet); } catch {}
+  const kids = [...sheet.children], open = kids.filter(el => el.classList.contains('line') && el.dataset.i != null && !el.classList.contains('ticked'));
+  const SHOW = 3 + stageMore;
+  if (open.length <= SHOW + 1) return;
+  const hideFrom = open[SHOW], start = kids.indexOf(hideFrom), hidden = [];
+  for (let n = start; n < kids.length; n++) { const el = kids[n]; if (el.classList.contains('stg-more')) continue; el.classList.add('stg-hide'); if (el.classList.contains('line')) hidden.push(el); }
+  // a part heading just before the hidden ones stays hidden too, unless it heads something shown
+  const prev = kids[start - 1]; if (prev && prev.classList.contains('dpart')) prev.classList.add('stg-hide');
+  const d = state.days[viewDay] || { blocks: [] };
+  const em = hidden.slice(0, 6).map(el => blockEmoji(d.blocks[Number(el.dataset.i)] || {})).join(' ');
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'stg-more';
+  b.innerHTML = '<span>' + hidden.length + ' more later</span><em>' + esc(em) + '</em><b>Show ' + Math.min(3, hidden.length) + ' more \u203a</b>';
+  b.addEventListener('click', () => { stageMore += 3; stageDay(); });
+  sheet.insertBefore(b, kids[start - 1] && kids[start - 1].classList.contains('dpart') ? kids[start - 1] : hideFrom);
 }
 // a believable real time: not under a third of the plan, not over double plus half an hour
 function tookOk(took, m) { return took >= Math.max(3, m * 0.33) && took <= m * 2 + 30; }
@@ -20079,7 +20086,7 @@ setInterval(() => {
     const left = Number(el.dataset.end) - Date.now();
     if (el.classList.contains('over')) { el.textContent = '+' + fmtIn(-left); continue; }
     if (left <= 0) { renderDay(); return; }
-    el.textContent = fmtLeft(left);
+    el.textContent = el.classList.contains('how') ? leftWords(left) : fmtLeft(left);
   }
 }, 1000);
 
