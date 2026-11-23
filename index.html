@@ -2179,7 +2179,7 @@ body[data-view="day"] { background-image: none; }
 .tt-row.today { background: color-mix(in srgb, #7daf86 12%, var(--card)); }
 .tt-row.today > b { color: #4e8a5c; }
 .tt .tt-c.next { box-shadow: inset 0 0 0 2px #7daf86; border-radius: 10px; font-weight: 600; }
-.tt-row.on { background: color-mix(in srgb, #7daf86 18%, var(--card)); }
+.tt .tt-c.on { background: color-mix(in srgb, #7daf86 22%, var(--card)); }
 .tt-hint { margin: 10px 2px 0; font-size: 12px; color: var(--muted); text-align: center; }
 .ml-eh { margin: 12px 0 0; font-size: 15px; font-weight: 600; }
 .ml-today { margin-top: 16px; padding: 22px 18px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
@@ -7326,7 +7326,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:13:45</footer>
+  <footer>Mr.O:13:47</footer>
 </div>
 
 <script>
@@ -15119,8 +15119,7 @@ function addGrocery(text) {
    tap a meal to change it. it stays on this device. */
 const MEAL_DAYS = [1, 2, 3, 4, 5, 6, 0];   // Monday first
 const MEAL_SLOTS = [['b', 'Breakfast', '\u{1F305}'], ['l', 'Lunch', '\u2600\uFE0F'], ['d', 'Dinner', '\u{1F319}']];
-let mealEdit = null;     // the day being filled in
-let mealFocus = null;    // which meal of it you tapped
+let mealEdit = null;     // "day:meal" being typed in
 
 function mealsFor(day) { if (!state.meals) state.meals = {}; return state.meals[day] || (state.meals[day] = { b: '', l: '', d: '' }); }
 const tidyMeal = t => String(t || '').replace(/\s+/g, ' ').replace(/\s*\+\s*/g, ' + ').trim();
@@ -15139,11 +15138,12 @@ function renderMeals() {
   let html = '<div class="tt"><div class="tt-row tt-head"><span></span>' + MEAL_SLOTS.map(([k, name, e]) => '<span>' + e + ' ' + name + '</span>').join('') + '</div>';
   for (const d of MEAL_DAYS) {
     const m = mealsFor(d), isT = d === today;
-    html += '<div class="tt-row' + (isT ? ' today' : '') + (String(mealEdit) === String(d) ? ' on' : '') + '"><b>' + cap(FULL[d]).slice(0, 3) + '</b>' +
-      MEAL_SLOTS.map(([k]) => '<button type="button" class="tt-c' + (m[k] ? '' : ' empty') + (isT && k === nextK ? ' next' : '') + '" data-day="' + d + '" data-k="' + k + '"><span>' + (m[k] ? esc(m[k]) : '–') + '</span></button>').join('') + '</div>';
-    if (String(mealEdit) === String(d)) {
-      html += '<div class="ml-edit"><p class="ml-eh">' + cap(FULL[d]) + '</p>' + MEAL_SLOTS.map(([k, name, e]) =>
-        '<label>' + e + ' ' + name + '<input type="text" maxlength="80" data-k="' + k + '" list="ml-sugg" placeholder="e.g. ' + (k === 'b' ? 'Oats + banana' : k === 'l' ? 'Jollof rice + chicken' : 'Beans + plantain') + '"></label>').join('') +
+    const [eD, eK] = String(mealEdit || '').split(':');
+    html += '<div class="tt-row' + (isT ? ' today' : '') + '"><b>' + cap(FULL[d]).slice(0, 3) + '</b>' +
+      MEAL_SLOTS.map(([k]) => '<button type="button" class="tt-c' + (m[k] ? '' : ' empty') + (isT && k === nextK ? ' next' : '') + (eD === String(d) && eK === k ? ' on' : '') + '" data-day="' + d + '" data-k="' + k + '"><span>' + (m[k] ? esc(m[k]) : '–') + '</span></button>').join('') + '</div>';
+    if (eD === String(d)) {
+      const [, name, e] = MEAL_SLOTS.find(x => x[0] === eK);
+      html += '<div class="ml-edit"><label>' + e + ' ' + cap(FULL[d]) + ' \u00b7 ' + name + '<input type="text" maxlength="80" data-k="' + eK + '" list="ml-sugg" placeholder="e.g. ' + (eK === 'b' ? 'Oats + banana' : eK === 'l' ? 'Jollof rice + chicken' : 'Beans + plantain') + '"></label>' +
         '<div class="ml-acts"><button type="button" class="ml-save">Save</button><button type="button" class="ml-cancel">Cancel</button></div></div>';
     }
   }
@@ -15151,21 +15151,20 @@ function renderMeals() {
   box.innerHTML = html;
 
   box.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
-    const d = b.dataset.day;
-    mealEdit = String(mealEdit) === d ? null : d;
-    mealFocus = b.dataset.k || null;
+    const v = b.dataset.day + ':' + b.dataset.k;
+    mealEdit = mealEdit === v ? null : v;
     renderMeals();
     const ed = box.querySelector('.ml-edit'); if (ed) ed.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }));
   const ed = box.querySelector('.ml-edit');
   if (ed) {
-    const d = mealEdit, m = mealsFor(d);
+    const d = mealEdit.split(':')[0], m = mealsFor(d);
     const ins = [...ed.querySelectorAll('input')];
     ins.forEach(i => { i.value = m[i.dataset.k] || ''; i.addEventListener('keydown', e => { if (e.key === 'Enter') done(); if (e.key === 'Escape') { mealEdit = null; renderMeals(); } }); });
     const done = () => { ins.forEach(i => m[i.dataset.k] = tidyMeal(i.value)); mealEdit = null; save(); renderMeals(); };
     ed.querySelector('.ml-save').addEventListener('click', done);
     ed.querySelector('.ml-cancel').addEventListener('click', () => { mealEdit = null; renderMeals(); });
-    const first = (mealFocus && ins.find(i => i.dataset.k === mealFocus)) || ins.find(i => !i.value) || ins[0]; setTimeout(() => first.focus(), 30);
+    setTimeout(() => ins[0].focus(), 30);
   }
 }
 
