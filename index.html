@@ -7189,7 +7189,6 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 
     <div id="food-now"></div>
     <div id="food-plate"></div>
-    <div id="food-month"></div>
 
     <div class="datebar" style="margin-top:22px">
       <div class="big" id="food-title"></div>
@@ -7201,7 +7200,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     </div>
     <div id="food-log"></div>
     </div>
-    <div id="food-patview" hidden><div id="food-patterns"></div></div>
+    <div id="food-patview" hidden><div id="food-month"></div><div id="food-patterns"></div></div>
     <div id="food-mealview" hidden><div id="food-meals"></div></div>
   </section>
 
@@ -13628,7 +13627,6 @@ function moodMoments(recent, now) {
   const nx = rs[2], nm = MOODS.find(m => m.k === nx.mood);
   const tip = betterIn1h(nx.mood, recent, now, rs[1].mood), tm = MOODS.find(m => m.k === tip.mood);
   return '<div class="mjs">' + cols + '</div>' +
-    '<p class="mj-why"><b>In 1h:</b> ' + (nm ? nm.e + ' ' : '') + esc(nx.mood || 'okay') + (nx.why && nx.why !== 'you logged it' ? ', ' + esc(nx.why) : '') + '</p>' +
     '<p class="mj-tip"><b>Tip:</b> ' + esc(tip.do) + (tip.mood === nx.mood ? '. You\u2019ll stay ' + (tm ? tm.e + ' ' : '') + tip.mood + '.'
                                                        : '. In 1h you\u2019ll feel ' + (tm ? tm.e + ' ' : '') + tip.mood + '.') + '</p>';
 }
@@ -13890,19 +13888,9 @@ function renderPlate() {
     { k: 'Veg & fruit', v: veg ? veg + ' today' : 'none yet', ok: veg >= (h < 14 ? 1 : 2) },
     { k: 'Water', v: water + ' of 8', ok: water >= waterBy }
   ];
-  const miss = [];
-  if (!items[0].ok) miss.push(PRO_IDEAS[now.getDate() % PRO_IDEAS.length]);
-  if (!items[1].ok) miss.push(VEG_IDEAS[now.getDate() % VEG_IDEAS.length]);
-  if (!items[2].ok) miss.push((waterBy - water) + ' glass' + (waterBy - water > 1 ? 'es' : '') + ' of water');
-  const tip = miss.length ? 'To catch up: ' + miss.join(', ') + '.' : 'On track for this time of day. Nice.';
-
-  const ins = noticeFood();
   box.innerHTML = '<div class="pl-card"><div class="pl-head"><b>Today’s plate</b><small>so far, for ' + (h < 12 ? 'this morning' : h < 17 ? 'this afternoon' : 'today') + '</small></div>' +
     '<div class="pl-row">' + items.map(x => '<span class="pl-i' + (x.ok ? ' ok' : '') + '"><i>' + (x.ok ? '✓' : '') + '</i><small>' + x.k + '</small><b>' + x.v + '</b></span>').join('') + '</div>' +
-    '<p class="pl-tip"></p>' +
-    (ins ? '<div class="pl-ins"><span>Noticed</span><p></p><small></small></div>' : '') + '</div>';
-  box.querySelector('.pl-tip').textContent = tip;
-  if (ins) { box.querySelector('.pl-ins p').textContent = ins.say; box.querySelector('.pl-ins small').textContent = ins.proof; }
+    '</div>';
 }
 
 // one pattern from your own last 14 days, with the numbers behind it
@@ -13955,7 +13943,7 @@ function renderBodyNow() {
   const stat = (n, label) => '<div><b>' + n + '</b><span>' + label + '</span></div>';
   let html = '<div class="fh-top"><span>How you feel</span>' +
              '<button type="button" class="goalchip" aria-label="your goal, tap to change">' + goal.e + (myGoal2() ? myGoal2().e : '') + ' Goal</button></div>';
-  const tail = () => eatNextHTML(goal, recent, now);
+  const tail = () => '';
 
   if (!recent.length) {
     card.innerHTML = html + moodMoments(recent, now) + tail();
