@@ -3486,28 +3486,28 @@ body.showmode #view-day .qp { display: none; }
 }
 
 /* today's plate */
-.ed-card { margin-top: 12px; padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.ed-card { margin-top: 16px; padding: 24px 20px 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
 .ed-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .ed-top span { font-size: 13px; font-weight: 600; color: var(--muted); }
 .ed-top small { font-size: 12px; color: var(--muted); }
-.ed-last { margin: 6px 0 0; font-size: 24px; font-weight: 600; line-height: 1.2; }
-.ed-last small { display: block; margin-top: 2px; font-size: 13px; font-weight: 400; color: var(--muted); }
-.ed-now { margin: 12px 0 0; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, #7daf86 16%, var(--card)); font-size: 14px; line-height: 1.4; }
+.ed-last { margin: 10px 0 0; font-size: 28px; font-weight: 600; line-height: 1.2; }
+.ed-last small { display: block; margin-top: 6px; font-size: 14px; font-weight: 400; color: var(--muted); }
+.ed-now { margin: 20px 0 0; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, #7daf86 16%, var(--card)); font-size: 14px; line-height: 1.4; }
 .ed-now b { font-weight: 600; }
-.ed-strip { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-top: 16px; }
-.ed-strip span { aspect-ratio: 1; border-radius: 6px; background: var(--hair); display: grid; place-items: center; font-size: 10px; font-weight: 600; color: #fff; }
+.ed-strip { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; margin-top: 24px; }
+.ed-strip span { aspect-ratio: 1; border-radius: 50%; background: var(--hair); display: grid; place-items: center; font-size: 10px; font-weight: 600; color: #fff; }
 .ed-strip span.on { background: #7daf86; }
 .ed-strip span.on2 { background: #4e8a5c; }
 .ed-strip span.today { outline: 1.5px solid var(--ink); outline-offset: 1px; }
-.ed-axis { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--muted); }
+.ed-axis { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--muted); }
 .ed-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
 .ed-stats div { padding: 10px; background: var(--hair); border-radius: 14px; }
 .ed-stats b { display: block; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .ed-stats small { font-size: 12px; color: var(--muted); }
-.ed-go { display: block; width: 100%; margin-top: 16px; padding: 14px; border: 0; border-radius: 16px; background: #7daf86; color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+.ed-go { display: block; width: 100%; margin-top: 28px; padding: 14px; border: 0; border-radius: 16px; background: #7daf86; color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
 .ed-go:active { transform: scale(.98); }
-.ed-when { display: flex; justify-content: center; gap: 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
-.ed-when button { border: 0; background: none; padding: 4px; font: inherit; color: var(--muted); text-decoration: underline; cursor: pointer; }
+.ed-when { display: flex; justify-content: center; gap: 18px; margin-top: 10px; font-size: 13px; color: var(--muted); }
+.ed-when button { border: 0; background: none; padding: 6px 4px; font: inherit; color: var(--muted); text-decoration: none; cursor: pointer; }
 .fd-more { margin-top: 18px; }
 .fd-more > summary { list-style: none; cursor: pointer; padding: 12px 2px; font-size: 15px; font-weight: 600; border-top: 1px solid var(--hair); }
 .fd-more > summary::-webkit-details-marker { display: none; }
@@ -7259,7 +7259,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:49</footer>
+  <footer>Mr.O:09:52</footer>
 </div>
 
 <script>
@@ -14079,19 +14079,18 @@ function renderEdibles() {
     nowLine = '<p class="ed-now">' + (st ? esc(mins < 120 ? st.replace(/\s*Wait before having more\./, '') : st) : 'Wearing off.') +
       (mins < 120 ? '<br><b>Wait at least ' + agoText((120 - mins) * 60000) + ' before having more.</b>' : '') + '</p>';
   }
-  const trend = prev === wk ? 'same as the week before' : wk < prev ? (prev - wk) + ' fewer than the week before' : (wk - prev) + ' more than the week before';
+  const trend = prev === wk ? 'same as last week' : (wk < prev ? 'down' : 'up') + ' from ' + prev + ' last week';
   let strip = '';
   for (let i = 13; i >= 0; i--) {
     const k = shiftKey(tk, -i), c = perDay[k] || 0;
     strip += '<span class="' + (c > 1 ? 'on2' : c ? 'on' : '') + (i === 0 ? ' today' : '') + '" title="' + k + ': ' + c + '">' + (c > 1 ? c : '') + '</span>';
   }
-  box.innerHTML = '<div class="ed-card"><div class="ed-top"><span>\u{1F33F} Edibles</span><small>' + (last ? 'last: ' + when + ', ' + at : '') + '</small></div>' +
-    '<p class="ed-last">' + big + (last ? '<small>' + wk + ' this week, ' + trend + '</small>' : '<small>Tap the button each time you have one.</small>') + '</p>' +
+  box.innerHTML = '<div class="ed-card"><div class="ed-top"><span>\u{1F33F} Edibles</span></div>' +
+    '<p class="ed-last">' + big + (last ? '<small>' + wk + ' this week \u00b7 ' + trend + '</small>' : '<small>Tap the button each time you have one.</small>') + '</p>' +
     nowLine +
     '<div class="ed-strip">' + strip + '</div><div class="ed-axis"><span>2 weeks ago</span><span>today</span></div>' +
-    '<div class="ed-stats"><div><b>' + wkDays + '<small>/7</small></b><small>days this week</small></div><div><b>' + wk + '</b><small>this week</small></div><div><b>' + mo + '</b><small>last 30 days</small></div></div>' +
     '<button type="button" class="ed-go" data-ed="0">I had one</button>' +
-    '<div class="ed-when">Earlier? <button type="button" data-ed="60">1h ago</button><button type="button" data-ed="180">3h ago</button><button type="button" data-ed="last">last night</button></div></div>';
+    '<div class="ed-when"><button type="button" data-ed="60">1h ago</button><button type="button" data-ed="180">3h ago</button><button type="button" data-ed="last">last night</button></div></div>';
   box.querySelectorAll('[data-ed]').forEach(b => b.addEventListener('click', () => {
     const v = b.dataset.ed;
     if (v === 'last') { const t = new Date(); t.setDate(t.getDate() - 1); t.setHours(21, 0, 0, 0); logEdible(Math.max(0, Math.round((now - t) / 60000))); }
