@@ -3499,9 +3499,14 @@ body.showmode #view-day .qp { display: none; }
 .ed-strip span.fut { background: none; color: var(--muted); opacity: .4; }
 .ed-foot { margin-top: auto; padding-top: 28px; }
 .ed-strip span { width: 34px; height: 34px; border-radius: 50%; background: var(--hair); display: grid; place-items: center; font-size: 12px; color: var(--muted); }
-.ed-strip span.on, .ed-strip span.on2 { color: #fff; font-weight: 600; }
-.ed-strip span.on { background: #7daf86; }
-.ed-strip span.on2 { background: #4e8a5c; }
+.ed-strip span { cursor: pointer; }
+.ed-strip span.sober { background: #7daf86; color: #fff; font-weight: 600; }
+.ed-strip span.had { background: color-mix(in srgb, var(--muted) 30%, var(--card)); color: var(--ink); }
+.ed-strip span.had2 { background: color-mix(in srgb, var(--muted) 55%, var(--card)); color: var(--ink); font-weight: 600; }
+.ed-strip span.sel { box-shadow: 0 0 0 2px var(--card), 0 0 0 4px #4e8a5c; }
+.ed-strip span.fut { cursor: default; }
+.ed-day { margin: 16px 0 0; text-align: center; font-size: 14px; color: var(--muted); }
+.ed-day b { color: var(--ink); font-weight: 600; margin-right: 4px; }
 .ed-strip span.today { outline: 1.5px solid var(--ink); outline-offset: 1px; }
 .ed-axis { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: var(--muted); }
 .ed-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
@@ -7263,7 +7268,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:54</footer>
+  <footer>Mr.O:13:35</footer>
 </div>
 
 <script>
@@ -14061,6 +14066,7 @@ function logEdible(minsAgo) {
   save(); renderFood();
   if (typeof offerUndo === 'function') offerUndo('=Edible logged', () => { state.food = state.food.filter(x => x !== f); save(); renderFood(); });
 }
+let edSel = null;   // the calendar day you tapped
 function renderEdibles() {
   const box = document.getElementById('food-edible');
   const now = Date.now(), tk = todayKey(), ts = edibleTimes();
@@ -14084,18 +14090,33 @@ function renderEdibles() {
       (mins < 120 ? '<br><b>Wait at least ' + agoText((120 - mins) * 60000) + ' before having more.</b>' : '') + '</p>';
   }
   const trend = prev === wk ? 'same as last week' : (wk < prev ? 'down' : 'up') + ' from ' + prev + ' last week';
+  // green = a sober day. days before your first logged edible are not counted
   const dow = (fromKey(tk).getDay() + 6) % 7, start = shiftKey(tk, -dow - 21);
+  const first = ts.length ? key(new Date(ts[ts.length - 1])) : tk;
   let strip = ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => '<em>' + x + '</em>').join('');
   for (let i = 0; i < 28; i++) {
     const k = shiftKey(start, i), c = perDay[k] || 0, fut = k > tk;
-    strip += '<span class="' + (fut ? 'fut' : c > 1 ? 'on2' : c ? 'on' : '') + (k === tk ? ' today' : '') + '">' + fromKey(k).getDate() + '</span>';
+    const cls = fut ? 'fut' : c > 1 ? 'had2' : c ? 'had' : k < tk && k >= first ? 'sober' : '';
+    strip += '<span data-day="' + k + '" class="' + cls + (k === tk ? ' today' : '') + (k === edSel ? ' sel' : '') + '">' + fromKey(k).getDate() + '</span>';
+  }
+  // the day you tapped: the times you logged
+  let dayLine = '';
+  if (edSel) {
+    const sd = fromKey(edSel), times = ts.filter(a => key(new Date(a)) === edSel).sort((a, b) => a - b);
+    const name = edSel === tk ? 'Today' : edSel === shiftKey(tk, -1) ? 'Yesterday' : cap(FULL[sd.getDay()]) + ' ' + sd.getDate() + ' ' + cap(MONTHS[sd.getMonth()]);
+    dayLine = '<p class="ed-day"><b>' + name + '</b> ' + (times.length ? times.map(a => { const x = new Date(a); return clock(x.getHours() * 60 + x.getMinutes()); }).join(', ')
+               : edSel < first ? 'before you started tracking' : edSel === tk ? 'none so far' : 'sober day \u{1F33F}') + '</p>';
   }
   box.innerHTML = '<div class="ed-card"><div class="ed-top"><span>\u{1F33F} Edibles</span></div>' +
     '<p class="ed-last">' + big + (last ? '<small>' + wk + ' this week \u00b7 ' + trend + '</small>' : '<small>Tap the button each time you have one.</small>') + '</p>' +
     nowLine +
-    '<div class="ed-strip">' + strip + '</div>' +
+    '<div class="ed-strip">' + strip + '</div>' + dayLine +
     '<div class="ed-foot"><button type="button" class="ed-go" data-ed="0">I had one</button>' +
     '<div class="ed-when"><button type="button" data-ed="60">1h ago</button><button type="button" data-ed="180">3h ago</button><button type="button" data-ed="last">last night</button></div></div></div>';
+  box.querySelectorAll('[data-day]').forEach(c => c.addEventListener('click', () => {
+    if (c.classList.contains('fut')) return;
+    edSel = edSel === c.dataset.day ? null : c.dataset.day; renderEdibles();
+  }));
   box.querySelectorAll('[data-ed]').forEach(b => b.addEventListener('click', () => {
     const v = b.dataset.ed;
     if (v === 'last') { const t = new Date(); t.setDate(t.getDate() - 1); t.setHours(21, 0, 0, 0); logEdible(Math.max(0, Math.round((now - t) / 60000))); }
