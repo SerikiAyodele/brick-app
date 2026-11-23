@@ -3518,6 +3518,22 @@ body.showmode #view-day .qp { display: none; }
 .ed-when { display: flex; justify-content: center; gap: 18px; margin-top: 10px; font-size: 13px; color: var(--muted); }
 .ed-when button { border: 0; background: none; padding: 6px 4px; font: inherit; color: var(--muted); text-decoration: none; cursor: pointer; }
 .fd-more { margin-top: 18px; }
+.ed-ask p { margin: 0 0 10px; font-size: 15px; font-weight: 600; text-align: center; }
+.ed-ask p small { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 4px; }
+.ed-ask > div { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.ed-ask > div button { padding: 9px 14px; border: 1px solid var(--hair); border-radius: 999px; background: var(--card); color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; }
+.ed-ask > div button.on { background: #7daf86; border-color: #7daf86; color: #fff; }
+.ed-done { display: block; width: 100%; margin-top: 16px; padding: 16px; border: 0; border-radius: 16px; background: var(--hair); color: var(--ink); font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+.ep-card { margin-top: 16px; padding: 24px 20px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.ep-h { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+.ep-row { display: flex; gap: 14px; align-items: flex-start; padding: 16px 0; border-bottom: 1px solid var(--hair); }
+.ep-row:last-of-type { border-bottom: 0; }
+.ep-row > span { flex: none; font-size: 22px; line-height: 1.2; }
+.ep-row b { display: block; font-size: 16px; font-weight: 600; line-height: 1.3; }
+.ep-row small { display: block; margin-top: 4px; font-size: 13px; color: var(--muted); line-height: 1.4; }
+.ep-tip { margin: 12px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--hair); font-size: 13px; line-height: 1.4; }
+.ep-fine { margin: 14px 0 0; font-size: 12px; color: var(--muted); }
+.ep-empty { margin: 0; font-size: 15px; color: var(--muted); line-height: 1.5; }
 .fd-more > summary { list-style: none; cursor: pointer; padding: 12px 2px; font-size: 15px; font-weight: 600; border-top: 1px solid var(--hair); }
 .fd-more > summary::-webkit-details-marker { display: none; }
 .fd-more > summary::after { content: '\203A'; float: right; color: var(--muted); transition: transform .2s; }
@@ -7241,7 +7257,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <div id="food-log"></div>
     </details>
     </div>
-    <div id="food-patview" hidden><div id="food-month"></div><div id="food-patterns"></div></div>
+    <div id="food-patview" hidden><div id="ed-patterns"></div><details class="fd-more"><summary>Food patterns <small>optional</small></summary><div id="food-month"></div><div id="food-patterns"></div></details></div>
     <div id="food-mealview" hidden><div id="food-meals"></div></div>
   </section>
 
@@ -7268,7 +7284,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:13:35</footer>
+  <footer>Mr.O:13:38</footer>
 </div>
 
 <script>
@@ -14059,8 +14075,11 @@ function edibleTimes() {
   const all = food.concat(taps.filter(a => !food.some(x => Math.abs(x - a) < 45 * 60000)));
   return all.filter(a => a <= Date.now()).sort((a, b) => b - a);
 }
+const ED_CUES = ['Evening wind-down', 'Stressed', 'Bored', 'Low mood', 'Can\u2019t sleep', 'With friends', 'Craving', 'Celebrating'];
+let edAsk = null;   // the edible we are asking about
 function logEdible(minsAgo) {
   const id = Date.now() + '';
+  edAsk = id;
   const f = { id, at: Date.now() - minsAgo * 60000, what: 'Edible', infused: true, meal: 'snack' };
   state.food.push(f); state.food.sort((a, b) => b.at - a.at);
   save(); renderFood();
@@ -14069,6 +14088,7 @@ function logEdible(minsAgo) {
 let edSel = null;   // the calendar day you tapped
 function renderEdibles() {
   const box = document.getElementById('food-edible');
+  const askFor = edAsk && state.food.find(f => f.id === edAsk);
   const now = Date.now(), tk = todayKey(), ts = edibleTimes();
   const perDay = {}; ts.forEach(a => { const k = key(new Date(a)); perDay[k] = (perDay[k] || 0) + 1; });
   const inDays = (from, to) => { let n = 0, d = 0; for (let i = from; i < to; i++) { const c = perDay[shiftKey(tk, -i)] || 0; n += c; if (c) d++; } return [n, d]; };
@@ -14079,7 +14099,7 @@ function renderEdibles() {
   const when = !last ? '' : daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : cap(FULL[d.getDay()]) + ' ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()]);
   const at = d ? clock(d.getHours() * 60 + d.getMinutes()) : '';
   const big = !last ? 'None logged yet'
-            : mins < 60 ? mins + ' min ago'
+            : mins < 2 ? 'Just now' : mins < 60 ? mins + ' min ago'
             : daysAgo === 0 ? agoText(now - last) + ' ago'
             : daysAgo + ' day' + (daysAgo > 1 ? 's' : '') + ' since your last';
   // what it is doing right now, while it is still working
@@ -14110,9 +14130,19 @@ function renderEdibles() {
   box.innerHTML = '<div class="ed-card"><div class="ed-top"><span>\u{1F33F} Edibles</span></div>' +
     '<p class="ed-last">' + big + (last ? '<small>' + wk + ' this week \u00b7 ' + trend + '</small>' : '<small>Tap the button each time you have one.</small>') + '</p>' +
     nowLine +
-    '<div class="ed-strip">' + strip + '</div>' + dayLine +
-    '<div class="ed-foot"><button type="button" class="ed-go" data-ed="0">I had one</button>' +
-    '<div class="ed-when"><button type="button" data-ed="60">1h ago</button><button type="button" data-ed="180">3h ago</button><button type="button" data-ed="last">last night</button></div></div></div>';
+    (askFor ? '' : '<div class="ed-strip">' + strip + '</div>' + dayLine) +
+    '<div class="ed-foot">' + (askFor ? '<div class="ed-ask"><p>What led to it? <small>tap any</small></p><div>' +
+      ED_CUES.map(c => '<button type="button" data-cue="' + esc(c) + '" class="' + ((askFor.cue || []).includes(c) ? 'on' : '') + '">' + esc(c) + '</button>').join('') +
+      '</div><button type="button" class="ed-done" data-cue="">Done</button></div>'
+    : '<button type="button" class="ed-go" data-ed="0">I had one</button>' +
+    '<div class="ed-when"><button type="button" data-ed="60">1h ago</button><button type="button" data-ed="180">3h ago</button><button type="button" data-ed="last">last night</button></div>') + '</div></div>';
+  box.querySelectorAll('[data-cue]').forEach(b => b.addEventListener('click', () => {
+    const c = b.dataset.cue;
+    if (!c) { edAsk = null; renderEdibles(); return; }
+    askFor.cue = askFor.cue || [];
+    const i = askFor.cue.indexOf(c); if (i > -1) askFor.cue.splice(i, 1); else askFor.cue.push(c);
+    save(); renderEdibles();
+  }));
   box.querySelectorAll('[data-day]').forEach(c => c.addEventListener('click', () => {
     if (c.classList.contains('fut')) return;
     edSel = edSel === c.dataset.day ? null : c.dataset.day; renderEdibles();
@@ -14122,6 +14152,72 @@ function renderEdibles() {
     if (v === 'last') { const t = new Date(); t.setDate(t.getDate() - 1); t.setHours(21, 0, 0, 0); logEdible(Math.max(0, Math.round((now - t) / 60000))); }
     else logEdible(+v);
   }));
+}
+
+/* ---- what leads you to an edible ----
+   from the last 60 days: when, which days, what you felt before, sleep,
+   how full your day was, and the reasons you tapped. only what the data shows. */
+function renderEdiblePatterns() {
+  const box = document.getElementById('ed-patterns');
+  if (!box) return;
+  const now = Date.now(), since = now - 60 * 86400000, tk = todayKey();
+  const ts = edibleTimes().filter(a => a >= since);
+  if (ts.length < 3) {
+    box.innerHTML = '<div class="ep-card"><p class="ep-empty">Log a few edibles and what led to them. Your patterns will show up here.</p></div>';
+    return;
+  }
+  const n = ts.length, out = [];
+  const pct = x => Math.round(x / n * 100) + '%';
+
+  const cues = {};
+  (state.food || []).filter(f => f.at >= since && entryKinds(f).includes('cannabis')).forEach(f => (f.cue || []).forEach(c => cues[c] = (cues[c] || 0) + 1));
+  (state.journeys || []).forEach(j => (j.cravings || []).filter(c => c.at >= since).forEach(c => (c.cue || []).forEach(x => cues[x] = (cues[x] || 0) + 1)));
+  const topCue = Object.entries(cues).sort((a, b) => b[1] - a[1]);
+  if (topCue.length && topCue[0][1] >= 2)
+    out.push({ e: '\u{1F4AD}', t: 'Top reason: ' + topCue[0][0].toLowerCase(), s: topCue.slice(0, 3).map(([c, k]) => c.toLowerCase() + ' ' + k + '\u00d7').join(' \u00b7 ') });
+
+  const hrs = ts.map(a => new Date(a).getHours());
+  let bestH = 0, bestN = 0;
+  for (let h = 0; h < 24; h++) { const c = hrs.filter(x => (x - h + 24) % 24 < 3).length; if (c > bestN) { bestN = c; bestH = h; } }
+  if (bestN / n >= 0.4) out.push({ e: '\u{1F552}', t: 'Mostly between ' + clock(bestH * 60).replace(':00', '') + ' and ' + clock(((bestH + 3) % 24) * 60).replace(':00', ''), s: bestN + ' of your last ' + n + ' (' + pct(bestN) + ')' });
+
+  const dn = [0, 0, 0, 0, 0, 0, 0]; ts.forEach(a => dn[new Date(a).getDay()]++);
+  const order = [0, 1, 2, 3, 4, 5, 6].sort((a, b) => dn[b] - dn[a]);
+  const top2 = dn[order[0]] + dn[order[1]];
+  if (n >= 5 && top2 / n >= 0.45 && dn[order[1]] > 0)
+    out.push({ e: '\u{1F4C5}', t: cap(FULL[order[0]]) + 's and ' + cap(FULL[order[1]]) + 's', s: top2 + ' of ' + n + ' happen on these two days' });
+
+  const before = {};
+  ts.forEach(a => { const m = (state.moods || []).filter(x => x.at < a && a - x.at <= 4 * 3600000).sort((x, y) => y.at - x.at)[0]; if (m) before[m.mood] = (before[m.mood] || 0) + 1; });
+  const bm = Object.entries(before).sort((a, b) => b[1] - a[1])[0];
+  if (bm && bm[1] >= 2) out.push({ e: (MOODS.find(m => m.k === bm[0]) || { e: '\u{1F642}' }).e, t: 'You often felt ' + bm[0] + ' before', s: bm[1] + ' times you checked in as ' + bm[0] + ' in the 4 hours before one' });
+
+  const days = []; for (let i = 1; i <= 60; i++) days.push(shiftKey(tk, -i));
+  const edDays = new Set(ts.map(a => key(new Date(a))));
+  const sl = k => { const e = typeof sleepOn === 'function' ? sleepOn(k) : null; const m = e ? sleepMins(e) : 0; return m > 0 ? m : null; };
+  const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+  const sE = avg(days.filter(k => edDays.has(k)).map(sl).filter(Boolean)), sS = avg(days.filter(k => !edDays.has(k)).map(sl).filter(Boolean));
+  if (sE && sS && sS - sE >= 40) out.push({ e: '\u{1F634}', t: 'Less sleep, more likely', s: 'About ' + dur(Math.round(sE)) + ' of sleep before edible days, ' + dur(Math.round(sS)) + ' before sober days' });
+
+  if (typeof blocksOf === 'function') {
+    const h = k => blocksOf(k).reduce((t, b) => t + (b.to - b.from), 0) / 60;
+    const planned = days.filter(k => blocksOf(k).length);
+    const hE = avg(planned.filter(k => edDays.has(k)).map(h)), hS = avg(planned.filter(k => !edDays.has(k)).map(h));
+    if (hE !== null && hS !== null && hS - hE >= 1.5) out.push({ e: '\u{1F6CB}\uFE0F', t: 'Quiet days are riskier', s: 'About ' + Math.round(hE) + 'h planned on edible days, ' + Math.round(hS) + 'h on sober days' });
+    else if (hE !== null && hS !== null && hE - hS >= 1.5) out.push({ e: '\u{1F4CB}', t: 'Busy days are riskier', s: 'About ' + Math.round(hE) + 'h planned on edible days, ' + Math.round(hS) + 'h on sober days' });
+  }
+
+  const ds = [...edDays].sort(), gaps = [];
+  for (let i = 1; i < ds.length; i++) gaps.push(Math.round((fromKey(ds[i]) - fromKey(ds[i - 1])) / 86400000) - 1);
+  if (gaps.length >= 2) {
+    const g = gaps.slice().sort((a, b) => a - b)[Math.floor(gaps.length / 2)], best = Math.max(...gaps);
+    out.push({ e: '\u{1F33F}', t: g === 0 ? 'Usually on back-to-back days' : 'Usually ' + g + ' sober day' + (g === 1 ? '' : 's') + ' in between', s: 'Your longest break: ' + best + ' day' + (best === 1 ? '' : 's') });
+  }
+
+  box.innerHTML = '<div class="ep-card"><p class="ep-h">What leads you to an edible</p>' +
+    out.map(o => '<div class="ep-row"><span>' + o.e + '</span><div><b>' + esc(o.t) + '</b><small>' + esc(o.s) + '</small></div></div>').join('') +
+    (topCue.length ? '' : '<p class="ep-tip">Tip: after you tap \u201cI had one\u201d, pick what led to it. Your reasons will show here.</p>') +
+    '<p class="ep-fine">From your last ' + n + ' edibles, over 60 days.</p></div>';
 }
 
 // longer-term: habits, timing, and how food lines up with your moods
@@ -15028,7 +15124,7 @@ function setFoodView(v) {
   document.getElementById('food-mealview').hidden = v !== 'meals';
   if (v === 'meals') renderMeals();
   if (v === 'groc') renderGroceries();
-  if (v === 'pat') renderPatterns();
+  if (v === 'pat') { renderPatterns(); renderEdiblePatterns(); }
 }
 
 function renderFood() {
@@ -15049,6 +15145,7 @@ function renderFood() {
   renderPlate();
   renderMonth();
   renderPatterns();
+  renderEdiblePatterns();
   renderQuick();
   renderPreview();
   fillHeads();
