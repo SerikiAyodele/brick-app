@@ -7042,6 +7042,41 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 .gl-up i { font-style: normal; color: var(--c, var(--pink)); }
 .gl-up small, .gl-down small { flex: none; font-weight: 600; color: var(--c, var(--pink)); }
 .gl-up span, .gl-down span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* ===== home, refreshed ===== */
+body::before { content: ""; position: fixed; z-index: 40; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); background: var(--paper); pointer-events: none; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now {
+  display: block; padding: 22px 22px 18px !important; border: 0 !important; border-radius: 28px !important; color: #fff !important; text-align: left;
+  background: radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--pink) 55%, #0b0d1c) 0%, #121428 55%, #0b0c16 100%) !important;
+  box-shadow: 0 18px 40px -22px color-mix(in srgb, var(--pink) 70%, transparent), inset 0 1px 0 rgba(255,255,255,.08) !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now::after { display: none; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now.empty, #view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now:not(.live) { display: flex; flex-direction: column; gap: 6px; }
+.hm-nrow { display: flex; align-items: center; gap: 16px; }
+.hm-ntx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-lbl { color: color-mix(in srgb, var(--pink) 60%, #fff) !important; letter-spacing: 1.5px; font-size: 12px; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now b { font-size: 30px !important; line-height: 1.1; letter-spacing: -.5px; color: #fff !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-sub { font-size: 14px; line-height: 1.45; color: rgba(255,255,255,.62) !important; }
+.hm-ring2 { flex: none; position: relative; width: 96px; height: 96px; border-radius: 50%;
+  background: conic-gradient(color-mix(in srgb, var(--pink) 75%, #fff) calc(var(--p) * 1turn), rgba(255,255,255,.1) 0); }
+.hm-rin { position: absolute; inset: 7px; border-radius: 50%; background: #10122a; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.hm-rt { font-size: 17px; font-weight: 600; color: #fff; letter-spacing: -.3px; font-variant-numeric: tabular-nums; }
+.hm-rl { font-size: 11px; color: rgba(255,255,255,.55); }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-prog { margin-top: 18px; color: rgba(255,255,255,.55) !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-bar { height: 4px; background: rgba(255,255,255,.1) !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-bar u { background: color-mix(in srgb, var(--pink) 75%, #fff) !important; }
+
+#view-home#view-home #menu > .hm-pills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-pill { display: flex; box-shadow: none !important; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; padding: 16px 14px 14px; border: 1px solid var(--hair); border-radius: 22px; background: var(--card) !important; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+#view-home .hm-pill:active { transform: scale(.96); }
+.hm-pb { font-size: 24px; font-weight: 600; letter-spacing: -.5px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.hm-pb i { font-style: normal; font-size: 14px; font-weight: 500; color: var(--muted); }
+.hm-pl { margin-top: 6px; font-size: 14px; font-weight: 600; }
+.hm-ps { font-size: 12px; color: var(--muted); }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-pill.on { border-color: color-mix(in srgb, #7daf86 50%, var(--hair)); background: color-mix(in srgb, #7daf86 12%, var(--card)) !important; }
+
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-sec { margin: 30px 4px 12px !important; font-size: 12px !important; letter-spacing: 1.5px !important; }
+#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-area { min-height: 138px !important; padding: 18px 16px 16px !important; border-radius: 24px !important; border: 1px solid color-mix(in srgb, var(--c) 22%, var(--hair)) !important;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--c) 18%, var(--card)) 0%, var(--card) 75%) !important; box-shadow: none !important; }
 </style>
 </head>
 <body>
@@ -7326,7 +7361,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:13:47</footer>
+  <footer>Mr.O:14:26</footer>
 </div>
 
 <script>
@@ -16788,10 +16823,12 @@ function renderHomeNow() {
     const bar = '<span class="hm-prog"><span class="hm-bar"><u style="width:' + Math.round(done / total * 100) + '%"></u></span>' +
                 '<span>' + done + ' of ' + total + ' done</span></span>';
     if (cur) {
-      html = '<button type="button" class="hm-now live"><span class="hm-lbl">Now</span>' +
+      const pr = Math.max(0, Math.min(1, (nowM - cur.from) / (cur.to - cur.from)));
+      const left = fmtIn((cur.to - nowM) * 60000);
+      html = '<button type="button" class="hm-now live"><span class="hm-nrow"><span class="hm-ntx"><span class="hm-lbl">Now</span>' +
              '<b>' + esc(cur.b.label || 'unnamed block') + '</b>' +
-             '<span class="hm-sub">' + fmtIn((cur.to - nowM) * 60000) + ' left \u00b7 ends ' + clock(cur.to) +
-             (next ? ' \u00b7 then ' + esc(next.label || 'next block') : '') + '</span>' + bar + '</button>';
+             '<span class="hm-sub">until ' + clock(cur.to) + (next ? '<br>then ' + esc(next.label || 'next block') : '') + '</span></span>' +
+             '<span class="hm-ring2" style="--p:' + pr.toFixed(3) + '"><span class="hm-rin"><span class="hm-rt">' + left + '</span><span class="hm-rl">left</span></span></span></span>' + bar + '</button>';
     } else if (nowM < toMins(d.start)) {
       html = '<button type="button" class="hm-now"><span class="hm-lbl">Up first</span>' +
              '<b>' + esc(d.blocks[0].label || 'unnamed block') + '</b>' +
@@ -17886,8 +17923,7 @@ function renderHome() {
   renderQuote();
   renderHomeNow();
   renderHomeQuick(document.getElementById("home-now"));
-  renderHomeNudge(document.getElementById("home-now"));
-  renderHomeTip(document.getElementById("home-now"));
+
   setTimeout(renderHomeRings, 0);
 
   const slot = document.getElementById('menu');
@@ -17896,18 +17932,14 @@ function renderHome() {
   // one Goals card: this week across all areas
   const all = AREAS.flatMap(x => areaGoals(x.k).map(g => goalStatus(goalScore(g, ks).pct)[0]));
   const onT = all.filter(x => x === 'on').length;
-  let html = '<button type="button" class="hm-goals" data-goals="1"><span class="hm-gt"><b>Goals</b><small>' +
-    (all.length ? onT + ' of ' + all.length + ' on track' : 'set your goals') + '</small></span>' +
-    '<span class="hm-gbars">' + AREAS.map(x => { const gs = areaGoals(x.k), sc = gs.length ? areaScore(x.k, ks) : 0;
-      return '<i style="--c:' + x.c + '"><u style="height:' + Math.max(gs.length ? 12 : 0, sc) + '%"></u></i>'; }).join('') + '</span></button>';
-  {   // habits sit beside goals: done today, and the best streak
-    const H = (state.habits || []).slice(0, 3), tkh = todayKey(), dn = H.filter(x => (x.marks || []).includes(tkh)).length, best = H.length ? Math.max(...H.map(x => streakOf(x.marks || []))) : 0;
-    html = '<div class="hm-gh">' + html + '<button type="button" class="hm-goals hm-habs" data-habs="1"><span class="hm-gt"><b>Habits</b><small>' + (H.length ? dn + ' of ' + H.length + ' today' : 'up to 3') + '</small></span><em>' + (best ? best + '<i>day streak</i>' : '+') + '</em></button></div>';
-  }
-  {   // plan my week, right on Home
-    const wd = new Date().getDay(), mon = (wd === 0 || wd === 5 || wd === 6) ? mondayOf(shiftKey(planKey(), 7)) : mondayOf(planKey()), done = !!((state.weekPlans || {})[mon] || {}).appliedAt;
-    html += '<button type="button" class="hm-week' + (done ? ' done' : '') + '" data-week="' + mon + '"><span>' + (done ? '\u2713 Week planned' : '\u2728 Plan my week') + '</span><small>' + (done ? 'see or change it' : (mon > planKey() ? 'next week \u00b7 4 short steps' : '4 short steps')) + '</small><b>\u203a</b></button>';
-  }
+  const H = (state.habits || []).slice(0, 3), tkh = todayKey(), dn = H.filter(x => (x.marks || []).includes(tkh)).length;
+  const wd = new Date().getDay(), mon = (wd === 0 || wd === 5 || wd === 6) ? mondayOf(shiftKey(planKey(), 7)) : mondayOf(planKey()), wdone = !!((state.weekPlans || {})[mon] || {}).appliedAt;
+  const pill = (attr, big, small, label, on) => '<button type="button" class="hm-pill' + (on ? ' on' : '') + '" ' + attr + '><span class="hm-pb">' + big + '</span><span class="hm-pl">' + label + '</span><span class="hm-ps">' + small + '</span></button>';
+  let html = '<div class="hm-pills">' +
+    pill('data-goals="1"', all.length ? onT + '<i>/' + all.length + '</i>' : '+', all.length ? 'on track' : 'set them', 'Goals', all.length && onT === all.length) +
+    pill('data-habs="1"', H.length ? dn + '<i>/' + H.length + '</i>' : '+', H.length ? 'today' : 'up to 3', 'Habits', H.length && dn === H.length) +
+    pill('data-week="' + mon + '"', wdone ? '\u2713' : '\u2728', wdone ? 'planned' : (mon > planKey() ? 'next week' : '4 steps'), 'Week', wdone) +
+    '</div>';
   // the areas, each with one live number from the systems that run it
   html += '<div class="hm-sec">Today</div><div class="hm-areas">' + AREAS.map(x => {
     const L = areaLive(x.k);
