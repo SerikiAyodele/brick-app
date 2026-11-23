@@ -3486,6 +3486,34 @@ body.showmode #view-day .qp { display: none; }
 }
 
 /* today's plate */
+.ed-card { margin-top: 12px; padding: 18px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
+.ed-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ed-top span { font-size: 13px; font-weight: 600; color: var(--muted); }
+.ed-top small { font-size: 12px; color: var(--muted); }
+.ed-last { margin: 6px 0 0; font-size: 24px; font-weight: 600; line-height: 1.2; }
+.ed-last small { display: block; margin-top: 2px; font-size: 13px; font-weight: 400; color: var(--muted); }
+.ed-now { margin: 12px 0 0; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, #7daf86 16%, var(--card)); font-size: 14px; line-height: 1.4; }
+.ed-now b { font-weight: 600; }
+.ed-strip { display: grid; grid-template-columns: repeat(14, 1fr); gap: 4px; margin-top: 16px; }
+.ed-strip span { aspect-ratio: 1; border-radius: 6px; background: var(--hair); display: grid; place-items: center; font-size: 10px; font-weight: 600; color: #fff; }
+.ed-strip span.on { background: #7daf86; }
+.ed-strip span.on2 { background: #4e8a5c; }
+.ed-strip span.today { outline: 1.5px solid var(--ink); outline-offset: 1px; }
+.ed-axis { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--muted); }
+.ed-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+.ed-stats div { padding: 10px; background: var(--hair); border-radius: 14px; }
+.ed-stats b { display: block; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ed-stats small { font-size: 12px; color: var(--muted); }
+.ed-go { display: block; width: 100%; margin-top: 16px; padding: 14px; border: 0; border-radius: 16px; background: #7daf86; color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; }
+.ed-go:active { transform: scale(.98); }
+.ed-when { display: flex; justify-content: center; gap: 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.ed-when button { border: 0; background: none; padding: 4px; font: inherit; color: var(--muted); text-decoration: underline; cursor: pointer; }
+.fd-more { margin-top: 18px; }
+.fd-more > summary { list-style: none; cursor: pointer; padding: 12px 2px; font-size: 15px; font-weight: 600; border-top: 1px solid var(--hair); }
+.fd-more > summary::-webkit-details-marker { display: none; }
+.fd-more > summary::after { content: '\203A'; float: right; color: var(--muted); transition: transform .2s; }
+.fd-more[open] > summary::after { transform: rotate(90deg); }
+.fd-more > summary small { margin-left: 6px; font-size: 12px; font-weight: 400; color: var(--muted); }
 .pl-card { margin-top: 12px; padding: 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
 .pl-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .pl-head b { font-size: 16px; font-weight: 600; }
@@ -7178,6 +7206,9 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     </div>
 
     <div id="food-logview">
+    <div id="food-edible"></div>
+    <details class="fd-more" id="food-more">
+    <summary>Food <small>optional</small></summary>
     <div class="fd-composer">
       <span class="fd-pick"><i id="meal-dot"></i><select id="meal-pick" aria-label="which meal"></select></span>
       <input id="food-input" type="text" placeholder="What did you eat?" maxlength="120" autocomplete="off" list="food-past">
@@ -7199,6 +7230,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
       </div>
     </div>
     <div id="food-log"></div>
+    </details>
     </div>
     <div id="food-patview" hidden><div id="food-month"></div><div id="food-patterns"></div></div>
     <div id="food-mealview" hidden><div id="food-meals"></div></div>
@@ -7227,7 +7259,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:45</footer>
+  <footer>Mr.O:09:49</footer>
 </div>
 
 <script>
@@ -14010,6 +14042,63 @@ function renderBodyNow() {
   box.appendChild(card);
 }
 
+/* ---- edibles: how often, with one tap ----
+   every edible you logged here, in the food log, or in a quit plan. */
+function edibleTimes() {
+  const food = (state.food || []).filter(f => entryKinds(f).includes('cannabis')).map(f => f.at);
+  const taps = (state.journeys || []).flatMap(j => (j.uses || []).map(u => u.at));
+  const all = food.concat(taps.filter(a => !food.some(x => Math.abs(x - a) < 45 * 60000)));
+  return all.filter(a => a <= Date.now()).sort((a, b) => b - a);
+}
+function logEdible(minsAgo) {
+  const id = Date.now() + '';
+  const f = { id, at: Date.now() - minsAgo * 60000, what: 'Edible', infused: true, meal: 'snack' };
+  state.food.push(f); state.food.sort((a, b) => b.at - a.at);
+  save(); renderFood();
+  if (typeof offerUndo === 'function') offerUndo('=Edible logged', () => { state.food = state.food.filter(x => x !== f); save(); renderFood(); });
+}
+function renderEdibles() {
+  const box = document.getElementById('food-edible');
+  const now = Date.now(), tk = todayKey(), ts = edibleTimes();
+  const perDay = {}; ts.forEach(a => { const k = key(new Date(a)); perDay[k] = (perDay[k] || 0) + 1; });
+  const inDays = (from, to) => { let n = 0, d = 0; for (let i = from; i < to; i++) { const c = perDay[shiftKey(tk, -i)] || 0; n += c; if (c) d++; } return [n, d]; };
+  const [wk, wkDays] = inDays(0, 7), [prev] = inDays(7, 14), [mo] = inDays(0, 30);
+  const last = ts[0], mins = last ? Math.floor((now - last) / 60000) : null;
+  const d = last ? new Date(last) : null;
+  const daysAgo = last ? Math.round((fromKey(tk) - fromKey(key(d))) / 86400000) : null;
+  const when = !last ? '' : daysAgo === 0 ? 'today' : daysAgo === 1 ? 'yesterday' : cap(FULL[d.getDay()]) + ' ' + d.getDate() + ' ' + cap(MONTHS[d.getMonth()]);
+  const at = d ? clock(d.getHours() * 60 + d.getMinutes()) : '';
+  const big = !last ? 'None logged yet'
+            : mins < 60 ? mins + ' min ago'
+            : daysAgo === 0 ? agoText(now - last) + ' ago'
+            : daysAgo + ' day' + (daysAgo > 1 ? 's' : '') + ' since your last';
+  // what it is doing right now, while it is still working
+  let nowLine = '';
+  if (last && mins < 8 * 60) {
+    const st = bodyStep('cannabis', mins);
+    nowLine = '<p class="ed-now">' + (st ? esc(mins < 120 ? st.replace(/\s*Wait before having more\./, '') : st) : 'Wearing off.') +
+      (mins < 120 ? '<br><b>Wait at least ' + agoText((120 - mins) * 60000) + ' before having more.</b>' : '') + '</p>';
+  }
+  const trend = prev === wk ? 'same as the week before' : wk < prev ? (prev - wk) + ' fewer than the week before' : (wk - prev) + ' more than the week before';
+  let strip = '';
+  for (let i = 13; i >= 0; i--) {
+    const k = shiftKey(tk, -i), c = perDay[k] || 0;
+    strip += '<span class="' + (c > 1 ? 'on2' : c ? 'on' : '') + (i === 0 ? ' today' : '') + '" title="' + k + ': ' + c + '">' + (c > 1 ? c : '') + '</span>';
+  }
+  box.innerHTML = '<div class="ed-card"><div class="ed-top"><span>\u{1F33F} Edibles</span><small>' + (last ? 'last: ' + when + ', ' + at : '') + '</small></div>' +
+    '<p class="ed-last">' + big + (last ? '<small>' + wk + ' this week, ' + trend + '</small>' : '<small>Tap the button each time you have one.</small>') + '</p>' +
+    nowLine +
+    '<div class="ed-strip">' + strip + '</div><div class="ed-axis"><span>2 weeks ago</span><span>today</span></div>' +
+    '<div class="ed-stats"><div><b>' + wkDays + '<small>/7</small></b><small>days this week</small></div><div><b>' + wk + '</b><small>this week</small></div><div><b>' + mo + '</b><small>last 30 days</small></div></div>' +
+    '<button type="button" class="ed-go" data-ed="0">I had one</button>' +
+    '<div class="ed-when">Earlier? <button type="button" data-ed="60">1h ago</button><button type="button" data-ed="180">3h ago</button><button type="button" data-ed="last">last night</button></div></div>';
+  box.querySelectorAll('[data-ed]').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.ed;
+    if (v === 'last') { const t = new Date(); t.setDate(t.getDate() - 1); t.setHours(21, 0, 0, 0); logEdible(Math.max(0, Math.round((now - t) / 60000))); }
+    else logEdible(+v);
+  }));
+}
+
 // longer-term: habits, timing, and how food lines up with your moods
 function renderPatterns() {
   const box = document.getElementById('food-patterns');
@@ -14926,6 +15015,10 @@ function renderFood() {
   pick.value = mealPick;
   paintMeal();
 
+  renderEdibles();
+  // food logging is optional: open it only on days you have logged food
+  const more = document.getElementById('food-more');
+  if (!more.dataset.set) { more.dataset.set = '1'; more.open = state.food.some(f => key(new Date(f.at)) === todayKey() && !entryKinds(f).includes('cannabis')) || !state.goal; }
   renderFoodLog();
   renderBodyNow();
   renderPlate();
