@@ -2168,6 +2168,20 @@ body[data-view="day"] { background-image: none; }
 .gr-prow input { flex: 1; font-size: 16px; min-width: 0; }
 .gr-pin, .gm-bin, .jr-form input[type="date"] { color: var(--ink); background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 10px 12px; font: 500 16px "Poppins", sans-serif; }
 .gr-pin:focus, .gm-bin:focus, .jr-form input[type="date"]:focus { outline: none; border-color: var(--pink); }
+.tt { margin-top: 16px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; overflow: hidden; }
+.tt-row { display: grid; grid-template-columns: 46px repeat(3, minmax(0, 1fr)); align-items: stretch; border-top: 1px solid var(--hair); }
+.tt-head { border-top: 0; }
+.tt-head span { padding: 14px 8px 10px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.tt-row > b { display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--muted); }
+.tt .tt-c { display: flex; align-items: center; min-height: 60px; margin: 0; padding: 8px; border: 0; border-left: 1px solid var(--hair); border-radius: 0; box-shadow: none; background: none; color: var(--ink); font: inherit; font-size: 13px; line-height: 1.3; text-align: left; cursor: pointer; }
+.tt-c > span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+.tt .tt-c.empty { justify-content: center; color: var(--muted); opacity: .35; }
+.tt-row.today { background: color-mix(in srgb, #7daf86 12%, var(--card)); }
+.tt-row.today > b { color: #4e8a5c; }
+.tt .tt-c.next { box-shadow: inset 0 0 0 2px #7daf86; border-radius: 10px; font-weight: 600; }
+.tt-row.on { background: color-mix(in srgb, #7daf86 18%, var(--card)); }
+.tt-hint { margin: 10px 2px 0; font-size: 12px; color: var(--muted); text-align: center; }
+.ml-eh { margin: 12px 0 0; font-size: 15px; font-weight: 600; }
 .ml-today { margin-top: 16px; padding: 22px 18px 12px; background: var(--card); border: 1px solid var(--hair); border-radius: 20px; }
 .ml-h { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
 .ml-h small { margin-left: 6px; font-size: 13px; font-weight: 400; color: var(--muted); }
@@ -2189,7 +2203,7 @@ body[data-view="day"] { background-image: none; }
 .ml-day span i { font-style: normal; color: var(--muted); }
 .ml-day em { flex: none; font-style: normal; font-size: 12px; color: var(--muted); }
 .ml-day.on { background: color-mix(in srgb, #7daf86 10%, var(--card)); }
-.ml-edit { padding: 4px 18px 18px; background: color-mix(in srgb, #7daf86 10%, var(--card)); }
+.ml-edit { border-top: 1px solid var(--hair); padding: 4px 16px 18px; background: color-mix(in srgb, #7daf86 10%, var(--card)); }
 .ml-edit label { display: block; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--muted); }
 .ml-edit input { display: block; width: 100%; box-sizing: border-box; margin-top: 6px; padding: 12px 14px; border: 1px solid var(--hair); border-radius: 12px; background: var(--card); color: var(--ink); font: inherit; font-size: 16px; }
 .ml-acts { display: flex; gap: 8px; margin-top: 16px; }
@@ -7312,7 +7326,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:13:41</footer>
+  <footer>Mr.O:13:44</footer>
 </div>
 
 <script>
@@ -15105,7 +15119,8 @@ function addGrocery(text) {
    tap a meal to change it. it stays on this device. */
 const MEAL_DAYS = [1, 2, 3, 4, 5, 6, 0];   // Monday first
 const MEAL_SLOTS = [['b', 'Breakfast', '\u{1F305}'], ['l', 'Lunch', '\u2600\uFE0F'], ['d', 'Dinner', '\u{1F319}']];
-let mealEdit = null;     // "day:slot" being typed in
+let mealEdit = null;     // the day being filled in
+let mealFocus = null;    // which meal of it you tapped
 
 function mealsFor(day) { if (!state.meals) state.meals = {}; return state.meals[day] || (state.meals[day] = { b: '', l: '', d: '' }); }
 const tidyMeal = t => String(t || '').replace(/\s+/g, ' ').replace(/\s*\+\s*/g, ' + ').trim();
@@ -15120,30 +15135,25 @@ function renderMeals() {
   for (const f of (state.food || []).slice(0, 300)) if (!isDrink(f) && !entryKinds(f).includes('cannabis')) { const v = tidyMeal(f.what); if (v.length > 2) used[v] = (used[v] || 0) + 1; }
   const sugg = Object.keys(used).sort((x, y) => used[y] - used[x]).slice(0, 40);
 
-  // today, big
-  const tm = mealsFor(today);
-  let html = '<div class="ml-today"><p class="ml-h">Today <small>' + cap(FULL[today]) + '</small></p>' +
-    MEAL_SLOTS.map(([k, name, e]) => '<button type="button" class="ml-slot' + (k === nextK ? ' next' : '') + (tm[k] ? '' : ' empty') + '" data-day="' + today + '">' +
-      '<span>' + e + '</span><div><small>' + name + (k === nextK ? ' · next' : '') + '</small><b>' + (tm[k] ? esc(tm[k]) : 'Not planned') + '</b></div></button>').join('') + '</div>';
-
-  // the week, one line a day
-  html += '<p class="ml-wk">This week</p><div class="ml-list">';
+  // a timetable you can read at a glance: days down, meals across
+  let html = '<div class="tt"><div class="tt-row tt-head"><span></span>' + MEAL_SLOTS.map(([k, name, e]) => '<span>' + e + ' ' + name + '</span>').join('') + '</div>';
   for (const d of MEAL_DAYS) {
-    const m = mealsFor(d), have = MEAL_SLOTS.filter(([k]) => m[k]);
-    html += '<button type="button" class="ml-day' + (d === today ? ' today' : '') + (String(mealEdit) === String(d) ? ' on' : '') + '" data-day="' + d + '"><b>' + cap(FULL[d]).slice(0, 3) + '</b>' +
-      '<span>' + (have.length ? have.map(([k]) => esc(m[k])).join(' · ') : '<i>Nothing planned</i>') + '</span><em>' + (have.length ? have.length + '/3' : '+') + '</em></button>';
+    const m = mealsFor(d), isT = d === today;
+    html += '<div class="tt-row' + (isT ? ' today' : '') + (String(mealEdit) === String(d) ? ' on' : '') + '"><b>' + cap(FULL[d]).slice(0, 3) + '</b>' +
+      MEAL_SLOTS.map(([k]) => '<button type="button" class="tt-c' + (m[k] ? '' : ' empty') + (isT && k === nextK ? ' next' : '') + '" data-day="' + d + '" data-k="' + k + '"><span>' + (m[k] ? esc(m[k]) : '–') + '</span></button>').join('') + '</div>';
     if (String(mealEdit) === String(d)) {
-      html += '<div class="ml-edit">' + MEAL_SLOTS.map(([k, name, e]) =>
+      html += '<div class="ml-edit"><p class="ml-eh">' + cap(FULL[d]) + '</p>' + MEAL_SLOTS.map(([k, name, e]) =>
         '<label>' + e + ' ' + name + '<input type="text" maxlength="80" data-k="' + k + '" list="ml-sugg" placeholder="e.g. ' + (k === 'b' ? 'Oats + banana' : k === 'l' ? 'Jollof rice + chicken' : 'Beans + plantain') + '"></label>').join('') +
         '<div class="ml-acts"><button type="button" class="ml-save">Save</button><button type="button" class="ml-cancel">Cancel</button></div></div>';
     }
   }
-  html += '</div><datalist id="ml-sugg">' + sugg.map(v => '<option value="' + esc(v) + '">').join('') + '</datalist>';
+  html += '</div><p class="tt-hint">Tap any meal to change it.</p><datalist id="ml-sugg">' + sugg.map(v => '<option value="' + esc(v) + '">').join('') + '</datalist>';
   box.innerHTML = html;
 
   box.querySelectorAll('[data-day]').forEach(b => b.addEventListener('click', () => {
     const d = b.dataset.day;
-    mealEdit = String(mealEdit) === d && b.classList.contains('ml-day') ? null : d;
+    mealEdit = String(mealEdit) === d ? null : d;
+    mealFocus = b.dataset.k || null;
     renderMeals();
     const ed = box.querySelector('.ml-edit'); if (ed) ed.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }));
@@ -15155,7 +15165,7 @@ function renderMeals() {
     const done = () => { ins.forEach(i => m[i.dataset.k] = tidyMeal(i.value)); mealEdit = null; save(); renderMeals(); };
     ed.querySelector('.ml-save').addEventListener('click', done);
     ed.querySelector('.ml-cancel').addEventListener('click', () => { mealEdit = null; renderMeals(); });
-    const first = ins.find(i => !i.value) || ins[0]; setTimeout(() => first.focus(), 30);
+    const first = (mealFocus && ins.find(i => i.dataset.k === mealFocus)) || ins.find(i => !i.value) || ins[0]; setTimeout(() => first.focus(), 30);
   }
 }
 
