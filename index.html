@@ -7044,7 +7044,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 .gl-up span, .gl-down span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 /* ===== home, refreshed ===== */
-body::before { content: ""; position: fixed; z-index: 40; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); background: var(--paper); pointer-events: none; }
+body::before { content: ""; position: fixed; z-index: 1000; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); background: var(--paper); pointer-events: none; }
 #view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now {
   display: block; padding: 22px 22px 18px !important; border: 0 !important; border-radius: 28px !important; color: #fff !important; text-align: left;
   background: radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--pink) 55%, #0b0d1c) 0%, #121428 55%, #0b0c16 100%) !important;
@@ -7077,6 +7077,13 @@ body::before { content: ""; position: fixed; z-index: 40; left: 0; right: 0; top
 #view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-sec { margin: 30px 4px 12px !important; font-size: 12px !important; letter-spacing: 1.5px !important; }
 #view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-area { min-height: 138px !important; padding: 18px 16px 16px !important; border-radius: 24px !important; border: 1px solid color-mix(in srgb, var(--c) 22%, var(--hair)) !important;
   background: linear-gradient(160deg, color-mix(in srgb, var(--c) 18%, var(--card)) 0%, var(--card) 75%) !important; box-shadow: none !important; }
+
+/* ===== plan day, calmer ===== */
+#view-day#view-day#view-day#view-day#view-day:not(.planning):not(.noblocks) .start-row > :not(.dv-seg) { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day:not(.planning):not(.noblocks) .start-row { justify-content: flex-end; margin: 0 0 8px !important; min-height: 0 !important; }
+#view-day#view-day#view-day#view-day#view-day:not(.planning) #block-list .line .bin { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day:not(.planning) #block-list .line:not(.plan-row) { grid-template-columns: 30px 38px minmax(0, 1fr) auto auto !important; grid-template-areas: "tick emo mid chip how" "tick emo at at at" !important; }
+#view-day#view-day#view-day#view-day#view-day .sheet:has(.fbtn) .chipslot:has(.fbtn) { display: flex !important; }
 </style>
 </head>
 <body>
@@ -7361,7 +7368,7 @@ body::before { content: ""; position: fixed; z-index: 40; left: 0; right: 0; top
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:14:26</footer>
+  <footer>Mr.O:15:20</footer>
 </div>
 
 <script>
@@ -10109,6 +10116,7 @@ function renderDayGoal() {
 }
 
 function renderDay() {
+  { const vd = document.getElementById('view-day'); vd.classList.toggle('planning', !!sortingDay); vd.classList.toggle('noblocks', !dayFor(viewDay).blocks.length); }
   renderDayGoal();
   renderDump();
   renderCarry();
@@ -10386,7 +10394,7 @@ function renderDay() {
     extra.className = 'line-extra';
     let chip = null;
     const field = b.meeting ? 'agenda' : outcomeField(b.label);
-    if (field) {
+    if (field && (b[field] || []).length) {
       const L = b[field] || [];
       chip = document.createElement('button');
       chip.type = 'button';
