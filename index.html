@@ -7376,7 +7376,7 @@ body::before { content: ""; position: fixed; z-index: 1000; left: 0; right: 0; t
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:13:02</footer>
+  <footer>Mr.O:15:51</footer>
 </div>
 
 <script>
@@ -9514,6 +9514,8 @@ document.addEventListener('visibilitychange', () => { if (focus && document.visi
 function closeFocus() {
   focusQuiet(false);
   flowSound(false);
+  // no check-ins while you focus, so ask as you come out if one is due
+  if (focus) { const fb = focus.b; setTimeout(() => { try { askMoodAfter({ label: fb.label || 'your focus' }, true); } catch {} }, 600); }
   if (focus) clearInterval(focus.timer);
   focus = null;
   const el = document.getElementById('focus');
@@ -11748,8 +11750,8 @@ function askMealAfter(b) {
 /* ---- how do you feel, after a block ----
    when you tick a block on today's plan, a row of faces pops up. one tap
    saves it with what you just finished. at most once an hour, so it never nags. */
-function askMoodAfter(b) {
-  if (viewDay !== planKey()) return;
+function askMoodAfter(b, anyDay) {
+  if (!anyDay && viewDay !== planKey()) return;
   const last = state.moods.slice().sort((a, c) => c.at - a.at)[0];
   if (last && Date.now() - last.at < MOOD_EVERY) return;
   let el = document.getElementById('mood-after');
@@ -17188,7 +17190,7 @@ setInterval(() => {
     const h = new Date().getHours(); if (h < 7 || h >= 23) return;   // not in the night
     moodAskNext = Date.now() + 20 * 60000;                          // if you skip it, ask again in 20 minutes
     const cur = (typeof currentBlockLabel === 'function' && currentBlockLabel()) || '';
-    askMoodAfter({ label: cur || 'the last hour' });
+    askMoodAfter({ label: cur || 'the last hour' }, true);
   } catch {}
 }, 60000);
 // cloud backup: check on open and when you come back to the app; a fresh install asks for the passcode to restore
