@@ -7,8 +7,10 @@ self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).catch(() => {}).then(() => self.skipWaiting()));
 });
 // drop older saved copies, and take over open pages straight away
+// older copies are only dropped once the new one holds the page, so there is always something to open
 self.addEventListener('activate', e => e.waitUntil(
-  caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())
+  caches.open(CACHE).then(c => c.match('index.html')).then(ok => ok ? caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
+                                                            : null).catch(() => {}).then(() => self.clients.claim())
 ));
 self.addEventListener('fetch', e => {
   const r = e.request;
@@ -30,7 +32,8 @@ self.addEventListener('fetch', e => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(page ? 'index.html' : r, copy)).catch(() => {}); }
       return res;
     } catch {
-      return (await caches.match(r, { ignoreSearch: true })) || (await caches.match('index.html')) || Response.error();
+      return (await caches.match(r, { ignoreSearch: true })) || (await caches.match('index.html', { ignoreSearch: true })) || (await caches.match('./')) ||
+        new Response('<!doctype html><meta name="viewport" content="width=device-width"><body style="background:#000;color:#aaa;font:16px -apple-system,sans-serif;padding:80px 24px;text-align:center">brick can\u2019t reach the internet right now.<br><br>Check your connection and open it again.</body>', { headers: { 'Content-Type': 'text/html' } });
     }
   })());
 });
