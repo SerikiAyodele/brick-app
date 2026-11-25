@@ -7106,6 +7106,21 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 .gm-set .gm-w { width: 64px !important; text-align: right; }
 .gm-set .gm-unit { flex: none; min-width: 34px; height: 30px; margin-left: 2px; padding: 0 8px; border: 1px solid var(--hair); border-radius: 10px; background: none; color: var(--muted); font: 600 13px "Poppins", sans-serif; cursor: pointer; }
 .gm-set .gm-unit:active { background: var(--hair); }
+
+/* ===== move, clearer ===== */
+.gm-set.bw .gm-w, .gm-set.bw .gm-x { visibility: hidden; width: 0 !important; padding: 0 !important; margin: 0 !important; }
+.gm-set.bw .gm-u { width: auto; margin-left: 2px; }
+.gm-set.bw .gm-r { margin-left: 10px; }
+.gm-set.bw .gm-unit { color: #7daf86; border-color: color-mix(in srgb, #7daf86 50%, var(--hair)); }
+.gm-cols { display: grid; grid-template-columns: 22px 100px 1fr 70px 44px; gap: 4px; margin: 4px 0 2px; font-size: 11px; letter-spacing: .6px; text-transform: uppercase; color: var(--muted); opacity: .7; }
+.gm-cols span:nth-child(2) { text-align: right; padding-right: 30px; }
+.gm-cnt { flex: none; padding: 3px 9px; border-radius: 999px; background: color-mix(in srgb, #7daf86 20%, var(--card)); color: #7daf86; font-size: 12px; font-weight: 600; }
+.gm-chev { flex: none; width: 16px; text-align: center; font-size: 18px; color: var(--muted); opacity: .6; }
+.gm-ex.on .gm-rt b { color: var(--muted); }
+.gm-ex.on .gm-step { background: #7daf86 !important; color: #fff !important; }
+.gm-tools { padding-top: 10px; margin-top: 10px !important; border-top: 1px solid var(--hair); }
+.gm-tools button[data-a=rm] { margin-left: auto; }
+.gm-tools button.danger { margin-left: auto; color: #d97a6c !important; }
 </style>
 </head>
 <body>
@@ -7391,7 +7406,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:25</footer>
+  <footer>Mr.O:18:42</footer>
 </div>
 
 <script>
@@ -16393,8 +16408,7 @@ function renderGym() {
     const row = document.createElement('button');
     row.type = 'button';
     row.className = 'gm-row';
-    row.innerHTML = '<span class="gm-step">' + (allOn ? '✓' : idx + 1) + '</span><span class="gm-rt">' + (it === nextIt ? '<em></em>' : '') + '<b></b><small></small><span class="gm-dots">' +
-      sets.map((_, i) => '<i class="' + (sd.includes(i) ? 'on' : '') + '"></i>').join('') + '</span></span>';
+    row.innerHTML = '<span class="gm-step">' + (allOn ? '✓' : idx + 1) + '</span><span class="gm-rt">' + (it === nextIt ? '<em></em>' : '') + '<b></b><small></small></span>' + (!allOn && sd.length ? '<span class="gm-cnt">' + sd.length + '/' + sets.length + '</span>' : '') + '<span class="gm-chev">' + (open ? '\u02c5' : '\u203a') + '</span>';
     row.querySelector('b').textContent = cap(it.nm.replace(/⭐/g, '').trim());
     row.querySelector('small').textContent = setSummary(sets);
     if (it === nextIt) row.querySelector('em').textContent = (sd.length ? 'Now' : 'Up next') + (bestOn ? ' · ' + TIER_WHY[exTier(it)] : '');
@@ -16415,14 +16429,14 @@ function renderGym() {
 
       // weight unit for this exercise: kg or p (plates / pin on the stack)
       const wParse = w => { const m = String(w || '').match(/^(\d+(?:\.\d+)?)\s*(kg|p)?$/i); return m ? { n: m[1], u: (m[2] || 'kg').toLowerCase() } : null; };
-      const exUnit = (sets.map(x => wParse(x.w)).find(Boolean) || { u: 'kg' }).u;
+      const exUnit = sets.length && sets.every(x => x.bw) ? 'r' : (sets.map(x => wParse(x.w)).find(Boolean) || { u: 'kg' }).u;
       sets.forEach((st, i) => {
         const on = sd.includes(i);
         const r = document.createElement('div');
         r.className = 'gm-set' + (on ? ' on' : '');
         r.innerHTML = '<span class="gm-n">' + (i + 1) + '</span>' +
           '<input class="gm-w" type="text" inputmode="decimal" maxlength="12" placeholder="0" aria-label="set ' + (i + 1) + ' weight">' +
-          '<button type="button" class="gm-unit" aria-label="unit, tap to switch between kilograms and plates">' + exUnit + '</button>' +
+          '<button type="button" class="gm-unit" aria-label="unit: kilograms, plates or reps only. tap to switch">' + (exUnit === 'r' ? 'R' : exUnit) + '</button>' +
           '<span class="gm-x">×</span>' +
           '<input class="gm-r" type="number" inputmode="numeric" min="1" max="300" aria-label="set ' + (i + 1) + (st.hold ? ' seconds' : ' reps') + '">' +
           '<span class="gm-u">' + (st.hold ? 's' : '') + '</span>' +
@@ -16437,10 +16451,14 @@ function renderGym() {
           if (/^\d+(\.\d+)?$/.test(v)) v += exUnit;
           st.w = v || null; keep(); renderGym();
         });
+        if (exUnit === 'r') { r.classList.add('bw'); if (!st.hold) r.querySelector('.gm-u').textContent = 'reps'; }
         r.querySelector('.gm-unit').addEventListener('click', () => {
-          const to = exUnit === 'kg' ? 'p' : 'kg';
-          for (const x of sets) { const q = wParse(x.w); if (q) x.w = q.n + to; }
-          if (!sets.some(x => wParse(x.w))) sets[0].w = '0' + to;
+          const to = exUnit === 'kg' ? 'p' : exUnit === 'p' ? 'r' : 'kg';
+          for (const x of sets) {
+            if (to === 'r') { x.wPrev = x.w; x.w = null; x.bw = true; continue; }
+            if (x.bw) { x.bw = false; x.w = x.wPrev || null; delete x.wPrev; }
+            const q = wParse(x.w); if (q) x.w = q.n + to;
+          }
           keep(); renderGym();
         });
         rp.addEventListener('change', () => { const v = Number(rp.value) || null; if (st.hold) st.hold = v; else st.reps = v; keep(); renderGym(); });
