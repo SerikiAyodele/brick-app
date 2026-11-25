@@ -3,8 +3,8 @@
   "short_name": "brick",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#faf4ea",
-  "theme_color": "#faf4ea",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
   "icons": [
     {
       "src": "icon-180.png",
