@@ -7044,7 +7044,7 @@ body[data-view="day"] { background: radial-gradient(60rem 22rem at 50% -8rem, co
 .gl-up span, .gl-down span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 /* ===== home, refreshed ===== */
-body::before { content: ""; position: fixed; z-index: 1000; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); background: var(--paper); pointer-events: none; }
+#sbar { position: fixed; z-index: 1000; left: 0; right: 0; top: 0; height: env(safe-area-inset-top, 0px); background: var(--paper); pointer-events: none; }
 #view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now {
   display: block; padding: 22px 22px 18px !important; border: 0 !important; border-radius: 28px !important; color: #fff !important; text-align: left;
   background: radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--pink) 55%, #0b0d1c) 0%, #121428 55%, #0b0c16 100%) !important;
@@ -7090,9 +7090,22 @@ body::before { content: ""; position: fixed; z-index: 1000; left: 0; right: 0; t
 #focus.idle :is(.fx-top, .fx-growing, .fx-forest, .fx-goals, .fl-top, .fl-bar, .fl-bot, .fl-sm) { opacity: .06 !important; }
 #focus.idle :is(.fx-ends, .fl-then) { opacity: .35 !important; }
 #focus.idle .fx-ring { opacity: .5; transition: opacity 1.2s ease; }
+
+/* ===== gym, cleaner ===== */
+body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !important; }
+#restbar { padding: 16px 16px 14px; background: var(--card); border: 1px solid var(--hair); border-radius: 24px; box-shadow: 0 18px 40px -12px rgba(0,0,0,.55); }
+#restbar .rb-in { max-width: none; padding: 0 !important; background: none !important; border: 0 !important; box-shadow: none !important; color: var(--ink); }
+#restbar.go { background: color-mix(in srgb, #7daf86 30%, var(--card)); }
+#restbar .rb-feel { max-width: none; margin: 12px 0 0; padding: 12px 0 0; background: none; border: 0; border-top: 1px solid var(--hair); border-radius: 0; box-shadow: none; }
+#restbar .rb-feel button { flex: 1; min-height: 40px; }
+#restbar .rb-feel span { flex: none; margin-right: 4px; }
+#restbar .rb-skip { padding: 0 16px; min-height: 40px; border: 0 !important; border-radius: 14px !important; background: var(--hair) !important; color: var(--ink) !important; font-weight: 600; opacity: 1 !important; }
+.gm-set .gm-lv { width: auto !important; min-width: 58px; padding: 0 10px !important; font-size: 12px !important; font-weight: 600; border-radius: 12px !important; }
+.gm-set .gm-lv:not([style]) { background: none !important; border: 1px dashed var(--hair) !important; color: var(--muted) !important; font-weight: 500; }
 </style>
 </head>
 <body>
+<div id="sbar" aria-hidden="true"></div>
 
 <div class="wrap">
 
@@ -7374,7 +7387,7 @@ body::before { content: ""; position: fixed; z-index: 1000; left: 0; right: 0; t
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:17</footer>
+  <footer>Mr.O:18:23</footer>
 </div>
 
 <script>
@@ -16405,7 +16418,7 @@ function renderGym() {
           '<span class="gm-x">×</span>' +
           '<input class="gm-r" type="number" inputmode="numeric" min="1" max="300" aria-label="set ' + (i + 1) + (st.hold ? ' seconds' : ' reps') + '">' +
           '<span class="gm-u">' + (st.hold ? 's' : '') + '</span>' +
-          '<button type="button" class="gm-lv" aria-label="effort, tap to change">' + (st.lv || '·') + '</button>' +
+          '<button type="button" class="gm-lv" aria-label="effort, tap to change">' + (st.lv ? { L: 'Light', M: 'Med', H: 'Hard' }[st.lv] : 'Effort') + '</button>' +
           '<button type="button" class="gm-tick" aria-label="' + (on ? 'set done, tap to undo' : 'mark set done') + '">✓</button>';
         if (st.lv) r.querySelector('.gm-lv').style.setProperty('--c', LEVELS[st.lv][1]);
         const w = r.querySelector('.gm-w'), rp = r.querySelector('.gm-r');
