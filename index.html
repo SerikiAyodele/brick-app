@@ -7102,6 +7102,10 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 #restbar .rb-skip { padding: 0 16px; min-height: 40px; border: 0 !important; border-radius: 14px !important; background: var(--hair) !important; color: var(--ink) !important; font-weight: 600; opacity: 1 !important; }
 .gm-set .gm-lv { width: auto !important; min-width: 58px; padding: 0 10px !important; font-size: 12px !important; font-weight: 600; border-radius: 12px !important; }
 .gm-set .gm-lv:not([style]) { background: none !important; border: 1px dashed var(--hair) !important; color: var(--muted) !important; font-weight: 500; }
+
+.gm-set .gm-w { width: 64px !important; text-align: right; }
+.gm-set .gm-unit { flex: none; min-width: 34px; height: 30px; margin-left: 2px; padding: 0 8px; border: 1px solid var(--hair); border-radius: 10px; background: none; color: var(--muted); font: 600 13px "Poppins", sans-serif; cursor: pointer; }
+.gm-set .gm-unit:active { background: var(--hair); }
 </style>
 </head>
 <body>
@@ -7387,7 +7391,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:23</footer>
+  <footer>Mr.O:18:25</footer>
 </div>
 
 <script>
@@ -16409,12 +16413,16 @@ function renderGym() {
       name.addEventListener('change', () => { gymEdit(ex.id, 'nm', name.value.trim() || it.nm); renderGym(); });
       if (gymWkEdit) inner.appendChild(name);   // renaming lives in Edit mode, so the name is not shown twice
 
+      // weight unit for this exercise: kg or p (plates / pin on the stack)
+      const wParse = w => { const m = String(w || '').match(/^(\d+(?:\.\d+)?)\s*(kg|p)?$/i); return m ? { n: m[1], u: (m[2] || 'kg').toLowerCase() } : null; };
+      const exUnit = (sets.map(x => wParse(x.w)).find(Boolean) || { u: 'kg' }).u;
       sets.forEach((st, i) => {
         const on = sd.includes(i);
         const r = document.createElement('div');
         r.className = 'gm-set' + (on ? ' on' : '');
         r.innerHTML = '<span class="gm-n">' + (i + 1) + '</span>' +
-          '<input class="gm-w" type="text" inputmode="decimal" maxlength="12" placeholder="weight" aria-label="set ' + (i + 1) + ' weight">' +
+          '<input class="gm-w" type="text" inputmode="decimal" maxlength="12" placeholder="0" aria-label="set ' + (i + 1) + ' weight">' +
+          '<button type="button" class="gm-unit" aria-label="unit, tap to switch between kilograms and plates">' + exUnit + '</button>' +
           '<span class="gm-x">×</span>' +
           '<input class="gm-r" type="number" inputmode="numeric" min="1" max="300" aria-label="set ' + (i + 1) + (st.hold ? ' seconds' : ' reps') + '">' +
           '<span class="gm-u">' + (st.hold ? 's' : '') + '</span>' +
@@ -16422,11 +16430,18 @@ function renderGym() {
           '<button type="button" class="gm-tick" aria-label="' + (on ? 'set done, tap to undo' : 'mark set done') + '">✓</button>';
         if (st.lv) r.querySelector('.gm-lv').style.setProperty('--c', LEVELS[st.lv][1]);
         const w = r.querySelector('.gm-w'), rp = r.querySelector('.gm-r');
-        w.value = st.w || ''; rp.value = st.hold || st.reps || '';
+        const pw = wParse(st.w);
+        w.value = pw ? pw.n : (st.w || ''); rp.value = st.hold || st.reps || '';
         w.addEventListener('change', () => {
-          let v = w.value.trim().replace(/\s+/g, '').replace(/x/i, '×');
-          if (/^\d+(\.\d+)?$/.test(v)) v += 'kg';
-          st.w = v || null; w.value = st.w || ''; keep(); renderGym();
+          let v = w.value.trim().replace(/\s+/g, '').replace(/x/i, '×').replace(/(kg|p)$/i, '');
+          if (/^\d+(\.\d+)?$/.test(v)) v += exUnit;
+          st.w = v || null; keep(); renderGym();
+        });
+        r.querySelector('.gm-unit').addEventListener('click', () => {
+          const to = exUnit === 'kg' ? 'p' : 'kg';
+          for (const x of sets) { const q = wParse(x.w); if (q) x.w = q.n + to; }
+          if (!sets.some(x => wParse(x.w))) sets[0].w = '0' + to;
+          keep(); renderGym();
         });
         rp.addEventListener('change', () => { const v = Number(rp.value) || null; if (st.hold) st.hold = v; else st.reps = v; keep(); renderGym(); });
         r.querySelector('.gm-lv').addEventListener('click', () => {
