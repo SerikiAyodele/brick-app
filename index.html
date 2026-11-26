@@ -7129,6 +7129,13 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 #view-day#view-day#view-day#view-day#view-day#view-day .vt-more { flex: none; padding: 10px 16px; border: 1px solid var(--hair); border-radius: 999px; background: none; color: var(--muted); font: 500 14px "Poppins", sans-serif; cursor: pointer; }
 #view-day#view-day#view-day#view-day#view-day#view-day #block-list .line .bemo { background: none !important; border: 0 !important; box-shadow: none !important; font-size: 22px; }
 #view-day#view-day#view-day#view-day#view-day#view-day #block-list .line .how:not(.live) { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 4px !important; color: var(--muted) !important; font-weight: 500 !important; min-width: 0 !important; }
+
+/* ===== plan: no start row, more colour ===== */
+#view-day#view-day#view-day#view-day#view-day#view-day:not(.planning) .start-row { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i]:not(.cur):not(.done) { background: linear-gradient(90deg, color-mix(in srgb, var(--bc, #6c9cff) 22%, transparent), transparent 80%) !important; border-radius: 16px; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i] .bemo { width: 40px !important; height: 40px !important; border-radius: 13px !important; background: color-mix(in srgb, var(--bc, #6c9cff) 40%, var(--card)) !important; font-size: 20px; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i] .how:not(.live) { color: var(--bc, #6c9cff) !important; font-weight: 600 !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line.cur[data-i] { box-shadow: inset 3px 0 0 var(--bc, var(--pink)) !important; }
 </style>
 </head>
 <body>
@@ -7414,7 +7421,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:09:54</footer>
+  <footer>Mr.O:10:04</footer>
 </div>
 
 <script>
@@ -8314,11 +8321,18 @@ function nowHHMM() {
 }
 
 function dayStartFor() { try { const r = typeof routineGet === 'function' && routineGet('am'); if (r && r.start) return r.start; } catch {} return '08:00'; }
+// where the day before ends, if it runs past midnight (like a sleep block): 'HH:MM', else null
+function prevDayEnd(k) {
+  const p = state.days[shiftKey(k, -1)]; if (!p || !p.blocks || !p.blocks.length) return null;
+  const end = toMins(p.start) + p.blocks.reduce((t, b) => t + (Number(b.mins) || 60), 0);
+  if (end < 1440 || end >= 2880) return null;
+  const m = end - 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+}
 function dayFor(k) {
-  // today starts from right now; a day ahead starts at your morning time
+  // a day starts where the day before ended; otherwise today starts now and a day ahead at your morning time
   const d = state.days[k];
-  if (!d) state.days[k] = { start: k === planKey() ? nowHHMM() : dayStartFor(), blocks: [] };
-  else if (k > planKey() && !d.blocks.length && !d.touched && !d.planSnap) d.start = dayStartFor();   // repair an empty day ahead
+  if (!d) state.days[k] = { start: prevDayEnd(k) || (k === planKey() ? nowHHMM() : dayStartFor()), blocks: [] };
+  else if (k > planKey() && !d.blocks.length && !d.touched && !d.planSnap && !d.startSet) d.start = prevDayEnd(k) || dayStartFor();   // repair an empty day ahead
   return state.days[k];
 }
 
@@ -10175,6 +10189,9 @@ function renderDayGoal() {
 
 let planToolsOpen = false;   // the extra plan tools, folded away until asked for
 function renderDay() {
+  { // keep the start in step with where the day before ended, until you tick something
+    const d0 = state.days[viewDay], pe = d0 && !d0.startSet && !d0.blocks.some(b => b.done) ? prevDayEnd(viewDay) : null;
+    if (pe && d0.start !== pe) { d0.start = pe; save(); } }
   { const vd = document.getElementById('view-day'); vd.classList.toggle('planning', !!sortingDay); vd.classList.toggle('noblocks', !dayFor(viewDay).blocks.length); }
   renderDayGoal();
   renderDump();
@@ -10654,6 +10671,8 @@ function renderDay() {
       cp.setAttribute('aria-label', 'copy this day as text, to paste into ChatGPT'); cp.addEventListener('click', () => copyDaySheet(viewDay)); tools.append(cp); }
     { const dg = document.createElement('button'); dg.className = 'arrange'; dg.type = 'button'; dg.textContent = '\u{1F3AF} Day goal';
       dg.addEventListener('click', () => { dayGoalEditing = true; renderDayGoal(); window.scrollTo({ top: 0, behavior: 'smooth' }); }); tools.prepend(dg); }
+    { const cv = document.createElement('button'); cv.className = 'arrange'; cv.type = 'button'; cv.textContent = dayView === 'cal' ? '\u2630 List view' : '\u25A6 Calendar view';
+      cv.addEventListener('click', () => { const b2 = document.querySelector('#dv-seg [data-dv="' + (dayView === 'cal' ? 'list' : 'cal') + '"]'); if (b2) b2.click(); renderDay(); }); tools.prepend(cv); }
     { const mo = document.createElement('button'); mo.type = 'button'; mo.className = 'vt-more'; mo.textContent = planToolsOpen ? 'Fewer options' : 'More options';
       mo.addEventListener('click', () => { planToolsOpen = !planToolsOpen; renderDay(); }); tools.prepend(mo); tools.classList.toggle('open', planToolsOpen); }
     blockList.appendChild(tools);
@@ -10707,6 +10726,7 @@ function commitStart() {
   const v = startInput.value;
   if (!/^\d{2}:\d{2}/.test(v)) { renderDay(); return; }   // cleared, put it back
   if (v.slice(0, 5) === dayFor(viewDay).start) return;
+  dayFor(viewDay).startSet = true;   // you chose it: stop following the day before
   setStart(toMins(v.slice(0, 5)));
 }
 
@@ -17564,13 +17584,13 @@ const CAL_H = 58;   // pixels per hour
 // colours like Google Calendar: one per kind of block
 function calColor(b) {
   const l = String((b && b.label) || '').toLowerCase();
-  if (b && b.meeting || /meet|sync|call|1:1|standup|stand-up|review|interview/.test(l)) return '#e6c35c';
-  if (b && b.workout || /gym|workout|run|walk|yoga|swim|pilates|stretch|train/.test(l)) return '#c07f8c';
-  if (/breakfast|lunch|dinner|eat|meal|snack|cook/.test(l)) return '#86b48d';
-  if (/sleep|nap|rest|break|relax|wind ?down/.test(l)) return '#8f97c4';
-  if (/shower|bath|skin|hair|self ?care|get ready|pray|meditat/.test(l)) return '#c9a0d6';
-  if (/deep|focus|code|work|deploy|build|admin|email|project|study|read|write/.test(l)) return '#7f97b8';
-  return '#8fa6cc';
+  if (b && b.meeting || /meet|sync|call|1:1|standup|stand-up|review|interview/.test(l)) return '#f2c94c';
+  if (b && b.workout || /gym|workout|run|walk|yoga|swim|pilates|stretch|train/.test(l)) return '#ef6f8a';
+  if (/breakfast|lunch|dinner|eat|meal|snack|cook/.test(l)) return '#5fc97e';
+  if (/sleep|nap|rest|break|relax|wind ?down/.test(l)) return '#8c8cff';
+  if (/shower|bath|skin|hair|self ?care|get ready|pray|meditat/.test(l)) return '#c77dff';
+  if (/deep|focus|code|work|deploy|build|admin|email|project|study|read|write/.test(l)) return '#4ea8ff';
+  return '#6c9cff';
 }
 const calHour = hr => { const h = hr % 24; return (h % 12 || 12) + ' ' + (h < 12 ? 'AM' : 'PM'); };
 function renderDayCal() {
