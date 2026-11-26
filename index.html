@@ -7662,6 +7662,16 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
 .edc-card h2 { text-align: center !important; text-transform: none !important; }
 .ed-how { display: inline-flex; align-items: center; gap: 6px; margin: 12px 0 0; padding: 8px 14px; border-radius: 999px; border: 0; background: var(--pink-s); color: var(--pink); font: 600 13px "Poppins", sans-serif; cursor: pointer; }
 .ed-how i { font-style: normal; }
+
+/* goals: progress and today's step */
+.gl-prog { display: flex; align-items: center; gap: 10px; margin: 2px 0 6px 46px; }
+.gl-prog i { flex: 0 0 90px; height: 5px; border-radius: 3px; background: var(--hair); overflow: hidden; }
+.gl-prog u { display: block; height: 100%; border-radius: 3px; background: var(--c, var(--pink)); }
+.gl-prog span { font-size: 12px; color: var(--muted); }
+.gl-prog b { font-weight: 600; } .gl-prog b.on { color: #A89C70; } .gl-prog b.behind, .gl-prog b.off { color: var(--pink); }
+.gl-next { margin: 0 0 10px 46px; font-size: 13px; line-height: 1.4; color: var(--ink); }
+.gl-next span { display: inline-block; margin-right: 6px; padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .5px; background: var(--pink-s); color: var(--pink); }
+.gl-btns, .gl-sl { display: none !important; }
 </style>
 </head>
 <body>
@@ -7946,7 +7956,7 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:36</footer>
+  <footer>Mr.O:19:37</footer>
 </div>
 
 <script>
@@ -18985,7 +18995,12 @@ function renderGoals() {
       body = gs.map((g, gi) => { const sc = goalScore(g, ks), st = goalStatus(sc.pct);
         if (goalEditing === a.k + ':' + gi) return '<div class="gl-edit"><input type="text" class="gl-in" maxlength="100" data-gein="' + a.k + ':' + gi + '" aria-label="edit goal"><div class="gl-ebtns"><button type="button" data-gesave="' + a.k + ':' + gi + '">Save</button><button type="button" data-gecancel="1">Cancel</button><button type="button" class="rm" data-germ="' + a.k + ':' + gi + '">Remove</button></div></div>';
         return '<div class="gl-rowwrap"><button type="button" class="gl-edbtn" data-ged="' + a.k + ':' + gi + '" aria-label="edit ' + esc(g.text) + '">Edit</button><button type="button" class="gl-row" data-wkt="' + a.k + ':' + gi + '" aria-label="' + esc(g.text) + ', ' + st[1] + '"><i class="gl-chk ' + st[0] + '">' + (st[0] === 'on' ? '\u2713' : '') + '</i><span class="gl-t' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + esc(g.text) + '</span></button></div>' +
-        ((g.actions || []).length ? '<p class="gl-sl' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') + upLine(upOf(a.k, 'week')) +
+        ((g.actions || []).length ? '<p class="gl-sl' + (g.private || a.k === 'love' ? ' priv' : '') + '">' + g.actions.map(esc).join(' \u00b7 ') + '</p>' : '') + (() => { try { const M0 = g.m === 'custom' ? null : g.m === 'dyn' ? (g.dyn ? dynMeasure(g.dyn) : null) : MEASURES[g.m];
+          const pct = Math.max(0, Math.min(100, sc.pct || 0)), num = !M0 ? (sc.v || 0) + ' of ' + sc.target + ' days' : sc.v === null ? 'no data yet' : (M0.pct ? sc.v + '%' : sc.v + ' of ' + sc.target + ' ' + M0.unit);
+          const c = goalCoach(g);
+          return '<div class="gl-prog"><i><u style="width:' + pct + '%"></u></i><span>' + esc(num) + ' \u00b7 <b class="' + st[0] + '">' + st[1] + '</b></span></div>' +
+            (c && c.step && g.doneWk !== mondayOf(planKey()) ? '<p class="gl-next"><span>Today</span>' + esc(c.step) + '</p>' : ''); } catch (e) { return ''; } })() +
+        upLine(upOf(a.k, 'week')) +
         '<div class="gl-btns"><button type="button" data-gls="' + a.k + ':' + gi + '">' + ((g.actions || []).length ? 'Edit steps' : '+ Add steps') + '</button><button type="button" data-glsug="' + a.k + ':' + gi + '">\u2728 Suggest steps</button></div>'; }).join('') +
         (gs.length < MAX_LIFE_GOALS && (weekGoalCount() < MAX_WEEK_ALL || !gs.length) ? '<button type="button" class="gl-add" data-wkadd="' + a.k + '">+ ' + (gs.length ? 'one more' : 'a goal for this week') + '</button>' : '');
     } else if (goalsTab === 'month') {
@@ -20955,13 +20970,41 @@ function chatContext() {
     const td = (state.dump || []).filter(x => !x.done).map(x => x.text);
     if (td.length) out.push('To do (not planned): ' + td.slice(0, 15).join('; '));
   } catch {}
-  return out.join('\n').slice(0, 5000);
+  // everything else in brick, summarised, so chat can see all of your data
+  const tk = todayKey(), hm = at => { const x = new Date(at); return key(x) + ' ' + clock(x.getHours() * 60 + x.getMinutes()); };
+  const sect = (name, fn) => { try { const v = fn(); if (v && v.length) out.push('\n## ' + name + '\n' + (Array.isArray(v) ? v.join('\n') : v)); } catch {} };
+  sect('Last 7 days of plans', () => { const L = []; for (let i = 1; i <= 7; i++) { const k = shiftKey(tk, -i), d = state.days[k]; if (d && d.blocks && d.blocks.length) L.push(k + ': ' + d.blocks.filter(b => b.done).length + '/' + d.blocks.length + ' done (' + d.blocks.map(b => (b.label || '?') + (b.done ? '✓' : '')).join(', ') + ')'); } return L; });
+  sect('Tomorrow', () => { const d = state.days[shiftKey(tk, 1)]; return d && d.blocks.length ? d.blocks.map(b => (b.label || '?') + ' ' + (Number(b.mins) || 60) + 'm').join(', ') : ''; });
+  sect('Edibles', () => { const ts = edibleTimes().filter(a => a > Date.now() - 60 * 86400000), L = [];
+    if (ts.length) L.push('Last: ' + hm(ts[0]) + '. Days clear: ' + Math.round((fromKey(tk) - fromKey(key(new Date(ts[0])))) / 86400000) + '. Count last 7d: ' + ts.filter(a => a > Date.now() - 7 * 864e5).length + ', last 30d: ' + ts.filter(a => a > Date.now() - 30 * 864e5).length);
+    if (ts.length) L.push('Times (60d): ' + ts.slice(0, 40).map(hm).join('; '));
+    const cues = (state.food || []).filter(f => (f.cue || []).length).map(f => f.cue.join('/')); if (cues.length) L.push('Reasons tapped: ' + cues.slice(0, 30).join('; '));
+    if (state.edibleQs) L.push('Her answers: ' + ED_Q.map(q => q.q + ' ' + (state.edibleQs[q.k] || '-')).join(' | '));
+    return L; });
+  sect('Habits', () => (state.habits || []).map(h => h.name + ': streak ' + streakOf(h.marks || []) + ', done today ' + ((h.marks || []).includes(tk) ? 'yes' : 'no')));
+  sect('Quit journeys', () => (state.journeys || []).map(j => j.name + ' since ' + j.start + (j.end ? ' (ended)' : '') + ', cravings ' + (j.cravings || []).length + ', slips ' + (j.slips || []).length));
+  sect('Moods (14 days)', () => (state.moods || []).filter(m => m.at > Date.now() - 14 * 864e5).sort((x, y) => x.at - y.at).map(m => hm(m.at) + ' ' + m.mood + (m.after ? ' after ' + m.after : '') + (m.note ? ' (' + m.note + ')' : '')));
+  sect('Sleep (14 nights)', () => { const L = []; for (let i = 0; i < 14; i++) { const k = shiftKey(tk, -i), e = sleepOn(k); if (e) L.push(k + ': ' + e.bed + ' to ' + e.wake + ' (' + dur(sleepMins(e)) + ')'); } return L; });
+  sect('Food & drink (7 days)', () => (state.food || []).filter(f => f.at > Date.now() - 7 * 864e5).sort((x, y) => x.at - y.at).map(f => hm(f.at) + ' ' + f.what));
+  sect('Meal plan', () => MEAL_DAYS.map(d => { const m = mealsFor(d); return cap(FULL[d]).slice(0, 3) + ': ' + [m.b, m.l, m.d].map(x => x || '-').join(' | '); }));
+  sect('Groceries list', () => (state.grocery || []).filter(x => !x.done).map(x => x.text + (x.qty ? ' ' + x.qty + (x.unit || '') : '')).join(', '));
+  sect('Workouts', () => routine().workouts.map(w => w.title + ' on ' + (w.days || []).map(d => WEEK[d]).join('/') + ': ' + w.ex.map(e => e.nm).join(', ')));
+  sect('Gym log (14 days)', () => { const L = {}; for (const x of (state.gymLog || [])) if (x.d >= shiftKey(tk, -14)) (L[x.d] = L[x.d] || []).push((x.w || 'bw') + 'x' + (x.reps || x.hold || '?') + (x.feel ? ' ' + x.feel : '')); return Object.keys(L).sort().map(k => k + ': ' + L[k].length + ' sets'); });
+  sect('Money', () => { const cur = ymOf(Date.now()), B = linesFor(cur), L = [];
+    if (B.length) L.push('Budget ' + cur + ': ' + B.map(b => b.name + ' ' + b.amount).join(', '));
+    (state.money || []).slice().sort((x, y) => y.at - x.at).slice(0, 25).forEach(x => L.push(hm(x.at) + ' ' + (x.dir || '') + ' ' + x.amt + ' ' + (x.what || x.desc || '') + (x.bal != null ? ' bal ' + x.bal : '')));
+    return L; });
+  sect('People', () => (state.people || []).map(x => x.name + ' every ' + x.every + 'd' + (x.last ? ', last ' + key(new Date(x.last)) : '') + (personDue(x) >= 0 ? ' (due)' : '')));
+  sect('Self this week', () => ((state.selfWeeks || {})[mondayOf(tk)] || []).map(x => x.text + (x.done ? ' (done)' : '') + (x.earn ? ' reward for ' + x.earn : '')));
+  sect('Tweets / ideas', () => (state.ideas || []).slice(-20).map(x => typeof x === 'string' ? x : (x.text || '')));
+  sect('Health goal', () => state.goal ? 'Food goal: ' + state.goal + (state.goal2 ? ', ' + state.goal2 : '') : '');
+  return out.join('\n').slice(0, 30000);
 }
 
 function renderChat() {
   const log = document.getElementById('chat-log');
   let h = '';
-  if (!chatMsgs.length) h = '<div class="ch-empty">Ask Claude anything. It can see your goals and today\'s plan, so you can ask things like <b>what should I focus on today?</b></div>';
+  if (!chatMsgs.length) h = '<div class="ch-empty">Ask Claude anything. It can see all of your brick data: plans, goals, habits, edibles, moods, sleep, food, gym, money and people. Ask things like <b>why do I have edibles on some days?</b></div>';
   chatMsgs.forEach((m, mi) => {
     h += '<div class="ch-msg ' + (m.role === 'user' ? 'me' : 'ai') + '">' + esc(m.content) + '</div>';
     if (m.ops) h += m.opsDone ? '<div class="ch-ops done"><p>' + (m.opsDone === 'applied' ? 'Approved, your plan changed \u2713' : 'Denied, nothing changed') + '</p></div>' : planOpsPreview(m, mi);
