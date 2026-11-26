@@ -7121,6 +7121,14 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 .gm-tools { padding-top: 10px; margin-top: 10px !important; border-top: 1px solid var(--hair); }
 .gm-tools button[data-a=rm] { margin-left: auto; }
 .gm-tools button.danger { margin-left: auto; color: #d97a6c !important; }
+
+/* ===== plan, quiet ===== */
+#view-day#view-day#view-day#view-day#view-day#view-day #day-prog, #view-day#view-day#view-day#view-day#view-day#view-day .tl-in, #view-day#view-day#view-day#view-day#view-day#view-day .dp-hrs, #view-day#view-day#view-day#view-day#view-day#view-day #total, #view-day#view-day#view-day#view-day#view-day#view-day #day-top { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day .viewtools:not(.open) > :not(.vt-more) { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day .viewtools { flex-wrap: wrap !important; overflow: visible !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day .vt-more { flex: none; padding: 10px 16px; border: 1px solid var(--hair); border-radius: 999px; background: none; color: var(--muted); font: 500 14px "Poppins", sans-serif; cursor: pointer; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line .bemo { background: none !important; border: 0 !important; box-shadow: none !important; font-size: 22px; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line .how:not(.live) { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 4px !important; color: var(--muted) !important; font-weight: 500 !important; min-width: 0 !important; }
 </style>
 </head>
 <body>
@@ -7406,7 +7414,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:29</footer>
+  <footer>Mr.O:09:54</footer>
 </div>
 
 <script>
@@ -10129,6 +10137,7 @@ function renderDayGoal() {
   // ask on today and on days ahead, so you can set tomorrow's goal while you plan it
   if (viewDay < planKey() && !dayGoalEditing) return;
   if (day.goalSkip && !dayGoalEditing) return;
+  if (!dayGoalEditing) return;   // only when you ask for it, from More options
   const ahead = viewDay > planKey();
   const dayName = viewDay === shiftKey(planKey(), 1) ? 'tomorrow' : cap(FULL[fromKey(viewDay).getDay()]);
 
@@ -10164,6 +10173,7 @@ function renderDayGoal() {
   box.querySelector('.dg-skip').addEventListener('click', () => { if (dayGoalEditing) dayGoalEditing = false; else day.goalSkip = true; save(); renderDayGoal(); });
 }
 
+let planToolsOpen = false;   // the extra plan tools, folded away until asked for
 function renderDay() {
   { const vd = document.getElementById('view-day'); vd.classList.toggle('planning', !!sortingDay); vd.classList.toggle('noblocks', !dayFor(viewDay).blocks.length); }
   renderDayGoal();
@@ -10642,6 +10652,10 @@ function renderDay() {
     { const pw = document.createElement('button'); pw.className = 'arrange best-order'; pw.type = 'button'; pw.textContent = '\u2728 Plan my week'; pw.addEventListener('click', () => planWeekPage()); tools.append(pw); }
     { const cp = document.createElement('button'); cp.className = 'arrange'; cp.type = 'button'; cp.textContent = 'Copy my day';
       cp.setAttribute('aria-label', 'copy this day as text, to paste into ChatGPT'); cp.addEventListener('click', () => copyDaySheet(viewDay)); tools.append(cp); }
+    { const dg = document.createElement('button'); dg.className = 'arrange'; dg.type = 'button'; dg.textContent = '\u{1F3AF} Day goal';
+      dg.addEventListener('click', () => { dayGoalEditing = true; renderDayGoal(); window.scrollTo({ top: 0, behavior: 'smooth' }); }); tools.prepend(dg); }
+    { const mo = document.createElement('button'); mo.type = 'button'; mo.className = 'vt-more'; mo.textContent = planToolsOpen ? 'Fewer options' : 'More options';
+      mo.addEventListener('click', () => { planToolsOpen = !planToolsOpen; renderDay(); }); tools.prepend(mo); tools.classList.toggle('open', planToolsOpen); }
     blockList.appendChild(tools);
   }
 
