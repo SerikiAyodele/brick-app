@@ -7496,7 +7496,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:13</footer>
+  <footer>Mr.O:12:17</footer>
 </div>
 
 <script>
@@ -9932,10 +9932,17 @@ function lengthPicker(b, from, len) {
         fx = fx.includes('warn') ? fx.slice(fx.indexOf('<span class="ls-fx warn">')) : '';   // only the warning, if any
         if (nx) fx = '<span class="ls-fx">Then ' + esc((nx.label || 'next').trim()) + ' at ' + clock(from + r) + '</span>' + fx;
         const hm = m => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
-        endP.innerHTML = '<span class="ls-tl"><b>' + clock(from) + '</b><i>\u2192</i><label class="ls-endpick"><b>' + clock(from + r) + '</b><input type="time" step="300" value="' + hm(from + r) + '" aria-label="ends at, tap to pick"></label></span>' +
-          fx;
+        // built once, then only its text changes: rebuilding the time box closes the iPhone wheel mid-spin
+        if (!endP.querySelector('.ls-endpick')) {
+          endP.innerHTML = '<span class="ls-tl"><b>' + clock(from) + '</b><i>\u2192</i><label class="ls-endpick"><b class="ls-endt"></b><input type="time" step="300" aria-label="ends at, tap to pick"></label></span><span class="ls-fxs"></span>';
+          const ein = endP.querySelector('.ls-endpick input');
+          const fromWheel = () => { if (!/^\d{2}:\d{2}/.test(ein.value)) return; let m = toMins(ein.value) - (from % 1440); if (m <= 0) m += 1440; typed = m; delta = 0; df.set(typed); paintEnd(); };
+          ein.addEventListener('change', fromWheel); ein.addEventListener('input', fromWheel);
+        }
         const ein = endP.querySelector('.ls-endpick input');
-        ein.addEventListener('change', () => { if (!/^\d{2}:\d{2}/.test(ein.value)) return; let m = toMins(ein.value) - (from % 1440); if (m <= 0) m += 1440; typed = m; delta = 0; df.set(typed); paintEnd(); }); };
+        endP.querySelector('.ls-endt').textContent = clock(from + r);
+        if (document.activeElement !== ein) ein.value = hm(from + r);
+        endP.querySelector('.ls-fxs').innerHTML = fx; };
       const df = durField(dfBox, len, m => { typed = m; paintEnd(); });
       // smart picks: your usual, what it really took last time, a little more or less, until the next set time
       const day = dayFor(viewDay), idx = day.blocks.indexOf(b), picks = [];
