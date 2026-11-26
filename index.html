@@ -7363,6 +7363,26 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote p { font-size: 18px !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote::before { font-size: 90px !important; top: -12px !important; }
 body[data-view="home"][data-view] .wrap.wrap { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* ===== home: calmer bold, visible progress ===== */
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="health"] { --b1: #3d6fc9; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="wealth"] { --b1: #b9822f; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="love"]   { --b1: #c04f7d; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="self"]   { --b1: #7056c4; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area { background: var(--b1) !important; box-shadow: none !important; padding-bottom: 22px !important; min-height: 92px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::after { content: "" !important; display: block !important; position: absolute !important; z-index: 0; left: 72px !important; right: 18px !important; bottom: 12px !important; top: auto !important;
+  width: auto !important; height: 6px !important; border-radius: 3px !important; background: rgba(255,255,255,.22) !important; opacity: 1 !important; animation: none !important; font-size: 0 !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::before { z-index: 1 !important; left: 72px !important; top: auto !important; bottom: 12px !important; height: 6px !important; border-radius: 3px !important;
+  width: calc((100% - 90px) * var(--fn)) !important; background: #fff !important; }
+@keyframes hmBar { 0% { width: 0; } }
+body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::before { animation: hmBar 1.2s cubic-bezier(.3, .8, .3, 1) both !important; animation-delay: calc(500ms + var(--n) * 140ms) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now { display: flex !important; flex-direction: column !important; align-items: stretch !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-nrow { display: flex !important; width: 100% !important; align-items: center !important; justify-content: space-between !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-ntx { flex: 1 1 auto !important; min-width: 0; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-ring2 { flex: none !important; margin-left: auto !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-prog { width: 100% !important; align-self: stretch !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-prog .hm-bar { flex: 1 1 auto !important; width: auto !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote { box-shadow: none !important; margin-top: 12px !important; }
 </style>
 </head>
 <body>
@@ -7648,7 +7668,7 @@ body[data-view="home"][data-view] .wrap.wrap { padding-bottom: calc(84px + env(s
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:40</footer>
+  <footer>Mr.O:18:45</footer>
 </div>
 
 <script>
@@ -16999,7 +17019,7 @@ function renderQuote() {
   box.type = 'button';
   box.setAttribute('aria-label', 'another quote');
   // a bold gradient that changes with the quote
-  const QG = ['linear-gradient(135deg, #ff5fa2, #ff9a5a)', 'linear-gradient(135deg, #8b5cf6, #3b82f6)', 'linear-gradient(135deg, #f43f5e, #f59e0b)', 'linear-gradient(135deg, #06b6d4, #6366f1)', 'linear-gradient(135deg, #ec4899, #8b5cf6)', 'linear-gradient(135deg, #10b981, #3b82f6)'];
+  const QG = ['linear-gradient(135deg, #c04f7d, #7056c4)', 'linear-gradient(135deg, #3d6fc9, #7056c4)', 'linear-gradient(135deg, #b9822f, #c04f7d)', 'linear-gradient(135deg, #7056c4, #3d6fc9)', 'linear-gradient(135deg, #2f8f7a, #3d6fc9)', 'linear-gradient(135deg, #c04f7d, #b9822f)'];
   box.style.setProperty('--qg', QG[(seed + quoteBump) % QG.length]);
 
   const again = document.createElement('span');
@@ -18326,9 +18346,9 @@ function renderHome() {
   // the areas, each with one live number from the systems that run it
   let html = '<div class="hm-areas hm-big4 hm-rows">' + AREAS.map(x => {
     const L = areaLive(x.k), sc0 = L.fill != null ? L.fill : areaScore(x.k, ks), fillPct = Math.max(6, sc0 || 0);
-    return '<button type="button" class="hm-area" data-open="' + x.k + '" data-emo="' + ({ health: '\u{1F33F}', wealth: '\u{1F4B8}', love: '\u{1F49E}', self: '\u{1F98B}' }[x.k] || '\u2728') + '" style="--c:' + x.c + ';--n:' + AREAS.indexOf(x) + ';--f:' + fillPct + '%"><span class="hm-ae">' + x.e + '</span>' +
+    return '<button type="button" class="hm-area" data-open="' + x.k + '" data-emo="' + ({ health: '\u{1F33F}', wealth: '\u{1F4B8}', love: '\u{1F49E}', self: '\u{1F98B}' }[x.k] || '\u2728') + '" style="--c:' + x.c + ';--n:' + AREAS.indexOf(x) + ';--f:' + fillPct + '%;--fn:' + (fillPct / 100).toFixed(3) + '"><span class="hm-ae">' + x.e + '</span>' +
       '<b class="hm-an">' + x.name + '</b><em>' + L.big + '</em><small>' + esc(L.cap) + '</small></button>';
-  }).join('') + '</div>' + pills;
+  }).join('') + '</div>';
   slot.innerHTML = html;
   if (!document.body.dataset.hmPlayed) setTimeout(() => { document.body.dataset.hmPlayed = '1'; }, 2200);
   slot.querySelectorAll('[data-goals]').forEach(g => g.addEventListener('click', () => { goalsTab = 'week'; show('goals'); window.scrollTo(0, 0); }));
