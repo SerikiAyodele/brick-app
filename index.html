@@ -7192,6 +7192,21 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 .ls-endpick input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 .ls-endhint { display: block; margin-top: 4px; font-size: 12px; color: var(--muted); text-align: center; }
 .ls-fx { display: block; margin-top: 6px; font-size: 13px; color: var(--muted); text-align: center; }
+
+/* ===== done row ===== */
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold { display: flex !important; align-items: center; gap: 14px; width: 100%; padding: 12px 16px !important; border: 1px solid color-mix(in srgb, #7ee0b5 30%, var(--hair)) !important; border-radius: 20px !important;
+  background: linear-gradient(135deg, color-mix(in srgb, #7ee0b5 16%, var(--card)), color-mix(in srgb, #7cc4ff 8%, var(--card))) !important; color: var(--ink); text-align: left; cursor: pointer; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-ring { flex: none; position: relative; width: 40px; height: 40px; border-radius: 50%; background: conic-gradient(#7ee0b5 calc(var(--dp) * 1turn), color-mix(in srgb, #7ee0b5 18%, transparent) 0) !important; display: grid; place-items: center; font-style: normal; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-ring > i { width: 30px; height: 30px; border-radius: 50%; background: var(--card); color: #7ee0b5; display: grid; place-items: center; font-style: normal; font-size: 15px; font-weight: 700; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold b { flex: 1; min-width: 0; display: flex; flex-direction: column; font-size: 17px; font-weight: 600; line-height: 1.2; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold b small { margin: 2px 0 0 !important; font-size: 12px; font-weight: 500; color: var(--muted); }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-coins { display: flex; flex-direction: row; font-style: normal; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-coins span { width: 32px; height: 32px; margin-left: -9px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; background: color-mix(in srgb, var(--cc, #9fb4ff) 55%, var(--card)); border: 2px solid var(--card); }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-coins span:first-child { margin-left: 0; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-coins .more { background: var(--hair); color: var(--muted); font-size: 11px; font-weight: 600; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold u { text-decoration: none; color: var(--muted); transition: transform .2s; }
+#view-day#view-day#view-day#view-day#view-day#view-day .donefold.open u { transform: rotate(180deg); }
+#view-day#view-day#view-day#view-day#view-day#view-day .df-earlier { display: block; width: 100%; margin: 8px 0 4px; padding: 10px; border: 1px dashed var(--hair); border-radius: 14px; background: none; color: var(--muted); font: 500 13px "Poppins", sans-serif; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -7477,7 +7492,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:11</footer>
+  <footer>Mr.O:12:12</footer>
 </div>
 
 <script>
@@ -7714,6 +7729,7 @@ function planMin(k) { return Math.floor((Date.now() - fromKey(k).getTime()) / 60
 
 let viewDay = planKey();
 let noteFor = null;   // the timestamp of the check in being annotated
+let doneShown = 5;   // how many finished blocks show when the done row is open
 let dayShowDone = (() => { try { return localStorage.getItem(KEY + '.showdone') === '1'; } catch { return false; } })();   // done blocks fold into one soft row
 let sortingDay = false;   // planning mode: number, drag, set lengths, then Finish plan
 let sortingKey = null;
@@ -10356,7 +10372,8 @@ function renderDay() {
     at = at + len;
     const partOf = m => { m = ((m % 1440) + 1440) % 1440; return m >= 240 && m < 720 ? 'Morning' : m >= 720 && m < 1080 ? 'Afternoon' : 'Night'; };
     const showPart = () => { const pt = partOf(from); if (pt !== partShown) { partShown = pt; const lab = document.createElement('div'); lab.className = 'dpart'; lab.dataset.part = pt; lab.textContent = pt; sheet.appendChild(lab); } };
-    if (!(!sortingDay && b.done && i < firstOpen && firstOpen > 0 && !dayShowDone)) showPart();
+    const foldHide = !sortingDay && b.done && i < firstOpen && firstOpen > 0 && (!dayShowDone || i < firstOpen - doneShown);
+    if (!foldHide) showPart();
 
     // finished blocks fold into one line, so the page shows what is left
     if (!sortingDay && b.done && i < firstOpen && firstOpen > 0) {
@@ -10364,13 +10381,23 @@ function renderDay() {
         const f = document.createElement('button');
         f.type = 'button'; f.className = 'donefold' + (dayShowDone ? ' open' : '');
         const doneB = day.blocks.slice(0, firstOpen), doneM = doneB.reduce((t, x) => t + (Number(x.mins) || 0), 0);
-        const emo = [...new Set(doneB.map(x => blockEmoji(x)).filter(Boolean))].slice(0, 5).join('');
-        f.innerHTML = '<i>\u2713</i><b>' + firstOpen + ' done<small>' + minsLabel(doneM) + '</small></b><em>' + emo + '</em><u aria-hidden="true">\u2304</u>';
-        f.setAttribute('aria-label', firstOpen + ' done, tap to ' + (dayShowDone ? 'fold' : 'show'));
-        f.addEventListener('click', () => { dayShowDone = !dayShowDone; try { localStorage.setItem(KEY + '.showdone', dayShowDone ? '1' : '0'); } catch {} renderDay(); });
+        // newest first: the last few you finished, as overlapping coloured coins
+        const recent = doneB.slice(-4).reverse(), tot = day.blocks.length;
+        const coins = recent.map(x => '<span style="--cc:' + calColor(x) + '">' + blockEmoji(x) + '</span>').join('') + (firstOpen > 4 ? '<span class="more">+' + (firstOpen - 4) + '</span>' : '');
+        f.style.setProperty('--dp', (firstOpen / tot).toFixed(3));
+        f.innerHTML = '<i class="df-ring"><i>\u2713</i></i><b>' + firstOpen + ' done<small>' + minsLabel(doneM) + ' \u00b7 ' + firstOpen + ' of ' + tot + '</small></b><em class="df-coins">' + coins + '</em><u aria-hidden="true">\u2304</u>';
+        f.setAttribute('aria-label', firstOpen + ' done, tap to ' + (dayShowDone ? 'fold' : 'show the last ' + Math.min(5, firstOpen)));
+        f.addEventListener('click', () => { dayShowDone = !dayShowDone; doneShown = 5; try { localStorage.setItem(KEY + '.showdone', dayShowDone ? '1' : '0'); } catch {} renderDay(); });
         sheet.appendChild(f);
+        // open: the last 5 at a time, and a way to see 5 more
+        if (dayShowDone && firstOpen > doneShown) {
+          const m = document.createElement('button'); m.type = 'button'; m.className = 'df-earlier';
+          m.textContent = 'Show ' + Math.min(5, firstOpen - doneShown) + ' earlier \u00b7 ' + (firstOpen - doneShown) + ' more';
+          m.addEventListener('click', () => { doneShown += 5; renderDay(); });
+          sheet.appendChild(m);
+        }
       }
-      if (!dayShowDone) return;
+      if (foldHide) return;
     }
 
     const h = habitNamed(b.label);
