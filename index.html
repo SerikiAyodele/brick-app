@@ -7383,6 +7383,22 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-prog { width: 100% !important; align-self: stretch !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-prog .hm-bar { flex: 1 1 auto !important; width: auto !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote { box-shadow: none !important; margin-top: 12px !important; }
+
+/* ===== home: back to the liked rows, with a fill you can see ===== */
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area { background: color-mix(in srgb, var(--c) 10%, var(--card)) !important; border: 1px solid color-mix(in srgb, var(--c) 35%, transparent) !important;
+  box-shadow: none !important; padding: 12px 18px 12px 12px !important; min-height: 84px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::before { left: 0 !important; top: 0 !important; bottom: 0 !important; height: auto !important; border-radius: 0 !important; width: var(--f) !important;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 30%, var(--card)), color-mix(in srgb, var(--c) 62%, var(--card))) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::after { content: "" !important; display: block !important; position: absolute !important; z-index: 0; top: 0 !important; bottom: 0 !important; height: auto !important; right: auto !important;
+  left: calc(var(--f) - 3px) !important; width: 3px !important; border-radius: 2px !important; background: var(--c) !important; box-shadow: 0 0 12px var(--c) !important; opacity: 1 !important; }
+@keyframes hmEdge { 0% { left: -3px; } }
+@keyframes hmFill2 { 0% { width: 0; } }
+body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::before { animation: hmFill2 1.3s cubic-bezier(.3, .8, .3, 1) both !important; animation-delay: calc(450ms + var(--n) * 140ms) !important; }
+body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::after { animation: hmEdge 1.3s cubic-bezier(.3, .8, .3, 1) both !important; animation-delay: calc(450ms + var(--n) * 140ms) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area .hm-ae { background: var(--c) !important; box-shadow: 0 8px 18px -8px var(--c) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area .hm-an { color: var(--ink) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area small { color: color-mix(in srgb, var(--ink) 72%, transparent) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area em, :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area em i { color: var(--ink) !important; }
 </style>
 </head>
 <body>
@@ -7668,7 +7684,7 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:45</footer>
+  <footer>Mr.O:18:48</footer>
 </div>
 
 <script>
