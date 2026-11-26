@@ -2,7 +2,7 @@
 // never wait long. if the network is slow or down, open the saved copy and
 // keep fetching the new one in the background for next time. your data is
 // not here, it stays in the phone's localStorage.
-const CACHE = 'brick-v7';
+const CACHE = 'brick-v8';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-180.png', 'icon-512.png'];
 const WAIT = 4000;   // how long the page waits for the network before using the saved copy
 self.addEventListener('install', e => {
