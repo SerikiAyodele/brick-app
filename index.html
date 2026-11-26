@@ -7399,6 +7399,15 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area .hm-an { color: var(--ink) !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area small { color: color-mix(in srgb, var(--ink) 72%, transparent) !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area em, :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area em i { color: var(--ink) !important; }
+
+/* ===== goals & habits, matching the rows ===== */
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-duo { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; margin-top: 8px !important; border: 0 !important; background: none !important; border-radius: 0 !important; overflow: visible !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-half { display: flex !important; align-items: center; gap: 10px; padding: 12px !important; border-radius: 20px !important; border: 1px solid var(--hair) !important; background: var(--card) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-half + .hm-half { border-left: 1px solid var(--hair) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-he { flex: none; width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; font-size: 17px; font-weight: 800; color: #fff; background: #7cc4ff; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-half[data-habs] .hm-he { background: #b79cff; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-ht b { font-size: 15px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-hv { font-size: 22px !important; font-weight: 700 !important; }
 </style>
 </head>
 <body>
@@ -7684,7 +7693,7 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:48</footer>
+  <footer>Mr.O:18:49</footer>
 </div>
 
 <script>
@@ -18354,7 +18363,7 @@ function renderHome() {
   const wd = new Date().getDay(), mon = (wd === 0 || wd === 5 || wd === 6) ? mondayOf(shiftKey(planKey(), 7)) : mondayOf(planKey()), wdone = !!((state.weekPlans || {})[mon] || {}).appliedAt;
   const pill = (attr, big, small, label, on) => '<button type="button" class="hm-pill' + (on ? ' on' : '') + '" ' + attr + '><span class="hm-pb">' + big + '</span><span class="hm-pl">' + label + '</span><span class="hm-ps">' + small + '</span></button>';
   // goals and habits: one neat row, two halves
-  const half = (attr, e, name, val, sub) => '<button type="button" class="hm-half" ' + attr + '><span class="hm-he">' + e + '</span><span class="hm-ht"><b>' + name + '</b><small>' + sub + '</small></span><span class="hm-hv">' + val + '</span></button>';
+  const half = (attr, e, name, val, sub) => '<button type="button" class="hm-half" ' + attr + '><span class="hm-he">' + e.replace(/\u{1F3AF}/u, '\u2691').replace(/\u2705/u, '\u2713') + '</span><span class="hm-ht"><b>' + name + '</b><small>' + sub + '</small></span><span class="hm-hv">' + val + '</span></button>';
   const pills = '<div class="hm-duo">' +
     half('data-goals="1"', '\u{1F3AF}', 'Goals', all.length ? onT + '<i>/' + all.length + '</i>' : '+', all.length ? 'on track' : 'set them') +
     half('data-habs="1"', '\u2705', 'Habits', H.length ? dn + '<i>/' + H.length + '</i>' : '+', H.length ? 'today' : 'up to 3') +
@@ -18364,7 +18373,7 @@ function renderHome() {
     const L = areaLive(x.k), sc0 = L.fill != null ? L.fill : areaScore(x.k, ks), fillPct = Math.max(6, sc0 || 0);
     return '<button type="button" class="hm-area" data-open="' + x.k + '" data-emo="' + ({ health: '\u{1F33F}', wealth: '\u{1F4B8}', love: '\u{1F49E}', self: '\u{1F98B}' }[x.k] || '\u2728') + '" style="--c:' + x.c + ';--n:' + AREAS.indexOf(x) + ';--f:' + fillPct + '%;--fn:' + (fillPct / 100).toFixed(3) + '"><span class="hm-ae">' + x.e + '</span>' +
       '<b class="hm-an">' + x.name + '</b><em>' + L.big + '</em><small>' + esc(L.cap) + '</small></button>';
-  }).join('') + '</div>';
+  }).join('') + '</div>' + pills;
   slot.innerHTML = html;
   if (!document.body.dataset.hmPlayed) setTimeout(() => { document.body.dataset.hmPlayed = '1'; }, 2200);
   slot.querySelectorAll('[data-goals]').forEach(g => g.addEventListener('click', () => { goalsTab = 'week'; show('goals'); window.scrollTo(0, 0); }));
