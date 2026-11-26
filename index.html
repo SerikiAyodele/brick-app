@@ -7540,6 +7540,47 @@ html:root body .tabs button:not([aria-selected="true"]) { color: rgba(246, 231, 
 #view-day#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-ring > i { color: #A89C70 !important; background: #3a2620 !important; }
 #view-day#view-day#view-day#view-day#view-day#view-day#view-day .dpart { color: #D58198 !important; }
 #view-day#view-day#view-day#view-day#view-day#view-day#view-day .dpart::after { background: rgba(213, 129, 152, .35) !important; }
+
+/* groceries: one suggestion */
+.gr-one { display: grid; grid-template-columns: 1fr auto auto; grid-template-areas: "k k k" "t s p"; align-items: center; gap: 4px 10px; margin-top: 14px; padding: 14px 14px 14px 16px; border-radius: 22px; background: var(--card); border: 1px solid var(--hair); }
+.gr-one-k { grid-area: k; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--pink); }
+.gr-one > div { grid-area: t; min-width: 0; }
+.gr-one b { display: block; font-size: 17px; font-weight: 600; }
+.gr-one small { display: block; font-size: 13px; color: var(--muted); }
+.gr-one-skip { grid-area: s; border: 0; background: none; color: var(--muted); font: 500 14px "Poppins", sans-serif; padding: 8px; cursor: pointer; }
+.gr-one .gr-plus { grid-area: p; }
+
+/* ===== plan: subtle done row, quiet to do, less space ===== */
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .donefold { padding: 8px 12px !important; gap: 10px !important; background: none !important; border: 1px dashed var(--hair) !important; border-radius: 14px !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-ring { width: 22px !important; height: 22px !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-ring > i { width: 16px !important; height: 16px !important; font-size: 9px !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .donefold b { flex-direction: row !important; align-items: baseline; gap: 8px; font-size: 14px !important; font-weight: 500 !important; color: var(--muted) !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .donefold b small { margin: 0 !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .donefold .df-coins { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .viewtools { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 { margin-top: 18px !important; padding: 0 !important; border: 0 !important; background: none !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-h { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-h b { font-size: 15px; font-weight: 600; color: var(--muted); letter-spacing: .3px; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-h small { flex: 1; font-size: 12px; color: var(--muted); opacity: .7; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-plus { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--hair); background: none; color: var(--pink); font: 400 20px/1 "Poppins", sans-serif; display: grid; place-items: center; cursor: pointer; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-add { display: flex; gap: 8px; margin-bottom: 8px; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-add[hidden] { display: none !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-add input { flex: 1; min-width: 0; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--hair); background: var(--card); color: var(--ink); font: inherit; font-size: 15px; }
+#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .bd2 .bd-add button { width: auto !important; height: auto !important; padding: 0 16px !important; border-radius: 14px !important; border: 0; background: var(--pink) !important; color: #2a1b16 !important; font: 600 14px "Poppins", sans-serif !important; }
+html body .wrap.wrap { padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* meals: roomier timetable, one food per line */
+html body .tt { margin-top: 14px !important; border-radius: 22px !important; }
+html body .tt-row { grid-template-columns: 44px repeat(3, minmax(0, 1fr)) !important; }
+html body .tt-head span { padding: 12px 10px 10px !important; font-size: 12px !important; }
+html body .tt-row > b { font-size: 12px !important; letter-spacing: .5px; }
+html body .tt .tt-c { min-width: 0 !important; overflow: hidden !important; min-height: 62px !important; padding: 10px !important; align-items: center !important; }
+html body .tt-c > span { display: flex !important; flex-direction: column; gap: 3px; width: 100%; min-width: 0; -webkit-line-clamp: unset !important; overflow: visible !important; }
+html body .tt-c > span i { display: block; max-width: 100%; font-style: normal; font-size: 13px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body .tt-c > span i + i { color: color-mix(in srgb, var(--ink) 72%, transparent); }
+html body .tt-c > span i.more { font-size: 11px; color: var(--muted); }
+html body .tt-hint { margin-top: 10px !important; }
+html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; }
 </style>
 </head>
 <body>
@@ -7759,7 +7800,6 @@ html:root body .tabs button:not([aria-selected="true"]) { color: rgba(246, 231, 
       <button type="button" class="md-seg-b on" data-fv="log">Today</button>
       <button type="button" class="md-seg-b" data-fv="meals">Meals</button>
       <button type="button" class="md-seg-b" data-fv="groc">Groceries</button>
-      <button type="button" class="md-seg-b" data-fv="pat">Patterns</button>
     </div>
 
     <div id="food-groc" hidden>
@@ -7825,7 +7865,7 @@ html:root body .tabs button:not([aria-selected="true"]) { color: rgba(246, 231, 
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:06</footer>
+  <footer>Mr.O:19:31</footer>
 </div>
 
 <script>
@@ -11126,7 +11166,7 @@ function renderDay() {
       cv.addEventListener('click', () => { const b2 = document.querySelector('#dv-seg [data-dv="' + (dayView === 'cal' ? 'list' : 'cal') + '"]'); if (b2) b2.click(); renderDay(); }); tools.prepend(cv); }
     { const mo = document.createElement('button'); mo.type = 'button'; mo.className = 'vt-more'; mo.textContent = planToolsOpen ? 'Fewer options' : 'More options';
       mo.addEventListener('click', () => { planToolsOpen = !planToolsOpen; renderDay(); }); tools.prepend(mo); tools.classList.toggle('open', planToolsOpen); }
-    blockList.appendChild(tools);
+    if (false) blockList.appendChild(tools);
   }
 
   document.getElementById('block-add').hidden = false;
@@ -11313,6 +11353,7 @@ function todoDrag(e, x, li) {
   addEventListener('pointermove', move); addEventListener('pointerup', end); addEventListener('pointercancel', end);
   place(e.clientX, e.clientY);
 }
+let dumpAdding = false;
 function renderDump() {
   const slot = document.getElementById('dump-slot');
   if (!slot) return;
@@ -11322,14 +11363,16 @@ function renderDump() {
   const L = state.dump || (state.dump = []);
   const N = (state.dumpNotes || []).filter(x => !x.gone);
   const open = L.filter(x => !x.done), doneToday = L.filter(x => x.done && key(new Date(x.doneAt || x.at)) === t);
-  slot.innerHTML = '<section class="bd"><div class="bd-h"><b>To do</b><small>' + (open.length ? open.length + ' open' : 'not in the plan yet') + '</small></div>' +
-    '<div class="bd-add"><input type="text" maxlength="140" placeholder="Add a to do" aria-label="add a to do"><button type="button" aria-label="add">+</button></div>' +
+  const adding = dumpAdding || !!dumpDraft;
+  slot.innerHTML = '<section class="bd bd2"><div class="bd-h"><b>To do</b><small>' + (open.length ? open.length + ' open' : '') + '</small><button type="button" class="bd-plus" aria-label="add a to do">' + (adding ? '\u00d7' : '+') + '</button></div>' +
+    '<div class="bd-add"' + (adding ? '' : ' hidden') + '><input type="text" maxlength="140" placeholder="What needs doing?" aria-label="add a to do"><button type="button" aria-label="add">Add</button></div>' +
     (open.length ? '<ul class="bd-list">' + open.map(x => '<li data-tdid="' + x.id + '"><span class="bd-drag" aria-label="drag into your plan">\u283F</span><button type="button" class="bd-tick" data-dt="' + x.id + '" aria-label="done"></button><span>' + esc(x.text) + '</span><button type="button" class="bd-plan" data-dp="' + x.id + '">Plan it</button></li>').join('') + '</ul>' : '') +
     (doneToday.length ? '<button type="button" class="bd-done">' + (dumpOpenDone ? 'Hide' : 'Show') + ' ' + doneToday.length + ' done</button>' +
       (dumpOpenDone ? '<ul class="bd-list done">' + doneToday.map(x => '<li><button type="button" class="bd-tick on" data-dt="' + x.id + '" aria-label="not done">\u2713</button><span>' + esc(x.text) + '</span></li>').join('') + '</ul>' : '') : '') +
     (N.length ? '<button type="button" class="bd-done bd-nt">' + (dumpNotesOpen ? 'Hide' : 'Notes from earlier \u00b7') + ' ' + N.length + '</button>' +
       (dumpNotesOpen ? '<ul class="bd-list bd-notes">' + N.map(x => '<li><span>' + esc(x.text) + '</span><button type="button" class="bd-ndel" data-nd="' + x.id + '" aria-label="delete note">\u00d7</button></li>').join('') + '</ul>' : '') : '') +
     '</section>';
+  slot.querySelector('.bd-plus').addEventListener('click', () => { dumpAdding = !adding; if (!dumpAdding) dumpDraft = ''; renderDump(); if (dumpAdding) { const n = document.querySelector('#dump-slot .bd-add input'); if (n) n.focus(); } });
   const inp = slot.querySelector('.bd-add input');
   inp.value = dumpDraft;
   inp.addEventListener('input', () => { dumpDraft = inp.value; });
@@ -15648,33 +15691,20 @@ function renderGroceries() {
   const onList = { has: onGrocList };
   // once something for a gap is on your list, that gap is covered and goes
   const gaps = foodGaps().filter(gp => !gp.items.some(onGrocList)), rs = restockSoon().filter(x => !onGrocList(x.name));
-  let top = '';
-  if (gaps.length || rs.length) {
-    top = '<div class="gr-sug"><div class="gr-sug-head"><b>From what you eat</b><span>last 2 weeks</span></div><ul>' +
-      gaps.map(gp => { const pickIt = gp.items.find(n => !onList.has(n)) || gp.items[0];
-        return '<li><div><b>' + esc(cap(pickIt)) + '</b><small>' + esc(gp.say) + '</small></div><button type="button" class="gr-plus" data-add="' + esc(pickIt) + '" aria-label="add ' + esc(pickIt) + '">+</button></li>'; }).join('') +
-      rs.map(x => '<li><div><b>' + esc(cap(x.name)) + '</b><small>you buy it about every ' + x.days + ' days, last ' + x.since + ' days ago</small></div><button type="button" class="gr-plus" data-add="' + esc(x.name) + '" aria-label="add ' + esc(x.name) + '">+</button></li>').join('') +
-      '</ul></div>';
-  }
+  // one suggestion at a time: add it and the next one shows, or skip it
+  const cands = [];
+  for (const gp of gaps) { const n = gp.items.find(x => !onList.has(x)) || gp.items[0]; cands.push({ name: n, why: gp.say }); }
+  for (const x of rs) cands.push({ name: x.name, why: 'you buy it about every ' + x.days + ' days' });
   const sg = grocerySuggestions();
-  if (sg) {   // nothing twice: what is already suggested above stays out of the goal list
-    const shown = new Set([...gaps.map(gp => gp.items.find(n => !onList.has(n)) || gp.items[0]), ...rs.map(x => x.name)]);
-    sg.list = sg.list.filter(x => !shown.has(x.name));
-  }
-  if (!sg) {
-    box.innerHTML = top + '<div class="gr-sug"><b>Suggestions</b><p class="gr-empty">Set a health goal on the Log tab and I will suggest foods that help.</p></div>';
-    box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addGrocery(cap(b.dataset.add))));
-    return;
-  }
-  if (!sg.list.length) { box.innerHTML = top; box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addGrocery(cap(b.dataset.add)))); return; }
-  box.innerHTML = top + '<div class="gr-sug"><div class="gr-sug-head"><b>For your goal</b><span>' + sg.goal.e + ' ' + sg.goal.name + '</span></div>' +
-    '<p class="gr-hint">' + esc(GOAL_HINT[sg.goal.k] || '') + '</p>' +
-    '<ul>' + sg.list.map(x => '<li><div><b>' + esc(cap(x.name)) + '</b><small>' +
-      (x.times ? 'you eat this · ' + x.times + '× this month' : 'new for you') + ' · ' + esc(x.why) +
-      '</small></div><button type="button" class="gr-plus" data-add="' + esc(x.name) + '" aria-label="add ' + esc(x.name) + '">+</button></li>').join('') +
-    '</ul></div>';
-  box.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addGrocery(cap(b.dataset.add))));
+  if (sg) for (const x of sg.list) cands.push({ name: x.name, why: (sg.goal.e + ' ' + x.why).trim() });
+  const pick = cands.find(c => !onGrocList(c.name) && !grSkipped.has(c.name.toLowerCase()));
+  if (!pick) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div class="gr-one"><span class="gr-one-k">Suggested</span><div><b>' + esc(cap(pick.name)) + '</b><small>' + esc(pick.why) + '</small></div>' +
+    '<button type="button" class="gr-one-skip">Skip</button><button type="button" class="gr-plus" aria-label="add ' + esc(pick.name) + '">+</button></div>';
+  box.querySelector('.gr-plus').addEventListener('click', () => addGrocery(cap(pick.name)));
+  box.querySelector('.gr-one-skip').addEventListener('click', () => { grSkipped.add(pick.name.toLowerCase()); renderGroceries(); });
 }
+const grSkipped = new Set();
 
 function addGrocery(text) {
   text = String(text || '').trim();
@@ -15717,7 +15747,7 @@ function renderMeals() {
     const m = mealsFor(d), isT = d === today;
     const [eD, eK] = String(mealEdit || '').split(':');
     html += '<div class="tt-row' + (isT ? ' today' : '') + '"><b>' + cap(FULL[d]).slice(0, 3) + '</b>' +
-      MEAL_SLOTS.map(([k]) => '<button type="button" class="tt-c' + (m[k] ? '' : ' empty') + (isT && k === nextK ? ' next' : '') + (eD === String(d) && eK === k ? ' on' : '') + '" data-day="' + d + '" data-k="' + k + '"><span>' + (m[k] ? esc(m[k]) : '–') + '</span></button>').join('') + '</div>';
+      MEAL_SLOTS.map(([k]) => '<button type="button" class="tt-c' + (m[k] ? '' : ' empty') + (isT && k === nextK ? ' next' : '') + (eD === String(d) && eK === k ? ' on' : '') + '" data-day="' + d + '" data-k="' + k + '"><span>' + (m[k] ? (() => { const it = m[k].split(/\s*\+\s*/).filter(Boolean); return it.slice(0, 3).map(x => '<i>' + esc(cap(x)) + '</i>').join('') + (it.length > 3 ? '<i class="more">+' + (it.length - 3) + ' more</i>' : ''); })() : '–') + '</span></button>').join('') + '</div>';
     if (eD === String(d)) {
       const [, name, e] = MEAL_SLOTS.find(x => x[0] === eK);
       html += '<div class="ml-edit"><label>' + e + ' ' + cap(FULL[d]) + ' \u00b7 ' + name + '<input type="text" maxlength="80" data-k="' + eK + '" list="ml-sugg" placeholder="e.g. ' + (eK === 'b' ? 'Oats + banana' : eK === 'l' ? 'Jollof rice + chicken' : 'Beans + plantain') + '"></label>' +
