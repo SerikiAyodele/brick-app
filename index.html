@@ -7982,7 +7982,7 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:40</footer>
+  <footer>Mr.O:19:56</footer>
 </div>
 
 <script>
@@ -10815,8 +10815,10 @@ function renderDayPick() {
     const i = day.blocks.findIndex(y => (y.label || '').trim().toLowerCase() === l.toLowerCase());
     if (i > -1) day.blocks.splice(i, 1);
     else {
-      day.blocks.push({ label: x.label, mins: x.mins });
-      day.blocks.sort((a, c) => (order[(a.label || '').toLowerCase()] ?? 9999) - (order[(c.label || '').toLowerCase()] ?? 9999));
+      // slot it in by its usual time, without moving what you already arranged
+      let at = day.blocks.findIndex(y => (order[(y.label || '').toLowerCase()] ?? 9999) > x.at);
+      if (at < 0) at = day.blocks.length;
+      day.blocks.splice(at, 0, { label: x.label, mins: x.mins });
       { const f0 = order[(day.blocks[0].label || '').toLowerCase()]; if (f0 != null && !day.startSet && !prevDayEnd(viewDay)) day.start = hhmm(f0 % 1440); }
     }
     day.touched = true; save(); renderDay();
@@ -10934,7 +10936,7 @@ function renderDay() {
       sd.addEventListener('click', () => planForMePage(viewDay)); blockList.appendChild(sd); }
     document.getElementById('total').textContent = '';
     document.getElementById('block-add').hidden = false;
-    sortingDay = !day.planSnap && viewDay >= planKey();   // a new day opens straight into planning
+    sortingDay = false;   // a new day is a normal day: pick blocks, drag to arrange
     sortingKey = viewDay;
     return;
   }
