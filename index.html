@@ -7675,6 +7675,28 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
 
 /* plan: no template, yesterday or suggest-my-day prompts */
 #view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .dtp, #view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day #carry-slot, #view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .empty-sug, #view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day#view-day .nc-ystrip { display: none !important; }
+
+/* ===== new day picker, alarms ===== */
+.dp { margin: 4px 0 16px; padding: 16px; border-radius: 22px; background: var(--card); border: 1px solid var(--hair); }
+.dp-h b { display: block; font-size: 18px; font-weight: 600; }
+.dp-h small { font-size: 13px; color: var(--muted); }
+.dp-k { margin: 14px 0 6px; font-size: 11px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--pink); }
+.dp ul { list-style: none; margin: 0; padding: 0; }
+.dp li { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--hair); }
+.dp li:first-child { border-top: 0; }
+.dp li i { font-style: normal; font-size: 22px; width: 30px; text-align: center; }
+.dp li span { flex: 1; min-width: 0; }
+.dp li b { display: block; font-size: 15px; font-weight: 500; }
+.dp li small { font-size: 12px; color: var(--muted); }
+.dp li button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--pink); background: none; color: var(--pink); font: 500 20px/1 "Poppins", sans-serif; cursor: pointer; }
+.dp li.on button { background: var(--pink); color: #2a1b16; font-size: 16px; }
+.dp li.on b { color: var(--muted); }
+.dp-done { width: 100%; margin-top: 14px; padding: 13px; border: 0; border-radius: 14px; background: var(--pink); color: #2a1b16; font: 600 15px "Poppins", sans-serif; cursor: pointer; }
+#day-bell { font-size: 15px; }
+.bl-sub { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+.bl-list label { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.bl-list span { flex: 1; }
+.bl-cal { margin-top: 8px !important; background: var(--hair) !important; color: var(--ink) !important; }
 </style>
 </head>
 <body>
@@ -7815,6 +7837,7 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
         <button class="nav" id="day-prev"  type="button" aria-label="previous day">&#8592;</button>
         <button class="nav" id="day-today" type="button">today</button>
         <button class="nav" id="day-next"  type="button" aria-label="next day">&#8594;</button>
+        <button class="nav" id="day-bell" type="button" aria-label="alarms for this day">&#x1F514;</button>
       </div>
     </div>
 
@@ -7959,7 +7982,7 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:38</footer>
+  <footer>Mr.O:19:40</footer>
 </div>
 
 <script>
@@ -10752,6 +10775,89 @@ function renderDayGoal() {
 }
 
 let planToolsOpen = false;
+/* ---- a new day: tap + on the things you usually do, then Done ----
+   'every day' is what is in most of your recent days; the weekday list is what you do on that day of the week. */
+function usualBlocks(k) {
+  const tk = planKey(), wd = fromKey(k).getDay(), C = {};
+  let days = 0, wdays = 0;
+  for (let i = 1; i <= 35; i++) {
+    const dk = shiftKey(tk, -i), d = state.days[dk]; if (!d || !d.blocks || !d.blocks.length) continue;
+    days++; const same = fromKey(dk).getDay() === wd; if (same) wdays++;
+    let at = toMins(d.start); const seen = new Set();
+    for (const b of d.blocks) { const m = Number(b.mins) || 60, l = (b.label || '').trim(); if (l && !seen.has(l.toLowerCase())) { seen.add(l.toLowerCase());
+      const c = C[l.toLowerCase()] || (C[l.toLowerCase()] = { label: l, n: 0, wn: 0, mins: [], at: [] }); c.n++; if (same) c.wn++; c.mins.push(m); c.at.push(at % 1440 < 240 ? at % 1440 + 1440 : at % 1440); } at += m; }
+  }
+  const med = a => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
+  const all = Object.values(C).map(c => ({ label: c.label, mins: Math.round(med(c.mins) / 5) * 5 || 30, at: med(c.at), every: days >= 3 && c.n / days >= 0.5, wday: wdays >= 1 && c.wn / wdays >= 0.5 }));
+  const every = all.filter(x => x.every).sort((a, b) => a.at - b.at);
+  const wdOnly = all.filter(x => x.wday && !x.every).sort((a, b) => a.at - b.at);
+  return { every, wdOnly };
+}
+function renderDayPick() {
+  let box = document.getElementById('day-pick');
+  if (!box) { box = document.createElement('div'); box.id = 'day-pick'; const bl = document.getElementById('block-list'); if (!bl) return; bl.parentNode.insertBefore(box, bl); }
+  const day = dayFor(viewDay);
+  if (viewDay < planKey() || day.pickDone || (day.blocks.length && !day.picking)) { box.innerHTML = ''; return; }
+  const U = usualBlocks(viewDay);
+  if (!U.every.length && !U.wdOnly.length) { box.innerHTML = ''; return; }
+  day.picking = true;
+  const inDay = l => day.blocks.some(b => (b.label || '').trim().toLowerCase() === l.toLowerCase());
+  const rows = L => L.map(x => '<li class="' + (inDay(x.label) ? 'on' : '') + '"><i>' + blockEmoji({ label: x.label }) + '</i><span><b>' + esc(x.label) + '</b><small>' + minsLabel(x.mins) + ' · usually ' + clock(x.at % 1440) + '</small></span>' +
+    '<button type="button" data-pk="' + esc(x.label) + '" aria-label="' + (inDay(x.label) ? 'remove ' : 'add ') + esc(x.label) + '">' + (inDay(x.label) ? '✓' : '+') + '</button></li>').join('');
+  const wdn = cap(FULL[fromKey(viewDay).getDay()]);
+  box.innerHTML = '<div class="dp"><div class="dp-h"><b>Build your ' + wdn + '</b><small>tap + on what you are doing</small></div>' +
+    (U.every.length ? '<p class="dp-k">Every day</p><ul>' + rows(U.every) + '</ul>' : '') +
+    (U.wdOnly.length ? '<p class="dp-k">On ' + wdn + 's</p><ul>' + rows(U.wdOnly) + '</ul>' : '') +
+    '<button type="button" class="dp-done">Done' + (day.blocks.length ? ' · ' + day.blocks.length + ' block' + (day.blocks.length === 1 ? '' : 's') : '') + '</button></div>';
+  const order = {}; [...U.every, ...U.wdOnly].forEach(x => { order[x.label.toLowerCase()] = x.at; });
+  box.querySelectorAll('[data-pk]').forEach(b => b.addEventListener('click', () => {
+    const l = b.dataset.pk, x = [...U.every, ...U.wdOnly].find(y => y.label === l);
+    const i = day.blocks.findIndex(y => (y.label || '').trim().toLowerCase() === l.toLowerCase());
+    if (i > -1) day.blocks.splice(i, 1);
+    else {
+      day.blocks.push({ label: x.label, mins: x.mins });
+      day.blocks.sort((a, c) => (order[(a.label || '').toLowerCase()] ?? 9999) - (order[(c.label || '').toLowerCase()] ?? 9999));
+      { const f0 = order[(day.blocks[0].label || '').toLowerCase()]; if (f0 != null && !day.startSet && !prevDayEnd(viewDay)) day.start = hhmm(f0 % 1440); }
+    }
+    day.touched = true; save(); renderDay();
+  }));
+  box.querySelector('.dp-done').addEventListener('click', () => { day.picking = false; day.pickDone = true; save(); renderDay(); window.scrollTo(0, 0); });
+}
+/* ---- alarms: each block can ring. iPhone alarms through a Shortcut, or Calendar events with an alert ---- */
+function dayStarts(k) {
+  const day = dayFor(k), nowM = k === planKey() ? planMin(k) : -1, out = [];
+  let at = toMins(day.start);
+  day.blocks.forEach((b, i) => { const len = Number(b.mins) || 60; if (!b.done && at > nowM) out.push({ i, at, len, label: (b.label || 'Block').trim(), b }); at += len; });
+  return out;
+}
+function bellSheet(k) {
+  const ups = dayStarts(k);
+  const old = document.getElementById('why3'); if (old) old.remove();
+  const el = document.createElement('div'); el.id = 'why3'; el.className = 'w3';
+  const d = fromKey(k), name = k === planKey() ? 'today' : cap(FULL[d.getDay()]);
+  el.innerHTML = '<div class="w3-back"></div><div class="w3-sheet" role="dialog" aria-modal="true" aria-label="alarms"><span class="w3-grab"></span>' +
+    '<h2>\u{1F514} Alarms for ' + name + '</h2>' +
+    (ups.length ? '<p class="bl-sub">Pick the blocks that should ring when they start.</p><ul class="al-list bl-list">' + ups.map((u, n) => '<li><label><input type="checkbox" data-n="' + n + '"' + (u.b.alarm !== false ? ' checked' : '') + '><b>' + clock(u.at % 1440) + '</b><span>' + esc(blockEmoji(u.b) + ' ' + u.label) + '</span></label></li>').join('') + '</ul>' +
+      '<button type="button" class="lf-btn main w3-ok" data-a="clock">Set as iPhone alarms</button><button type="button" class="lf-btn w3-ok bl-cal" data-a="cal">Add to Calendar with alerts</button>' +
+      '<details class="al-help"><summary>First time setting alarms? Make the Shortcut once</summary><ol>' +
+        '<li>Open the <b>Shortcuts</b> app and tap <b>+</b>.</li><li>Name it <b>' + ALARM_SHORTCUT + '</b>.</li>' +
+        '<li>Add <b>Split Text</b>. Split <b>Shortcut Input</b> by <b>New Lines</b>.</li><li>Add <b>Repeat with Each</b> item in Split Text.</li>' +
+        '<li>Inside it, add <b>Get Dates from Input</b> with <b>Repeat Item</b>.</li><li>Then add <b>Create Alarm</b> at <b>Dates</b>. Turn off <b>Show When Run</b>.</li>' +
+        '<li>Done. Next time, one tap sets them all.</li></ol><p>Calendar needs no setup: each block becomes an event that alerts you when it starts.</p></details>'
+      : '<p class="bl-sub">No blocks left to ring for ' + name + '. Add some to your plan first.</p>') + '</div>';
+  document.body.appendChild(el);
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 200); };
+  el.querySelector('.w3-back').addEventListener('click', close);
+  const picked = () => { const P = []; el.querySelectorAll('[data-n]').forEach(c => { const u = ups[Number(c.dataset.n)]; u.b.alarm = c.checked; if (c.checked) P.push(u); }); save(); renderDay(); return P; };
+  const ck = el.querySelector('[data-a=clock]'); if (ck) ck.addEventListener('click', () => { const P = picked(); if (!P.length) return; close();
+    location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(ALARM_SHORTCUT) + '&input=text&text=' + encodeURIComponent(P.map(u => { const t = fromKey(k); t.setMinutes(u.at); return key(t) + ' ' + hhmm(u.at % 1440); }).join('\n')); });
+  const cl = el.querySelector('[data-a=cal]'); if (cl) cl.addEventListener('click', () => { const P = picked(); if (!P.length) return; close();
+    const f = m => { const t = fromKey(k); t.setMinutes(m); return t.getFullYear() + String(t.getMonth() + 1).padStart(2, '0') + String(t.getDate()).padStart(2, '0') + 'T' + String(t.getHours()).padStart(2, '0') + String(t.getMinutes()).padStart(2, '0') + '00'; };
+    const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//brick//plan//EN'].concat(...P.map(u => ['BEGIN:VEVENT', 'UID:brick-' + k + '-' + u.i + '-' + u.at + '@brick', 'DTSTAMP:' + f(0), 'DTSTART:' + f(u.at), 'DTEND:' + f(u.at + u.len),
+      'SUMMARY:' + u.label.replace(/[,;\\]/g, ' '), 'BEGIN:VALARM', 'TRIGGER:PT0M', 'ACTION:DISPLAY', 'DESCRIPTION:' + u.label.replace(/[,;\\]/g, ' '), 'END:VALARM', 'END:VEVENT']), ['END:VCALENDAR']).join('\r\n');
+    location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics); });
+}
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#day-bell')) bellSheet(viewDay); });
 // the week across the top of Plan: tap a day to open it
 function renderPlanWeek() {
   let box = document.getElementById('plan-week');
@@ -10765,6 +10871,7 @@ function renderPlanWeek() {
   box.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { if (b.dataset.k === viewDay) return; viewDay = b.dataset.k; sortingDay = false; renderDay(); }));
 }   // the extra plan tools, folded away until asked for
 function renderDay() {
+  try { renderDayPick(); } catch (e) { console.error(e); }
   { // keep the start in step with where the day before ended, until you tick something
     const d0 = state.days[viewDay], pe = d0 && !d0.startSet && !d0.blocks.some(b => b.done) ? prevDayEnd(viewDay) : null;
     if (pe && d0.start !== pe) { d0.start = pe; save(); } }
@@ -12017,7 +12124,6 @@ function renderTomorrowSuggest() {
   slot.innerHTML = '';
   if (viewDay <= planKey()) return;
   const day = dayFor(viewDay);
-  if (!day.askedPlan && viewDay === shiftKey(planKey(), 1) && !document.getElementById('paksheet')) { day.askedPlan = true; save(); setTimeout(() => planAskSheet(viewDay), 250); }
   if (day.noSuggest) return;
   return renderDayTemplate(slot, day);
   const S = suggestRoutines(shiftKey(viewDay, -1), viewDay);
