@@ -7207,6 +7207,10 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 #view-day#view-day#view-day#view-day#view-day#view-day .donefold u { text-decoration: none; color: var(--muted); transition: transform .2s; }
 #view-day#view-day#view-day#view-day#view-day#view-day .donefold.open u { transform: rotate(180deg); }
 #view-day#view-day#view-day#view-day#view-day#view-day .df-earlier { display: block; width: 100%; margin: 8px 0 4px; padding: 10px; border: 1px dashed var(--hair); border-radius: 14px; background: none; color: var(--muted); font: 500 13px "Poppins", sans-serif; cursor: pointer; }
+
+#lensheet .ls-rm, #lensheet .ls-nudge, #lensheet .ab-sub { display: none !important; }
+#lensheet .ls-end { margin: 18px 0 6px !important; }
+#lensheet .ls-tl { font-size: 20px; }
 </style>
 </head>
 <body>
@@ -7492,7 +7496,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:12:12</footer>
+  <footer>Mr.O:12:13</footer>
 </div>
 
 <script>
@@ -9925,10 +9929,11 @@ function lengthPicker(b, from, len) {
           if (after) fx = '<span class="ls-fx">Everything after moves ' + minsLabel(Math.abs(dd)) + (dd > 0 ? ' later' : ' earlier') + '.</span>';
           if (day.end && dd > 0) { const over = planEndOf(day) + dd - endLimit(day); if (over > 0) fx += '<span class="ls-fx warn">That runs ' + minsLabel(over) + ' past your end time.</span>'; } }
         const nx = day && day.blocks.slice(day.blocks.indexOf(b) + 1).find(x => !x.done);
-        if (nx) fx = '<span class="ls-fx">' + esc((nx.label || 'Next').trim()) + ' starts at ' + clock(from + r) + '.</span>' + fx;
+        fx = fx.includes('warn') ? fx.slice(fx.indexOf('<span class="ls-fx warn">')) : '';   // only the warning, if any
+        if (nx) fx = '<span class="ls-fx">Then ' + esc((nx.label || 'next').trim()) + ' at ' + clock(from + r) + '</span>' + fx;
         const hm = m => { m = ((m % 1440) + 1440) % 1440; return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); };
         endP.innerHTML = '<span class="ls-tl"><b>' + clock(from) + '</b><i>\u2192</i><label class="ls-endpick"><b>' + clock(from + r) + '</b><input type="time" step="300" value="' + hm(from + r) + '" aria-label="ends at, tap to pick"></label></span>' +
-          '<small class="ls-endhint">Tap the end time to pick it</small>' + fx;
+          fx;
         const ein = endP.querySelector('.ls-endpick input');
         ein.addEventListener('change', () => { if (!/^\d{2}:\d{2}/.test(ein.value)) return; let m = toMins(ein.value) - (from % 1440); if (m <= 0) m += 1440; typed = m; delta = 0; df.set(typed); paintEnd(); }); };
       const df = durField(dfBox, len, m => { typed = m; paintEnd(); });
@@ -9938,7 +9943,7 @@ function lengthPicker(b, from, len) {
       if (viewDay === planKey() && !b.done) { const nm = planMin(viewDay), ran = nm - from;
         if (ran >= 5) {
           if (ran > len) picks.push(['Until now', Math.round(ran / 5) * 5]);
-          picks.push(['+15 min', Math.ceil((ran + 15) / 5) * 5], ['+30 min', Math.ceil((ran + 30) / 5) * 5]);
+          picks.push(['15 more', Math.ceil((ran + 15) / 5) * 5], ['30 more', Math.ceil((ran + 30) / 5) * 5]);
           if (ran <= len - 10) picks.unshift(['Stop now', Math.max(5, Math.round(ran / 5) * 5)]);
         } }
       if (usual && usual !== len) picks.push(['Usual', usual]);
@@ -9946,10 +9951,10 @@ function lengthPicker(b, from, len) {
         if (last && last !== len && last !== usual) picks.push(['Last took', Math.round(last / 5) * 5]); }
       { let at2 = from + len; for (let j = idx + 1; j < day.blocks.length; j++) { const x = day.blocks[j]; if (x.fixedAt) { const u = toMins(x.fixedAt) - from; if (u >= 5 && u !== len) picks.push(['Until ' + (x.label || 'next'), u]); break; } at2 += Number(x.mins) || 60; } }
       if (picks.length < 3) for (const m of [30, 45, 60, 90, 120]) if (m !== len && picks.length < 4 && !picks.some(x => x[1] === m)) picks.push([minsLabel(m), m]);
-      picks.push(['\u221215m', -15], ['\u22125m', -5], ['+5m', 5], ['+15m', 15]);
+      picks.splice(3);   // three at most
       const sm = el.querySelector('.ls-smart');
       const signed = t => t.startsWith('+') || t.startsWith('\u2212');
-      sm.innerHTML = (picks.some(([t]) => !signed(t)) ? '<div class="ls-picks">' + picks.map(([t, m], i) => signed(t) ? '' : '<button type="button" data-pk="' + i + '"><b>' + esc(t) + '</b><small>' + minsLabel(m) + '<br>ends ' + clock(from + m) + '</small></button>').join('') + '</div>' : '') +
+      sm.innerHTML = (picks.some(([t]) => !signed(t)) ? '<div class="ls-picks">' + picks.map(([t, m], i) => signed(t) ? '' : '<button type="button" data-pk="' + i + '"><b>' + esc(t) + '</b><small>' + minsLabel(m) + '</small></button>').join('') + '</div>' : '') +
         '<div class="ls-nudge">' + picks.map(([t], i) => signed(t) ? '<button type="button" data-pk="' + i + '">' + esc(t) + '</button>' : '').join('') + '</div>';
       sm.querySelectorAll('[data-pk]').forEach(x => x.addEventListener('click', () => { const [t, m] = picks[Number(x.dataset.pk)]; typed = Math.max(5, Math.min(1440, (t.startsWith('+') || t.startsWith('\u2212')) ? typed + m : m)); df.set(typed); paintEnd(); }));
       paintEnd();
