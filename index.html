@@ -7164,6 +7164,21 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .pghead span { color: var(--bpink) !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .pghead h1::after, :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .pghead::after { background: linear-gradient(90deg, var(--bpink), var(--bblue)) !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area .hm-abar u, :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-areas .hm-area .hm-abar > * { background: var(--c) !important; }
+
+/* ===== plan: the week on top ===== */
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 4px 0 16px; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 0 7px; border: 0; border-radius: 16px; background: none; color: var(--ink); font: inherit; cursor: pointer; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week small { font-size: 11px; font-weight: 600; color: var(--muted); }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week b { font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week .past b { color: var(--muted); }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week .today b { color: #ff8fb8; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week .sel { background: linear-gradient(160deg, #ff8fb8, #c79bff 55%, #7cc4ff); box-shadow: 0 8px 18px -10px rgba(255,143,184,.8); }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week .sel small, #view-day#view-day#view-day#view-day#view-day#view-day #plan-week .sel b { color: #fff !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week i { width: 5px; height: 5px; border-radius: 50%; background: transparent; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week i.has { background: var(--muted); opacity: .6; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week i.some { background: #7cc4ff; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week i.all { background: #7ee0b5; }
+#view-day#view-day#view-day#view-day#view-day#view-day #plan-week .sel i.has, #view-day#view-day#view-day#view-day#view-day#view-day #plan-week .sel i.some { background: #fff; opacity: .85; }
 </style>
 </head>
 <body>
@@ -7449,7 +7464,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:11</footer>
+  <footer>Mr.O:10:14</footer>
 </div>
 
 <script>
@@ -10215,12 +10230,25 @@ function renderDayGoal() {
   box.querySelector('.dg-skip').addEventListener('click', () => { if (dayGoalEditing) dayGoalEditing = false; else day.goalSkip = true; save(); renderDayGoal(); });
 }
 
-let planToolsOpen = false;   // the extra plan tools, folded away until asked for
+let planToolsOpen = false;
+// the week across the top of Plan: tap a day to open it
+function renderPlanWeek() {
+  let box = document.getElementById('plan-week');
+  if (!box) { box = document.createElement('div'); box.id = 'plan-week'; const db = document.querySelector('#view-day .datebar'); if (!db) return; db.after(box); }
+  const mon = mondayOf(viewDay), tk = planKey();
+  box.innerHTML = [0, 1, 2, 3, 4, 5, 6].map(n => {
+    const k = shiftKey(mon, n), d = fromKey(k), dd = state.days[k], bl = dd ? dd.blocks : [], dn = bl.filter(b => b.done).length;
+    const dot = !bl.length ? '' : dn === bl.length ? 'all' : dn ? 'some' : 'has';
+    return '<button type="button" data-k="' + k + '" class="' + (k === viewDay ? 'sel' : '') + (k === tk ? ' today' : '') + (k < tk ? ' past' : '') + '"><small>' + FULL[d.getDay()].slice(0, 1).toUpperCase() + '</small><b>' + d.getDate() + '</b><i class="' + dot + '"></i></button>';
+  }).join('');
+  box.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => { if (b.dataset.k === viewDay) return; viewDay = b.dataset.k; sortingDay = false; renderDay(); }));
+}   // the extra plan tools, folded away until asked for
 function renderDay() {
   { // keep the start in step with where the day before ended, until you tick something
     const d0 = state.days[viewDay], pe = d0 && !d0.startSet && !d0.blocks.some(b => b.done) ? prevDayEnd(viewDay) : null;
     if (pe && d0.start !== pe) { d0.start = pe; save(); } }
   { const vd = document.getElementById('view-day'); vd.classList.toggle('planning', !!sortingDay); vd.classList.toggle('noblocks', !dayFor(viewDay).blocks.length); }
+  renderPlanWeek();
   renderDayGoal();
   renderDump();
   renderCarry();
