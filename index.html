@@ -21,6 +21,8 @@
     document.documentElement.style.background = dark ? '#000000' : '#ffffff';
     var m = document.querySelector('meta[name=theme-color]');
     if (m) m.setAttribute('content', dark ? '#000000' : '#ffffff');
+    var sb = document.querySelector('meta[name=apple-mobile-web-app-status-bar-style]');
+    if (sb) sb.setAttribute('content', dark ? 'black-translucent' : 'default');
   })();
 </script>
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -7132,9 +7134,9 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
 
 /* ===== plan: no start row, more colour ===== */
 #view-day#view-day#view-day#view-day#view-day#view-day:not(.planning) .start-row { display: none !important; }
-#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i]:not(.cur):not(.done) { background: linear-gradient(90deg, color-mix(in srgb, var(--bc, #6c9cff) 22%, transparent), transparent 80%) !important; border-radius: 16px; }
-#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i] .bemo { width: 40px !important; height: 40px !important; border-radius: 13px !important; background: color-mix(in srgb, var(--bc, #6c9cff) 40%, var(--card)) !important; font-size: 20px; }
-#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i] .how:not(.live) { color: var(--bc, #6c9cff) !important; font-weight: 600 !important; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i]:not(.cur):not(.done) { background: color-mix(in srgb, var(--bc, #9fb4ff) 7%, transparent) !important; border-radius: 16px; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i] .bemo { width: 42px !important; height: 42px !important; border-radius: 14px !important; background: linear-gradient(150deg, color-mix(in srgb, var(--bc, #9fb4ff) 95%, #fff), color-mix(in srgb, var(--bc, #9fb4ff) 70%, #000 0%)) !important; box-shadow: 0 6px 16px -8px var(--bc, #9fb4ff) !important; font-size: 21px; }
+#view-day#view-day#view-day#view-day#view-day#view-day #block-list .line[data-i] .how:not(.live) { color: color-mix(in srgb, var(--bc, #9fb4ff) 80%, var(--ink)) !important; font-weight: 600 !important; }
 #view-day#view-day#view-day#view-day#view-day#view-day #block-list .line.cur[data-i] { box-shadow: inset 3px 0 0 var(--bc, var(--pink)) !important; }
 
 /* ===== home: pretty, warm colours ===== */
@@ -7464,7 +7466,7 @@ body[data-view="gym"] #nowpill, body:has(#restbar) #nowpill { display: none !imp
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:10:14</footer>
+  <footer>Mr.O:10:17</footer>
 </div>
 
 <script>
@@ -17640,13 +17642,13 @@ const CAL_H = 58;   // pixels per hour
 // colours like Google Calendar: one per kind of block
 function calColor(b) {
   const l = String((b && b.label) || '').toLowerCase();
-  if (b && b.meeting || /meet|sync|call|1:1|standup|stand-up|review|interview/.test(l)) return '#f2c94c';
-  if (b && b.workout || /gym|workout|run|walk|yoga|swim|pilates|stretch|train/.test(l)) return '#ef6f8a';
-  if (/breakfast|lunch|dinner|eat|meal|snack|cook/.test(l)) return '#5fc97e';
-  if (/sleep|nap|rest|break|relax|wind ?down/.test(l)) return '#8c8cff';
-  if (/shower|bath|skin|hair|self ?care|get ready|pray|meditat/.test(l)) return '#c77dff';
-  if (/deep|focus|code|work|deploy|build|admin|email|project|study|read|write/.test(l)) return '#4ea8ff';
-  return '#6c9cff';
+  if (b && b.meeting || /meet|sync|call|1:1|standup|stand-up|review|interview/.test(l)) return '#ffd66b';
+  if (b && b.workout || /gym|workout|run|walk|yoga|swim|pilates|stretch|train/.test(l)) return '#ff8fb8';
+  if (/breakfast|lunch|dinner|eat|meal|snack|cook/.test(l)) return '#7ee0b5';
+  if (/sleep|nap|rest|break|relax|wind ?down/.test(l)) return '#b79cff';
+  if (/shower|bath|skin|hair|self ?care|get ready|pray|meditat/.test(l)) return '#ffb38a';
+  if (/deep|focus|code|work|deploy|build|admin|email|project|study|read|write/.test(l)) return '#7cc4ff';
+  return '#9fb4ff';
 }
 const calHour = hr => { const h = hr % 24; return (h % 12 || 12) + ' ' + (h < 12 ? 'AM' : 'PM'); };
 function renderDayCal() {
