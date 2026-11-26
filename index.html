@@ -7331,6 +7331,38 @@ body[data-view="home"][data-view] .wrap.wrap { padding-bottom: calc(104px + env(
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote > span:not(.again) { font-size: 13px !important; font-weight: 600; color: rgba(255,255,255,.85) !important; }
 :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote .again { display: block !important; order: 9; font-size: 11px !important; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,.7) !important; }
 body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote { animation: hmFadeUp .6s ease-out .9s both; }
+
+/* ===== home: bold rows, one screen ===== */
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home > #menu { flex: none !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area { min-height: 74px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="health"] { --b1: #2f6fe4; --b2: #4f9bff; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="wealth"] { --b1: #d97706; --b2: #f5a524; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="love"]   { --b1: #e0336f; --b2: #ff6aa2; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area[data-open="self"]   { --b1: #7c3aed; --b2: #a77bff; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area { min-height: 84px !important; padding: 12px 16px 12px 12px !important; border-radius: 20px !important; border: 0 !important; column-gap: 12px !important;
+  grid-template-columns: 46px minmax(0, 1fr) auto !important;
+  background: linear-gradient(110deg, var(--b1), var(--b2)) !important; box-shadow: 0 10px 22px -14px var(--b1) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::before { background: linear-gradient(90deg, rgba(255,255,255,.22), rgba(255,255,255,.1)) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area .hm-ae { width: 46px !important; height: 46px !important; border-radius: 14px !important; background: rgba(255,255,255,.22) !important; box-shadow: none !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area .hm-ae svg { stroke: #fff !important; color: #fff !important; width: 24px !important; height: 24px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area .hm-an { color: #fff !important; font-size: 17px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area small { color: rgba(255,255,255,.85) !important; font-size: 13px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area em, :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area em i { color: #fff !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area em { font-size: 30px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows { gap: 8px !important; margin-top: 12px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .pghead { margin-bottom: 10px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .pghead h1 { font-size: 28px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now { padding: 12px 14px 10px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now .hm-prog { margin-top: 8px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-ring2 { width: 46px !important; height: 46px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rin { inset: 4px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rt { font-size: 11px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-duo { margin-top: 8px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-half { padding: 10px 14px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote { margin-top: 8px !important; padding: 16px 18px 14px !important; gap: 6px !important; border-radius: 22px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote p { font-size: 18px !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote::before { font-size: 90px !important; top: -12px !important; }
+body[data-view="home"][data-view] .wrap.wrap { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important; }
 </style>
 </head>
 <body>
@@ -7616,7 +7648,7 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:38</footer>
+  <footer>Mr.O:18:40</footer>
 </div>
 
 <script>
