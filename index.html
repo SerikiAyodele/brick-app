@@ -7319,6 +7319,18 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
 body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now, body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .pghead { animation: hmFadeUp .5s ease-out both; }
 body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-duo { animation: hmFadeUp .5s ease-out .7s both; }
 @media (prefers-reduced-motion: reduce) { body :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area, body :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-rows .hm-area.hm-area::before, body :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-now, body :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .pghead, body :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .hm-duo { animation: none !important; } }
+
+/* ===== home: a bold quote ===== */
+body[data-view="home"][data-view] .wrap.wrap { padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home > #quote { display: block !important; flex: none !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home .quote, :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote { display: flex !important; flex-direction: column; gap: 10px; width: 100%; margin: 12px 0 0 !important; padding: 22px 22px 20px !important; border: 0 !important; border-radius: 26px !important;
+  background: var(--qg, linear-gradient(135deg, #ff5fa2, #ff9a5a)) !important; color: #fff !important; text-align: left !important; cursor: pointer; position: relative; overflow: hidden;
+  box-shadow: 0 18px 36px -18px rgba(255, 95, 162, .55) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote::before { content: "\201C"; position: absolute; right: 14px; top: -18px; font: 700 120px Georgia, serif; color: rgba(255,255,255,.22); pointer-events: none; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote p { margin: 0 !important; font: 700 21px/1.32 Georgia, "Playfair Display", serif !important; color: #fff !important; letter-spacing: -.2px; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote > span:not(.again) { font-size: 13px !important; font-weight: 600; color: rgba(255,255,255,.85) !important; }
+:root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote .again { display: block !important; order: 9; font-size: 11px !important; letter-spacing: 1.4px; text-transform: uppercase; color: rgba(255,255,255,.7) !important; }
+body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home#view-home #quote .quote { animation: hmFadeUp .6s ease-out .9s both; }
 </style>
 </head>
 <body>
@@ -7604,7 +7616,7 @@ body:not([data-hm-played]) :root:root #view-home#view-home#view-home#view-home#v
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:18:29</footer>
+  <footer>Mr.O:18:38</footer>
 </div>
 
 <script>
@@ -16954,6 +16966,9 @@ function renderQuote() {
   box.className = 'quote';
   box.type = 'button';
   box.setAttribute('aria-label', 'another quote');
+  // a bold gradient that changes with the quote
+  const QG = ['linear-gradient(135deg, #ff5fa2, #ff9a5a)', 'linear-gradient(135deg, #8b5cf6, #3b82f6)', 'linear-gradient(135deg, #f43f5e, #f59e0b)', 'linear-gradient(135deg, #06b6d4, #6366f1)', 'linear-gradient(135deg, #ec4899, #8b5cf6)', 'linear-gradient(135deg, #10b981, #3b82f6)'];
+  box.style.setProperty('--qg', QG[(seed + quoteBump) % QG.length]);
 
   const again = document.createElement('span');
   again.className = 'again';
