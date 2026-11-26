@@ -7581,6 +7581,54 @@ html body .tt-c > span i + i { color: color-mix(in srgb, var(--ink) 72%, transpa
 html body .tt-c > span i.more { font-size: 11px; color: var(--muted); }
 html body .tt-hint { margin-top: 10px !important; }
 html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; }
+
+/* ===== health rows ===== */
+.hr-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+.hr-row { position: relative; display: flex; align-items: center; border-radius: 22px; overflow: hidden; isolation: isolate; background: color-mix(in srgb, var(--c) 9%, var(--card)); border: 1px solid color-mix(in srgb, var(--c) 30%, transparent); }
+.hr-row::before { content: ""; position: absolute; z-index: -1; left: 0; top: 0; bottom: 0; width: var(--f); background: linear-gradient(90deg, color-mix(in srgb, var(--c) 14%, var(--card)), color-mix(in srgb, var(--c) 38%, var(--card))); }
+.hr-main { flex: 1; min-width: 0; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 14px; min-height: 78px; padding: 14px 18px 14px 14px; border: 0; background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.hr-ic { width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; font-style: normal; font-size: 22px; background: color-mix(in srgb, var(--c) 45%, var(--card)); }
+.hr-t b { display: block; font-size: 17px; font-weight: 600; }
+.hr-t small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hr-main em { font-style: normal; font-size: 26px; font-weight: 700; letter-spacing: -.5px; white-space: nowrap; }
+.hr-main em i { font-style: normal; font-size: 14px; font-weight: 500; color: var(--muted); }
+.hr-w { display: flex; gap: 6px; padding-right: 14px; }
+.hr-w button { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--c); color: #2a1b16; font: 600 20px/1 "Poppins", sans-serif; cursor: pointer; }
+.hr-w button[data-w="-1"] { background: color-mix(in srgb, var(--c) 25%, var(--card)); color: var(--ink); }
+/* ===== self, weekly ===== */
+.sf-head { display: flex; align-items: flex-end; justify-content: space-between; }
+.sf-head small { display: block; font-size: 13px; color: var(--muted); margin-top: -6px; }
+.sf-nav { display: flex; gap: 6px; }
+.sf-nav button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--hair); background: none; color: var(--ink); font-size: 16px; cursor: pointer; }
+.sf-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 16px 0 18px; }
+.sf-days span { display: flex; flex-direction: column; align-items: center; padding: 8px 0; border-radius: 16px; }
+.sf-days small { font-size: 11px; font-weight: 600; color: var(--muted); }
+.sf-days b { font-size: 17px; font-weight: 600; }
+.sf-days .past b { color: var(--muted); }
+.sf-days .today { background: var(--pink); }
+.sf-days .today small, .sf-days .today b { color: #2a1b16; }
+.sf-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sf-bar b { font-size: 18px; font-weight: 600; }
+.sf-bar small { flex: 1; font-size: 13px; color: var(--muted); }
+.sf-plus { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--pink); color: #2a1b16; font: 400 22px/1 "Poppins", sans-serif; cursor: pointer; }
+.sf-add { padding: 14px; margin-bottom: 10px; border-radius: 22px; background: var(--card); border: 1px solid var(--hair); }
+.sf-add input, .sf-earn select { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--hair); background: var(--paper); color: var(--ink); font: inherit; font-size: 16px; }
+.sf-ideas { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.sf-ideas button { padding: 7px 11px; border-radius: 999px; border: 1px solid var(--hair); background: none; color: var(--ink); font: 13px "Poppins", sans-serif; cursor: pointer; }
+.sf-earn { display: block; font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.sf-earn select { margin-top: 6px; font-size: 14px; }
+.sf-save { width: 100%; padding: 13px; border: 0; border-radius: 14px; background: var(--pink); color: #2a1b16; font: 600 15px "Poppins", sans-serif; cursor: pointer; }
+.sf-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.sf-list li { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 10px 12px 14px; border-radius: 20px; background: var(--card); border: 1px solid var(--hair); }
+.sf-tick { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--pink); background: none; color: #2a1b16; font-weight: 700; cursor: pointer; }
+.sf-list li.done .sf-tick { background: var(--pink); }
+.sf-list li span { flex: 1; min-width: 0; }
+.sf-list li b { display: block; font-size: 16px; font-weight: 500; }
+.sf-list li.done b { color: var(--muted); text-decoration: line-through; }
+.sf-list li small { display: block; font-size: 12px; color: var(--pink); margin-top: 2px; }
+.sf-del { border: 0; background: none; color: var(--muted); font-size: 18px; padding: 6px; cursor: pointer; opacity: .6; }
+.sf-empty { width: 100%; padding: 18px; border-radius: 22px; border: 1px dashed var(--dash); background: none; color: var(--muted); font: 14px/1.5 "Poppins", sans-serif; text-align: left; cursor: pointer; }
+.sf-empty b { display: block; margin-top: 8px; color: var(--pink); }
 </style>
 </head>
 <body>
@@ -7662,8 +7710,8 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
 
   <div class="morepanel" id="more-panel" hidden>
     <button class="brick flat" id="tab-life"   role="tab" aria-selected="false" aria-controls="view-life" hidden>life</button>
-    <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas" hidden>tweets</button>
-    <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits" hidden>habits</button>
+    <button class="brick flat" id="tab-ideas"  role="tab" aria-selected="false" aria-controls="view-ideas">tweets</button>
+    <button class="brick flat" id="tab-habits" role="tab" aria-selected="false" aria-controls="view-habits">habits</button>
     <button class="brick flat" id="tab-money"  role="tab" aria-selected="false" aria-controls="view-money" hidden>wallet</button>
     <button class="brick flat" id="tab-goals"  role="tab" aria-selected="false" aria-controls="view-goals" hidden>goals</button>
     <button class="brick flat" id="tab-people" role="tab" aria-selected="false" aria-controls="view-people" hidden>people</button>
@@ -7865,7 +7913,7 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:31</footer>
+  <footer>Mr.O:19:33</footer>
 </div>
 
 <script>
@@ -7926,7 +7974,7 @@ const OLD = 'paper.by.mia.v1';
 
 const blank = { dayRoutines: {}, habits: [], days: {}, moods: [], ideas: [], gym: {}, gymEdits: {}, food: [], order: [], compact: false, dismissed: [],
                 goal: null, goal2: null, goalText: '', life: {}, grocery: [], gymSets: {}, gymPlan: {}, gymLog: [],
-                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [], weekPlans: {}, dayTemplates: {} };
+                penalties: [], penaltyLink: '', goalSetAt: 0, goalUnlockUntil: 0, sleep: [], routine: null, trainProfile: null, groceryLog: [], journeys: [], money: [], meals: {}, grocBudget: {}, prices: {}, moneyPlan: null, imported: [], grocLists: [], people: [], monthGoals: {}, habitsCleared: 1, habitsOld: [], dump: [], forest: [], weekPlans: {}, dayTemplates: {}, selfWeeks: {}, edibleQs: null };
 
 function load() {
   try {
@@ -7977,6 +8025,8 @@ function load() {
         forest: Array.isArray(d.forest) ? d.forest : [],
         weekPlans: (d.weekPlans && typeof d.weekPlans === 'object') ? d.weekPlans : {},
         dayTemplates: (d.dayTemplates && typeof d.dayTemplates === 'object') ? d.dayTemplates : {},
+        selfWeeks: (d.selfWeeks && typeof d.selfWeeks === 'object') ? d.selfWeeks : {},
+        edibleQs: (d.edibleQs && typeof d.edibleQs === 'object') ? d.edibleQs : null,
         dayRoutines: (d.dayRoutines && typeof d.dayRoutines === 'object') ? d.dayRoutines : {}
       };
     }
@@ -18579,6 +18629,10 @@ function areaLive(k) {
     if (!P.length) return { big: '+', cap: 'add your people' };
     return due.length ? { big: esc(due[0].name), cap: 'is due a hello' } : { big: '\u2713', cap: 'all caught up' };
   }
+  { const Wk = ((state.selfWeeks || {})[mondayOf(t)] || []);
+    if (!Wk.length) return { big: '+', cap: 'plan something for you', fill: 0 };
+    const dn = Wk.filter(x => x.done).length;
+    return { big: dn + '<i>/' + Wk.length + '</i>', cap: 'for me this week', fill: Math.round(dn / Wk.length * 100) }; }
   const H = state.habits || [];
   if (!H.length) return { big: '+', cap: 'start a habit' };
   const best = Math.max(...H.map(h => streakOf(h.marks)));
@@ -18902,7 +18956,7 @@ function openArea(sec, area, sc) {
 }
 
 // the pages that live under each area, opened from its page on Home
-const AREA_PAGES = { health: ['food', 'gym', 'mood'], wealth: ['money'], love: ['people'], self: ['habits', 'ideas'] };
+const AREA_PAGES = { health: ['food', 'gym', 'mood'], wealth: ['money'], love: ['people'], self: [] };
 const PAGE_NAME = { food: 'Fuel', gym: 'Move', mood: 'Health log', money: 'Wallet', habits: 'Habits', ideas: 'Tweets', people: 'People' };
 function areaOfPage(tab) { const k = Object.keys(AREA_PAGES).find(a => AREA_PAGES[a].includes(tab)); return k ? AREAS.find(a => a.k === k) : null; }
 function areaPagesHtml(a) {
@@ -19560,34 +19614,30 @@ const WATER_GOAL = 8;
 function waterToday() { const t = todayKey(); return (state.food || []).filter(f => key(new Date(f.at)) === t && entryKinds(f).includes('water')); }
 function healthPage(box) {
   const tk = todayKey(), sl = sleepOn(tk), sm = sl ? sleepMins(sl) : 0;
-  const nights = []; for (let i = 6; i >= 0; i--) { const e = sleepOn(shiftKey(tk, -i)); nights.push(e ? sleepMins(e) || 0 : 0); }
   const W = waterToday().length, g = tileFor('gym'), f = tileFor('food');
   const last = (state.moods || []).slice().sort((x, y) => y.at - x.at)[0];
   const lm = last && key(new Date(last.at)) === tk ? MOODS.find(m => m.k === last.mood) : null;
-  const top = (e, t) => '<span class="hh-top"><i>' + e + '</i>' + t + '</span>';
-  box.innerHTML = '<button type="button" class="lf-back">\u2190 Home</button><h1 class="hp-title">Health</h1>' +
-    '<div class="hh-grid">' +
-      '<button type="button" class="hh-card" data-h="sleep" style="--c:#8f8fe0">' + top('\u{1F634}', 'Sleep') + '<b>' + (sm ? dur(sm) : 'Log') + '</b><small>' + (sl ? clock(toMins(sl.bed)) + ' to ' + clock(toMins(sl.wake)) : 'last night') + '</small>' +
-        '<span class="hh-bars" aria-label="last 7 nights">' + nights.map(m => '<u style="height:' + Math.max(10, Math.min(100, Math.round(m / 600 * 100))) + '%" class="' + (!m ? 'none' : m < 420 ? 'low' : '') + '"></u>').join('') + '</span></button>' +
-      '<div class="hh-card hh-water" style="--c:#5fa8dc">' + top('\u{1F4A7}', 'Water') + '<b>' + W + '<i>/' + WATER_GOAL + '</i></b><small>' + (W >= WATER_GOAL ? 'done for today' : (WATER_GOAL - W) + ' glasses to go') + '</small>' +
-        '<span class="hh-drops">' + Array.from({ length: WATER_GOAL }, (_, i) => '<u class="' + (i < W ? 'on' : '') + '"></u>').join('') + '</span>' +
-        '<span class="hh-wbtns">' + (W ? '<button type="button" class="less" data-w="-1" aria-label="one glass less">\u2212</button>' : '') + '<button type="button" data-w="1">+ glass</button></span></div>' +
-      '<button type="button" class="hh-card" data-h="gym" style="--c:#A89C70">' + top('\u{1F3C3}\u200D\u2640\uFE0F', 'Move') + '<b>' + g.big + (g.unit ? '<i>' + esc(g.unit) + '</i>' : '') + '</b><small>' + esc(g.cap || '') + '</small></button>' +
-      '<button type="button" class="hh-card" data-h="food" style="--c:#e0a35a">' + top('\u{1F37D}\uFE0F', 'Food') + '<b>' + f.big + (f.unit ? '<i>' + esc(f.unit) + '</i>' : '') + '</b><small>' + esc(f.cap || '') + '</small></button>' +
-    '</div>' +
-    '<div class="hh-energy">' +
-      '<div class="hh-ehead">' + top('\u26A1', 'Energy') + '<button type="button" data-h="checkin">' + (lm ? lm.e + ' ' + lm.k : 'Check in') + '</button></div>' +
-      moodLinksHtml() +
-      '<button type="button" class="hh-log" data-h="mood">Health log \u203a</button>' +
+  const row = (h, c, e, name, cap, big, fill, extra) => '<div class="hr-row" style="--c:' + c + ';--f:' + Math.max(0, Math.min(100, fill || 0)) + '%"><button type="button" class="hr-main" data-h="' + h + '">' +
+    '<i class="hr-ic">' + e + '</i><span class="hr-t"><b>' + name + '</b><small>' + cap + '</small></span><em>' + big + '</em></button>' + (extra || '') + '</div>';
+  box.innerHTML = '<button type="button" class="lf-back">← Home</button><h1 class="hp-title">Health</h1><div class="hr-list">' +
+    row('sleep', '#A89C70', '\u{1F634}', 'Sleep', sl ? clock(toMins(sl.bed)) + ' to ' + clock(toMins(sl.wake)) : 'tap to log last night', sm ? dur(sm) : '+', sm / 480 * 100) +
+    row('water', '#D58198', '\u{1F4A7}', 'Water', W >= WATER_GOAL ? 'done for today' : (WATER_GOAL - W) + ' glasses to go', W + '<i>/' + WATER_GOAL + '</i>', W / WATER_GOAL * 100,
+      '<span class="hr-w">' + (W ? '<button type="button" data-w="-1" aria-label="one glass less">−</button>' : '') + '<button type="button" data-w="1" aria-label="one more glass">+</button></span>') +
+    row('gym', '#AE5369', '\u{1F3C3}‍♀️', 'Move', esc(g.cap || ''), g.big + (g.unit ? '<i>' + esc(g.unit) + '</i>' : ''), g.frac != null ? g.frac * 100 : 0) +
+    row('food', '#8f9560', '\u{1F37D}️', 'Fuel', esc(f.cap || ''), f.big + (f.unit ? '<i>' + esc(f.unit) + '</i>' : ''), 0) +
+    row('checkin', '#e2a9b3', lm ? lm.e : '⚡', 'Energy', lm ? 'you feel ' + lm.k : 'how do you feel?', lm ? '' : '+', lm ? 100 : 0) +
+    row('mood', '#b67c8a', '\u{1FA7A}', 'Health log', 'moods, notes and patterns', '›', 0) +
     '</div>';
   box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; show('home'); window.scrollTo(0, 0); });
   box.querySelectorAll('[data-h]').forEach(b => b.addEventListener('click', () => {
     const h = b.dataset.h;
     if (h === 'sleep') return quickSheet('sleep');
     if (h === 'checkin') return quickSheet('mood');
+    if (h === 'water') return;
     show(h); window.scrollTo(0, 0);
   }));
-  box.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', () => {
+  box.querySelectorAll('[data-w]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
     if (b.dataset.w === '1') {
       state.food.unshift({ id: Date.now() + '', at: Date.now(), what: 'Water', meal: mealFor('water') });
       state.food.sort((x, y) => y.at - x.at);
@@ -19596,11 +19646,52 @@ function healthPage(box) {
       const w = waterToday()[0]; if (w) state.food = state.food.filter(x => x !== w);
     }
     save(); renderLife();
-    const c = document.querySelector('.hh-water'); if (c && b.dataset.w === '1') c.classList.add('pop');
   }));
+}
+
+/* ---- Self: this week, for me ----
+   the things you will do for yourself this week: rest, treats, rewards for
+   hitting a goal. a weekly list, like Plan but for you. */
+let selfWeek = null, selfAdding = false, selfReward = null;
+const SELF_IDEAS = ['\u{1F6C1} Long bath', '\u{1F4D6} Read for fun', '\u{1F33F} Walk outside', '\u{1F485} Nails done', '\u{1F37D}️ Nice dinner out', '\u{1F3AC} Movie night', '\u{1F4A4} Sleep in', '\u{1F6CD}️ Treat myself', '\u{1F9D8} Quiet hour, no phone', '☎️ Call someone I love'];
+function selfPage(box) {
+  const tk = todayKey();
+  if (!selfWeek) selfWeek = mondayOf(tk);
+  const W = (state.selfWeeks || (state.selfWeeks = {}))[selfWeek] || (state.selfWeeks[selfWeek] = []);
+  const days = [0, 1, 2, 3, 4, 5, 6].map(n => shiftKey(selfWeek, n));
+  const a = fromKey(days[0]), z = fromKey(days[6]);
+  const goals = AREAS.flatMap(x => areaGoals(x.k).map(g => g.text)).filter(Boolean);
+  const done = W.filter(x => x.done).length;
+  box.innerHTML = '<button type="button" class="lf-back">← Home</button>' +
+    '<div class="sf-head"><div><h1 class="hp-title">Self</h1><small>' + a.getDate() + ' ' + cap(MONTHS[a.getMonth()].slice(0, 3)) + ' to ' + z.getDate() + ' ' + cap(MONTHS[z.getMonth()].slice(0, 3)) + '</small></div>' +
+      '<div class="sf-nav"><button type="button" data-wk="-7" aria-label="last week">←</button><button type="button" data-wk="7" aria-label="next week">→</button></div></div>' +
+    '<div class="sf-days">' + days.map(k => { const d = fromKey(k); return '<span class="' + (k === tk ? 'today' : '') + (k < tk ? ' past' : '') + '"><small>' + FULL[d.getDay()].slice(0, 1).toUpperCase() + '</small><b>' + d.getDate() + '</b></span>'; }).join('') + '</div>' +
+    '<div class="sf-bar"><b>For me this week</b><small>' + (W.length ? done + ' of ' + W.length + ' done' : 'rest, treats and rewards') + '</small><button type="button" class="sf-plus" aria-label="add">' + (selfAdding ? '×' : '+') + '</button></div>' +
+    (selfAdding ? '<div class="sf-add"><input type="text" maxlength="80" placeholder="Something just for you"><div class="sf-ideas">' + SELF_IDEAS.map(x => '<button type="button" data-idea="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
+      (goals.length ? '<label class="sf-earn">Earn it by finishing<select><option value="">no goal, just because</option>' + goals.map(g => '<option>' + esc(g) + '</option>').join('') + '</select></label>' : '') +
+      '<button type="button" class="sf-save">Add to this week</button></div>' : '') +
+    (W.length ? '<ul class="sf-list">' + W.map((x, i) => '<li class="' + (x.done ? 'done' : '') + '"><button type="button" class="sf-tick" data-t="' + i + '" aria-label="done">' + (x.done ? '✓' : '') + '</button>' +
+        '<span><b>' + esc(x.text) + '</b>' + (x.earn ? '<small>\u{1F3C6} reward for: ' + esc(x.earn) + '</small>' : '') + '</span><button type="button" class="sf-del" data-d="' + i + '" aria-label="remove">×</button></li>').join('') + '</ul>'
+      : (selfAdding ? '' : '<button type="button" class="sf-empty">Plan something kind for yourself this week. A long bath, a nice dinner, or a reward for a goal you hit. <b>+ Add one</b></button>'));
+  box.querySelector('.lf-back').addEventListener('click', () => { lifeOpen = null; show('home'); window.scrollTo(0, 0); });
+  box.querySelectorAll('[data-wk]').forEach(b => b.addEventListener('click', () => { selfWeek = shiftKey(selfWeek, Number(b.dataset.wk)); renderLife(); }));
+  const open = () => { selfAdding = !selfAdding; renderLife(); const i = box.querySelector('.sf-add input'); if (i) i.focus(); };
+  box.querySelector('.sf-plus').addEventListener('click', open);
+  const em = box.querySelector('.sf-empty'); if (em) em.addEventListener('click', open);
+  const inp = box.querySelector('.sf-add input');
+  if (inp) {
+    const add = () => { const v = inp.value.trim(); if (!v) { inp.focus(); return; } const sel = box.querySelector('.sf-earn select');
+      W.push({ text: v, done: false, earn: sel && sel.value ? sel.value : '' }); selfAdding = false; save(); renderLife(); };
+    box.querySelectorAll('[data-idea]').forEach(b => b.addEventListener('click', () => { inp.value = b.dataset.idea; inp.focus(); }));
+    box.querySelector('.sf-save').addEventListener('click', add);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') add(); });
+  }
+  box.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => { const x = W[Number(b.dataset.t)]; x.done = !x.done; save(); if (x.done && typeof tickBurst === 'function') tickBurst(b.getBoundingClientRect()); renderLife(); }));
+  box.querySelectorAll('[data-d]').forEach(b => b.addEventListener('click', () => { const i = Number(b.dataset.d), gone = W[i]; W.splice(i, 1); save(); renderLife(); offerUndo('"' + gone.text.slice(0, 24) + '"', () => { W.splice(i, 0, gone); save(); renderLife(); }); }));
 }
 function areaPortals(box, a) {
   if (a.k === 'health') return healthPage(box);
+  if (a.k === 'self') return selfPage(box);
   const gs = areaGoals(a.k), j = a.k === 'health' ? activeJourney() : null;
   const tabs = (AREA_PAGES[a.k] || []).concat(a.k === 'love' ? ['love'] : []);
   const doors = tabs.map(tab => {
