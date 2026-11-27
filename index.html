@@ -7982,7 +7982,7 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:19:56</footer>
+  <footer>Mr.O:05:44</footer>
 </div>
 
 <script>
@@ -21098,7 +21098,21 @@ function chatContext() {
   sect('Sleep (14 nights)', () => { const L = []; for (let i = 0; i < 14; i++) { const k = shiftKey(tk, -i), e = sleepOn(k); if (e) L.push(k + ': ' + e.bed + ' to ' + e.wake + ' (' + dur(sleepMins(e)) + ')'); } return L; });
   sect('Food & drink (7 days)', () => (state.food || []).filter(f => f.at > Date.now() - 7 * 864e5).sort((x, y) => x.at - y.at).map(f => hm(f.at) + ' ' + f.what));
   sect('Meal plan', () => MEAL_DAYS.map(d => { const m = mealsFor(d); return cap(FULL[d]).slice(0, 3) + ': ' + [m.b, m.l, m.d].map(x => x || '-').join(' | '); }));
-  sect('Groceries list', () => (state.grocery || []).filter(x => !x.done).map(x => x.text + (x.qty ? ' ' + x.qty + (x.unit || '') : '')).join(', '));
+  sect('Groceries', () => { const L = [], G = state.grocery || [], naira0 = n => '₦' + Math.round(n).toLocaleString();
+    const pr = x => { try { const p = itemPrice(x); return p ? ' ~' + naira0(p) : ''; } catch { return ''; } };
+    const row = x => x.text + (x.qty ? ' ' + x.qty + (x.unit || '') : '') + (x.note ? ' (' + x.note + ')' : '') + pr(x);
+    const open = G.filter(x => !x.done), got = G.filter(x => x.done);
+    L.push('To buy (' + open.length + '): ' + (open.map(row).join('; ') || 'nothing'));
+    if (got.length) L.push('Ticked off: ' + got.map(row).join('; '));
+    try { const tot = open.reduce((t, x) => t + (itemPrice(x) || 0), 0); if (tot) L.push('Estimated cost of the list: ' + naira0(tot)); } catch {}
+    const mk = ymOf(Date.now()), bud = (state.grocBudget || {})[mk];
+    const spent = (state.groceryLog || []).filter(x => ymOf(x.at) === mk).reduce((t, x) => t + (x.price || 0), 0);
+    L.push('This month: spent ' + naira0(spent) + (bud ? ' of a ' + naira0(bud) + ' budget' : ' (no grocery budget set)'));
+    const log = (state.groceryLog || []).slice().sort((a, b) => b.at - a.at).slice(0, 60);
+    if (log.length) L.push('Bought recently (newest first): ' + log.map(x => key(new Date(x.at)) + ' ' + x.text + (x.price ? ' ' + naira0(x.price) : '')).join('; '));
+    const P = Object.entries(state.prices || {}).slice(0, 60); if (P.length) L.push('Known prices: ' + P.map(([k, v]) => k + ' ' + naira0(v.per) + (v.unit ? '/' + v.unit : '')).join('; '));
+    const LS = (state.grocLists || []).slice(-5); if (LS.length) L.push('Past lists: ' + LS.map(l => key(new Date(l.at)) + ': ' + (l.items || []).map(x => x.text).join(', ')).join(' | '));
+    return L; });
   sect('Workouts', () => routine().workouts.map(w => w.title + ' on ' + (w.days || []).map(d => WEEK[d]).join('/') + ': ' + w.ex.map(e => e.nm).join(', ')));
   sect('Gym log (14 days)', () => { const L = {}; for (const x of (state.gymLog || [])) if (x.d >= shiftKey(tk, -14)) (L[x.d] = L[x.d] || []).push((x.w || 'bw') + 'x' + (x.reps || x.hold || '?') + (x.feel ? ' ' + x.feel : '')); return Object.keys(L).sort().map(k => k + ': ' + L[k].length + ' sets'); });
   sect('Money', () => { const cur = ymOf(Date.now()), B = linesFor(cur), L = [];
