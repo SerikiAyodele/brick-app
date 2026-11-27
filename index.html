@@ -7982,7 +7982,7 @@ html body .wrap.wrap { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0
     <button id="chat-clear" class="ch-clear" type="button" hidden>Start a new chat</button>
   </section>
 
-  <footer>Mr.O:05:44</footer>
+  <footer>Mr.O:05:45</footer>
 </div>
 
 <script>
@@ -21061,6 +21061,15 @@ function _oldApplyPlanOps(ops) {
   day.touched = true; save(); renderDay(); try { renderHome(); } catch {}
   offerUndo('=Plan changed', () => { day.start = before.start; day.blocks = before.blocks; save(); renderDay(); });
 }
+const CHAT_SECTIONS = [], CHAT_KW = {"Last 7 days of plans": "plan|week|yesterday|day|done|block|schedule|productive", "Tomorrow": "tomorrow|plan", "Edibles": "edible|weed|thc|sober|cannabis|clear|craving|high", "Habits": "habit|streak", "Quit journeys": "quit|craving|slip|journey", "Moods (14 days)": "mood|feel|energy|tired|stress|anxious|happy|sad|low", "Sleep (14 nights)": "sleep|bed|wake|tired|rest|night", "Food & drink (7 days)": "food|eat|ate|meal|drink|water|coffee|caffeine|diet|hungry|lunch|dinner|breakfast", "Meal plan": "meal|eat|food|cook|breakfast|lunch|dinner", "Groceries": "grocer|shop|buy|list|market|food|price|cost|spend|budget|ingredient", "Workouts": "gym|workout|exercise|train|move|lift", "Gym log (14 days)": "gym|workout|exercise|sets|lift|weight|progress", "Money": "money|spend|spent|budget|naira|save|saving|cost|bank|income|wallet|afford|₦", "People": "people|friend|family|call|mum|love|who", "Self this week": "self|reward|treat|me time|for me", "Tweets / ideas": "tweet|idea|thought", "Health goal": "health|food|goal"};
+// the full detail of every section your question touches; 'everything' or 'all my data' attaches all of it
+function chatTopics(text) {
+  chatContext();
+  const all = /all (of )?my data|everything|whole|overview|summary|see my data/i.test(text);
+  const out = [];
+  for (const S of CHAT_SECTIONS) if (all || S.re.test(text)) { try { const v = S.fn(); if (v && v.length) out.push('## ' + S.name + '\n' + (Array.isArray(v) ? v.join('\n') : v)); } catch {} }
+  return out.length ? '\n\n[brick data for this question]\n' + out.join('\n\n').slice(0, 24000) : '';
+}
 function chatContext() {
   const out = [], d = new Date();
   out.push('Now: ' + d.toDateString() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'));
@@ -21081,9 +21090,11 @@ function chatContext() {
     const td = (state.dump || []).filter(x => !x.done).map(x => x.text);
     if (td.length) out.push('To do (not planned): ' + td.slice(0, 15).join('; '));
   } catch {}
-  // everything else in brick, summarised, so chat can see all of your data
+  // everything else lives in sections: a one-line summary of each goes in the context (the chat server keeps
+  // only the first ~5000 characters), and the full section is attached to any question that asks about it
+  CHAT_SECTIONS.length = 0;
   const tk = todayKey(), hm = at => { const x = new Date(at); return key(x) + ' ' + clock(x.getHours() * 60 + x.getMinutes()); };
-  const sect = (name, fn) => { try { const v = fn(); if (v && v.length) out.push('\n## ' + name + '\n' + (Array.isArray(v) ? v.join('\n') : v)); } catch {} };
+  const sect = (name, fn) => { CHAT_SECTIONS.push({ name, fn, re: new RegExp(CHAT_KW[name] || name, 'i') }); };
   sect('Last 7 days of plans', () => { const L = []; for (let i = 1; i <= 7; i++) { const k = shiftKey(tk, -i), d = state.days[k]; if (d && d.blocks && d.blocks.length) L.push(k + ': ' + d.blocks.filter(b => b.done).length + '/' + d.blocks.length + ' done (' + d.blocks.map(b => (b.label || '?') + (b.done ? '✓' : '')).join(', ') + ')'); } return L; });
   sect('Tomorrow', () => { const d = state.days[shiftKey(tk, 1)]; return d && d.blocks.length ? d.blocks.map(b => (b.label || '?') + ' ' + (Number(b.mins) || 60) + 'm').join(', ') : ''; });
   sect('Edibles', () => { const ts = edibleTimes().filter(a => a > Date.now() - 60 * 86400000), L = [];
@@ -21123,7 +21134,10 @@ function chatContext() {
   sect('Self this week', () => ((state.selfWeeks || {})[mondayOf(tk)] || []).map(x => x.text + (x.done ? ' (done)' : '') + (x.earn ? ' reward for ' + x.earn : '')));
   sect('Tweets / ideas', () => (state.ideas || []).slice(-20).map(x => typeof x === 'string' ? x : (x.text || '')));
   sect('Health goal', () => state.goal ? 'Food goal: ' + state.goal + (state.goal2 ? ', ' + state.goal2 : '') : '');
-  return out.join('\n').slice(0, 30000);
+  const one = v => (Array.isArray(v) ? v : String(v).split('\n')).filter(Boolean);
+  out.push('\n## Also in brick (full details are attached to questions about these)');
+  for (const S of CHAT_SECTIONS) { try { const v = one(S.fn()); if (v.length) out.push('- ' + S.name + ': ' + v[0].slice(0, 140) + (v.length > 1 ? ' (+' + (v.length - 1) + ' more lines)' : '')); } catch {} }
+  return out.join('\n').slice(0, 4800);
 }
 
 function renderChat() {
@@ -21162,7 +21176,7 @@ async function chatSend(text) {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), 60000);
     const msgs = chatMsgs.slice(-20).map(m => ({ role: m.role, content: m.content }));
-    msgs[msgs.length - 1].content += PLAN_NOTE;   // lets Claude suggest plan changes; you confirm with Apply
+    msgs[msgs.length - 1].content += chatTopics(text) + PLAN_NOTE;   // lets Claude suggest plan changes; you confirm with Apply
     const r = await aiFetch('/api/chat', { messages: msgs, context: chatContext() }, ctl.signal);
     clearTimeout(timer);
     const out = await r.json().catch(() => null);
